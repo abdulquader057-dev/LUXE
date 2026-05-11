@@ -1,8 +1,8 @@
 "use client";
-
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
   ShoppingCart, 
@@ -62,6 +62,8 @@ const ProductPage = () => {
                 src={product.images[selectedImage]}
                 alt={product.name}
                 fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <button className="absolute top-6 right-6 w-12 h-12 rounded-full glass-morphism flex items-center justify-center hover:scale-110 transition-transform">
@@ -79,7 +81,13 @@ const ProductPage = () => {
                     selectedImage === i ? "border-primary" : "border-transparent opacity-50 hover:opacity-100"
                   )}
                 >
-                  <Image src={img} alt="" fill className="object-cover" />
+                  <Image 
+                    src={img} 
+                    alt="" 
+                    fill 
+                    sizes="100px"
+                    className="object-cover" 
+                  />
                 </button>
               ))}
             </div>
@@ -214,5 +222,4 @@ const ProductPage = () => {
   );
 };
 
-import Link from "next/link";
 export default ProductPage;

@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Instagram, Twitter, MessageCircle, ArrowUpRight, Github, Mail } from "lucide-react";
+import { Camera, Globe, MessageCircle, ArrowUpRight, Code, Mail } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -19,9 +19,9 @@ const Footer = () => {
             </p>
             <div className="flex gap-4">
               {[
-                { icon: Instagram, href: "#" },
-                { icon: Twitter, href: "#" },
-                { icon: Github, href: "#" },
+                { icon: Camera, href: "#" },
+                { icon: Globe, href: "#" },
+                { icon: Code, href: "#" },
                 { icon: MessageCircle, href: "#", color: "text-green-500" },
               ].map((social, i) => (
                 <a 
@@ -34,6 +34,7 @@ const Footer = () => {
               ))}
             </div>
           </div>
+
 
           <div>
             <h4 className="text-[10px] font-bold tracking-[0.3em] text-white/30 uppercase mb-8">Navigation</h4>
