@@ -46,7 +46,7 @@ const ShopContent = () => {
               THE <br /><span className="text-gradient">ARCHIVE.</span>
             </h1>
             <p className="text-white/40 text-xl font-medium tracking-wide max-w-lg">
-              Synthesized by ZYRA Intelligence. Engineered for the future. Explore the global digital wardrobe.
+              Synthesized by LUXE Intelligence. Engineered for the future. Explore the global digital wardrobe.
             </p>
           </MotionItem>
         </div>
@@ -124,11 +124,11 @@ const ShopContent = () => {
                       <Sparkles size={20} className="text-primary animate-pulse" />
                       <h4 className="text-lg font-black tracking-tighter uppercase">AI Neural Filtering</h4>
                     </div>
-                    <p className="text-xs text-white/40 font-medium tracking-widest uppercase leading-relaxed max-w-md">Let ZYRA synthesize your perfect match based on biometric intent and aesthetic history.</p>
+                    <p className="text-xs text-white/40 font-medium tracking-widest uppercase leading-relaxed max-w-md">Let LUXE synthesize your perfect match based on biometric intent and aesthetic history.</p>
                   </div>
                   <Magnetic>
-                    <button className="px-12 py-5 bg-primary text-black rounded-[20px] font-black tracking-widest text-[10px] uppercase hover:bg-white transition-all shadow-[0_0_40px_rgba(0,242,255,0.3)]">
-                      INITIALIZE ZYRA
+                    <button className="px-10 py-4 bg-primary text-black font-nav font-black tracking-[0.4em] uppercase hover:scale-105 transition-transform">
+                        INITIALIZE LUXE
                     </button>
                   </Magnetic>
                 </div>

@@ -135,7 +135,7 @@ const ProductPage = () => {
                     <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                        <Zap size={20} className="text-primary" />
                     </div>
-                    <h4 className="text-sm font-black tracking-widest uppercase">ZYRA Stylist Insights</h4>
+                    <h4 className="text-sm font-black tracking-widest uppercase">LUXE Stylist Insights</h4>
                  </div>
                  <p className="text-sm text-white/60 mb-6 leading-relaxed font-medium italic">
                    &quot;Architected for a futuristic silhouette. This piece aligns with your recent interest in tech-modest aesthetics. Pair with our Bio-Metal accessories for maximum impact.&quot;

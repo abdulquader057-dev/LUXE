@@ -300,7 +300,7 @@ export default function ProfilePage() {
               </p>
               <div className="flex items-center gap-3 mt-6">
                 <BrainCircuit size={16} className="text-primary" />
-                <span className="text-[10px] font-black tracking-widest text-primary uppercase">ZYRA Neural Analysis v4.0</span>
+                <span className="text-[10px] font-black tracking-widest text-primary uppercase">LUXE Neural Analysis v4.0</span>
               </div>
             </div>
 

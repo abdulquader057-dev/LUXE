@@ -58,7 +58,7 @@ export class AIService {
     }
 
     return {
-      content: "I am ZYRA, analyzing your request through my neural fashion engine...",
+      content: "I am LUXE, analyzing your request through my neural fashion engine...",
       type: "text"
     };
   }

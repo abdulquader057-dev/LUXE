@@ -51,7 +51,7 @@ export const PersonalizedFeed = () => {
               </div>
               <div>
                 <h2 className="text-4xl md:text-5xl font-black tracking-tighter uppercase leading-[0.8]">Neural <br/><span className="text-gradient">Curation.</span></h2>
-                <p className="text-[10px] font-black tracking-[0.4em] text-white/20 uppercase mt-2">Architected by ZYRA Intelligence</p>
+                <p className="text-[10px] font-black tracking-[0.4em] text-white/20 uppercase mt-2">Architected by LUXE Intelligence</p>
               </div>
               <div className="h-px flex-1 bg-white/5 ml-8 hidden md:block opacity-20" />
             </MotionContainer>

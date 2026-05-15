@@ -1,219 +1,273 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Float, PerspectiveCamera, Environment, MeshDistortMaterial } from "@react-three/drei";
+import * as THREE from "three";
+
+// --- SOUND SYSTEM ---
+const playCinematicSound = () => {
+  if (typeof window === "undefined") return;
+  
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    
+    const ctx = new AudioContextClass();
+    
+    // Deep Bass Impact
+    const bass = ctx.createOscillator();
+    const bassGain = ctx.createGain();
+    
+    bass.type = "sine";
+    bass.frequency.setValueAtTime(40, ctx.currentTime);
+    bass.frequency.exponentialRampToValueAtTime(0.01, ctx.currentTime + 2.5);
+    
+    bassGain.gain.setValueAtTime(0.6, ctx.currentTime);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
+    
+    bass.connect(bassGain);
+    bassGain.connect(ctx.destination);
+    
+    // Metallic Resonance
+    const shimmer = ctx.createOscillator();
+    const shimmerGain = ctx.createGain();
+    
+    shimmer.type = "triangle";
+    shimmer.frequency.setValueAtTime(440, ctx.currentTime);
+    shimmer.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 3);
+    
+    shimmerGain.gain.setValueAtTime(0.05, ctx.currentTime);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3);
+    
+    shimmer.connect(shimmerGain);
+    shimmerGain.connect(ctx.destination);
+    
+    bass.start();
+    shimmer.start();
+    bass.stop(ctx.currentTime + 3);
+    shimmer.stop(ctx.currentTime + 3);
+  } catch (e) {
+    console.error("Audio failed", e);
+  }
+};
+
+// --- 3D COMPONENTS ---
+
+const CinematicCloth = ({ logoTexture }: { logoTexture: THREE.Texture }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const [phase, setPhase] = useState(0); 
+  
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const t = state.clock.getElapsedTime();
+    
+    const material = meshRef.current.material as any;
+    if (material) {
+      if (material.distort !== undefined) {
+         material.distort = THREE.MathUtils.lerp(material.distort, phase >= 1 ? 0 : 0.4, 0.02);
+         material.speed = 1.5;
+      }
+      material.opacity = THREE.MathUtils.lerp(material.opacity, phase >= 1 ? 0 : 1, 0.05);
+    }
+    
+    if (t > 2.5 && phase === 0) setPhase(1);
+    if (t > 5 && phase === 1) setPhase(2);
+  });
+
+  return (
+    <group>
+      {/* The Logo Plate */}
+      <mesh position={[0, 0, -1]}>
+        <planeGeometry args={[4, 4]} />
+        <meshStandardMaterial 
+          map={logoTexture} 
+          metalness={1} 
+          roughness={0.05} 
+          emissive="#00f2ff"
+          emissiveIntensity={0.1}
+        />
+      </mesh>
+      
+      {/* The Moving Fabric (Reveal Layer) */}
+      <mesh ref={meshRef} position={[0, 0, 0.2]}>
+        <planeGeometry args={[12, 12, 64, 64]} />
+        <MeshDistortMaterial
+          color="#050505"
+          speed={1.5}
+          distort={0.4}
+          radius={1}
+          metalness={0.9}
+          roughness={0.1}
+          transparent
+          opacity={1}
+        />
+      </mesh>
+    </group>
+  );
+};
+
+const EnergyPulse = () => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const t = state.clock.getElapsedTime();
+    const s = 1 + Math.sin(t * 8) * 0.1;
+    meshRef.current.scale.set(s, s, s);
+    meshRef.current.rotation.z += 0.005;
+    (meshRef.current.material as any).opacity = 0.1 + Math.sin(t * 4) * 0.05;
+  });
+
+  return (
+    <mesh ref={meshRef} position={[0, 0, -1.5]}>
+      <ringGeometry args={[2.5, 2.55, 128]} />
+      <meshBasicMaterial color="#00f2ff" transparent opacity={0.1} />
+    </mesh>
+  );
+};
+
+const Scene = ({ logoTexture }: { logoTexture: THREE.Texture | null }) => {
+  const { camera } = useThree();
+  
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
+    if (t > 5) {
+      camera.position.z = THREE.MathUtils.lerp(camera.position.z, -8, 0.04);
+    }
+  });
+
+  if (!logoTexture) return null;
+
+  return (
+    <>
+      <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={40} />
+      <ambientLight intensity={0.1} />
+      <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} color="#ffd700" />
+      <pointLight position={[-10, -10, 5]} intensity={1.5} color="#00f2ff" />
+      <pointLight position={[0, 0, 10]} intensity={0.5} color="#ffffff" />
+      
+      <Float speed={1.2} rotationIntensity={0.2} floatIntensity={0.5}>
+        <CinematicCloth logoTexture={logoTexture} />
+      </Float>
+      
+      <EnergyPulse />
+      
+      <Environment preset="night" />
+    </>
+  );
+};
+
+// --- MAIN COMPONENT ---
 
 export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
-  const [phase, setPhase] = useState(0);
+  const [logoTexture, setLogoTexture] = useState<THREE.Texture | null>(null);
+  const [showBrandName, setShowBrandName] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Timing structure:
-    // 0-1s: Phase 1 (Environment & AI Energy Awakening)
-    // 1-2s: Phase 2 (Cinematic Cloth Reveal begins)
-    // 2-3s: Phase 3 (Logo Reveal)
-    // 3-4s: Phase 4 (Energy Surge)
-    // 4-5s: Phase 5 (Camera Fly-Through)
-    // >5s: Complete
+    const loader = new THREE.TextureLoader();
+    loader.load("/logo.jpeg", (tex) => {
+      setLogoTexture(tex);
+      setIsReady(true);
+    });
+    
+    const soundTimer = setTimeout(() => {
+      playCinematicSound();
+    }, 800);
 
-    const timers = [
-      setTimeout(() => setPhase(1), 1000), // cloth
-      setTimeout(() => setPhase(2), 2000), // logo
-      setTimeout(() => setPhase(3), 3000), // surge
-      setTimeout(() => setPhase(4), 4000), // fly-through
-      setTimeout(() => {
-        setPhase(5);
-        onComplete();
-      }, 5000),
-    ];
+    const nameTimer = setTimeout(() => {
+      setShowBrandName(true);
+    }, 3000);
 
-    return () => timers.forEach(clearTimeout);
+    const completeTimer = setTimeout(() => {
+      onComplete();
+    }, 7500);
+
+    return () => {
+      clearTimeout(soundTimer);
+      clearTimeout(nameTimer);
+      clearTimeout(completeTimer);
+    };
   }, [onComplete]);
 
   return (
-    <AnimatePresence>
-      {phase < 5 && (
-        <motion.div
-          key="luxe-intro"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, filter: "blur(20px)" }}
-          transition={{ duration: 1, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] overflow-hidden bg-black flex items-center justify-center pointer-events-none"
-        >
-          {/* Phase 1: Environment & AI Energy */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-black via-[#0a0a0c] to-black opacity-90" />
+    <motion.div
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.5, filter: "blur(40px)" }}
+      transition={{ duration: 1.8, ease: [0.7, 0, 0.3, 1] }}
+      className="fixed inset-0 z-[9999] bg-black overflow-hidden flex items-center justify-center"
+    >
+      {!isReady && (
+         <motion.div 
+            animate={{ opacity: [0.2, 0.6, 0.2] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="text-[10px] font-tech tracking-[1em] text-white/30 uppercase"
+         >
+            Initializing Neural System...
+         </motion.div>
+      )}
+
+      {isReady && (
+        <>
+          {/* Background Ambience */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,242,255,0.03)_0%,transparent_70%)]" />
           
-          {/* Ambient Fog / Glow */}
-          <motion.div
-            initial={{ opacity: 0, scale: 1.2 }}
-            animate={{ opacity: 0.4, scale: 1 }}
-            transition={{ duration: 4, ease: "easeOut" }}
-            className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(0,245,212,0.05),_transparent_60%)]"
-          />
-
-          {/* Luxury Metallic Ambient Lighting */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: phase >= 1 ? 0.3 : 0 }}
-            transition={{ duration: 2 }}
-            className="absolute top-[-20%] left-[-10%] w-[140%] h-[50%] bg-[radial-gradient(ellipse_at_top,_rgba(255,215,0,0.15),_transparent_70%)] mix-blend-screen"
-          />
-
-          {/* Violet Reflections & Emerald Accents */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: phase >= 1 ? 0.2 : 0 }}
-            transition={{ duration: 3 }}
-            className="absolute bottom-[-10%] right-[-10%] w-[100%] h-[50%] bg-[radial-gradient(circle_at_bottom_right,_rgba(108,63,232,0.2),_transparent_60%)] mix-blend-screen"
-          />
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: phase >= 1 ? 0.15 : 0 }}
-            transition={{ duration: 3.5 }}
-            className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] bg-[radial-gradient(circle_at_bottom_left,_rgba(16,185,129,0.15),_transparent_50%)] mix-blend-screen"
-          />
-
-          {/* Phase 2: Cinematic Cloth Reveal (Abstracted via gradient waves) */}
-          <motion.div
-            initial={{ opacity: 0, y: "100%" }}
-            animate={
-              phase >= 1
-                ? { opacity: 0.8, y: "0%" }
-                : { opacity: 0, y: "100%" }
-            }
-            transition={{ duration: 2, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute inset-0 bg-gradient-to-t from-black via-[#111] to-transparent mix-blend-multiply opacity-80"
-            style={{
-              backgroundSize: "200% 200%",
-              animation: "cloth-wave 4s ease infinite alternate",
-            }}
-          />
-
-          {/* Phase 3 & 4: Logo Reveal & Energy Surge */}
-          <div className="relative z-10 flex items-center justify-center">
-            {phase >= 2 && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8, filter: "blur(20px)" }}
-                animate={
-                  phase >= 4
-                    ? { scale: 50, opacity: 0, filter: "blur(10px)" } // Phase 5: Camera Fly-Through
-                    : phase >= 3
-                    ? { scale: 1.05, opacity: 1, filter: "blur(0px)" } // Phase 4: Surge
-                    : { scale: 1, opacity: 1, filter: "blur(0px)" } // Phase 3: Reveal
-                }
-                transition={
-                  phase >= 4
-                    ? { duration: 1.2, ease: [0.8, 0, 0.2, 1] } // Fast zoom out for fly-through
-                    : { duration: 2, ease: "easeOut" }
-                }
-                className="relative flex items-center justify-center"
-              >
-                {/* Logo Image Container */}
-                <div className="relative w-[300px] h-[300px] md:w-[600px] md:h-[600px] z-10 flex items-center justify-center">
-                  
-                  {/* Holographic Chromatic Aberration Layers (Phase 3 & 4) */}
-                  {phase >= 3 && (
-                    <>
-                      <motion.img
-                        src="/luxe-logo.png"
-                        alt=""
-                        initial={{ x: 0, opacity: 0 }}
-                        animate={{ 
-                          x: phase >= 4 ? [-8, 8, -4, 0] : [-2, 2, 0], 
-                          opacity: phase >= 4 ? 0.6 : 0.3 
-                        }}
-                        transition={{ duration: 0.2, repeat: Infinity, repeatType: "mirror" }}
-                        className="absolute w-full h-full object-contain mix-blend-screen hue-rotate-[90deg] brightness-150 blur-[3px]"
-                      />
-                      <motion.img
-                        src="/luxe-logo.png"
-                        alt=""
-                        initial={{ x: 0, opacity: 0 }}
-                        animate={{ 
-                          x: phase >= 4 ? [8, -8, 4, 0] : [2, -2, 0],
-                          opacity: phase >= 4 ? 0.6 : 0.3 
-                        }}
-                        transition={{ duration: 0.2, repeat: Infinity, repeatType: "mirror", delay: 0.1 }}
-                        className="absolute w-full h-full object-contain mix-blend-screen hue-rotate-[-90deg] brightness-150 blur-[3px]"
-                      />
-                    </>
-                  )}
-
-                  {/* Core Logo Image */}
-                  <img
-                    src="/luxe-logo.png"
-                    alt="LUXE by SYEDS"
-                    className="relative z-20 w-full h-full object-contain mix-blend-lighten drop-shadow-[0_0_40px_rgba(255,215,0,0.4)]"
-                  />
-
-                  {/* Platinum / Gold Sweeping Reflection */}
-                  <motion.div
-                    initial={{ left: "-150%" }}
-                    animate={{ left: "150%" }}
-                    transition={{
-                      duration: 3,
-                      ease: "easeInOut",
-                      repeat: Infinity,
-                      repeatDelay: 1
-                    }}
-                    className="absolute top-0 bottom-0 w-[50%] z-30 bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.4)] to-transparent skew-x-[-30deg] mix-blend-color-dodge pointer-events-none"
-                  />
-                </div>
-
-                {/* Holographic Gold Energy & AI Cyan Pulse */}
-                {phase >= 3 && (
-                  <>
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: [0, 0.8, 0], scale: [0.8, 2, 3] }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
-                      className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,_rgba(0,245,212,0.4),_transparent_70%)] rounded-full mix-blend-screen"
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: [0, 0.5, 0], scale: [0.8, 1.5, 2.5] }}
-                      transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
-                      className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,_rgba(255,215,0,0.3),_transparent_70%)] rounded-full mix-blend-screen"
-                    />
-                  </>
-                )}
-              </motion.div>
-            )}
+          {/* Cinematic 3D Scene */}
+          <div className="absolute inset-0">
+            <Canvas dpr={[1, 1.5]} gl={{ antialias: true, powerPreference: "high-performance" }}>
+              <Scene logoTexture={logoTexture} />
+            </Canvas>
           </div>
 
-          {/* Phase 4: Luxury Particle Explosion */}
-          {phase >= 3 && (
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {[...Array(20)].map((_, i) => (
+          {/* Overlay UI Elements */}
+          <AnimatePresence>
+            {showBrandName && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style={{ zIndex: 10 }}>
+                <motion.h1
+                  initial={{ opacity: 0, scale: 0.8, letterSpacing: "0.5em" }}
+                  animate={{ opacity: 1, scale: 1, letterSpacing: "2.5em" }}
+                  transition={{ duration: 2.5, ease: "easeOut" }}
+                  className="text-7xl md:text-9xl font-display font-black text-white/95 uppercase mt-32 md:mt-48 mix-blend-difference"
+                >
+                  LUXE
+                </motion.h1>
                 <motion.div
-                  key={i}
-                  initial={{
-                    opacity: 0,
-                    x: "50vw",
-                    y: "50vh",
-                    scale: 0,
-                  }}
-                  animate={{
-                    opacity: [0, 1, 0],
-                    x: `${50 + (Math.random() - 0.5) * 80}vw`,
-                    y: `${50 + (Math.random() - 0.5) * 80}vh`,
-                    scale: Math.random() * 1.5 + 0.5,
-                  }}
-                  transition={{
-                    duration: 1.2 + Math.random(),
-                    ease: "easeOut",
-                  }}
-                  style={{ willChange: "transform, opacity" }}
-                  className="absolute w-1 h-1 rounded-full bg-white shadow-[0_0_10px_rgba(255,215,0,0.6)] mix-blend-screen"
-                  style={{
-                    backgroundColor: Math.random() > 0.6 ? "#00f5d4" : Math.random() > 0.3 ? "#ffd700" : "#6c3fe8",
-                    willChange: "transform, opacity"
-                  }}
-                />
-              ))}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 0.5, y: 0 }}
+                  transition={{ delay: 1.2, duration: 1.5 }}
+                  className="text-[9px] md:text-[11px] font-tech tracking-[1.5em] text-primary mt-6 uppercase"
+                >
+                  Architect of Future Fashion
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Cinematic Tech Accents */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 2 }}
+          >
+            <div className="absolute top-12 left-12 w-24 h-[1px] bg-white/5" />
+            <div className="absolute top-12 left-12 w-[1px] h-24 bg-white/5" />
+            
+            <div className="absolute bottom-12 right-12 text-right">
+              <div className="text-[8px] font-tech text-white/20 tracking-widest uppercase mb-2">Neural Engine ACTIVE</div>
+              <div className="w-24 h-[1px] bg-white/5 ml-auto" />
+              <div className="absolute top-0 right-0 w-[1px] h-24 bg-white/5" />
             </div>
-          )}
-        </motion.div>
+          </motion.div>
+
+          {/* Vignette & Grain Overlay */}
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.8)_100%)]" />
+          <div className="absolute inset-0 pointer-events-none opacity-[0.05] mix-blend-overlay">
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+          </div>
+        </>
       )}
-    </AnimatePresence>
+    </motion.div>
   );
 };

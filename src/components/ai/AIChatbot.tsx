@@ -29,7 +29,7 @@ const AIChatbot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "I am ZYRA, your Neural Style Consultant. How shall we architect your silhouette today?",
+      content: "I am LUXE, your Neural Style Consultant. How shall we architect your silhouette today?",
       type: "text",
     },
   ]);
@@ -154,7 +154,7 @@ const AIChatbot = () => {
                   <Sparkles size={16} className="text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-display font-black tracking-tight text-white/90">ZYRA</h3>
+                  <h3 className="text-sm font-display font-black tracking-tight text-white/90">LUXE</h3>
                   <div className="flex items-center gap-2 mt-0.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
                     <span className="text-[8px] font-black tracking-[0.3em] text-white/20 uppercase">Online</span>
@@ -289,7 +289,7 @@ const AIChatbot = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Ask Zyra..."
+                  placeholder="Ask Luxe..."
                   className="w-full bg-white/[0.02] border border-white/[0.06] rounded-xl py-3.5 pl-5 pr-24 text-sm focus:outline-none focus:border-primary/30 transition-all placeholder:text-white/10"
                 />
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1.5">

@@ -9,8 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
     "@supabase/supabase-js": "^2.105.4",
     "@types/canvas-confetti": "^1.9.0",
+    "@types/three": "^0.184.1",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
@@ -21,6 +24,7 @@
     "react-dropzone": "^15.0.0",
     "react-hook-form": "^7.75.0",
     "tailwind-merge": "^3.6.0",
+    "three": "^0.184.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

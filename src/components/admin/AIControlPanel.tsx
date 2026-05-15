@@ -23,7 +23,7 @@ export const AIControlPanel = () => {
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                   <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">Active Core</span>
                </div>
-               <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Model: ZYRA-X-4.0</span>
+               <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Model: LUXE-X-4.0</span>
             </div>
          </div>
          <div className="w-16 h-16 rounded-2xl glass border border-white/10 flex items-center justify-center text-primary hover:scale-110 transition-transform cursor-pointer">

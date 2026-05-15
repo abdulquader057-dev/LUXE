@@ -38,7 +38,7 @@ const RevealText = ({ text, delay = 0, variant = "the" }: { text: string; delay?
 };
 
 const SearchBar = () => {
-  const placeholders = ["NEURAL BASE...", "ARCHIVE_X...", "S/S_2026...", "ZYRA_CORE..."];
+  const placeholders = ["NEURAL BASE...", "ARCHIVE_X...", "S/S_2026...", "LUXE_CORE..."];
   const [index, setIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
 
