@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Layers, Fingerprint, Activity,
-  Heart, Compass, Search, Menu, X, Box, ShoppingBag
+  Heart, Compass, Search, Menu, X, Box, ShoppingBag, Settings2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Magnetic } from "./ui/Magnetic";
@@ -25,6 +25,7 @@ const Sidebar = () => {
   const secondaryLinks = [
     { name: "Archive", href: "/swipe", icon: Heart },
     { name: "Identity", href: "/profile", icon: Fingerprint },
+    { name: "Settings", href: "/settings", icon: Settings2 },
   ];
 
   const renderNavIcon = (link: any, index: number) => {

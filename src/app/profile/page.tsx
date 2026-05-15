@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
+import LuxeButton from "@/components/ui/LuxeButton";
 import {
   BrainCircuit, Palette, Heart, Star,
   Zap, Trophy, Crown, Diamond,
   TrendingUp, Eye, ShoppingBag, Sparkles,
-  ChevronRight, BarChart3
+  ChevronRight, BarChart3, Settings2
 } from "lucide-react";
 import { DEFAULT_STYLE_DNA, ALL_BADGES, MOCK_OUTFITS, TREND_RADAR } from "@/data/ecosystem";
 import { cn } from "@/lib/utils";
@@ -105,6 +107,7 @@ export default function ProfilePage() {
             { id: "aesthetics", label: "Aesthetics", icon: Palette },
             { id: "badges", label: "Badges", icon: Trophy },
             { id: "trends", label: "Trend Radar", icon: TrendingUp },
+            { id: "settings", label: "Control Hub", icon: Settings2 },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -323,6 +326,32 @@ export default function ProfilePage() {
                 ))}
               </div>
             </div>
+        {/* Settings / Control Hub Section */}
+        {activeSection === "settings" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-panel !rounded-[32px] p-12 border border-white/5 flex flex-col items-center justify-center text-center space-y-8"
+          >
+            <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary relative">
+               <Settings2 size={40} className="animate-spin-slow" />
+               <motion.div 
+                 animate={{ scale: [1, 1.2, 1] }}
+                 transition={{ duration: 2, repeat: Infinity }}
+                 className="absolute inset-0 bg-primary/20 blur-2xl rounded-full -z-10"
+               />
+            </div>
+            
+            <div className="space-y-4 max-w-md">
+              <h3 className="text-3xl font-display font-light italic">System Configuration</h3>
+              <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em] leading-relaxed">
+                Initialize the primary command center to manage your identity, neural style preferences, and elite membership status.
+              </p>
+            </div>
+
+            <Link href="/settings">
+               <LuxeButton size="lg">Initialize Control Hub</LuxeButton>
+            </Link>
           </motion.div>
         )}
       </div>
