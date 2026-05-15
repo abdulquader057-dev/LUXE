@@ -36,31 +36,39 @@ const Sidebar = () => {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 + index * 0.08, duration: 0.6 }}
+            transition={{ delay: 0.2 + index * 0.05, duration: 0.6 }}
             className={cn(
-              "relative flex items-center gap-4 px-5 py-4 transition-all duration-400 group cursor-pointer",
-              isActive ? "bg-[rgba(0,229,204,0.06)]" : "hover:bg-white/[0.02]"
+              "relative flex items-center gap-4 px-5 py-4 transition-all duration-500 group cursor-pointer",
+              isActive ? "bg-primary/5" : "hover:bg-white/[0.02]"
             )}
           >
             {/* Active Indicator Border */}
             {isActive && (
               <motion.div
                 layoutId="activeSidebarBorder"
-                className="absolute left-0 top-0 bottom-0 w-[2px] bg-primary"
+                className="absolute left-0 top-0 bottom-0 w-[2px] bg-primary shadow-[0_0_10px_#00E5CC]"
                 initial={{ scaleY: 0 }}
                 animate={{ scaleY: 1 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               />
             )}
 
-            <link.icon
-              size={20}
-              strokeWidth={1.5}
-              className={cn(
-                "transition-all duration-300",
-                isActive ? "text-primary drop-shadow-[0_0_8px_rgba(0,229,204,0.5)]" : "text-[#44445A] group-hover:text-white group-hover:scale-110"
+            <div className="relative">
+              <link.icon
+                size={18}
+                strokeWidth={isActive ? 2 : 1.2}
+                className={cn(
+                  "transition-all duration-300 z-10 relative",
+                  isActive ? "text-primary scale-110" : "text-white/30 group-hover:text-white/80 group-hover:scale-110"
+                )}
+              />
+              {isActive && (
+                <motion.div 
+                  layoutId="iconGlow"
+                  className="absolute inset-0 bg-primary/20 blur-[8px] rounded-full -z-0" 
+                />
               )}
-            />
+            </div>
 
             <motion.span
               animate={{
@@ -68,18 +76,20 @@ const Sidebar = () => {
                 x: isHovered ? 0 : -10,
               }}
               className={cn(
-                "text-[10px] font-nav font-bold tracking-[0.25em] uppercase whitespace-nowrap",
-                isActive ? "text-white" : "text-[#44445A] group-hover:text-white/80"
+                "text-[9px] font-mono font-bold tracking-[0.3em] uppercase whitespace-nowrap transition-colors duration-300",
+                isActive ? "text-primary" : "text-white/20 group-hover:text-white/80"
               )}
             >
               {link.name}
             </motion.span>
 
-            {/* Tooltip on collapse */}
-            {!isHovered && (
-              <div className="absolute left-[70px] bg-black/80 backdrop-blur-md px-3 py-1.5 rounded border border-primary/20 text-[9px] font-nav text-primary tracking-widest opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all pointer-events-none z-50 uppercase">
-                {link.name}
-              </div>
+            {/* Scanning line indicator on active */}
+            {isActive && isHovered && (
+              <motion.div 
+                className="absolute inset-x-0 h-[1px] bg-primary/20 pointer-events-none"
+                animate={{ top: ["0%", "100%"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              />
             )}
           </motion.div>
         </Magnetic>
@@ -93,33 +103,87 @@ const Sidebar = () => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         animate={{
-          width: isHovered ? "200px" : "64px",
+          width: isHovered ? "220px" : "64px",
+          backgroundColor: isHovered ? "rgba(7, 7, 15, 0.95)" : "rgba(7, 7, 15, 0.4)",
         }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed top-0 left-0 h-screen z-[90] hidden lg:flex flex-col border-r border-white/[0.04] bg-[rgba(10,10,20,0.5)] backdrop-blur-[20px] overflow-hidden group/sidebar"
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed top-0 left-0 h-screen z-[90] hidden lg:flex flex-col border-r border-white/[0.03] backdrop-blur-[12px] overflow-hidden group/sidebar"
       >
-        <div className="flex-grow flex flex-col py-20">
-          <nav className="flex flex-col gap-2">
+        <div className="flex-grow flex flex-col py-24">
+          <nav className="flex flex-col gap-1">
             {mainLinks.map((link, i) => renderNavIcon(link, i))}
           </nav>
 
-          <div className="mt-auto flex flex-col gap-2">
-            <div className="w-full h-px bg-white/[0.04] mx-auto my-4" />
+          <div className="mt-auto flex flex-col gap-1">
+            <div className="px-5 mb-4">
+               <div className="w-full h-px bg-white/[0.05]" />
+            </div>
             {secondaryLinks.map((link, i) => renderNavIcon(link, i + 4))}
           </div>
         </div>
+
+        {/* HUD Data Readout at Bottom */}
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="p-6 border-t border-white/[0.03]"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest">Network</span>
+                  <span className="text-[7px] font-mono text-green-400 uppercase tracking-widest flex items-center gap-1">
+                    <div className="w-1 h-1 rounded-full bg-green-400 animate-pulse" />
+                    Online
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest">Latency</span>
+                  <span className="text-[7px] font-mono text-white/60 uppercase tracking-widest">24ms</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.aside>
 
-      {/* Mobile Bottom Navigation (Optional fallback) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] h-[64px] bg-[rgba(10,10,20,0.8)] backdrop-blur-2xl border-t border-white/[0.05] flex items-center justify-around px-4">
-        {mainLinks.slice(0, 4).map((link) => (
-          <Link href={link.href} key={link.name}>
-             <link.icon size={20} strokeWidth={1.5} className={pathname === link.href ? "text-primary" : "text-white/40"} />
+      {/* Mobile Bottom Navigation (High-Fidelity App Bar) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] px-4 pb-6 pointer-events-none">
+        <div className="h-[64px] bg-black/80 backdrop-blur-2xl border border-white/5 rounded-full flex items-center justify-around px-6 pointer-events-auto shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+          {mainLinks.slice(0, 4).map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link href={link.href} key={link.name} className="relative flex flex-col items-center gap-1">
+                <link.icon 
+                  size={18} 
+                  strokeWidth={isActive ? 2 : 1.2} 
+                  className={cn("transition-colors duration-300", isActive ? "text-primary" : "text-white/30")} 
+                />
+                {isActive && (
+                  <motion.div 
+                    layoutId="mobileNavGlow"
+                    className="absolute -inset-2 bg-primary/10 blur-[10px] rounded-full -z-10"
+                  />
+                )}
+                <span className={cn("text-[6px] font-mono uppercase tracking-[0.2em]", isActive ? "text-primary" : "text-white/20")}>
+                  {link.name.slice(0, 4)}
+                </span>
+              </Link>
+            );
+          })}
+          <Link href="/profile" className="relative flex flex-col items-center gap-1">
+            <Fingerprint 
+              size={18} 
+              strokeWidth={pathname === "/profile" ? 2 : 1.2} 
+              className={cn("transition-colors duration-300", pathname === "/profile" ? "text-primary" : "text-white/30")} 
+            />
+            <span className={cn("text-[6px] font-mono uppercase tracking-[0.2em]", pathname === "/profile" ? "text-primary" : "text-white/20")}>
+              Identity
+            </span>
           </Link>
-        ))}
-        <Link href="/profile">
-           <Fingerprint size={20} strokeWidth={1.5} className={pathname === "/profile" ? "text-primary" : "text-white/40"} />
-        </Link>
+        </div>
       </div>
     </>
   );

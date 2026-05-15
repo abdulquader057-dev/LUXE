@@ -57,6 +57,8 @@ export default function RootLayout({
       className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} h-full antialiased dark scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-black text-white selection:bg-primary selection:text-black relative cursor-none">
+        <div className="film-grain" />
+        <div className="watermark-vertical">LUXE SYSTEM // CORE V4.2 // NEURAL SYNC</div>
         <CustomCursor />
         <CinematicAtmosphere />
         <CurrencyProvider>

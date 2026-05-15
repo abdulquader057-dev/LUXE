@@ -46,7 +46,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       initial={{ opacity: 0, y: 30, scale: 0.97 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       className="group relative"
     >
       <Link href={`/product/${product.id}`} className="block outline-none">
@@ -56,60 +56,96 @@ const ProductCard = ({ product }: ProductCardProps) => {
           onMouseLeave={handleMouseLeave}
           style={!isMobile ? { rotateX, rotateY, perspective: "1000px" } : {}}
           className={cn(
-            "relative bg-surface rounded-lg overflow-hidden border border-subtle transition-all duration-400 ease-luxury",
-            "group-hover:-translate-y-2.5 group-hover:shadow-[0_24px_64px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,229,204,0.15)]"
+            "relative bg-black/40 backdrop-blur-xl rounded-sm overflow-hidden border border-white/5 transition-all duration-700 ease-luxury",
+            "group-hover:border-primary/30 group-hover:-translate-y-2 group-hover:shadow-[0_40px_80px_rgba(0,0,0,0.8)]",
+            "hud-border"
           )}
         >
           {/* IMAGE CONTAINER */}
-          <div className="relative aspect-[3/4] overflow-hidden">
+          <div className="relative aspect-[4/5] overflow-hidden">
             <Image
               src={product.images[0]}
               alt={product.name}
               fill
-              className="object-cover transition-transform duration-400 ease-luxury group-hover:scale-[1.06]"
+              className="object-cover transition-all duration-1000 ease-luxury grayscale group-hover:grayscale-0 group-hover:scale-[1.08] brightness-75 group-hover:brightness-100"
             />
             
-            {/* Category Tag */}
-            <div className="absolute top-4 left-4 z-10 px-2 py-1 rounded-[4px] bg-black/60 backdrop-blur-md border border-white/5">
-              <span className="text-[8px] font-tech font-bold tracking-widest text-white/80 uppercase">
-                {product.category}
-              </span>
+            {/* Scanning beam on image */}
+            <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-40 transition-opacity duration-700">
+              <div className="absolute inset-x-0 h-[2px] bg-primary shadow-[0_0_15px_#00E5CC] animate-[scanning-beam_3s_linear_infinite]" />
             </div>
 
-            {/* Quick-add overlay (Desktop) / Action Button (Mobile) */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 hidden md:block" />
-            
-            {/* Desktop Quick Add */}
-            <button className="hidden md:flex absolute bottom-0 left-0 w-full py-4 bg-gradient-to-r from-primary to-secondary text-black font-nav font-bold tracking-[0.2em] uppercase translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-luxury items-center justify-center gap-2">
-              <Plus size={16} strokeWidth={2.5} />
-              Quick Add
-            </button>
+            {/* Top Left: Category Data */}
+            <div className="absolute top-4 left-4 z-10 flex flex-col gap-1">
+              <div className="px-2 py-0.5 bg-primary/20 backdrop-blur-md border border-primary/30 rounded-sm">
+                <span className="text-[7px] font-mono font-bold tracking-[0.2em] text-primary uppercase">
+                  CAT // {product.category}
+                </span>
+              </div>
+              <div className="px-2 py-0.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-sm">
+                <span className="text-[7px] font-mono text-white/40 tracking-[0.2em] uppercase">
+                  ID: {product.id.slice(0, 8)}
+                </span>
+              </div>
+            </div>
 
-            {/* Mobile Quick Add Button */}
-            <button className="md:hidden absolute bottom-3 right-3 w-10 h-10 rounded-full bg-primary flex items-center justify-center text-black shadow-lg active:scale-95 transition-transform z-20">
-              <Plus size={20} strokeWidth={2.5} />
-            </button>
+            {/* Top Right: Status HUD */}
+            <div className="absolute top-4 right-4 z-10">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-sm">
+                 <motion.div 
+                   className="w-1 h-1 rounded-full bg-green-400"
+                   animate={{ opacity: [0.4, 1, 0.4] }}
+                   transition={{ duration: 1.5, repeat: Infinity }}
+                 />
+                 <span className="text-[7px] font-mono text-white/80 tracking-[0.1em] uppercase">In_Stock</span>
+              </div>
+            </div>
+
+            {/* Bottom Overlay: Technical Readout */}
+            <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-luxury bg-gradient-to-t from-black via-black/60 to-transparent">
+               <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-3">
+                  <div className="space-y-1">
+                    <span className="block text-[6px] font-mono text-white/30 tracking-[0.2em] uppercase">Collection</span>
+                    <span className="block text-[8px] font-mono text-white/80 tracking-[0.1em] uppercase font-bold truncate">Archive_X_2026</span>
+                  </div>
+                  <div className="space-y-1 text-right">
+                    <span className="block text-[6px] font-mono text-white/30 tracking-[0.2em] uppercase">Authentication</span>
+                    <span className="block text-[8px] font-mono text-primary tracking-[0.1em] uppercase font-bold">Verified_Core</span>
+                  </div>
+               </div>
+            </div>
           </div>
 
           {/* CARD INFO */}
-          <div className="p-4 md:p-5">
-            <h3 className="text-xs md:text-sm font-nav font-bold tracking-wider text-white uppercase group-hover:text-primary transition-colors mb-1 truncate">
-              {product.name}
-            </h3>
-            <div className="flex items-center gap-3">
-              <span className="text-[12px] md:text-[13px] font-tech font-bold text-primary tracking-widest">
-                {formatPrice(product.price)}
-              </span>
-              {product.originalPrice && (
-                <span className="text-[10px] md:text-[11px] font-tech text-muted line-through tracking-widest">
-                  {formatPrice(product.originalPrice)}
+          <div className="p-5 bg-black/20">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-[11px] font-mono font-bold tracking-[0.2em] text-white/80 uppercase group-hover:text-primary transition-colors flex-1 pr-4">
+                {product.name}
+              </h3>
+              <div className="flex flex-col items-end">
+                <span className="text-[13px] font-mono font-bold text-primary tracking-widest">
+                  {formatPrice(product.price)}
                 </span>
-              )}
+                {product.originalPrice && (
+                  <span className="text-[8px] font-mono text-white/20 line-through tracking-widest">
+                    {formatPrice(product.originalPrice)}
+                  </span>
+                )}
+              </div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-1 text-[7px] font-mono text-white/20 tracking-widest uppercase">
+                <Activity size={8} /> <span>Neural_Sync</span>
+              </div>
+              <div className="flex items-center gap-1 text-[7px] font-mono text-white/20 tracking-widest uppercase">
+                <Eye size={8} /> <span>View_Details</span>
+              </div>
             </div>
           </div>
           
-          {/* Cyan Glow behind card on hover */}
-          <div className="absolute -inset-10 bg-primary/10 blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+          {/* Corner Glow */}
+          <div className="absolute -inset-10 bg-primary/5 blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
         </motion.div>
       </Link>
     </motion.div>

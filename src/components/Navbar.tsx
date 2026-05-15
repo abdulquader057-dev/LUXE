@@ -39,21 +39,34 @@ const Navbar = () => {
         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
           "fixed top-0 left-0 right-0 z-[100] transition-all duration-500",
-          "h-[64px] md:h-[64px] flex items-center px-8",
+          "h-[64px] md:h-[72px] flex items-center px-8",
           "bg-[rgba(7,7,15,0.7)] backdrop-blur-[32px] saturate-[180%] border-b border-[rgba(0,229,204,0.08)]",
           "shadow-[0_1px_0_rgba(0,229,204,0.04),0_8px_32px_rgba(0,0,0,0.4)]"
         )}
       >
         <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center gap-16">
+        
+        {/* Scanning beam for navbar */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+          <div className="absolute inset-0 w-full h-[2px] bg-primary animate-[scanning-beam_8s_linear_infinite]" />
+        </div>
+
+        <div className="max-w-[1800px] mx-auto w-full flex items-center justify-between">
+          <div className="flex items-center gap-12">
             <Magnetic>
-              <Link href="/" className="text-[28px] font-display font-black tracking-[0.15em] text-white group flex items-center gap-1 hover:scale-[1.02] transition-all duration-300">
-                LUXE<span className="text-primary animate-pulse shadow-[0_0_10px_#00e5cc]">.</span>
+              <Link href="/" className="relative text-[26px] font-display font-black tracking-[0.2em] text-white group flex items-center gap-1">
+                <span className="relative z-10">LUXE</span>
+                <span className="text-primary animate-pulse">.</span>
+                {/* Logo scanning effect */}
+                <motion.div 
+                  className="absolute inset-0 bg-primary/10 blur-xl rounded-full"
+                  animate={{ opacity: [0.2, 0.4, 0.2] }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                />
               </Link>
             </Magnetic>
             
-            <div className="hidden lg:flex items-center gap-10">
+            <div className="hidden lg:flex items-center gap-8">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
@@ -61,14 +74,22 @@ const Navbar = () => {
                     <Link
                       href={link.href}
                       className={cn(
-                        "relative text-[12px] font-nav font-medium tracking-[0.3em] transition-all uppercase group py-2",
-                        isActive ? "text-primary" : "text-white/60 hover:text-white"
+                        "relative text-[10px] font-mono font-medium tracking-[0.4em] transition-all uppercase group py-2",
+                        isActive ? "text-primary" : "text-white/40 hover:text-white"
                       )}
                     >
-                      {link.name}
+                      <span className="relative z-10">{link.name}</span>
+                      {isActive && (
+                        <motion.span 
+                          layoutId="nav-active"
+                          className="absolute inset-0 bg-primary/5 border-x border-primary/20 -mx-4"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                        />
+                      )}
                       <span className={cn(
-                        "absolute bottom-0 left-0 h-[1.5px] bg-primary transition-transform duration-300 ease-out origin-left",
-                        isActive ? "w-full scale-x-100" : "w-full scale-x-0 group-hover:scale-x-100"
+                        "absolute -bottom-1 left-0 h-[1px] bg-primary transition-all duration-500 ease-luxury",
+                        isActive ? "w-full opacity-100" : "w-0 opacity-0 group-hover:w-full group-hover:opacity-50"
                       )} />
                     </Link>
                   </Magnetic>
@@ -77,64 +98,61 @@ const Navbar = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="hidden xl:block scale-90 origin-right">
-              <CurrencySwitcher />
+          <div className="flex items-center gap-8">
+            {/* System Status HUD */}
+            <div className="hidden xl:flex items-center gap-4 px-4 py-2 border-x border-white/5 bg-white/[0.02]">
+              <div className="flex flex-col items-end">
+                <div className="flex items-center gap-2">
+                  <span className="text-[8px] font-mono tracking-[0.2em] text-white/30 uppercase">Neural Status</span>
+                  <motion.div 
+                    className="w-1 h-1 rounded-full bg-primary shadow-[0_0_8px_#00E5CC]"
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                </div>
+                <span className="text-[9px] font-mono tracking-[0.1em] text-primary uppercase">Synchronized</span>
+              </div>
+              <div className="h-6 w-[1px] bg-white/5" />
+              <div className="flex flex-col items-start">
+                <span className="text-[8px] font-mono tracking-[0.2em] text-white/30 uppercase">Auth Level</span>
+                <span className="text-[9px] font-mono tracking-[0.1em] text-white/80 uppercase">Tier 01 // Admin</span>
+              </div>
             </div>
-            
-            <div className="flex items-center gap-2">
+
+            <div className="flex items-center gap-4">
               <Magnetic>
                 <button 
                   onClick={() => setIsSearchOpen(true)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white/60 hover:text-primary hover:drop-shadow-[0_0_24px_rgba(0,229,204,0.3)] transition-all"
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white/40 hover:text-primary border border-transparent hover:border-primary/20 transition-all hover:bg-primary/5"
                 >
-                  <Search size={18} strokeWidth={1.5} />
+                  <Search size={16} strokeWidth={1.5} />
                 </button>
               </Magnetic>
               
               <Magnetic>
-                <button className="w-10 h-10 rounded-full flex items-center justify-center text-white/60 hover:text-primary hover:drop-shadow-[0_0_24px_rgba(0,229,204,0.3)] transition-all relative group">
-                  <ShoppingBag size={18} strokeWidth={1.5} />
-                  <span className="absolute top-2 right-2 w-[14px] h-[14px] bg-[#00E5CC] rounded-full flex items-center justify-center text-[8px] font-tech font-bold text-black group-hover:animate-bounce">
-                    2
+                <button className="w-9 h-9 rounded-full flex items-center justify-center text-white/40 hover:text-primary border border-transparent hover:border-primary/20 transition-all hover:bg-primary/5 relative group">
+                  <ShoppingBag size={16} strokeWidth={1.5} />
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center text-[8px] font-mono font-bold text-black shadow-[0_0_10px_#00E5CC]">
+                    02
                   </span>
                 </button>
               </Magnetic>
 
+              <div className="h-4 w-[1px] bg-white/10 mx-2" />
+
               <Magnetic>
-                <Link href="/profile" className="w-10 h-10 rounded-full flex items-center justify-center text-white/60 hover:text-primary hover:drop-shadow-[0_0_24px_rgba(0,229,204,0.3)] transition-all relative group">
-                   <User size={18} strokeWidth={1.5} />
-                   <div className="absolute top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 px-2 py-1 rounded border border-primary/20 text-[8px] font-tech text-primary whitespace-nowrap pointer-events-none">
-                     CONNECTED
-                   </div>
-                </Link>
+                <button className="flex items-center gap-3 px-4 py-2 bg-primary text-black rounded-sm font-mono text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white transition-all shadow-[0_0_20px_rgba(0,229,204,0.3)]">
+                  <User size={14} />
+                  <span>Access</span>
+                </button>
               </Magnetic>
 
               <button 
-                className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-white/60 hover:text-primary transition-all"
+                className="lg:hidden w-10 h-10 flex items-center justify-center text-white/60 hover:text-primary transition-all"
                 onClick={() => setIsMobileMenuOpen(true)}
               >
                 <Menu size={20} strokeWidth={1.5} />
               </button>
-            </div>
-
-            <div className="hidden sm:flex items-center gap-4 ml-4">
-               <div className="flex flex-col items-end relative overflow-hidden py-1 pr-1">
-                  <div className="flex items-center gap-2">
-                    <motion.span 
-                      className="w-1.5 h-1.5 rounded-full bg-green-400"
-                      animate={{ scale: [1, 1.4, 1], opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                    <span className="text-[9px] font-tech font-bold tracking-widest text-primary uppercase">Neural Sync Active</span>
-                  </div>
-                  <span className="text-[8px] font-tech tracking-widest text-white/20 uppercase">Core v4.2</span>
-                  <motion.div 
-                    className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/10 to-transparent pointer-events-none"
-                    animate={{ y: ["-100%", "100%"] }}
-                    transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-                  />
-               </div>
             </div>
           </div>
         </div>
