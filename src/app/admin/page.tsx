@@ -1,242 +1,238 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingBag, 
-  Users, 
-  Settings, 
-  MessageCircle, 
-  TrendingUp, 
-  Plus, 
-  Search,
-  Bell,
-  ArrowUpRight,
-  ArrowDownRight,
-  MoreVertical,
-  ChevronRight
+  AdminSidebar 
+} from "@/components/admin/AdminSidebar";
+import { StatCard } from "@/components/admin/StatCard";
+import { ActivityFeed } from "@/components/admin/ActivityFeed";
+import { AIControlPanel } from "@/components/admin/AIControlPanel";
+import { WorkflowCanvas } from "@/components/admin/WorkflowCanvas";
+import { AnalyticsVisuals } from "@/components/admin/AnalyticsVisuals";
+import { ManagementHub } from "@/components/admin/ManagementHub";
+import { 
+  ShoppingBag, Users, Zap, 
+  BarChart3, BrainCircuit, Activity,
+  Database, ShieldCheck, Terminal,
+  Cpu, Network
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { MOCK_PRODUCTS } from "@/data/products";
-import Image from "next/image";
 
-const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState("dashboard");
+export default function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [isBooting, setIsBooting] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  const stats = [
-    { label: "Total Revenue", value: "₹2,84,500", change: "+12.5%", trending: "up" },
-    { label: "Orders", value: "142", change: "+8.2%", trending: "up" },
-    { label: "Customers", value: "892", change: "-2.4%", trending: "down" },
-    { label: "Conversion Rate", value: "3.2%", change: "+1.1%", trending: "up" },
+  useEffect(() => {
+    const timer = setTimeout(() => setIsBooting(false), 2000);
+    const clock = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(clock);
+    };
+  }, []);
+
+  // Mock Data (Preserving structural logic while upgrading visuals)
+  const orders = [
+    { id: 1, customer_name: "CYBER_NOMAD", total_price: 1240.00, status: "processing", items: [{}, {}] },
+    { id: 2, customer_name: "NEURAL_ENTITY", total_price: 850.00, status: "delivered", items: [{}] },
+    { id: 3, customer_name: "TECH_PRIEST", total_price: 2100.50, status: "shipped", items: [{}, {}, {}] },
   ];
 
-  return (
-    <div className="min-h-screen bg-[#050505] flex text-white">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-white/5 flex flex-col p-6 hidden lg:flex">
-        <div className="text-xl font-black tracking-tighter mb-12">
-          ZYVORA<span className="text-primary">.</span> ADMIN
-        </div>
+  const products = [
+    { id: 1, name: "Neural Overlay V1", price: 450, stock_quantity: 12, category: "Headwear", image_url: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200&h=200&fit=crop" },
+    { id: 2, name: "Kinetic Exo-Shell", price: 1200, stock_quantity: 5, category: "Outerwear", image_url: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=200&h=200&fit=crop" },
+    { id: 3, name: "Data-Stream Joggers", price: 280, stock_quantity: 45, category: "Bottoms", image_url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&h=200&fit=crop" },
+  ];
 
-        <nav className="flex-1 space-y-2">
-          {[
-            { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
-            { id: "products", icon: Package, label: "Products" },
-            { id: "orders", icon: ShoppingBag, label: "Orders" },
-            { id: "customers", icon: Users, label: "Customers" },
-            { id: "whatsapp", icon: MessageCircle, label: "WhatsApp" },
-            { id: "analytics", icon: TrendingUp, label: "Analytics" },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all",
-                activeTab === item.id 
-                  ? "bg-primary text-black" 
-                  : "text-white/40 hover:text-white hover:bg-white/5"
-              )}
-            >
-              <item.icon size={18} />
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        <button className="flex items-center gap-3 px-4 py-3 text-white/40 hover:text-white transition-colors text-sm font-bold">
-          <Settings size={18} /> Settings
-        </button>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
-        {/* Top Header */}
-        <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#080808]">
-          <div className="relative w-96 max-w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search data..." 
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-12 pr-4 text-sm focus:outline-none focus:border-primary/50"
-            />
-          </div>
-
-          <div className="flex items-center gap-6">
-            <button className="relative p-2 text-white/40 hover:text-white transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full" />
-            </button>
-            <div className="flex items-center gap-3 pl-6 border-l border-white/5">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold">Admin Control</p>
-                <p className="text-[10px] text-white/40 uppercase tracking-widest">Project Lead</p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-accent" />
+  if (isBooting) {
+    return (
+      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999]">
+         <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center gap-8"
+         >
+            <div className="w-24 h-24 rounded-3xl bg-primary/10 border border-primary/40 flex items-center justify-center relative overflow-hidden">
+               <Cpu size={40} className="text-primary animate-pulse" />
+               <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 border-2 border-primary/20 border-t-primary rounded-3xl"
+               />
             </div>
-          </div>
+            <div className="flex flex-col items-center">
+               <h1 className="text-2xl font-display font-black tracking-[0.5em] text-gradient uppercase">LUXE OS</h1>
+               <p className="text-[10px] font-black text-white/20 tracking-[0.3em] uppercase mt-2">Initializing Neural Infrastructure...</p>
+            </div>
+            <div className="w-64 h-1 bg-white/5 rounded-full overflow-hidden mt-4">
+               <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 2, ease: "easeInOut" }}
+                  className="h-full bg-primary shadow-[0_0_15px_#00f2ff]" 
+               />
+            </div>
+         </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-black text-white flex overflow-hidden font-sans selection:bg-primary selection:text-black">
+      {/* Sidebar Navigation */}
+      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {/* Main Operating Area */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        {/* Top OS Bar */}
+        <header className="h-20 border-b border-white/5 px-10 flex items-center justify-between bg-black/40 backdrop-blur-xl relative z-20">
+           <div className="flex items-center gap-8">
+              <div className="flex items-center gap-3">
+                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]" />
+                 <span className="text-[10px] font-black tracking-widest uppercase text-white/40">Neural Link: Stable</span>
+              </div>
+              <div className="h-4 w-[1px] bg-white/10" />
+              <div className="flex items-center gap-3">
+                 <Database size={14} className="text-primary/60" />
+                 <span className="text-[10px] font-black tracking-widest uppercase text-white/40">DB_SHADAB_MESH_01</span>
+              </div>
+           </div>
+
+           <div className="flex items-center gap-10">
+              <div className="flex flex-col items-end">
+                 <span className="text-xl font-display font-black tracking-tighter text-white">
+                    {currentTime.toLocaleTimeString([], { hour12: false })}
+                 </span>
+                 <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                    {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' }).toUpperCase()}
+                 </span>
+              </div>
+              <div className="w-12 h-12 rounded-2xl glass border border-white/10 flex items-center justify-center hover:border-primary/40 transition-all cursor-pointer group">
+                 <ShieldCheck size={20} className="group-hover:text-primary transition-colors" />
+              </div>
+           </div>
         </header>
 
-        {/* Scrollable Area */}
-        <div className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-7xl mx-auto space-y-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-black tracking-tighter uppercase mb-1">
-                  {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Overview
-                </h1>
-                <p className="text-xs text-white/40 font-medium tracking-wide">Monday, 12 May 2026</p>
-              </div>
-              <button className="px-6 py-3 bg-white text-black rounded-xl text-xs font-black tracking-tight hover:bg-primary transition-colors flex items-center gap-2">
-                <Plus size={16} /> ADD PRODUCT
-              </button>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-              {stats.map((stat, i) => (
-                <div key={i} className="glass-morphism p-6 rounded-3xl border-white/5">
-                  <p className="text-[10px] font-bold tracking-[0.2em] text-white/30 uppercase mb-4">{stat.label}</p>
-                  <div className="flex items-end justify-between">
-                    <p className="text-3xl font-black tracking-tighter">{stat.value}</p>
-                    <div className={cn(
-                      "flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg",
-                      stat.trending === "up" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
-                    )}>
-                      {stat.trending === "up" ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                      {stat.change}
-                    </div>
+        {/* Dynamic Content Viewport */}
+        <div className="flex-1 overflow-y-auto no-scrollbar p-10 relative">
+           
+           <AnimatePresence mode="wait">
+              {activeTab === "overview" && (
+                <motion.div
+                  key="overview"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-10"
+                >
+                  {/* Top Header */}
+                  <div className="flex items-center justify-between">
+                     <div>
+                        <h2 className="text-4xl font-display font-black tracking-tighter uppercase mb-2">Control Center</h2>
+                        <p className="text-sm text-white/40 tracking-widest uppercase italic">Executive Neural Overview</p>
+                     </div>
+                     <div className="flex gap-4">
+                        <button className="glass border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black tracking-widest uppercase hover:bg-white/5 transition-all">
+                           <Terminal size={14} /> CLI Access
+                        </button>
+                        <button className="bg-primary text-black px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black tracking-widest uppercase hover:scale-105 transition-all">
+                           <Zap size={14} fill="black" /> Turbo Sync
+                        </button>
+                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
 
-            {/* Content Tabs */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-              {/* Product Table */}
-              <div className="xl:col-span-2 glass-morphism rounded-[2.5rem] overflow-hidden border-white/5 flex flex-col">
-                <div className="p-6 border-b border-white/5 flex items-center justify-between">
-                  <h3 className="font-bold tracking-tight">Recent Products</h3>
-                  <button className="text-[10px] font-bold tracking-widest text-primary uppercase">View Inventory</button>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="text-left border-b border-white/5">
-                        <th className="p-6 text-[10px] font-bold tracking-widest text-white/30 uppercase">Product</th>
-                        <th className="p-6 text-[10px] font-bold tracking-widest text-white/30 uppercase">Category</th>
-                        <th className="p-6 text-[10px] font-bold tracking-widest text-white/30 uppercase">Price</th>
-                        <th className="p-6 text-[10px] font-bold tracking-widest text-white/30 uppercase">Stock</th>
-                        <th className="p-6 text-[10px] font-bold tracking-widest text-white/30 uppercase">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {MOCK_PRODUCTS.slice(0, 5).map((p) => (
-                        <tr key={p.id} className="hover:bg-white/5 transition-colors">
-                          <td className="p-6">
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-xl relative overflow-hidden bg-muted">
-                                <Image src={p.images[0]} alt="" fill className="object-cover" />
-                              </div>
-                              <p className="text-sm font-bold">{p.name}</p>
-                            </div>
-                          </td>
-                          <td className="p-6 text-xs text-white/40 uppercase font-bold tracking-tighter">
-                            {p.category.replace("-", " ")}
-                          </td>
-                          <td className="p-6 text-sm font-black tracking-tighter">₹{p.price.toLocaleString()}</td>
-                          <td className="p-6">
-                            <div className="flex items-center gap-2">
-                              <div className="h-1.5 w-12 bg-white/5 rounded-full overflow-hidden">
-                                <div 
-                                  className={cn("h-full", p.stock < 50 ? "bg-red-500" : "bg-primary")} 
-                                  style={{ width: `${(p.stock / 100) * 100}%` }} 
-                                />
-                              </div>
-                              <span className="text-[10px] font-bold">{p.stock}</span>
-                            </div>
-                          </td>
-                          <td className="p-6 text-white/20 hover:text-white cursor-pointer">
-                            <MoreVertical size={18} />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Sidebar Info */}
-              <div className="space-y-8">
-                {/* Orders Feed */}
-                <div className="glass-morphism rounded-[2.5rem] p-6 border-white/5">
-                  <h3 className="font-bold tracking-tight mb-6">Recent Orders</h3>
-                  <div className="space-y-6">
-                    {[
-                      { user: "Aryan S.", item: "Cyber-Modest Tech Kaftan", time: "2 min ago", status: "Paid" },
-                      { user: "Imran K.", item: "Neon-Pulse Sneakers X1", time: "15 min ago", status: "COD" },
-                      { user: "Sarah M.", item: "Vortex Chrono Watch", time: "1 hour ago", status: "Paid" },
-                    ].map((order, i) => (
-                      <div key={i} className="flex items-center gap-4 group cursor-pointer">
-                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all">
-                          <ShoppingBag size={18} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold truncate">{order.user}</p>
-                          <p className="text-[10px] text-white/40 truncate">{order.item}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] font-bold text-white/30">{order.time}</p>
-                          <p className="text-[10px] font-black tracking-widest text-primary uppercase">{order.status}</p>
-                        </div>
-                      </div>
-                    ))}
+                  {/* Core Statistics Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                     <StatCard label="Total Revenue" value="$12,402" change="+12.5%" isPositive={true} icon={ShoppingBag} color="#00f2ff" delay={0.1} />
+                     <StatCard label="Active Sessions" value="842" change="+5.2%" isPositive={true} icon={Users} color="#ff00ff" delay={0.2} />
+                     <StatCard label="Neural Matches" value="94%" change="+2.1%" isPositive={true} icon={BrainCircuit} color="#00ff9d" delay={0.3} />
+                     <StatCard label="Automation Load" value="12%" change="-1.5%" isPositive={false} icon={Activity} color="#ffcc00" delay={0.4} />
                   </div>
-                  <button className="w-full mt-8 py-3 glass border border-white/5 rounded-xl text-[10px] font-bold tracking-widest uppercase hover:border-white/20 transition-all">
-                    VIEW ALL ORDERS
-                  </button>
-                </div>
 
-                {/* AI Insights */}
-                <div className="bg-gradient-to-br from-primary/20 to-accent/20 rounded-[2.5rem] p-8 border border-white/10">
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-6">
-                    <TrendingUp size={24} className="text-primary" />
+                  {/* Operational Layout */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                     <div className="lg:col-span-2 space-y-10">
+                        <div className="h-[500px]">
+                           <AIControlPanel />
+                        </div>
+                        <div className="h-[400px]">
+                           <AnalyticsVisuals />
+                        </div>
+                     </div>
+                     <div className="h-full min-h-[600px]">
+                        <ActivityFeed />
+                     </div>
                   </div>
-                  <h4 className="text-xl font-black tracking-tight uppercase mb-2">AI INSIGHT</h4>
-                  <p className="text-white/60 text-sm leading-relaxed mb-6">
-                    "Neon-Pulse Sneakers" are trending in New Delhi. I recommend increasing stock by 20% and launching a WhatsApp blast.
-                  </p>
-                  <button className="w-full py-4 bg-white text-black rounded-xl text-xs font-black tracking-tight hover:bg-primary transition-colors flex items-center justify-center gap-2">
-                    TAKE ACTION <ChevronRight size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+                </motion.div>
+              )}
+
+              {activeTab === "orders" && (
+                <motion.div
+                  key="orders"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  className="h-full"
+                >
+                  <ManagementHub type="orders" data={orders} />
+                </motion.div>
+              )}
+
+              {activeTab === "products" && (
+                <motion.div
+                  key="products"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  className="h-full"
+                >
+                  <ManagementHub type="products" data={products} />
+                </motion.div>
+              )}
+
+              {activeTab === "automation" && (
+                <motion.div
+                  key="automation"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -50 }}
+                  className="h-full"
+                >
+                  <WorkflowCanvas />
+                </motion.div>
+              )}
+
+              {activeTab === "analytics" && (
+                <motion.div
+                  key="analytics"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 50 }}
+                  className="space-y-10"
+                >
+                  <div className="flex items-center justify-between">
+                     <div>
+                        <h2 className="text-4xl font-display font-black tracking-tighter uppercase mb-2">Neural Intelligence</h2>
+                        <p className="text-sm text-white/40 tracking-widest uppercase italic">Deep-dive behavioral forecasting</p>
+                     </div>
+                  </div>
+                  <AnalyticsVisuals />
+                </motion.div>
+              )}
+           </AnimatePresence>
+
         </div>
+
+        {/* Global OS Accents */}
+        <div className="absolute top-0 right-0 w-1/2 h-full pointer-events-none">
+           <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 blur-[150px] rounded-full opacity-30" />
+        </div>
+        
+        {/* CRT Scanline Effect */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.015] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-50 bg-[length:100%_2px,3px_100%]" />
       </main>
     </div>
   );
-};
-
-export default AdminDashboard;
+}

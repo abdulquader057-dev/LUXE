@@ -1,81 +1,109 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { ShoppingCart, Heart, Eye } from "lucide-react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { Heart, Plus, Activity, Star, Eye } from "lucide-react";
 import { Product } from "@/types";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { Magnetic } from "../ui/Magnetic";
+import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+  const { formatPrice } = useCurrency();
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // 3D Tilt Effect
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseXSpring = useSpring(x, { stiffness: 100, damping: 30 });
+  const mouseYSpring = useSpring(y, { stiffness: 100, damping: 30 });
+  
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["5deg", "-5deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      whileHover={{ y: -10 }}
+      initial={{ opacity: 0, y: 30, scale: 0.97 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="group relative"
     >
-      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-muted">
-        <Image
-          src={product.images[0]}
-          alt={product.name}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover transition-transform duration-700 group-hover:scale-110"
-        />
-        
-        {/* Overlays */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
-          <button className="w-12 h-12 rounded-full glass-morphism flex items-center justify-center text-white hover:bg-primary hover:text-black transition-all">
-            <ShoppingCart size={20} />
-          </button>
-          <Link href={`/product/${product.id}`} className="w-12 h-12 rounded-full glass-morphism flex items-center justify-center text-white hover:bg-white hover:text-black transition-all">
-            <Eye size={20} />
-          </Link>
-          <button className="w-12 h-12 rounded-full glass-morphism flex items-center justify-center text-white hover:bg-secondary hover:text-white transition-all">
-            <Heart size={20} />
-          </button>
-        </div>
+      <Link href={`/product/${product.id}`} className="block outline-none">
+        <motion.div
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{ rotateX, rotateY, perspective: "1000px" }}
+          className={cn(
+            "relative bg-surface rounded-lg overflow-hidden border border-subtle transition-all duration-400 ease-luxury",
+            "group-hover:-translate-y-2.5 group-hover:shadow-[0_24px_64px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,229,204,0.15)]"
+          )}
+        >
+          {/* IMAGE CONTAINER */}
+          <div className="relative aspect-[3/4] overflow-hidden">
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              className="object-cover transition-transform duration-400 ease-luxury group-hover:scale-[1.06]"
+            />
+            
+            {/* Category Tag */}
+            <div className="absolute top-4 left-4 z-10 px-2 py-1 rounded-[4px] bg-black/60 backdrop-blur-md border border-white/5">
+              <span className="text-[8px] font-tech font-bold tracking-widest text-white/80 uppercase">
+                {product.category}
+              </span>
+            </div>
 
-        {/* Badges */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2">
-          {product.isTrending && (
-            <span className="bg-primary text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-[0_0_15px_rgba(0,242,255,0.5)]">
-              TRENDING
-            </span>
-          )}
-          {product.discount && (
-            <span className="bg-secondary text-white text-[10px] font-bold px-2 py-1 rounded-full">
-              -{product.discount}%
-            </span>
-          )}
-          {product.isPreorder && (
-            <span className="bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-full border border-white/20">
-              PREORDER
-            </span>
-          )}
-        </div>
-      </div>
+            {/* Quick-add overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+            
+            <button className="absolute bottom-0 left-0 w-full py-4 bg-gradient-to-r from-primary to-secondary text-black font-nav font-bold tracking-[0.2em] uppercase translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-luxury flex items-center justify-center gap-2">
+              <Plus size={16} strokeWidth={2.5} />
+              Quick Add
+            </button>
+          </div>
 
-      <div className="mt-4 px-1">
-        <div className="flex justify-between items-start mb-1">
-          <h3 className="text-sm font-bold tracking-tight text-white/90 group-hover:text-primary transition-colors">
-            {product.name}
-          </h3>
-          <p className="text-sm font-black tracking-tighter">
-            ₹{product.price.toLocaleString()}
-          </p>
-        </div>
-        <p className="text-[10px] text-white/40 font-medium tracking-widest uppercase">
-          {product.category.replace("-", " ")}
-        </p>
-      </div>
+          {/* CARD INFO */}
+          <div className="p-5">
+            <h3 className="text-sm font-nav font-bold tracking-wider text-white uppercase group-hover:text-primary transition-colors mb-1">
+              {product.name}
+            </h3>
+            <div className="flex items-center gap-3">
+              <span className="text-[13px] font-tech font-bold text-primary tracking-widest">
+                {formatPrice(product.price)}
+              </span>
+              {product.originalPrice && (
+                <span className="text-[11px] font-tech text-muted line-through tracking-widest">
+                  {formatPrice(product.originalPrice)}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* Cyan Glow behind card on hover */}
+          <div className="absolute -inset-10 bg-primary/10 blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+        </motion.div>
+      </Link>
     </motion.div>
   );
 };

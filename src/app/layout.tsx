@@ -1,16 +1,49 @@
-import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Bebas_Neue, Rajdhani, Sora, Orbitron } from "next/font/google";
 import "./globals.css";
 import WhatsAppWidget from "@/components/WhatsAppWidget";
+import BackToTop from "@/components/BackToTop";
+import { CurrencyProvider } from "@/lib/contexts/CurrencyContext";
+import Sidebar from "@/components/Sidebar";
+import AIChatbot from "@/components/ai/AIChatbot";
+import { CinematicAtmosphere } from "@/components/CinematicAtmosphere";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { CustomCursor } from "@/components/CustomCursor";
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const bebasNeue = Bebas_Neue({
+  weight: "400",
+  variable: "--font-bebas",
   subsets: ["latin"],
 });
 
+const rajdhani = Rajdhani({
+  weight: ["500", "600", "700"],
+  variable: "--font-rajdhani",
+  subsets: ["latin"],
+});
+
+const sora = Sora({
+  variable: "--font-sora",
+  subsets: ["latin"],
+});
+
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+});
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
-  title: "Zyvora | Futuristic AI Fashion",
-  description: "Zyvora is a next-generation Gen-Z fashion brand combining Indian street culture with futuristic cyber aesthetics and AI-powered shopping.",
+  title: "LUXE | Cognitive Fashion Operating System",
+  description: "Experience the future of fashion. AI-native, luxury-grade, neural-powered style curation for the next generation of digital identities.",
+  keywords: ["AI Fashion", "Future of Retail", "Luxury Techwear", "Neural Styling", "Luxe"],
 };
 
 export default function RootLayout({
@@ -21,14 +54,25 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${outfit.variable} h-full antialiased dark`}
+      className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} h-full antialiased dark scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col bg-mesh">
-        {children}
-        <WhatsAppWidget />
+      <body className="min-h-full flex flex-col bg-black text-white selection:bg-primary selection:text-black relative cursor-none">
+        <CustomCursor />
+        <CinematicAtmosphere />
+        <CurrencyProvider>
+          <Navbar />
+          <Sidebar />
+          <div className="relative z-10 flex-grow lg:pl-[90px] transition-all duration-500 flex flex-col">
+            <div className="flex-grow">
+              {children}
+            </div>
+            <Footer />
+          </div>
+          <AIChatbot />
+          <WhatsAppWidget />
+          <BackToTop />
+        </CurrencyProvider>
       </body>
     </html>
   );
 }
-
-

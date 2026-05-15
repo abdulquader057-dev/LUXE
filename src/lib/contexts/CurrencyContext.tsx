@@ -1,0 +1,42 @@
+"use client";
+
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { Currency, commerceService } from "../services/commerce";
+
+interface CurrencyContextType {
+  currency: Currency;
+  setCurrency: (currency: Currency) => void;
+  formatPrice: (amount: number) => string;
+}
+
+const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
+
+export const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
+  const [currency, setCurrencyState] = useState<Currency>("INR");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("luxe_currency") as Currency;
+    if (stored) setCurrencyState(stored);
+  }, []);
+
+  const setCurrency = (newCurrency: Currency) => {
+    setCurrencyState(newCurrency);
+    localStorage.setItem("luxe_currency", newCurrency);
+  };
+
+  const formatPrice = (amount: number) => {
+    return commerceService.formatPrice(amount, currency);
+  };
+
+  return (
+    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice }}>
+      {children}
+    </CurrencyContext.Provider>
+  );
+};
+
+export const useCurrency = () => {
+  const context = useContext(CurrencyContext);
+  if (!context) throw new Error("useCurrency must be used within a CurrencyProvider");
+  return context;
+};
