@@ -5,15 +5,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   BrainCircuit, 
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Cpu,
+  Layers,
+  Zap
 } from "lucide-react";
-import { Navbar } from "@/components/Navbar";
-import { Hero } from "@/components/home/Hero";
-import { ProductCard } from "@/components/shop/ProductCard";
+import Navbar from "@/components/Navbar";
+import Hero from "@/components/home/Hero";
+import ProductCard from "@/components/shop/ProductCard";
 import { MOCK_PRODUCTS } from "@/data/products";
 import { LuxeIntro } from "@/components/LuxeIntro";
 import { CinematicAtmosphere } from "@/components/CinematicAtmosphere";
-import { MotionContainer } from "@/components/animations/MotionContainer";
+import { MotionContainer, MotionItem } from "@/components/MotionContainer";
 import Image from "next/image";
 import Link from "next/link";
 import Lenis from "lenis";
@@ -29,10 +32,13 @@ const CATEGORIES = [
 export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [systemActive, setSystemActive] = useState(false);
 
   useEffect(() => {
     if (!showIntro) {
+      // Trigger System Activation Sequence
+      setTimeout(() => setSystemActive(true), 200);
+
       const lenis = new Lenis({
         duration: 1.2,
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -75,174 +81,172 @@ export default function Home() {
             key="content"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 2 }}
             className="relative"
           >
-            {/* Cinematic Assembly Phase 1: Navbar */}
-            <motion.div
-              initial={{ y: -100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <Navbar />
-            </motion.div>
-            
-            <main className="pt-20">
-              {/* Cinematic Assembly Phase 2: Hero */}
-              <motion.div
-                initial={{ scale: 1.1, opacity: 0, filter: "blur(20px)" }}
-                animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-                transition={{ delay: 0.3, duration: 1.5, ease: "easeOut" }}
-              >
-                <Hero />
-              </motion.div>
-              
-              {/* Cinematic Assembly Phase 3: Explorer */}
-              <div className="container mx-auto px-4 py-12 md:py-20">
-                <motion.div 
-                  initial={{ y: 100, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.8, duration: 1 }}
-                  className="flex overflow-x-auto no-scrollbar gap-4 mb-16 pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:justify-center items-center"
-                >
-                  <div className="inline-flex items-center gap-2 p-2 rounded-full bg-surface/20 backdrop-blur-3xl border border-white/5">
-                    {CATEGORIES.map((cat) => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setActiveCategory(cat.id)}
-                        className="relative px-6 py-2.5 rounded-full overflow-hidden group transition-all duration-500 whitespace-nowrap"
+            {/* Cinematic Assembly Sequence */}
+            <AnimatePresence>
+              {systemActive && (
+                <>
+                  {/* PHASE 1: NAV & HUD */}
+                  <motion.div
+                    initial={{ y: -100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <Navbar />
+                  </motion.div>
+
+                  {/* PHASE 2: HERO (The Core) */}
+                  <motion.div
+                    initial={{ scale: 1.2, opacity: 0, filter: "blur(40px)" }}
+                    animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
+                    transition={{ delay: 0.3, duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <Hero />
+                  </motion.div>
+
+                  {/* PHASE 3: CATEGORIES & FEED */}
+                  <main className="pt-20">
+                    <div className="container mx-auto px-4 py-12 md:py-20">
+                      <motion.div 
+                        initial={{ y: 50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 1, duration: 1 }}
+                        className="flex overflow-x-auto no-scrollbar gap-4 mb-24 pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:justify-center items-center"
                       >
-                        {activeCategory === cat.id && (
-                          <motion.div
-                            layoutId="cat-active"
-                            className="absolute inset-0 bg-primary shadow-[0_0_30px_rgba(0,245,212,0.5)]"
-                            transition={{ type: "spring", bounce: 0.2, duration: 0.8 }}
-                          />
-                        )}
-                        <span className={itemStyle(activeCategory === cat.id)}>
-                          {cat.label}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-
-                <MotionContainer>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-10">
-                    <AnimatePresence mode="popLayout">
-                      {filteredProducts.map((product, idx) => (
-                        <motion.div
-                          key={product.id}
-                          layout
-                          initial={{ opacity: 0, y: 50 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.8, delay: idx * 0.05 }}
-                          className={idx % 5 === 0 ? "md:mt-24" : idx % 3 === 0 ? "lg:mt-12" : ""}
-                        >
-                          <ProductCard product={product} />
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
-                </MotionContainer>
-              </div>
-
-              {/* AI Integration Section */}
-              <section className="py-32 md:py-64 relative overflow-hidden">
-                <div className="absolute inset-0 bg-primary/5 blur-[150px] rounded-full translate-x-1/2 opacity-30" />
-                <div className="max-w-[1400px] mx-auto px-6 md:px-16 relative z-10">
-                  <div className="grid lg:grid-cols-2 gap-24 items-center">
-                    <motion.div
-                      initial={{ x: -100, opacity: 0 }}
-                      whileInView={{ x: 0, opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1 }}
-                    >
-                      <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8">
-                        <BrainCircuit size={16} className="text-primary" />
-                        <span className="text-[10px] font-tech font-bold tracking-[0.3em] text-white/60 uppercase">
-                          LUXE Neural Core v4.2
-                        </span>
-                      </div>
-                      <h2 className="text-5xl md:text-8xl font-display font-black tracking-tighter text-white mb-8 leading-[0.85]">
-                        FASHION <br/> <span className="text-primary italic">INTELLIGENCE</span>
-                      </h2>
-                      <p className="text-xl text-white/30 leading-relaxed mb-12 max-w-xl font-light">
-                        Our proprietary AI architect analyzes your biometric intent and aesthetic footprint to synthesize personalized digital silhouettes. 
-                        Clothing that evolves in real-time with your identity.
-                      </p>
-                      <button className="group relative px-12 py-6 bg-white text-black font-nav font-black tracking-[0.4em] uppercase overflow-hidden transition-all duration-500">
-                        <div className="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                        <span className="relative z-10 group-hover:text-black transition-colors">Initialize Stylist</span>
-                      </button>
-                    </motion.div>
-                    
-                    <motion.div 
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      whileInView={{ scale: 1, opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.2 }}
-                      className="relative aspect-square"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-secondary/10 rounded-[60px] blur-3xl animate-pulse" />
-                      <div className="absolute inset-0 glass-panel !rounded-[40px] border-white/10 overflow-hidden group">
-                        <Image 
-                          src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80"
-                          alt="AI Fashion"
-                          fill
-                          className="object-cover opacity-40 grayscale group-hover:scale-110 group-hover:opacity-60 transition-all duration-1000"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#020205] via-transparent to-transparent" />
-                        
-                        {/* HUD Elements */}
-                        <div className="absolute top-10 right-10 flex flex-col items-end gap-2">
-                           <div className="text-[8px] font-tech text-primary/60 tracking-widest uppercase">Syncing... 87%</div>
-                           <div className="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
-                              <motion.div 
-                                className="h-full bg-primary"
-                                animate={{ width: ["10%", "87%"] }}
-                                transition={{ duration: 4, repeat: Infinity }}
-                              />
-                           </div>
+                        <div className="inline-flex items-center gap-2 p-2 rounded-full bg-surface/20 backdrop-blur-3xl border border-white/5 relative">
+                          {/* Floating Tech Accent */}
+                          <div className="absolute -top-4 -left-4 text-primary opacity-20">
+                            <Cpu size={12} />
+                          </div>
+                          {CATEGORIES.map((cat) => (
+                            <button
+                              key={cat.id}
+                              onClick={() => setActiveCategory(cat.id)}
+                              className="relative px-6 py-2.5 rounded-full overflow-hidden group transition-all duration-500 whitespace-nowrap"
+                            >
+                              {activeCategory === cat.id && (
+                                <motion.div
+                                  layoutId="cat-active"
+                                  className="absolute inset-0 bg-primary shadow-[0_0_30px_rgba(0,245,212,0.5)]"
+                                  transition={{ type: "spring", bounce: 0.2, duration: 0.8 }}
+                                />
+                              )}
+                              <span className={itemStyle(activeCategory === cat.id)}>
+                                {cat.label}
+                              </span>
+                            </button>
+                          ))}
                         </div>
-                      </div>
-                    </motion.div>
-                  </div>
-                </div>
-              </section>
+                      </motion.div>
 
-              {/* Newsletter */}
-              <section className="bg-white text-black py-32 md:py-64 overflow-hidden relative">
-                <motion.div 
-                  style={{ x: "-10%" }}
-                  animate={{ x: "-50%" }}
-                  transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                  className="flex whitespace-nowrap text-[20vh] md:text-[35vh] font-display font-black leading-none opacity-5 select-none"
-                >
-                  FUTURE PROOF • LUXE NATIVE • BEYOND COUTURE • 
-                </motion.div>
-                <div className="max-w-[1400px] mx-auto px-6 md:px-16 relative z-10 -mt-24 md:-mt-48">
-                  <div className="flex flex-col md:flex-row justify-between items-end gap-16">
-                    <div className="max-w-3xl">
-                      <h3 className="text-5xl md:text-9xl font-display font-black tracking-tighter leading-[0.8] mb-12">
-                        JOIN THE <br/> <span className="text-outline">SYNTHESIS.</span>
-                      </h3>
-                      <div className="flex flex-col md:flex-row gap-6">
-                        <input 
-                          type="email" 
-                          placeholder="ENTER NEURAL ID (EMAIL)" 
-                          className="flex-1 bg-black/5 border-b-2 border-black/20 p-6 font-tech text-sm focus:outline-none focus:border-black transition-colors uppercase tracking-[0.2em]"
-                        />
-                        <button className="bg-black text-white px-16 py-6 font-nav font-black tracking-[0.4em] uppercase hover:bg-primary hover:text-black transition-all duration-500">
-                          Connect
-                        </button>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-12">
+                        {filteredProducts.map((product, idx) => (
+                          <motion.div
+                            key={product.id}
+                            initial={{ opacity: 0, y: 100, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ delay: 1.2 + idx * 0.05, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                            className={idx % 5 === 0 ? "md:mt-32" : idx % 3 === 0 ? "lg:mt-16" : ""}
+                          >
+                            <ProductCard product={product} />
+                          </motion.div>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                </div>
-              </section>
-            </main>
+
+                    {/* AI SYNTHESIS SECTION */}
+                    <section className="py-40 md:py-80 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(0,245,212,0.05)_0%,transparent_60%)]" />
+                      <div className="max-w-[1400px] mx-auto px-6 md:px-16">
+                        <div className="grid lg:grid-cols-2 gap-32 items-center">
+                          <motion.div
+                            initial={{ x: -100, opacity: 0 }}
+                            whileInView={{ x: 0, opacity: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1.5 }}
+                          >
+                            <div className="flex items-center gap-4 mb-10">
+                               <div className="w-12 h-[1px] bg-primary" />
+                               <span className="text-[10px] font-tech font-bold tracking-[1em] text-primary uppercase">Neural Blueprint</span>
+                            </div>
+                            <h2 className="text-6xl md:text-[9rem] font-display font-black tracking-tighter text-white mb-10 leading-[0.8]">
+                              GENETIC <br/> <span className="text-outline italic">COUTURE</span>
+                            </h2>
+                            <p className="text-2xl text-white/40 leading-relaxed mb-16 max-w-xl font-light">
+                              Holographic tailoring meets biological resonance. Our AI core synthesizes garments that evolve with your neural frequency.
+                            </p>
+                            <Link href="/shop" className="group inline-flex items-center gap-8 text-[12px] font-tech font-bold tracking-[0.5em] uppercase text-white hover:text-primary transition-colors">
+                              Initialize Connection
+                              <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:border-primary group-hover:bg-primary group-hover:text-black transition-all">
+                                <ArrowRight size={16} />
+                              </div>
+                            </Link>
+                          </motion.div>
+
+                          <motion.div 
+                            initial={{ scale: 0.9, opacity: 0, rotateY: 20 }}
+                            whileInView={{ scale: 1, opacity: 1, rotateY: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+                            className="relative"
+                          >
+                            <div className="aspect-[4/5] rounded-[40px] overflow-hidden border border-white/5 relative group">
+                              <Image 
+                                src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80"
+                                alt="Future Fashion"
+                                fill
+                                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#020205] via-transparent to-transparent" />
+                              
+                              {/* HUD ACCENT */}
+                              <div className="absolute bottom-10 left-10 right-10">
+                                 <div className="flex justify-between items-end mb-4">
+                                    <div className="text-[8px] font-tech text-white/40 tracking-[0.5em] uppercase">Material: Bioplastic Chrome</div>
+                                    <div className="text-[8px] font-tech text-primary tracking-[0.5em] uppercase">Sync: 100%</div>
+                                 </div>
+                                 <div className="h-[2px] w-full bg-white/10 rounded-full overflow-hidden">
+                                    <motion.div 
+                                      className="h-full bg-primary"
+                                      initial={{ width: 0 }}
+                                      whileInView={{ width: "100%" }}
+                                      viewport={{ once: true }}
+                                      transition={{ duration: 3 }}
+                                    />
+                                 </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* MARQUEE FOOTER PREVIEW */}
+                    <section className="bg-white text-black py-40 overflow-hidden relative">
+                       <motion.div 
+                        initial={{ x: 0 }}
+                        animate={{ x: "-100%" }}
+                        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+                        className="flex whitespace-nowrap text-[25vh] font-display font-black leading-none opacity-5 select-none"
+                      >
+                        LUXE AI • FUTURE FASHION • NEURAL SILHOUETTE • 
+                      </motion.div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="max-w-4xl text-center px-6">
+                           <h4 className="text-4xl md:text-7xl font-display font-black tracking-tight mb-12 uppercase leading-tight">
+                             Witness the Evolution of <span className="text-primary italic">Identity.</span>
+                           </h4>
+                           <button className="px-20 py-8 bg-black text-white font-nav font-black tracking-[0.5em] uppercase hover:bg-primary hover:text-black transition-all duration-500 text-sm">
+                              Enter the Multiverse
+                           </button>
+                        </div>
+                      </div>
+                    </section>
+                  </main>
+                </>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

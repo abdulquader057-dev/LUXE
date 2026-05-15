@@ -8,16 +8,14 @@ import {
   PerspectiveCamera, 
   Environment, 
   MeshDistortMaterial, 
-  Stars, 
   Points, 
   PointMaterial,
-  useTexture,
-  Center
+  useTexture
 } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 
-// --- SOUND SYSTEM (Synthesized for Premium Texture) ---
+// --- SOUND SYSTEM (Ultra-Pro Max Cinematic) ---
 const playCinematicSequence = () => {
   if (typeof window === "undefined") return;
   
@@ -29,42 +27,42 @@ const playCinematicSequence = () => {
     const master = ctx.createGain();
     master.connect(ctx.destination);
 
-    const playBassImpact = (time: number, freq: number, volume: number) => {
+    const playBassImpact = (time: number, freq: number, volume: number, decay: number = 4) => {
       const osc = ctx.createOscillator();
       const g = ctx.createGain();
       osc.type = "sine";
       osc.frequency.setValueAtTime(freq, time);
-      osc.frequency.exponentialRampToValueAtTime(0.01, time + 4);
+      osc.frequency.exponentialRampToValueAtTime(0.01, time + decay);
       g.gain.setValueAtTime(volume, time);
-      g.gain.exponentialRampToValueAtTime(0.0001, time + 4);
+      g.gain.exponentialRampToValueAtTime(0.0001, time + decay);
       osc.connect(g);
       g.connect(master);
       osc.start(time);
-      osc.stop(time + 4);
+      osc.stop(time + decay);
     };
 
-    const playMetallicSweep = (time: number) => {
+    const playEnergySurge = (time: number) => {
       const osc = ctx.createOscillator();
       const g = ctx.createGain();
       const filter = ctx.createBiquadFilter();
       osc.type = "sawtooth";
-      filter.type = "bandpass";
-      filter.frequency.setValueAtTime(2000, time);
-      filter.frequency.exponentialRampToValueAtTime(100, time + 2);
-      g.gain.setValueAtTime(0.05, time);
-      g.gain.exponentialRampToValueAtTime(0.0001, time + 2);
+      filter.type = "highpass";
+      filter.frequency.setValueAtTime(100, time);
+      filter.frequency.exponentialRampToValueAtTime(5000, time + 1.5);
+      g.gain.setValueAtTime(0.08, time);
+      g.gain.exponentialRampToValueAtTime(0.0001, time + 1.5);
       osc.connect(filter);
       filter.connect(g);
       g.connect(master);
       osc.start(time);
-      osc.stop(time + 2);
+      osc.stop(time + 1.5);
     };
 
-    // Sequence
-    playBassImpact(ctx.currentTime, 50, 0.8); // 0s Initial Impact
-    playMetallicSweep(ctx.currentTime + 1.5); // 1.5s Fabric Start
-    playBassImpact(ctx.currentTime + 3, 40, 1.0); // 3s Logo Reveal Impact
-    playMetallicSweep(ctx.currentTime + 5); // 5s Energy Surge
+    // Sequence (5s Total)
+    playBassImpact(ctx.currentTime, 50, 0.8, 2); // 0s Start
+    playEnergySurge(ctx.currentTime + 1); // 1s Wake
+    playBassImpact(ctx.currentTime + 2.5, 40, 1.0, 3); // 2.5s Reveal Impact
+    playEnergySurge(ctx.currentTime + 4); // 4s Fly-through Surge
   } catch (e) {
     console.error("Audio failed", e);
   }
@@ -74,11 +72,11 @@ const playCinematicSequence = () => {
 
 const LuxuryParticles = () => {
   const points = useMemo(() => {
-    const p = new Float32Array(2000 * 3);
-    for (let i = 0; i < 2000; i++) {
-      p[i * 3] = (Math.random() - 0.5) * 20;
-      p[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      p[i * 3 + 2] = (Math.random() - 0.5) * 20;
+    const p = new Float32Array(3000 * 3);
+    for (let i = 0; i < 3000; i++) {
+      p[i * 3] = (Math.random() - 0.5) * 30;
+      p[i * 3 + 1] = (Math.random() - 0.5) * 30;
+      p[i * 3 + 2] = (Math.random() - 0.5) * 30;
     }
     return p;
   }, []);
@@ -86,8 +84,8 @@ const LuxuryParticles = () => {
   const ref = useRef<THREE.Points>(null);
   useFrame((state) => {
     if (ref.current) {
-      ref.current.rotation.y += 0.001;
-      ref.current.rotation.x += 0.0005;
+      ref.current.rotation.y += 0.0008;
+      ref.current.rotation.x += 0.0004;
     }
   });
 
@@ -96,89 +94,113 @@ const LuxuryParticles = () => {
       <PointMaterial
         transparent
         color="#FFD700"
-        size={0.015}
+        size={0.012}
         sizeAttenuation={true}
         depthWrite={false}
-        opacity={0.4}
+        opacity={0.3}
         blending={THREE.AdditiveBlending}
       />
     </Points>
   );
 };
 
-const NeuralEnergyLines = () => {
-  const linesRef = useRef<THREE.Group>(null);
+const HolographicSilhouette = ({ texture }: { texture: THREE.Texture }) => {
+  const ref = useRef<THREE.Mesh>(null);
   useFrame((state) => {
-    if (linesRef.current) {
-      linesRef.current.rotation.z += 0.002;
-      linesRef.current.children.forEach((child: any, i) => {
-        child.material.opacity = 0.1 + Math.sin(state.clock.getElapsedTime() * 2 + i) * 0.1;
-      });
+    if (ref.current) {
+      ref.current.position.y += Math.sin(state.clock.getElapsedTime() * 2) * 0.005;
+      (ref.current.material as any).opacity = 0.2 + Math.sin(state.clock.getElapsedTime() * 3) * 0.1;
     }
   });
 
   return (
-    <group ref={linesRef}>
-      {[...Array(5)].map((_, i) => (
-        <mesh key={i} rotation={[Math.random() * Math.PI, Math.random() * Math.PI, 0]}>
-          <ringGeometry args={[3 + i * 0.5, 3.01 + i * 0.5, 32]} />
-          <meshBasicMaterial color="#00f2ff" transparent opacity={0.1} />
+    <mesh ref={ref} position={[3, 0, -5]}>
+      <planeGeometry args={[4, 6]} />
+      <meshBasicMaterial 
+        map={texture} 
+        transparent 
+        opacity={0.3} 
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+};
+
+const InterfaceFragments = () => {
+  const fragments = useMemo(() => {
+    return [...Array(10)].map(() => ({
+      position: [(Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 15],
+      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, 0],
+      scale: 0.1 + Math.random() * 0.4
+    }));
+  }, []);
+
+  return (
+    <group>
+      {fragments.map((frag, i) => (
+        <mesh key={i} position={frag.position as any} rotation={frag.rotation as any} scale={frag.scale}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial color="#00f2ff" transparent opacity={0.05} side={THREE.DoubleSide} />
         </mesh>
       ))}
     </group>
   );
 };
 
-const ForgedLogo = ({ logoTexture, opacity }: { logoTexture: THREE.Texture, opacity: number }) => {
+const ForgedLogo = ({ logoTexture, opacity, pulse }: { logoTexture: THREE.Texture, opacity: number, pulse: number }) => {
   return (
     <group>
-      <mesh position={[0, 0, -0.05]}>
-        <planeGeometry args={[4.2, 4.2]} />
+      {/* Forged Metal Plate */}
+      <mesh position={[0, 0, -0.1]}>
+        <planeGeometry args={[4.5, 4.5]} />
         <meshStandardMaterial 
-          color="#FFD700"
+          color="#050505"
           metalness={1}
-          roughness={0.1}
+          roughness={0.05}
           transparent
-          opacity={opacity * 0.3}
+          opacity={opacity}
         />
       </mesh>
+      
+      {/* Brand Logo Content */}
       <mesh position={[0, 0, 0]}>
         <planeGeometry args={[4, 4]} />
         <meshStandardMaterial 
           map={logoTexture} 
           metalness={1} 
-          roughness={0.05} 
+          roughness={0.1} 
           transparent
           opacity={opacity}
-          emissive="#00f2ff"
-          emissiveIntensity={opacity * 0.2}
+          emissive="#FFD700"
+          emissiveIntensity={pulse * 0.3}
         />
       </mesh>
-      {/* Chrome Edge Detail */}
-      <mesh position={[0, 0, 0.01]}>
-        <ringGeometry args={[2, 2.02, 4]} />
-        <meshStandardMaterial 
-          color="#E5E4E2" 
-          metalness={1} 
-          roughness={0} 
-          transparent 
-          opacity={opacity * 0.5} 
-        />
+
+      {/* Pulsing AI Ring */}
+      <mesh position={[0, 0, 0.05]}>
+        <ringGeometry args={[2.1, 2.15 + pulse * 0.05, 64]} />
+        <meshBasicMaterial color="#00f2ff" transparent opacity={opacity * 0.4} />
+      </mesh>
+      
+      {/* Golden Highlight Sweep */}
+      <mesh position={[0, 0, 0.02]}>
+        <planeGeometry args={[0.5, 5]} />
+        <meshBasicMaterial color="#FFD700" transparent opacity={pulse * 0.2} />
       </mesh>
     </group>
   );
 };
 
-const CinematicClothReveal = ({ phase, logoTexture }: { phase: number, logoTexture: THREE.Texture }) => {
+const CinematicClothReveal = ({ phase, logoTexture, pulse }: { phase: number, logoTexture: THREE.Texture, pulse: number }) => {
   const clothRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
     if (clothRef.current) {
-      const t = state.clock.getElapsedTime();
       const material = clothRef.current.material as any;
-      if (phase >= 1) {
-        material.distort = THREE.MathUtils.lerp(material.distort, 0.1, 0.02);
-        material.opacity = THREE.MathUtils.lerp(material.opacity, phase >= 2 ? 0 : 1, 0.03);
+      if (phase >= 2) {
+        material.distort = THREE.MathUtils.lerp(material.distort, 0.05, 0.03);
+        material.opacity = THREE.MathUtils.lerp(material.opacity, phase >= 3 ? 0 : 1, 0.05);
       }
     }
   });
@@ -186,18 +208,18 @@ const CinematicClothReveal = ({ phase, logoTexture }: { phase: number, logoTextu
   return (
     <group>
       {/* The Revealed Logo */}
-      <ForgedLogo logoTexture={logoTexture} opacity={phase >= 2 ? 1 : 0} />
+      <ForgedLogo logoTexture={logoTexture} opacity={phase >= 3 ? 1 : 0} pulse={pulse} />
       
       {/* The Luxury Fabric Overlay */}
-    <mesh ref={clothRef} position={[0, 0, 0.5]}>
-        <planeGeometry args={[15, 15, 64, 64]} />
+      <mesh ref={clothRef} position={[0, 0, 0.8]}>
+        <planeGeometry args={[20, 20, 64, 64]} />
         <MeshDistortMaterial
-          color="#030303"
-          speed={2}
+          color="#020202"
+          speed={3}
           distort={0.4}
           radius={1}
           metalness={1}
-          roughness={0.02}
+          roughness={0.01}
           transparent
           opacity={1}
         />
@@ -206,15 +228,20 @@ const CinematicClothReveal = ({ phase, logoTexture }: { phase: number, logoTextu
   );
 };
 
-const Scene = ({ phase, logoTexture }: { phase: number, logoTexture: THREE.Texture | null }) => {
+const Scene = ({ phase, logoTexture, silhouetteTexture, pulse }: { 
+  phase: number, 
+  logoTexture: THREE.Texture | null, 
+  silhouetteTexture: THREE.Texture | null,
+  pulse: number
+}) => {
   const { camera } = useThree();
-  const cameraTarget = useRef(new THREE.Vector3(0, 0, 8));
 
   useFrame(() => {
-    if (phase >= 4) {
-      camera.position.z = THREE.MathUtils.lerp(camera.position.z, -5, 0.05);
-      camera.fov = THREE.MathUtils.lerp(camera.fov, 120, 0.05);
-      camera.updateProjectionMatrix();
+    if (phase === 5) {
+      const pCam = camera as THREE.PerspectiveCamera;
+      pCam.position.z = THREE.MathUtils.lerp(pCam.position.z, -10, 0.04);
+      pCam.fov = THREE.MathUtils.lerp(pCam.fov, 140, 0.04);
+      pCam.updateProjectionMatrix();
     }
   });
 
@@ -222,22 +249,22 @@ const Scene = ({ phase, logoTexture }: { phase: number, logoTexture: THREE.Textu
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={40} />
+      <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={35} />
       
-      {/* Lighting Architecture */}
-      <ambientLight intensity={0.05} />
-      <spotLight position={[10, 10, 15]} angle={0.2} penumbra={1} intensity={10} color="#FFD700" />
-      <pointLight position={[-10, -5, 5]} intensity={5} color="#00f2ff" />
-      <pointLight position={[0, 5, 10]} intensity={2} color="#ffffff" />
-      <rectAreaLight position={[0, 0, 10]} width={20} height={20} intensity={0.5} color="#5C2BE8" />
+      {/* Lighting Suite */}
+      <ambientLight intensity={0.02} />
+      <spotLight position={[5, 10, 10]} angle={0.15} penumbra={1} intensity={15} color="#FFD700" />
+      <pointLight position={[-10, 0, 5]} intensity={8} color="#00f2ff" />
+      <rectAreaLight position={[0, 0, 5]} width={10} height={10} intensity={2} color="#020205" />
 
       <LuxuryParticles />
       
-      <group scale={phase >= 4 ? 1 + (phase - 4) * 0.5 : 1}>
-        <CinematicClothReveal phase={phase} logoTexture={logoTexture} />
+      <group scale={phase === 5 ? 1 + (10 - camera.position.z) * 0.2 : 1}>
+        <CinematicClothReveal phase={phase} logoTexture={logoTexture} pulse={pulse} />
       </group>
 
-      {phase >= 3 && <NeuralEnergyLines />}
+      {phase >= 4 && <InterfaceFragments />}
+      {phase >= 4 && silhouetteTexture && <HolographicSilhouette texture={silhouetteTexture} />}
       
       <Environment preset="night" />
     </>
@@ -248,95 +275,103 @@ const Scene = ({ phase, logoTexture }: { phase: number, logoTexture: THREE.Textu
 
 export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
   const [logoTexture, setLogoTexture] = useState<THREE.Texture | null>(null);
-  const [phase, setPhase] = useState(0); // 0: Ambient, 1: Cloth Move, 2: Reveal, 3: Surge, 4: Fly-through
+  const [silhouetteTexture, setSilhouetteTexture] = useState<THREE.Texture | null>(null);
+  const [phase, setPhase] = useState(0); // 0-5
+  const [pulse, setPulse] = useState(0);
   const [isReady, setIsReady] = useState(false);
-  const [showUI, setShowUI] = useState(false);
+  const [showText, setShowText] = useState(false);
 
   useEffect(() => {
     const loader = new THREE.TextureLoader();
-    loader.load("/logo.jpeg", (tex) => {
-      setLogoTexture(tex);
+    
+    // Parallel Load
+    Promise.all([
+      new Promise<THREE.Texture>((res) => loader.load("/logo.jpeg", res)),
+      new Promise<THREE.Texture>((res) => loader.load("/silhouette.png", res))
+    ]).then(([logo, silhouette]) => {
+      setLogoTexture(logo);
+      setSilhouetteTexture(silhouette);
       setIsReady(true);
       
-      // Orchestrate the Marvel-level Sequence
+      // PRECISE 5s TIMELINE
       const tl = gsap.timeline({
         onComplete: () => {
-          setTimeout(onComplete, 500);
+          setTimeout(onComplete, 200);
         }
       });
 
-      tl.to({}, { duration: 1, onStart: () => { setPhase(0); playCinematicSequence(); } })
-        .to({}, { duration: 1, onStart: () => setPhase(1) })
-        .to({}, { duration: 1, onStart: () => { setPhase(2); setShowUI(true); } })
-        .to({}, { duration: 1, onStart: () => setPhase(3) })
-        .to({}, { duration: 1, onStart: () => setPhase(4) });
+      // 0-1s: Awakening
+      tl.to({}, { duration: 1, onStart: () => { setPhase(1); playCinematicSequence(); } })
+        // 1-2s: Waves
+        .to({}, { duration: 1, onStart: () => setPhase(2) })
+        // 2-3s: Fabric Reveal
+        .to({}, { duration: 1, onStart: () => { setPhase(3); setShowText(true); } })
+        // 3-4s: Energy Surge
+        .to({}, { duration: 1, onStart: () => setPhase(4) })
+        // 4-5s: Fly-through
+        .to({}, { duration: 1, onStart: () => setPhase(5) });
+
+      // Pulsing Logic
+      gsap.to({ v: 0 }, {
+        v: 1,
+        duration: 0.5,
+        repeat: -1,
+        yoyo: true,
+        onUpdate: function() { setPulse(this.targets()[0].v); }
+      });
     });
   }, [onComplete]);
 
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 2, filter: "blur(100px)" }}
-      transition={{ duration: 1.5, ease: [0.7, 0, 0.3, 1] }}
+      exit={{ opacity: 0, filter: "blur(50px)" }}
+      transition={{ duration: 1.2, ease: "easeInOut" }}
       className="fixed inset-0 z-[9999] bg-[#020205] overflow-hidden flex items-center justify-center"
     >
       <div className="absolute inset-0">
-        <Canvas 
-          dpr={[1, 1.5]} 
-          gl={{ 
-            antialias: true, 
-            alpha: true, 
-            powerPreference: "high-performance",
-            stencil: false,
-            depth: true
-          }}
-        >
-          <Scene phase={phase} logoTexture={logoTexture} />
+        <Canvas dpr={[1, 1.5]} gl={{ antialias: true, alpha: true }}>
+          <Scene phase={phase} logoTexture={logoTexture} silhouetteTexture={silhouetteTexture} pulse={pulse} />
         </Canvas>
       </div>
 
-      {/* VFX OVERLAYS */}
+      {/* TEXT LAYER */}
       <AnimatePresence>
-        {showUI && (
+        {showText && (
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="mt-[30vh]"
+              initial={{ opacity: 0, letterSpacing: "1em" }}
+              animate={{ opacity: 1, letterSpacing: "3em" }}
+              transition={{ duration: 2, ease: "easeOut" }}
+              className="mt-[35vh] flex flex-col items-center"
             >
-              <h1 className="text-8xl md:text-[12rem] font-display font-black text-white/95 uppercase tracking-[1.5em] ml-[1.5em] mix-blend-difference">
+              <h1 className="text-6xl md:text-[10rem] font-display font-black text-white/95 uppercase tracking-inherit ml-[3em] mix-blend-difference">
                 LUXE
               </h1>
-              <div className="flex items-center justify-center gap-4 mt-8 opacity-40">
-                <div className="h-px w-24 bg-gradient-to-r from-transparent to-primary" />
-                <span className="text-[10px] font-tech tracking-[1em] uppercase text-primary">Neural Identity Authenticated</span>
-                <div className="h-px w-24 bg-gradient-to-l from-transparent to-primary" />
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 0.5, y: 0 }}
+                transition={{ delay: 0.5, duration: 1 }}
+                className="text-[10px] font-tech tracking-[2em] uppercase text-primary mt-8 ml-[2em]"
+              >
+                Neural Synthesis Active
+              </motion.div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* CINEMATIC HUD ACCENTS */}
-      <div className="absolute inset-12 border border-white/5 pointer-events-none">
-        <div className="absolute top-0 left-0 w-8 h-8 border-t border-l border-primary/40" />
-        <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-primary/40" />
-        <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-primary/40" />
-        <div className="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-primary/40" />
-        
-        <div className="absolute top-1/2 left-4 -translate-y-1/2 flex flex-col gap-2">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="w-1 h-1 bg-white/20 rounded-full" />
-          ))}
-        </div>
+      {/* HUD OVERLAYS */}
+      <div className="absolute inset-12 pointer-events-none opacity-20">
+        <div className="absolute top-0 left-0 w-12 h-[1px] bg-primary" />
+        <div className="absolute top-0 left-0 w-[1px] h-12 bg-primary" />
+        <div className="absolute bottom-0 right-0 w-12 h-[1px] bg-primary" />
+        <div className="absolute bottom-0 right-0 w-[1px] h-12 bg-primary" />
       </div>
 
-      {/* GRAIN & VIGNETTE */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.9)_100%)]" />
-      <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-      </div>
+      {/* CINEMATIC POST-PROCESSING */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.8)_100%)]" />
+      <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
     </motion.div>
   );
 };

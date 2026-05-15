@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import ProductCard from "@/components/shop/ProductCard";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -68,7 +69,7 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
             {/* Search Header */}
             <div className="p-6 md:p-10 border-b border-white/5 relative">
               <div className="relative flex items-center gap-3">
-                <Search className="text-primary animate-pulse shrink-0" size={24} md:size={32} />
+                <Search className="text-primary animate-pulse shrink-0" size={24} />
                 <input
                   ref={inputRef}
                   type="text"
@@ -81,7 +82,7 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                   onClick={onClose}
                   className="w-10 h-10 md:w-16 md:h-16 shrink-0 rounded-xl md:rounded-2xl glass hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"
                 >
-                  <X size={20} md:size={32} />
+                  <X size={20} />
                 </button>
               </div>
               
@@ -120,7 +121,7 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
 
                   <div className="glass-panel !rounded-[24px] md:!rounded-[32px] p-6 md:p-8 border-secondary/20 relative overflow-hidden group">
                      <div className="absolute top-0 right-0 p-4">
-                        <Sparkles size={16} md:size={20} className="text-secondary animate-pulse" />
+                        <Sparkles size={16} className="text-secondary animate-pulse" />
                      </div>
                      <h5 className="text-[12px] md:text-sm font-black mb-2 md:mb-3 uppercase">AI STYLIST TIP</h5>
                      <p className="text-[10px] md:text-[11px] text-white/40 leading-relaxed italic">
