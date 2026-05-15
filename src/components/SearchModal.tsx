@@ -63,25 +63,25 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
             initial={{ y: 50, scale: 0.95, opacity: 0 }}
             animate={{ y: 0, scale: 1, opacity: 1 }}
             exit={{ y: 50, scale: 0.95, opacity: 0 }}
-            className="relative w-full max-w-5xl glass-panel !rounded-[40px] border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-full"
+            className="relative w-full max-w-5xl glass-panel !rounded-[24px] md:!rounded-[40px] border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh] md:max-h-full"
           >
             {/* Search Header */}
-            <div className="p-10 border-b border-white/5 relative">
-              <div className="relative flex items-center">
-                <Search className="absolute left-0 text-primary animate-pulse" size={32} />
+            <div className="p-6 md:p-10 border-b border-white/5 relative">
+              <div className="relative flex items-center gap-3">
+                <Search className="text-primary animate-pulse shrink-0" size={24} md:size={32} />
                 <input
                   ref={inputRef}
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="SCAN NEURAL DATABASE..."
-                  className="w-full bg-transparent text-4xl md:text-5xl font-display font-black tracking-tighter text-white placeholder:text-white/10 pl-16 focus:outline-none uppercase"
+                  placeholder="SCAN DATABASE..."
+                  className="w-full bg-transparent text-xl md:text-5xl font-display font-black tracking-tighter text-white placeholder:text-white/10 focus:outline-none uppercase"
                 />
                 <button 
                   onClick={onClose}
-                  className="w-16 h-16 rounded-2xl glass hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all ml-4"
+                  className="w-10 h-10 md:w-16 md:h-16 shrink-0 rounded-xl md:rounded-2xl glass hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"
                 >
-                  <X size={32} />
+                  <X size={20} md:size={32} />
                 </button>
               </div>
               
@@ -96,20 +96,20 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto p-10 grid md:grid-cols-[300px_1fr] gap-16 no-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 md:p-10 grid md:grid-cols-[250px_1fr] gap-10 md:gap-16 no-scrollbar">
                {/* Left Column: Intelligence */}
-               <div className="space-y-12">
+               <div className="space-y-8 md:space-y-12">
                   <div>
-                    <h4 className="text-[10px] font-black tracking-[0.5em] text-primary uppercase mb-6 flex items-center gap-2">
+                    <h4 className="text-[9px] md:text-[10px] font-black tracking-[0.3em] md:tracking-[0.5em] text-primary uppercase mb-4 md:mb-6 flex items-center gap-2">
                        <TrendingUp size={12} />
                        NEURAL TRENDS
                     </h4>
-                    <div className="flex flex-col gap-3">
-                      {["Cybercore Sneaker", "Liquid Metal Goggles", "Neural Link Vest", "Modest Techwear"].map((t) => (
+                    <div className="flex flex-col gap-2 md:gap-3">
+                      {["Cybercore Sneaker", "Liquid Metal", "Neural Link", "Techwear"].map((t) => (
                         <button 
                           key={t}
                           onClick={() => setQuery(t)}
-                          className="text-left py-3 px-6 rounded-2xl glass border border-white/5 text-sm font-black tracking-tight text-white/40 hover:text-white hover:border-primary/40 hover:bg-primary/5 transition-all flex items-center justify-between group"
+                          className="text-left py-2.5 md:py-3 px-4 md:px-6 rounded-xl md:rounded-2xl glass border border-white/5 text-[12px] md:text-sm font-black tracking-tight text-white/40 hover:text-white hover:border-primary/40 hover:bg-primary/5 transition-all flex items-center justify-between group"
                         >
                           {t}
                           <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
@@ -118,28 +118,25 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                     </div>
                   </div>
 
-                  <div className="glass-panel !rounded-[32px] p-8 border-secondary/20 relative overflow-hidden group">
+                  <div className="glass-panel !rounded-[24px] md:!rounded-[32px] p-6 md:p-8 border-secondary/20 relative overflow-hidden group">
                      <div className="absolute top-0 right-0 p-4">
-                        <Sparkles size={20} className="text-secondary animate-pulse" />
+                        <Sparkles size={16} md:size={20} className="text-secondary animate-pulse" />
                      </div>
-                     <h5 className="text-sm font-black mb-3">AI STYLIST TIP</h5>
-                     <p className="text-[11px] text-white/40 leading-relaxed italic">
-                        "Your current silhouette indicates a 92% match with the 'Obsidian Cyber' collection. Would you like a deep scan?"
+                     <h5 className="text-[12px] md:text-sm font-black mb-2 md:mb-3 uppercase">AI STYLIST TIP</h5>
+                     <p className="text-[10px] md:text-[11px] text-white/40 leading-relaxed italic">
+                        "Your current silhouette indicates a 92% match with the 'Obsidian Cyber' collection."
                      </p>
-                     <button className="mt-6 text-[9px] font-black tracking-widest text-secondary hover:text-white transition-colors flex items-center gap-2 uppercase">
-                        Analyze Profile <ChevronRight size={12} />
-                     </button>
                   </div>
                </div>
 
                {/* Right Column: Visual Buffer */}
                <div>
-                  <div className="flex items-center justify-between mb-8">
-                     <h4 className="text-[10px] font-black tracking-[0.5em] text-white/20 uppercase">
-                        {query ? "DATABASE MATCHES" : "RECOMMENDED FOR YOU"}
+                  <div className="flex items-center justify-between mb-6 md:mb-8">
+                     <h4 className="text-[9px] md:text-[10px] font-black tracking-[0.3em] md:tracking-[0.5em] text-white/20 uppercase">
+                        {query ? "DATABASE MATCHES" : "RECOMMENDED NODES"}
                      </h4>
-                     <span className="text-[10px] font-black text-primary/40 uppercase">
-                        Found {results.length} nodes
+                     <span className="text-[9px] md:text-[10px] font-black text-primary/40 uppercase">
+                        {results.length} nodes
                      </span>
                   </div>
 

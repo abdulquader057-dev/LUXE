@@ -74,34 +74,40 @@ const ProductCard = ({ product }: ProductCardProps) => {
               </span>
             </div>
 
-            {/* Quick-add overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-400" />
+            {/* Quick-add overlay (Desktop) / Action Button (Mobile) */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 hidden md:block" />
             
-            <button className="absolute bottom-0 left-0 w-full py-3 md:py-4 bg-gradient-to-r from-primary to-secondary text-black font-nav font-bold tracking-[0.2em] uppercase translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-400 ease-luxury flex items-center justify-center gap-2">
+            {/* Desktop Quick Add */}
+            <button className="hidden md:flex absolute bottom-0 left-0 w-full py-4 bg-gradient-to-r from-primary to-secondary text-black font-nav font-bold tracking-[0.2em] uppercase translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-luxury items-center justify-center gap-2">
               <Plus size={16} strokeWidth={2.5} />
               Quick Add
+            </button>
+
+            {/* Mobile Quick Add Button */}
+            <button className="md:hidden absolute bottom-3 right-3 w-10 h-10 rounded-full bg-primary flex items-center justify-center text-black shadow-lg active:scale-95 transition-transform z-20">
+              <Plus size={20} strokeWidth={2.5} />
             </button>
           </div>
 
           {/* CARD INFO */}
-          <div className="p-5">
-            <h3 className="text-sm font-nav font-bold tracking-wider text-white uppercase group-hover:text-primary transition-colors mb-1">
+          <div className="p-4 md:p-5">
+            <h3 className="text-xs md:text-sm font-nav font-bold tracking-wider text-white uppercase group-hover:text-primary transition-colors mb-1 truncate">
               {product.name}
             </h3>
             <div className="flex items-center gap-3">
-              <span className="text-[13px] font-tech font-bold text-primary tracking-widest">
+              <span className="text-[12px] md:text-[13px] font-tech font-bold text-primary tracking-widest">
                 {formatPrice(product.price)}
               </span>
               {product.originalPrice && (
-                <span className="text-[11px] font-tech text-muted line-through tracking-widest">
+                <span className="text-[10px] md:text-[11px] font-tech text-muted line-through tracking-widest">
                   {formatPrice(product.originalPrice)}
                 </span>
               )}
             </div>
           </div>
           
-          {/* Cyan Glow behind card on hover - Optimized for performance */}
-          <div className="absolute -inset-10 bg-[radial-gradient(circle_at_center,_rgba(0,229,204,0.15),_transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+          {/* Cyan Glow behind card on hover */}
+          <div className="absolute -inset-10 bg-primary/10 blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
         </motion.div>
       </Link>
     </motion.div>

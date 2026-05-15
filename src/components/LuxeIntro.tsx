@@ -35,7 +35,7 @@ export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
         <motion.div
           key="luxe-intro"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, filter: "blur(20px)" }}
           transition={{ duration: 1, ease: "easeInOut" }}
           className="fixed inset-0 z-[9999] overflow-hidden bg-black flex items-center justify-center pointer-events-none"
         >
@@ -92,20 +92,19 @@ export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
           <div className="relative z-10 flex items-center justify-center">
             {phase >= 2 && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.8, filter: "blur(20px)" }}
                 animate={
                   phase >= 4
-                    ? { scale: 50, opacity: 0 } // Phase 5: Camera Fly-Through
+                    ? { scale: 50, opacity: 0, filter: "blur(10px)" } // Phase 5: Camera Fly-Through
                     : phase >= 3
-                    ? { scale: 1.05, opacity: 1 } // Phase 4: Surge
-                    : { scale: 1, opacity: 1 } // Phase 3: Reveal
+                    ? { scale: 1.05, opacity: 1, filter: "blur(0px)" } // Phase 4: Surge
+                    : { scale: 1, opacity: 1, filter: "blur(0px)" } // Phase 3: Reveal
                 }
                 transition={
                   phase >= 4
                     ? { duration: 1.2, ease: [0.8, 0, 0.2, 1] } // Fast zoom out for fly-through
                     : { duration: 2, ease: "easeOut" }
                 }
-                style={{ willChange: "transform, opacity" }}
                 className="relative flex items-center justify-center"
               >
                 {/* Logo Image Container */}
@@ -181,10 +180,10 @@ export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
             )}
           </div>
 
-          {/* Phase 4: Luxury Particle Explosion - Optimized for mobile */}
+          {/* Phase 4: Luxury Particle Explosion */}
           {phase >= 3 && (
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {[...Array(12)].map((_, i) => (
+              {[...Array(20)].map((_, i) => (
                 <motion.div
                   key={i}
                   initial={{
@@ -195,19 +194,19 @@ export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
                   }}
                   animate={{
                     opacity: [0, 1, 0],
-                    x: `${50 + (Math.random() - 0.5) * 100}vw`,
-                    y: `${50 + (Math.random() - 0.5) * 100}vh`,
-                    scale: Math.random() * 2 + 0.5,
+                    x: `${50 + (Math.random() - 0.5) * 80}vw`,
+                    y: `${50 + (Math.random() - 0.5) * 80}vh`,
+                    scale: Math.random() * 1.5 + 0.5,
                   }}
                   transition={{
-                    duration: 1.5 + Math.random(),
+                    duration: 1.2 + Math.random(),
                     ease: "easeOut",
                   }}
-                  className="absolute w-1 h-1 rounded-full bg-white mix-blend-screen"
+                  style={{ willChange: "transform, opacity" }}
+                  className="absolute w-1 h-1 rounded-full bg-white shadow-[0_0_10px_rgba(255,215,0,0.6)] mix-blend-screen"
                   style={{
                     backgroundColor: Math.random() > 0.6 ? "#00f5d4" : Math.random() > 0.3 ? "#ffd700" : "#6c3fe8",
-                    boxShadow: "0 0 10px currentColor",
-                    willChange: "transform, opacity",
+                    willChange: "transform, opacity"
                   }}
                 />
               ))}

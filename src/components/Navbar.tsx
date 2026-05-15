@@ -39,13 +39,13 @@ const Navbar = () => {
         transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
           "fixed top-0 left-0 right-0 z-[100] transition-all duration-500",
-          "h-[64px] md:h-[64px] flex items-center px-4 md:px-8",
+          "h-[64px] md:h-[64px] flex items-center px-8",
           "bg-[rgba(7,7,15,0.7)] backdrop-blur-[32px] saturate-[180%] border-b border-[rgba(0,229,204,0.08)]",
           "shadow-[0_1px_0_rgba(0,229,204,0.04),0_8px_32px_rgba(0,0,0,0.4)]"
         )}
       >
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center gap-4 lg:gap-16">
+          <div className="flex items-center gap-16">
             <Magnetic>
               <Link href="/" className="text-[28px] font-display font-black tracking-[0.15em] text-white group flex items-center gap-1 hover:scale-[1.02] transition-all duration-300">
                 LUXE<span className="text-primary animate-pulse shadow-[0_0_10px_#00e5cc]">.</span>
@@ -76,7 +76,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-6">
+          <div className="flex items-center gap-6">
             <div className="hidden xl:block scale-90 origin-right">
               <CurrencySwitcher />
             </div>
@@ -171,7 +171,7 @@ const Navbar = () => {
                     <Link
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-4xl sm:text-5xl font-display font-black tracking-tight text-white/60 hover:text-white transition-all uppercase"
+                      className="text-5xl font-display font-black tracking-tight text-white/60 hover:text-white transition-all uppercase"
                     >
                       {link.name}
                     </Link>

@@ -38,7 +38,7 @@ const RevealText = ({ text, delay = 0, variant = "the" }: { text: string; delay?
 };
 
 const SearchBar = () => {
-  const placeholders = ["NEURAL BASE...", "ARCHIVE_X...", "S/S_2026...", "LUXE_CORE..."];
+  const placeholders = ["NEURAL BASE...", "ARCHIVE_X...", "S/S_2026...", "ZYRA_CORE..."];
   const [index, setIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -50,15 +50,15 @@ const SearchBar = () => {
   }, [isFocused]);
 
   return (
-    <div className="flex flex-col sm:flex-row w-full max-w-xl items-center gap-4 mt-10 md:mt-16 relative z-30">
-      <div className="relative w-full flex-grow group">
+    <div className="flex flex-col sm:flex-row w-full max-w-2xl items-stretch sm:items-center gap-3 md:gap-4 mt-8 md:mt-16 relative z-30">
+      <div className="relative flex-grow group">
         <div className={cn(
           "absolute -inset-[1px] bg-gradient-to-r from-primary to-secondary rounded-full blur-[2px] transition-opacity duration-500",
           isFocused ? "opacity-100" : "opacity-0"
         )} />
-        <div className="relative flex items-center bg-surface/40 backdrop-blur-3xl border border-white/5 rounded-full px-4 md:px-6 py-3 md:py-4 transition-all duration-500 focus-within:bg-surface/60 w-full">
-          <Search size={18} className={cn("transition-colors duration-500 flex-shrink-0", isFocused ? "text-primary" : "text-white/40")} />
-          <div className="relative flex-grow h-6 overflow-hidden ml-4">
+        <div className="relative flex items-center bg-surface/40 backdrop-blur-3xl border border-white/5 rounded-full px-5 md:px-6 py-3.5 md:py-4 transition-all duration-500 focus-within:bg-surface/60">
+          <Search size={16} className={cn("transition-colors duration-500", isFocused ? "text-primary" : "text-white/40")} />
+          <div className="relative flex-grow h-6 overflow-hidden ml-3 md:ml-4">
             <AnimatePresence mode="popLayout">
               {!isFocused && (
                 <motion.div
@@ -67,7 +67,7 @@ const SearchBar = () => {
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -24, opacity: 0 }}
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="absolute inset-0 text-sm font-tech text-white/20 tracking-[0.2em] pointer-events-none flex items-center"
+                  className="absolute inset-0 text-[11px] md:text-sm font-tech text-white/20 tracking-[0.2em] pointer-events-none flex items-center"
                 >
                   {placeholders[index]}
                 </motion.div>
@@ -77,10 +77,10 @@ const SearchBar = () => {
               type="text"
               onFocus={() => setIsFocused(true)}
               onBlur={(e) => !e.target.value && setIsFocused(false)}
-              className="w-full h-full bg-transparent text-white font-tech text-sm tracking-widest focus:outline-none"
+              className="w-full h-full bg-transparent text-white font-tech text-xs md:text-sm tracking-widest focus:outline-none"
             />
           </div>
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/5 border border-white/5">
+          <div className="hidden xs:flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/5 border border-white/5">
             <Command size={10} className="text-white/40" />
             <span className="text-[9px] font-tech text-white/40">K</span>
           </div>
@@ -88,11 +88,11 @@ const SearchBar = () => {
       </div>
       
       <Magnetic>
-        <button className="relative w-full sm:w-auto px-8 py-3 md:py-4 rounded-full overflow-hidden group">
+        <button className="relative px-6 md:px-8 py-3.5 md:py-4 rounded-full overflow-hidden group">
           <div className="absolute inset-0 border border-white/10 rounded-full group-hover:border-primary/30 transition-colors" />
           <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-[1500ms] bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-30deg]" />
-          <span className="relative flex items-center justify-center gap-2 text-[10px] font-nav font-bold tracking-[0.3em] uppercase text-white/80 group-hover:text-white transition-colors">
-            <Filter size={14} className="text-primary" /> Filters
+          <span className="relative flex items-center justify-center gap-2 text-[9px] md:text-[10px] font-nav font-bold tracking-[0.3em] uppercase text-white/80 group-hover:text-white transition-colors">
+            <Filter size={12} className="text-primary" /> Filters
           </span>
         </button>
       </Magnetic>
@@ -133,7 +133,7 @@ const EditorialImage = ({ src, className, delay = 0, parallax = 0, rotate = 0 }:
 const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-32">
-      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-16 flex flex-col lg:flex-row items-center">
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-16 flex flex-col lg:flex-row items-center gap-12 lg:gap-0">
         
         {/* LEFT CONTENT */}
         <div className="relative z-20 w-full lg:w-3/5 text-left">
@@ -141,19 +141,19 @@ const Hero = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex items-center gap-3 mb-10"
+            className="flex items-center gap-3 mb-6 md:mb-10"
           >
             <div className="w-12 h-[1px] bg-primary/40" />
-            <span className="text-[10px] font-tech font-bold tracking-[0.5em] text-primary uppercase text-center md:text-left">
+            <span className="text-[9px] font-tech font-bold tracking-[0.5em] text-primary uppercase">
               LUXE Intelligence System v2.4
             </span>
           </motion.div>
           
           <h1 className="leading-[0.8] tracking-tighter select-none cursor-default">
-            <div className="text-[clamp(4rem,12vw,180px)] font-display font-black text-white">
+            <div className="text-[clamp(3.5rem,15vw,180px)] font-display font-black text-white">
               <RevealText text="THE" delay={0.4} variant="the" />
             </div>
-            <div className="text-[clamp(4rem,12vw,180px)] font-display font-black flex items-end">
+            <div className="text-[clamp(3.5rem,15vw,180px)] font-display font-black flex items-end">
               <span className="text-gradient">
                 <RevealText text="ARCHIVE" delay={0.7} variant="archive" />
               </span>
@@ -172,10 +172,10 @@ const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 1.8 }}
-            className="mt-12 h-6"
+            className="mt-8 md:mt-12 h-auto"
           >
-            <p className="text-xs md:text-sm font-tech tracking-[0.2em] text-muted uppercase text-center lg:text-left">
-              Synthesized by LUXE Intelligence. Engineered for the future.
+            <p className="text-[11px] md:text-sm font-tech tracking-[0.2em] text-muted uppercase leading-relaxed max-w-md">
+              Synthesized by LUXE Core. Engineered for the future of fashion.
             </p>
           </motion.div>
 
@@ -183,12 +183,24 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 2.2 }}
+            className="w-full"
           >
             <SearchBar />
           </motion.div>
         </div>
 
-        {/* RIGHT IMAGES (Floating Editorial) */}
+        {/* MOBILE IMAGE (Simplified) */}
+        <div className="relative w-full aspect-[4/5] block lg:hidden perspective-1000">
+           <EditorialImage
+            src="https://images.unsplash.com/photo-1550614000-4b95d4edfaeb?q=80&w=800&auto=format&fit=crop"
+            className="inset-0 w-full h-full z-10"
+            delay={2.5}
+            parallax={20}
+            rotate={0}
+          />
+        </div>
+
+        {/* RIGHT IMAGES (Floating Editorial - Desktop) */}
         <div className="flex-1 relative w-full h-[90vh] hidden lg:block perspective-1000">
           {/* Main Portrait */}
           <EditorialImage

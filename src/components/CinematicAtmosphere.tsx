@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export const CinematicAtmosphere = () => {
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none">
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none bg-[#05050E]">
       {/* 1. BASE LAYER: Deep Obsidian Radial Gradient */}
       <div 
         className="absolute inset-0" 
@@ -17,18 +17,22 @@ export const CinematicAtmosphere = () => {
       {/* 2. AMBIENT ORB LAYER */}
       {/* Orb 1: Soft Violet */}
       <motion.div
-        className="absolute top-[-10%] left-[-10%] rounded-full"
+        className="absolute top-[-10%] left-[-10%] rounded-full opacity-[0.15]"
         style={{
-          width: "700px",
-          height: "700px",
-          background: "radial-gradient(circle, rgba(92,43,232,0.15) 0%, rgba(92,43,232,0) 70%)",
+          width: "70vw",
+          height: "70vw",
+          maxWidth: "700px",
+          maxHeight: "700px",
+          background: "#5C2BE8",
+          filter: "blur(150px)",
+          willChange: "transform, opacity",
         }}
         animate={{
-          x: [0, 200, 0],
-          y: [0, 150, 0],
+          x: [0, 100, 0],
+          y: [0, 50, 0],
         }}
         transition={{
-          duration: 28,
+          duration: 25,
           repeat: Infinity,
           ease: "easeInOut",
         }}
@@ -36,33 +40,19 @@ export const CinematicAtmosphere = () => {
 
       {/* Orb 2: Cyan */}
       <motion.div
-        className="absolute bottom-[-10%] right-[-10%] rounded-full"
+        className="absolute bottom-[-10%] right-[-10%] rounded-full opacity-[0.1]"
         style={{
-          width: "500px",
-          height: "500px",
-          background: "radial-gradient(circle, rgba(0,229,204,0.12) 0%, rgba(0,229,204,0) 70%)",
+          width: "50vw",
+          height: "50vw",
+          maxWidth: "500px",
+          maxHeight: "500px",
+          background: "#00E5CC",
+          filter: "blur(120px)",
+          willChange: "transform, opacity",
         }}
         animate={{
-          x: [0, -150, 0],
-          y: [0, -200, 0],
-        }}
-        transition={{
-          duration: 22,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-
-      {/* Orb 3: Deep Indigo */}
-      <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{
-          width: "900px",
-          height: "900px",
-          background: "radial-gradient(circle, rgba(26,10,74,0.2) 0%, rgba(26,10,74,0) 70%)",
-        }}
-        animate={{
-          scale: [1, 1.1, 1],
+          x: [0, -80, 0],
+          y: [0, -100, 0],
         }}
         transition={{
           duration: 20,
@@ -71,23 +61,42 @@ export const CinematicAtmosphere = () => {
         }}
       />
 
-      {/* 3. TEXTURE LAYER: Removed SVG feTurbulence for performance */}
-      <div 
-        className="absolute inset-0 z-[1] opacity-[0.03] mix-blend-overlay"
+      {/* Orb 3: Deep Indigo */}
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.2]"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          width: "80vw",
+          height: "80vw",
+          maxWidth: "800px",
+          maxHeight: "800px",
+          background: "#1A0A4A",
+          filter: "blur(180px)",
+          willChange: "transform, opacity",
+        }}
+        animate={{
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 15,
+          repeat: Infinity,
+          ease: "easeInOut",
         }}
       />
 
+      {/* 3. TEXTURE LAYER: CSS Grain (Lighter than SVG feTurbulence) */}
+      <div className="absolute inset-0 z-[1] opacity-[0.02] pointer-events-none mix-blend-overlay">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+      </div>
+
       {/* 4. GRID LAYER: Ultra-faint diagonal grid */}
       <div 
-        className="absolute inset-0 z-[2] opacity-[0.025]"
+        className="absolute inset-0 z-[2] opacity-[0.015]"
         style={{
           backgroundImage: `
-            linear-gradient(45deg, rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(-45deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+            linear-gradient(45deg, rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(-45deg, rgba(255,255,255,0.05) 1px, transparent 1px)
           `,
-          backgroundSize: "80px 80px"
+          backgroundSize: "100px 100px"
         }}
       />
 
@@ -95,7 +104,7 @@ export const CinematicAtmosphere = () => {
       <div 
         className="absolute inset-0 z-[3]"
         style={{
-          background: "radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%)"
+          background: "radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 100%)"
         }}
       />
     </div>
