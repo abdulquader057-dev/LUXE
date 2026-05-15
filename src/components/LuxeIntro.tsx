@@ -107,25 +107,57 @@ export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
                 }
                 className="relative flex items-center justify-center"
               >
-                {/* Logo Text */}
-                <h1 className="text-[clamp(4rem,10vw,150px)] font-display font-black tracking-[0.2em] uppercase relative z-10 text-transparent bg-clip-text bg-gradient-to-b from-[#ffffff] via-[#e6e6e6] to-[#808080]">
-                  LUXE
-                </h1>
+                {/* Logo Image Container */}
+                <div className="relative w-[300px] h-[300px] md:w-[600px] md:h-[600px] z-10 flex items-center justify-center">
+                  
+                  {/* Holographic Chromatic Aberration Layers (Phase 3 & 4) */}
+                  {phase >= 3 && (
+                    <>
+                      <motion.img
+                        src="/luxe-logo.png"
+                        alt=""
+                        initial={{ x: 0, opacity: 0 }}
+                        animate={{ 
+                          x: phase >= 4 ? [-8, 8, -4, 0] : [-2, 2, 0], 
+                          opacity: phase >= 4 ? 0.6 : 0.3 
+                        }}
+                        transition={{ duration: 0.2, repeat: Infinity, repeatType: "mirror" }}
+                        className="absolute w-full h-full object-contain mix-blend-screen hue-rotate-[90deg] brightness-150 blur-[3px]"
+                      />
+                      <motion.img
+                        src="/luxe-logo.png"
+                        alt=""
+                        initial={{ x: 0, opacity: 0 }}
+                        animate={{ 
+                          x: phase >= 4 ? [8, -8, 4, 0] : [2, -2, 0],
+                          opacity: phase >= 4 ? 0.6 : 0.3 
+                        }}
+                        transition={{ duration: 0.2, repeat: Infinity, repeatType: "mirror", delay: 0.1 }}
+                        className="absolute w-full h-full object-contain mix-blend-screen hue-rotate-[-90deg] brightness-150 blur-[3px]"
+                      />
+                    </>
+                  )}
 
-                {/* Platinum Edge Detailing / Chrome Reflection */}
-                <motion.div
-                  initial={{ x: "-100%" }}
-                  animate={{ x: "100%" }}
-                  transition={{
-                    duration: 2.5,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                  }}
-                  className="absolute inset-0 z-20 bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.4)] to-transparent bg-clip-text text-transparent pointer-events-none"
-                  style={{ WebkitBackgroundClip: "text" }}
-                >
-                  LUXE
-                </motion.div>
+                  {/* Core Logo Image */}
+                  <img
+                    src="/luxe-logo.png"
+                    alt="LUXE by SYEDS"
+                    className="relative z-20 w-full h-full object-contain mix-blend-lighten drop-shadow-[0_0_40px_rgba(255,215,0,0.4)]"
+                  />
+
+                  {/* Platinum / Gold Sweeping Reflection */}
+                  <motion.div
+                    initial={{ left: "-150%" }}
+                    animate={{ left: "150%" }}
+                    transition={{
+                      duration: 3,
+                      ease: "easeInOut",
+                      repeat: Infinity,
+                      repeatDelay: 1
+                    }}
+                    className="absolute top-0 bottom-0 w-[50%] z-30 bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.4)] to-transparent skew-x-[-30deg] mix-blend-color-dodge pointer-events-none"
+                  />
+                </div>
 
                 {/* Holographic Gold Energy & AI Cyan Pulse */}
                 {phase >= 3 && (
