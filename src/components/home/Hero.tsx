@@ -38,7 +38,7 @@ const RevealText = ({ text, delay = 0, variant = "the" }: { text: string; delay?
 };
 
 const SearchBar = () => {
-  const placeholders = ["NEURAL BASE...", "ARCHIVE_X...", "S/S_2026...", "ZYRA_CORE..."];
+  const placeholders = ["NEURAL BASE...", "ARCHIVE_X...", "S/S_2026...", "LUXE_CORE..."];
   const [index, setIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -50,14 +50,14 @@ const SearchBar = () => {
   }, [isFocused]);
 
   return (
-    <div className="flex w-full max-w-xl items-center gap-4 mt-16 relative z-30">
-      <div className="relative flex-grow group">
+    <div className="flex flex-col sm:flex-row w-full max-w-xl items-center gap-4 mt-10 md:mt-16 relative z-30">
+      <div className="relative w-full flex-grow group">
         <div className={cn(
           "absolute -inset-[1px] bg-gradient-to-r from-primary to-secondary rounded-full blur-[2px] transition-opacity duration-500",
           isFocused ? "opacity-100" : "opacity-0"
         )} />
-        <div className="relative flex items-center bg-surface/40 backdrop-blur-3xl border border-white/5 rounded-full px-6 py-4 transition-all duration-500 focus-within:bg-surface/60">
-          <Search size={18} className={cn("transition-colors duration-500", isFocused ? "text-primary" : "text-white/40")} />
+        <div className="relative flex items-center bg-surface/40 backdrop-blur-3xl border border-white/5 rounded-full px-4 md:px-6 py-3 md:py-4 transition-all duration-500 focus-within:bg-surface/60 w-full">
+          <Search size={18} className={cn("transition-colors duration-500 flex-shrink-0", isFocused ? "text-primary" : "text-white/40")} />
           <div className="relative flex-grow h-6 overflow-hidden ml-4">
             <AnimatePresence mode="popLayout">
               {!isFocused && (
@@ -88,10 +88,10 @@ const SearchBar = () => {
       </div>
       
       <Magnetic>
-        <button className="relative px-8 py-4 rounded-full overflow-hidden group">
+        <button className="relative w-full sm:w-auto px-8 py-3 md:py-4 rounded-full overflow-hidden group">
           <div className="absolute inset-0 border border-white/10 rounded-full group-hover:border-primary/30 transition-colors" />
           <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-[1500ms] bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-30deg]" />
-          <span className="relative flex items-center gap-2 text-[10px] font-nav font-bold tracking-[0.3em] uppercase text-white/80 group-hover:text-white transition-colors">
+          <span className="relative flex items-center justify-center gap-2 text-[10px] font-nav font-bold tracking-[0.3em] uppercase text-white/80 group-hover:text-white transition-colors">
             <Filter size={14} className="text-primary" /> Filters
           </span>
         </button>
@@ -144,8 +144,8 @@ const Hero = () => {
             className="flex items-center gap-3 mb-10"
           >
             <div className="w-12 h-[1px] bg-primary/40" />
-            <span className="text-[10px] font-tech font-bold tracking-[0.5em] text-primary uppercase">
-              Zyra Intelligence System v2.4
+            <span className="text-[10px] font-tech font-bold tracking-[0.5em] text-primary uppercase text-center md:text-left">
+              LUXE Intelligence System v2.4
             </span>
           </motion.div>
           
@@ -174,8 +174,8 @@ const Hero = () => {
             transition={{ duration: 1, delay: 1.8 }}
             className="mt-12 h-6"
           >
-            <p className="text-sm font-tech tracking-[0.2em] text-muted uppercase">
-              Synthesized by ZYRA Intelligence. Engineered for the future.
+            <p className="text-xs md:text-sm font-tech tracking-[0.2em] text-muted uppercase text-center lg:text-left">
+              Synthesized by LUXE Intelligence. Engineered for the future.
             </p>
           </motion.div>
 

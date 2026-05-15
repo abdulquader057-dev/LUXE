@@ -17,16 +17,15 @@ export const CinematicAtmosphere = () => {
       {/* 2. AMBIENT ORB LAYER */}
       {/* Orb 1: Soft Violet */}
       <motion.div
-        className="absolute top-[-10%] left-[-10%] rounded-full opacity-[0.18]"
+        className="absolute top-[-10%] left-[-10%] rounded-full"
         style={{
           width: "700px",
           height: "700px",
-          background: "#5C2BE8",
-          filter: "blur(200px)",
+          background: "radial-gradient(circle, rgba(92,43,232,0.15) 0%, rgba(92,43,232,0) 70%)",
         }}
         animate={{
-          x: [0, 400, 0],
-          y: [0, 300, 0],
+          x: [0, 200, 0],
+          y: [0, 150, 0],
         }}
         transition={{
           duration: 28,
@@ -37,16 +36,15 @@ export const CinematicAtmosphere = () => {
 
       {/* Orb 2: Cyan */}
       <motion.div
-        className="absolute bottom-[-10%] right-[-10%] rounded-full opacity-[0.12]"
+        className="absolute bottom-[-10%] right-[-10%] rounded-full"
         style={{
           width: "500px",
           height: "500px",
-          background: "#00E5CC",
-          filter: "blur(160px)",
+          background: "radial-gradient(circle, rgba(0,229,204,0.12) 0%, rgba(0,229,204,0) 70%)",
         }}
         animate={{
-          x: [0, -300, 0],
-          y: [0, -400, 0],
+          x: [0, -150, 0],
+          y: [0, -200, 0],
         }}
         transition={{
           duration: 22,
@@ -57,15 +55,14 @@ export const CinematicAtmosphere = () => {
 
       {/* Orb 3: Deep Indigo */}
       <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.25]"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
         style={{
           width: "900px",
           height: "900px",
-          background: "#1A0A4A",
-          filter: "blur(240px)",
+          background: "radial-gradient(circle, rgba(26,10,74,0.2) 0%, rgba(26,10,74,0) 70%)",
         }}
         animate={{
-          scale: [1, 1.15, 1],
+          scale: [1, 1.1, 1],
         }}
         transition={{
           duration: 20,
@@ -74,20 +71,13 @@ export const CinematicAtmosphere = () => {
         }}
       />
 
-      {/* 3. TEXTURE LAYER: SVG feTurbulence Noise Grain */}
-      <div className="absolute inset-0 z-[1] opacity-[0.03] mix-blend-overlay">
-        <svg className="w-full h-full">
-          <filter id="noiseFilter">
-            <feTurbulence 
-              type="fractalNoise" 
-              baseFrequency="0.9" 
-              numOctaves="4" 
-              stitchTiles="stitch" 
-            />
-          </filter>
-          <rect width="100%" height="100%" filter="url(#noiseFilter)" />
-        </svg>
-      </div>
+      {/* 3. TEXTURE LAYER: Removed SVG feTurbulence for performance */}
+      <div 
+        className="absolute inset-0 z-[1] opacity-[0.03] mix-blend-overlay"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
 
       {/* 4. GRID LAYER: Ultra-faint diagonal grid */}
       <div 

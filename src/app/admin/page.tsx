@@ -87,7 +87,7 @@ export default function AdminDashboard() {
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         
         {/* Top OS Bar */}
-        <header className="h-20 border-b border-white/5 px-10 flex items-center justify-between bg-black/40 backdrop-blur-xl relative z-20">
+        <header className="h-16 md:h-20 border-b border-white/5 px-4 md:px-10 flex items-center justify-between bg-black/40 backdrop-blur-xl relative z-20">
            <div className="flex items-center gap-8">
               <div className="flex items-center gap-3">
                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]" />
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
               </div>
            </div>
 
-           <div className="flex items-center gap-10">
+           <div className="flex items-center gap-4 md:gap-10">
               <div className="flex flex-col items-end">
                  <span className="text-xl font-display font-black tracking-tighter text-white">
                     {currentTime.toLocaleTimeString([], { hour12: false })}
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Dynamic Content Viewport */}
-        <div className="flex-1 overflow-y-auto no-scrollbar p-10 relative">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-4 md:p-10 relative">
            
            <AnimatePresence mode="wait">
               {activeTab === "overview" && (
@@ -128,16 +128,16 @@ export default function AdminDashboard() {
                   className="space-y-10"
                 >
                   {/* Top Header */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
                      <div>
-                        <h2 className="text-4xl font-display font-black tracking-tighter uppercase mb-2">Control Center</h2>
-                        <p className="text-sm text-white/40 tracking-widest uppercase italic">Executive Neural Overview</p>
+                        <h2 className="text-2xl md:text-4xl font-display font-black tracking-tighter uppercase mb-1 md:mb-2">Control Center</h2>
+                        <p className="text-xs md:text-sm text-white/40 tracking-widest uppercase italic">Executive Neural Overview</p>
                      </div>
-                     <div className="flex gap-4">
-                        <button className="glass border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black tracking-widest uppercase hover:bg-white/5 transition-all">
+                     <div className="flex flex-wrap md:flex-nowrap gap-3 md:gap-4 w-full md:w-auto">
+                        <button className="flex-1 md:flex-none glass border-white/10 px-4 py-2 md:px-6 md:py-3 rounded-2xl flex items-center justify-center gap-2 md:gap-3 text-[10px] font-black tracking-widest uppercase hover:bg-white/5 transition-all">
                            <Terminal size={14} /> CLI Access
                         </button>
-                        <button className="bg-primary text-black px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black tracking-widest uppercase hover:scale-105 transition-all">
+                        <button className="flex-1 md:flex-none bg-primary text-black px-4 py-2 md:px-6 md:py-3 rounded-2xl flex items-center justify-center gap-2 md:gap-3 text-[10px] font-black tracking-widest uppercase hover:scale-105 transition-all">
                            <Zap size={14} fill="black" /> Turbo Sync
                         </button>
                      </div>
@@ -225,9 +225,9 @@ export default function AdminDashboard() {
 
         </div>
 
-        {/* Global OS Accents */}
-        <div className="absolute top-0 right-0 w-1/2 h-full pointer-events-none">
-           <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 blur-[150px] rounded-full opacity-30" />
+        {/* Global OS Accents - Optimized for mobile performance */}
+        <div className="absolute top-0 right-0 w-full md:w-1/2 h-full pointer-events-none">
+           <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] rounded-full opacity-30 bg-[radial-gradient(circle_at_center,_rgba(0,229,204,0.3),_transparent_70%)]" />
         </div>
         
         {/* CRT Scanline Effect */}
