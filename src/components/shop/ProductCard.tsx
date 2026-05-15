@@ -39,6 +39,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
     y.set(0);
   };
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.97 }}
@@ -52,7 +54,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           ref={cardRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          style={{ rotateX, rotateY, perspective: "1000px" }}
+          style={!isMobile ? { rotateX, rotateY, perspective: "1000px" } : {}}
           className={cn(
             "relative bg-surface rounded-lg overflow-hidden border border-subtle transition-all duration-400 ease-luxury",
             "group-hover:-translate-y-2.5 group-hover:shadow-[0_24px_64px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,229,204,0.15)]"

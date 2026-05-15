@@ -20,8 +20,7 @@ export const CinematicAtmosphere = () => {
         <motion.div
           className="absolute -top-1/4 -left-1/4 w-[100vw] h-[100vw] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(92, 43, 232, 0.4) 0%, transparent 70%)",
-            filter: "blur(80px)",
+            background: "radial-gradient(circle, rgba(92, 43, 232, 0.4) 0%, rgba(92, 43, 232, 0) 70%)",
           }}
           animate={{
             x: [0, 50, 0],
@@ -32,8 +31,7 @@ export const CinematicAtmosphere = () => {
         <motion.div
           className="absolute -bottom-1/4 -right-1/4 w-[80vw] h-[80vw] rounded-full"
           style={{
-            background: "radial-gradient(circle, rgba(0, 229, 204, 0.2) 0%, transparent 70%)",
-            filter: "blur(80px)",
+            background: "radial-gradient(circle, rgba(0, 229, 204, 0.2) 0%, rgba(0, 229, 204, 0) 70%)",
           }}
           animate={{
             x: [0, -40, 0],
