@@ -93,7 +93,7 @@ const LuxuryParticles = () => {
     <Points ref={ref} positions={points} stride={3} frustumCulled={false}>
       <PointMaterial
         transparent
-        color="#FFD700"
+        color="#00f2ff"
         size={0.012}
         sizeAttenuation={true}
         depthWrite={false}
@@ -104,44 +104,13 @@ const LuxuryParticles = () => {
   );
 };
 
-const HolographicSilhouette = ({ texture }: { texture: THREE.Texture }) => {
-  const ref = useRef<THREE.Mesh>(null);
-  useFrame((state) => {
-    if (ref.current) {
-      ref.current.position.y += Math.sin(state.clock.getElapsedTime() * 2) * 0.005;
-      (ref.current.material as any).opacity = 0.2 + Math.sin(state.clock.getElapsedTime() * 3) * 0.1;
-    }
-  });
-
+const HolographicGrid = ({ opacity }: { opacity: number }) => {
   return (
-    <mesh ref={ref} position={[3, 0, -5]}>
-      <planeGeometry args={[4, 6]} />
-      <meshBasicMaterial 
-        map={texture} 
-        transparent 
-        opacity={0.3} 
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-      />
-    </mesh>
-  );
-};
-
-const InterfaceFragments = () => {
-  const fragments = useMemo(() => {
-    return [...Array(10)].map(() => ({
-      position: [(Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 15],
-      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, 0],
-      scale: 0.1 + Math.random() * 0.4
-    }));
-  }, []);
-
-  return (
-    <group>
-      {fragments.map((frag, i) => (
-        <mesh key={i} position={frag.position as any} rotation={frag.rotation as any} scale={frag.scale}>
-          <planeGeometry args={[1, 1]} />
-          <meshBasicMaterial color="#00f2ff" transparent opacity={0.05} side={THREE.DoubleSide} />
+    <group position={[0, 0, -2]}>
+      {[...Array(6)].map((_, i) => (
+        <mesh key={i} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -i * 2]}>
+          <ringGeometry args={[i * 2, i * 2 + 0.02, 64]} />
+          <meshBasicMaterial color="#00f2ff" transparent opacity={opacity * 0.1} />
         </mesh>
       ))}
     </group>
@@ -166,7 +135,7 @@ const ForgedLogo = ({ logoTexture, opacity, pulse }: { logoTexture: THREE.Textur
       <mesh position={[0, 0, -0.1]}>
         <planeGeometry args={[4.5, 4.5]} />
         <meshStandardMaterial 
-          color="#050505"
+          color="#0a0a0a"
           metalness={1}
           roughness={0.05}
           transparent
@@ -183,8 +152,8 @@ const ForgedLogo = ({ logoTexture, opacity, pulse }: { logoTexture: THREE.Textur
           roughness={0.1} 
           transparent
           opacity={opacity}
-          emissive="#FFD700"
-          emissiveIntensity={pulse * 0.3}
+          emissive="#ffffff"
+          emissiveIntensity={pulse * 0.2}
         />
       </mesh>
 
@@ -194,47 +163,55 @@ const ForgedLogo = ({ logoTexture, opacity, pulse }: { logoTexture: THREE.Textur
         <meshBasicMaterial color="#00f2ff" transparent opacity={opacity * 0.4} />
       </mesh>
       
-      {/* Golden Highlight Sweep */}
-      <HighlightSweep pulse={pulse} />
+      {/* Scanning Beam */}
+      <ScanningBeam pulse={pulse} />
     </group>
   );
 };
 
-const HighlightSweep = ({ pulse }: { pulse: number }) => {
+const ScanningBeam = ({ pulse }: { pulse: number }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  const meshRef2 = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
     if (meshRef.current) {
-      meshRef.current.position.x = -3 + (time % 2) * 3;
-    }
-    if (meshRef2.current) {
-      meshRef2.current.position.x = -2 + ((time + 0.5) % 2.5) * 2;
+      meshRef.current.position.y = 2 - (time % 2) * 2;
     }
   });
 
   return (
-    <>
-      <mesh ref={meshRef} position={[0, 0, 0.02]} rotation={[0, 0, Math.PI / 4]}>
-        <planeGeometry args={[0.05, 10]} />
-        <meshBasicMaterial 
-          color="#FFD700" 
-          transparent 
-          opacity={pulse * 0.8} 
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-      <mesh ref={meshRef2} position={[0, 0, 0.02]} rotation={[0, 0, Math.PI / 4]}>
-        <planeGeometry args={[0.02, 10]} />
-        <meshBasicMaterial 
-          color="#00f2ff" 
-          transparent 
-          opacity={pulse * 0.4} 
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-    </>
+    <mesh ref={meshRef} position={[0, 0, 0.02]}>
+      <planeGeometry args={[4, 0.05]} />
+      <meshBasicMaterial 
+        color="#00f2ff" 
+        transparent 
+        opacity={pulse * 0.6} 
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  );
+};
+
+const HolographicSilhouette = ({ texture }: { texture: THREE.Texture }) => {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame((state) => {
+    if (ref.current) {
+      ref.current.position.y += Math.sin(state.clock.getElapsedTime() * 2) * 0.005;
+      (ref.current.material as any).opacity = 0.2 + Math.sin(state.clock.getElapsedTime() * 3) * 0.1;
+    }
+  });
+
+  return (
+    <mesh ref={ref} position={[3, 0, -5]}>
+      <planeGeometry args={[4, 6]} />
+      <meshBasicMaterial 
+        map={texture} 
+        transparent 
+        opacity={0.3} 
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+      />
+    </mesh>
   );
 };
 
@@ -276,6 +253,64 @@ const CinematicClothReveal = ({ phase, logoTexture, pulse }: { phase: number, lo
   );
 };
 
+const SystemBootHUD = ({ phase }: { phase: number }) => {
+  const lines = [
+    "INITIALIZING NEURAL LINK...",
+    "ACCESSING LUXE CORE...",
+    "CALIBRATING HOLOGRAPHIC ARRAY...",
+    "SYNTHESIZING FABRIC MESH...",
+    "SYSTEM READY."
+  ];
+
+  return (
+    <div className="absolute top-12 left-12 font-tech text-[10px] text-primary/40 space-y-1">
+      {lines.slice(0, phase).map((line, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-2"
+        >
+          <span className="w-1 h-1 bg-primary/40" />
+          {line}
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+const InterfaceFragments = () => {
+  const fragments = useMemo(() => {
+    return [...Array(15)].map(() => ({
+      position: [(Math.random() - 0.5) * 12, (Math.random() - 0.5) * 12, (Math.random() - 0.5) * 20],
+      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, 0],
+      scale: 0.1 + Math.random() * 0.5
+    }));
+  }, []);
+
+  return (
+    <group>
+      {fragments.map((frag, i) => (
+        <mesh key={i} position={frag.position as any} rotation={frag.rotation as any} scale={frag.scale}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial color="#00f2ff" transparent opacity={0.1} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
+const GlitchEffect = ({ phase }: { phase: number }) => {
+  if (phase !== 4) return null;
+  return (
+    <motion.div 
+      animate={{ opacity: [0, 0.2, 0, 0.3, 0] }}
+      transition={{ duration: 0.2, repeat: Infinity }}
+      className="absolute inset-0 z-50 pointer-events-none bg-primary/10 mix-blend-screen"
+    />
+  );
+};
+
 const Scene = ({ phase, logoTexture, silhouetteTexture, pulse }: { 
   phase: number, 
   logoTexture: THREE.Texture | null, 
@@ -300,18 +335,19 @@ const Scene = ({ phase, logoTexture, silhouetteTexture, pulse }: {
       <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={35} />
       
       {/* Lighting Suite */}
-      <ambientLight intensity={0.02} />
-      <spotLight position={[5, 10, 10]} angle={0.15} penumbra={1} intensity={15} color="#FFD700" />
-      <pointLight position={[-10, 0, 5]} intensity={8} color="#00f2ff" />
-      <rectAreaLight position={[0, 0, 5]} width={10} height={10} intensity={2} color="#020205" />
+      <ambientLight intensity={0.05} />
+      <spotLight position={[5, 10, 10]} angle={0.15} penumbra={1} intensity={20} color="#00f2ff" />
+      <pointLight position={[-10, 0, 5]} intensity={12} color="#ffffff" />
+      <rectAreaLight position={[0, 0, 5]} width={15} height={15} intensity={3} color="#050510" />
 
       <LuxuryParticles />
+      <HolographicGrid opacity={phase >= 2 ? 1 : 0} />
       
       <group scale={phase === 5 ? 1 + (10 - camera.position.z) * 0.2 : 1}>
         <CinematicClothReveal phase={phase} logoTexture={logoTexture} pulse={pulse} />
       </group>
 
-      {phase >= 4 && <InterfaceFragments />}
+      {phase >= 3 && <InterfaceFragments />}
       {phase >= 4 && silhouetteTexture && <HolographicSilhouette texture={silhouetteTexture} />}
       
       <Environment preset="night" />
@@ -383,6 +419,9 @@ export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
         </Canvas>
       </div>
 
+      <GlitchEffect phase={phase} />
+      <SystemBootHUD phase={phase} />
+
       {/* TEXT LAYER */}
       <AnimatePresence>
         {showText && (
@@ -415,11 +454,11 @@ export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
                 initial={{ opacity: 0, letterSpacing: "0.5em" }}
                 animate={{ opacity: 0.6, letterSpacing: "1.5em" }}
                 transition={{ delay: 1, duration: 2 }}
-                className="text-[9px] md:text-xs font-tech uppercase text-primary mt-12 pl-[1.5em] flex items-center gap-4"
+                className="text-[9px] md:text-xs font-tech uppercase text-[#00f2ff] mt-12 pl-[1.5em] flex items-center gap-4"
               >
-                <div className="w-8 h-[1px] bg-primary/30" />
+                <div className="w-8 h-[1px] bg-[#00f2ff]/30" />
                 Neural Synthesis Active
-                <div className="w-8 h-[1px] bg-primary/30" />
+                <div className="w-8 h-[1px] bg-[#00f2ff]/30" />
               </motion.div>
             </motion.div>
           </div>
@@ -427,11 +466,19 @@ export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
       </AnimatePresence>
 
       {/* HUD OVERLAYS */}
-      <div className="absolute inset-12 pointer-events-none opacity-20">
-        <div className="absolute top-0 left-0 w-12 h-[1px] bg-primary" />
-        <div className="absolute top-0 left-0 w-[1px] h-12 bg-primary" />
-        <div className="absolute bottom-0 right-0 w-12 h-[1px] bg-primary" />
-        <div className="absolute bottom-0 right-0 w-[1px] h-12 bg-primary" />
+      <div className="absolute inset-8 pointer-events-none opacity-40">
+        {/* Advanced Top HUD */}
+        <div className="absolute top-0 right-0 text-[8px] font-tech text-primary uppercase tracking-widest text-right">
+          <div>Status: <span className="text-white">Active</span></div>
+          <div>Link: <span className="text-white">Secure</span></div>
+          <div>Node: <span className="text-white">057-DEV</span></div>
+        </div>
+        
+        {/* Advanced Corners */}
+        <div className="absolute top-0 left-0 w-8 h-[1px] bg-primary/50" />
+        <div className="absolute top-0 left-0 w-[1px] h-8 bg-primary/50" />
+        <div className="absolute bottom-0 right-0 w-8 h-[1px] bg-primary/50" />
+        <div className="absolute bottom-0 right-0 w-[1px] h-8 bg-primary/50" />
       </div>
 
       {/* CINEMATIC POST-PROCESSING */}
