@@ -149,8 +149,19 @@ const InterfaceFragments = () => {
 };
 
 const ForgedLogo = ({ logoTexture, opacity, pulse }: { logoTexture: THREE.Texture, opacity: number, pulse: number }) => {
+  const logoRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (logoRef.current && opacity > 0.5) {
+      const time = state.clock.getElapsedTime();
+      logoRef.current.rotation.y = Math.sin(time * 0.5) * 0.1;
+      logoRef.current.rotation.x = Math.cos(time * 0.3) * 0.05;
+      logoRef.current.position.y = Math.sin(time * 1.5) * 0.05;
+    }
+  });
+
   return (
-    <group>
+    <group ref={logoRef}>
       {/* Forged Metal Plate */}
       <mesh position={[0, 0, -0.1]}>
         <planeGeometry args={[4.5, 4.5]} />
@@ -184,11 +195,46 @@ const ForgedLogo = ({ logoTexture, opacity, pulse }: { logoTexture: THREE.Textur
       </mesh>
       
       {/* Golden Highlight Sweep */}
-      <mesh position={[0, 0, 0.02]}>
-        <planeGeometry args={[0.5, 5]} />
-        <meshBasicMaterial color="#FFD700" transparent opacity={pulse * 0.2} />
-      </mesh>
+      <HighlightSweep pulse={pulse} />
     </group>
+  );
+};
+
+const HighlightSweep = ({ pulse }: { pulse: number }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const meshRef2 = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    if (meshRef.current) {
+      meshRef.current.position.x = -3 + (time % 2) * 3;
+    }
+    if (meshRef2.current) {
+      meshRef2.current.position.x = -2 + ((time + 0.5) % 2.5) * 2;
+    }
+  });
+
+  return (
+    <>
+      <mesh ref={meshRef} position={[0, 0, 0.02]} rotation={[0, 0, Math.PI / 4]}>
+        <planeGeometry args={[0.05, 10]} />
+        <meshBasicMaterial 
+          color="#FFD700" 
+          transparent 
+          opacity={pulse * 0.8} 
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+      <mesh ref={meshRef2} position={[0, 0, 0.02]} rotation={[0, 0, Math.PI / 4]}>
+        <planeGeometry args={[0.02, 10]} />
+        <meshBasicMaterial 
+          color="#00f2ff" 
+          transparent 
+          opacity={pulse * 0.4} 
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+    </>
   );
 };
 
@@ -207,8 +253,10 @@ const CinematicClothReveal = ({ phase, logoTexture, pulse }: { phase: number, lo
 
   return (
     <group>
-      {/* The Revealed Logo */}
-      <ForgedLogo logoTexture={logoTexture} opacity={phase >= 3 ? 1 : 0} pulse={pulse} />
+      {/* The Revealed Logo - Slightly offset up to avoid text overlap */}
+      <group position={[0, 1.5, 0]}>
+        <ForgedLogo logoTexture={logoTexture} opacity={phase >= 3 ? 1 : 0} pulse={pulse} />
+      </group>
       
       {/* The Luxury Fabric Overlay */}
       <mesh ref={clothRef} position={[0, 0, 0.8]}>
@@ -340,21 +388,38 @@ export const LuxeIntro = ({ onComplete }: { onComplete: () => void }) => {
         {showText && (
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
             <motion.div
-              initial={{ opacity: 0, letterSpacing: "1em" }}
-              animate={{ opacity: 1, letterSpacing: "3em" }}
-              transition={{ duration: 2, ease: "easeOut" }}
-              className="mt-[35vh] flex flex-col items-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1 }}
+              className="mt-[45vh] flex flex-col items-center"
             >
-              <h1 className="text-6xl md:text-[10rem] font-display font-black text-white/95 uppercase tracking-inherit ml-[3em] mix-blend-difference">
-                LUXE
-              </h1>
+              <div className="flex gap-4 md:gap-8 overflow-hidden">
+                {"LUXE".split("").map((letter, i) => (
+                  <motion.span
+                    key={i}
+                    initial={{ y: 200, rotate: 20, opacity: 0 }}
+                    animate={{ y: 0, rotate: 0, opacity: 1 }}
+                    transition={{ 
+                      duration: 1.5, 
+                      delay: i * 0.1, 
+                      ease: [0.16, 1, 0.3, 1] 
+                    }}
+                    className="text-7xl md:text-[13rem] font-display font-black text-white uppercase mix-blend-difference leading-none"
+                  >
+                    {letter}
+                  </motion.span>
+                ))}
+              </div>
+              
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 0.5, y: 0 }}
-                transition={{ delay: 0.5, duration: 1 }}
-                className="text-[10px] font-tech tracking-[2em] uppercase text-primary mt-8 ml-[2em]"
+                initial={{ opacity: 0, letterSpacing: "0.5em" }}
+                animate={{ opacity: 0.6, letterSpacing: "1.5em" }}
+                transition={{ delay: 1, duration: 2 }}
+                className="text-[9px] md:text-xs font-tech uppercase text-primary mt-12 pl-[1.5em] flex items-center gap-4"
               >
+                <div className="w-8 h-[1px] bg-primary/30" />
                 Neural Synthesis Active
+                <div className="w-8 h-[1px] bg-primary/30" />
               </motion.div>
             </motion.div>
           </div>
