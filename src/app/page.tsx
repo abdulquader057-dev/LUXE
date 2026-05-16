@@ -1,172 +1,113 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  BrainCircuit, 
-  ArrowRight,
-  Sparkles,
-  Cpu,
-  Layers,
-  Zap
-} from "lucide-react";
-import LuxeButton from "@/components/ui/LuxeButton";
+import Hero from "@/components/home/Hero";
+import ProductCard from "@/components/shop/ProductCard";
+import { cn } from "@/lib/utils";
 
-const CATEGORIES = [
-  { id: "all", label: "INDEX" },
-  { id: "cyber", label: "NEURAL" },
-  { id: "tech", label: "SYNTH" },
-  { id: "minimal", label: "VOID" },
-  { id: "limited", label: "ARCHIVE" }
+const products = [
+  {
+    id: "1",
+    name: "CYBER-LACE HOODIE",
+    price: 450,
+    originalPrice: 580,
+    image: "/hero-1.jpg",
+    category: "Upper",
+    momentum: 24,
+  },
+  {
+    id: "2",
+    name: "NEURAL GRID RUNNER",
+    price: 890,
+    image: "/hero-2.jpg",
+    category: "Footwear",
+    momentum: 18,
+  },
+  {
+    id: "3",
+    name: "VOID-TECH CARGO",
+    price: 620,
+    image: "/hero-3.jpg",
+    category: "Lower",
+  },
+  {
+    id: "4",
+    name: "ORBITAL SHELL V2",
+    price: 1200,
+    originalPrice: 1500,
+    image: "/hero-4.jpg",
+    category: "Outerwear",
+    momentum: 42,
+  },
+];
+
+const categories = [
+  { id: "all", label: "All DNA" },
+  { id: "Upper", label: "Uppers" },
+  { id: "Lower", label: "Lowers" },
+  { id: "Footwear", label: "Footwear" },
+  { id: "Outerwear", label: "Outerwear" },
 ];
 
 export default function Home() {
-  const [showIntro, setShowIntro] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [systemActive, setSystemActive] = useState(false);
-
-  useEffect(() => {
-    if (!showIntro) {
-      setTimeout(() => setSystemActive(true), 200);
-
-      const lenis = new Lenis({
-        duration: 1.5,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smoothWheel: true,
-      });
-
-      function raf(time: number) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
-      }
-
-      requestAnimationFrame(raf);
-      return () => lenis.destroy();
-    }
-  }, [showIntro]);
 
   const filteredProducts = activeCategory === "all" 
-    ? MOCK_PRODUCTS 
-    : MOCK_PRODUCTS.filter(p => p.category.toLowerCase().includes(activeCategory.toLowerCase()));
+    ? products 
+    : products.filter(p => p.category === activeCategory);
 
   return (
-    <div className="min-h-screen bg-[#050508] text-white selection:bg-primary selection:text-black overflow-x-hidden">
-      <AnimatePresence mode="wait">
-        {showIntro ? (
-          <LuxeIntro key="intro" onComplete={() => setShowIntro(false)} />
-        ) : (
-          <motion.div
-            key="content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="relative"
-          >
-            <Hero />
-            
-            <main className="relative z-10">
-              <div className="max-w-[1800px] mx-auto px-6 md:px-12 py-32">
-                
-                {/* CATEGORY HUD */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-24 border-b border-white/[0.03] pb-12">
-                   <div className="flex flex-col">
-                      <span className="text-[10px] font-mono text-primary tracking-[0.5em] uppercase mb-2">Registry // v.4.02</span>
-                      <h2 className="text-4xl md:text-5xl font-display font-light tracking-tight italic">Current Collections</h2>
-                   </div>
+    <main className="flex flex-col">
+      <Hero />
 
-                   <div className="flex flex-wrap gap-2 justify-center">
-                      {CATEGORIES.map((cat) => (
-                        <button
-                          key={cat.id}
-                          onClick={() => setActiveCategory(cat.id)}
-                          className={cn(
-                            "px-6 py-2 rounded-full border text-[9px] font-mono tracking-[0.3em] uppercase transition-all duration-500",
-                            activeCategory === cat.id 
-                              ? "bg-primary border-primary text-black shadow-[0_0_20px_rgba(0,229,204,0.3)]" 
-                              : "border-white/10 text-white/40 hover:border-white/30 hover:text-white"
-                          )}
-                        >
-                          {cat.label}
-                        </button>
-                      ))}
-                   </div>
-                </div>
+      <section className="container mx-auto px-6 py-24">
+        {/* CATEGORY CHIPS */}
+        <div className="flex flex-wrap items-center justify-center gap-4 mb-20 relative z-brand">
+          {categories.map((cat, i) => (
+            <motion.button
+              key={cat.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 3.5 + (i * 0.05) }}
+              onClick={() => setActiveCategory(cat.id)}
+              className={cn(
+                "px-8 py-3 rounded-full font-rajdhani text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase transition-all duration-300 relative group overflow-hidden",
+                activeCategory === cat.id 
+                  ? "text-black bg-white shadow-[0_0_20px_rgba(255,255,255,0.4)]" 
+                  : "text-white/40 glass-standard border-white/5 hover:text-white hover:border-accent-cyan/50"
+              )}
+            >
+              <span className="relative z-10">{cat.label}</span>
+              {activeCategory !== cat.id && (
+                <motion.div 
+                  className="absolute inset-0 bg-accent-cyan/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"
+                />
+              )}
+            </motion.button>
+          ))}
+        </div>
 
-                {/* PRODUCT GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
-                  {filteredProducts.map((product, idx) => (
-                    <motion.div
-                      key={product.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-100px" }}
-                      transition={{ delay: idx * 0.05, duration: 0.8 }}
-                    >
-                      <ProductCard product={product} />
-                    </motion.div>
-                  ))}
-                </div>
+        {/* PRODUCT GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 relative z-brand">
+          <AnimatePresence mode="popLayout">
+            {filteredProducts.map((product, idx) => (
+              <ProductCard key={product.id} product={product} index={idx} />
+            ))}
+          </AnimatePresence>
+        </div>
 
-                {/* EDITORIAL BREAK */}
-                <section className="py-48 grid lg:grid-cols-2 gap-24 items-center">
-                   <div className="relative aspect-[4/5] overflow-hidden rounded-2xl group">
-                      <Image 
-                        src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&q=80"
-                        alt="Editorial"
-                        fill
-                        className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                      <div className="absolute bottom-12 left-12">
-                         <span className="text-[10px] font-mono text-primary tracking-[0.5em] uppercase mb-4 block">Material Archive</span>
-                         <h3 className="text-5xl font-display font-light italic text-white max-w-sm leading-tight">Synthetic Silk & Neural Fibers.</h3>
-                      </div>
-                   </div>
-
-                   <div className="space-y-12">
-                      <div className="flex items-center gap-6">
-                         <div className="w-12 h-px bg-primary/40" />
-                         <span className="text-[10px] font-mono text-white/30 tracking-[0.8em] uppercase">Core Philosophy</span>
-                      </div>
-                      <h2 className="text-6xl md:text-8xl font-display font-light leading-[0.9] tracking-tighter">
-                        FASHION AS <br/>
-                        <span className="text-primary italic">SOFTWARE.</span>
-                      </h2>
-                      <p className="text-xl text-white/40 leading-relaxed max-w-lg">
-                        LUXE transcends physical boundaries, treating every garment as an executable interface. Our silhouettes are designed to resonate with your digital and biological frequency.
-                      </p>
-                      <LuxeButton size="lg" className="w-full md:w-auto">
-                        READ MANIFESTO
-                      </LuxeButton>
-                   </div>
-                </section>
-
-                {/* FULL WIDTH CTA */}
-                <section className="relative h-[60vh] flex items-center justify-center overflow-hidden rounded-3xl border border-white/[0.03]">
-                   <div className="absolute inset-0 z-0">
-                      <Image 
-                        src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80"
-                        alt="CTA Background"
-                        fill
-                        className="object-cover opacity-20 scale-110"
-                      />
-                   </div>
-                   <div className="relative z-10 text-center space-y-12 px-6">
-                      <h2 className="text-5xl md:text-8xl font-display font-light tracking-tighter">JOIN THE EVOLUTION</h2>
-                      <div className="flex flex-col md:flex-row gap-6 justify-center">
-                         <LuxeButton size="lg">START REGISTRY</LuxeButton>
-                         <LuxeButton variant="outline" size="lg">EXPLORE ARCHIVE</LuxeButton>
-                      </div>
-                   </div>
-                   
-                   {/* HUD Corner Accents */}
-                   <div className="absolute top-8 left-8 text-[8px] font-mono text-white/20 uppercase tracking-[0.5em]">System.Active()</div>
-                   <div className="absolute bottom-8 right-8 text-[8px] font-mono text-white/20 uppercase tracking-[0.5em]">Protocol.042</div>
-                </section>
-              </div>
-            </main>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        {/* NEURAL FOOTER TAG */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          className="mt-32 text-center"
+        >
+          <span className="text-[10px] font-orbitron text-accent-cyan/40 tracking-[0.8em] uppercase">
+            End of Neural Sequence // 0x4F2A
+          </span>
+        </motion.div>
+      </section>
+    </main>
   );
 }

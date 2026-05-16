@@ -13,14 +13,21 @@ const WhatsAppWidget = () => {
     <motion.button
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay: 1 }}
+      transition={{ delay: 3.8, duration: 0.5 }}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={handleWhatsApp}
-      className="fixed bottom-8 left-8 z-[100] w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.4)]"
+      className="fixed bottom-6 right-6 max-md:bottom-28 z-max w-[56px] h-[56px] rounded-full bg-[rgba(15,15,28,0.6)] backdrop-blur-xl border border-[rgba(0,229,204,0.3)] text-accent-cyan flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all group"
     >
-      <MessageCircle size={28} fill="white" />
-      <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold">1</span>
+      <MessageCircle size={26} className="relative z-10 transition-transform group-hover:scale-110" />
+      <div className="absolute inset-0 rounded-full bg-accent-cyan opacity-[0.05]" />
+      
+      {/* Pulse effect */}
+      <motion.div
+        className="absolute inset-0 rounded-full border border-accent-cyan/30"
+        animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      />
     </motion.button>
   );
 };

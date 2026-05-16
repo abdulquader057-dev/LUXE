@@ -1,153 +1,117 @@
 "use client";
 
-import React, { useRef } from "react";
-import Image from "next/image";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Heart, Plus, Activity, Star, Eye } from "lucide-react";
-import { Product } from "@/types";
-import Link from "next/link";
-import { Magnetic } from "../ui/Magnetic";
-import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import React, { useState, useRef } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { ShoppingCart, Heart, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
-  product: Product;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    originalPrice?: number;
+    image: string;
+    category: string;
+    momentum?: number;
+  };
+  index: number;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
-  const { formatPrice } = useCurrency();
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  // 3D Tilt Effect
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const mouseXSpring = useSpring(x, { stiffness: 100, damping: 30 });
-  const mouseYSpring = useSpring(y, { stiffness: 100, damping: 30 });
-  
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["5deg", "-5deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"]);
+const ProductCard = ({ product, index }: ProductCardProps) => {
+  const [rotate, setRotate] = useState({ x: 0, y: 0 });
+  const cardRef = useRef(null);
+  const isInView = useInView(cardRef, { once: true, amount: 0.15 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    x.set((e.clientX - rect.left) / rect.width - 0.5);
-    y.set((e.clientY - rect.top) / rect.height - 0.5);
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = (y - centerY) / 15;
+    const rotateY = (centerX - x) / 15;
+
+    setRotate({ x: rotateX, y: rotateY });
   };
 
   const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
+    setRotate({ x: 0, y: 0 });
   };
-
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 30, scale: 0.97 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative"
+      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{ 
+        duration: 0.6, 
+        delay: index * 0.08,
+        ease: [0.16, 1, 0.3, 1] 
+      }}
+      className="group perspective-1000"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
-      <Link href={`/product/${product.id}`} className="block outline-none">
-        <motion.div
-          ref={cardRef}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          style={!isMobile ? { rotateX, rotateY, perspective: "1000px" } : {}}
-          className={cn(
-            "relative bg-black/40 backdrop-blur-xl rounded-sm overflow-hidden border border-white/5 transition-all duration-700 ease-luxury",
-            "group-hover:border-primary/30 group-hover:-translate-y-2 group-hover:shadow-[0_40px_80px_rgba(0,0,0,0.8)]",
-            "hud-border"
-          )}
-        >
-          {/* IMAGE CONTAINER */}
-          <div className="relative aspect-[4/5] overflow-hidden">
-            <Image
-              src={product.images[0]}
-              alt={product.name}
-              fill
-              className="object-cover transition-all duration-1000 ease-luxury grayscale group-hover:grayscale-0 group-hover:scale-[1.08] brightness-75 group-hover:brightness-100"
-            />
-            
-            {/* Scanning beam on image */}
-            <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-40 transition-opacity duration-700">
-              <div className="absolute inset-x-0 h-[2px] bg-primary shadow-[0_0_15px_#00E5CC] animate-[scanning-beam_3s_linear_infinite]" />
-            </div>
+      <motion.div
+        animate={{ rotateX: rotate.x, rotateY: rotate.y }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        className="relative bg-surface border border-border-subtle rounded-radius-md overflow-hidden transition-all duration-400 group-hover:-translate-y-2 group-hover:shadow-[0_24_64px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,229,204,0.15)]"
+      >
+        {/* Category Tag */}
+        <div className="absolute top-3 left-3 z-20 px-2 py-1 glass-standard !bg-black/60 !border-white/10">
+          <span className="text-[8px] font-orbitron text-white/70 tracking-widest uppercase">{product.category}</span>
+        </div>
 
-            {/* Top Left: Category Data */}
-            <div className="absolute top-4 left-4 z-10 flex flex-col gap-1">
-              <div className="px-2 py-0.5 bg-primary/20 backdrop-blur-md border border-primary/30 rounded-sm">
-                <span className="text-[7px] font-mono font-bold tracking-[0.2em] text-primary uppercase">
-                  CAT // {product.category}
-                </span>
-              </div>
-              <div className="px-2 py-0.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-sm">
-                <span className="text-[7px] font-mono text-white/40 tracking-[0.2em] uppercase">
-                  ID: {product.id.slice(0, 8)}
-                </span>
-              </div>
-            </div>
-
-            {/* Top Right: Status HUD */}
-            <div className="absolute top-4 right-4 z-10">
-              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-sm">
-                 <motion.div 
-                   className="w-1 h-1 rounded-full bg-green-400"
-                   animate={{ opacity: [0.4, 1, 0.4] }}
-                   transition={{ duration: 1.5, repeat: Infinity }}
-                 />
-                 <span className="text-[7px] font-mono text-white/80 tracking-[0.1em] uppercase">In_Stock</span>
-              </div>
-            </div>
-
-            {/* Bottom Overlay: Technical Readout */}
-            <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-luxury bg-gradient-to-t from-black via-black/60 to-transparent">
-               <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-3">
-                  <div className="space-y-1">
-                    <span className="block text-[6px] font-mono text-white/30 tracking-[0.2em] uppercase">Collection</span>
-                    <span className="block text-[8px] font-mono text-white/80 tracking-[0.1em] uppercase font-bold truncate">Archive_X_2026</span>
-                  </div>
-                  <div className="space-y-1 text-right">
-                    <span className="block text-[6px] font-mono text-white/30 tracking-[0.2em] uppercase">Authentication</span>
-                    <span className="block text-[8px] font-mono text-primary tracking-[0.1em] uppercase font-bold">Verified_Core</span>
-                  </div>
-               </div>
-            </div>
+        {/* Momentum Indicator */}
+        {product.momentum && (
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2 py-1 glass-standard !bg-accent-cyan/10 !border-accent-cyan/20">
+            <div className="w-1 h-1 rounded-full bg-accent-cyan animate-pulse" />
+            <span className="text-[8px] font-orbitron text-accent-cyan tracking-widest uppercase">+{product.momentum}%</span>
           </div>
+        )}
 
-          {/* CARD INFO */}
-          <div className="p-5 bg-black/20">
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="text-[11px] font-mono font-bold tracking-[0.2em] text-white/80 uppercase group-hover:text-primary transition-colors flex-1 pr-4">
-                {product.name}
-              </h3>
-              <div className="flex flex-col items-end">
-                <span className="text-[13px] font-mono font-bold text-primary tracking-widest">
-                  {formatPrice(product.price)}
-                </span>
-                {product.originalPrice && (
-                  <span className="text-[8px] font-mono text-white/20 line-through tracking-widest">
-                    {formatPrice(product.originalPrice)}
-                  </span>
-                )}
-              </div>
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-1 text-[7px] font-mono text-white/20 tracking-widest uppercase">
-                <Activity size={8} /> <span>Neural_Sync</span>
-              </div>
-              <div className="flex items-center gap-1 text-[7px] font-mono text-white/20 tracking-widest uppercase">
-                <Eye size={8} /> <span>View_Details</span>
-              </div>
-            </div>
-          </div>
+        {/* Image Container */}
+        <div className="aspect-[3/4] overflow-hidden bg-black">
+          <motion.img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
           
-          {/* Corner Glow */}
-          <div className="absolute -inset-10 bg-primary/5 blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
-        </motion.div>
-      </Link>
+          {/* Quick Add Overlay */}
+          <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-400 ease-luxury bg-gradient-to-t from-black/80 to-transparent">
+            <button className="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-accent-cyan to-accent-violet rounded-radius-sm text-black font-rajdhani font-bold text-sm tracking-[0.1em] uppercase">
+              <Plus size={18} strokeWidth={2.5} />
+              Quick Add
+            </button>
+          </div>
+        </div>
+
+        {/* Card Info */}
+        <div className="p-4 space-y-2">
+          <h3 className="text-sm font-rajdhani text-white tracking-wide uppercase truncate">
+            {product.name}
+          </h3>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-accent-cyan font-orbitron font-semibold text-[13px]">
+                ${product.price}
+              </span>
+              {product.originalPrice && (
+                <span className="text-text-muted font-orbitron text-[11px] line-through">
+                  ${product.originalPrice}
+                </span>
+              )}
+            </div>
+            
+            <button className="text-text-muted hover:text-white transition-colors">
+              <Heart size={16} />
+            </button>
+          </div>
+        </div>
+      </motion.div>
     </motion.div>
   );
 };

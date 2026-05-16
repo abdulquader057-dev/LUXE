@@ -1,207 +1,98 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Search, Menu, X, User, Heart, Settings, Cpu, Flame, Sparkles, Zap, Users, BrainCircuit } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Magnetic } from "./ui/Magnetic";
-import { SearchModal } from "./SearchModal";
-import { CurrencySwitcher } from "./CurrencySwitcher";
+import { motion } from "framer-motion";
+import { Search, ShoppingBag, User, Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import LuxeLogo from "./LuxeLogo";
 
 const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const navLinks = [
-    { name: "COLLECTIONS", href: "/shop" },
-    { name: "BUILD FIT", href: "/build-outfit" },
-    { name: "DROPS", href: "/drops" },
-    { name: "FEED", href: "/feed" },
-  ];
-
   return (
-    <>
-      <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-        className={cn(
-          "fixed top-0 left-0 right-0 z-[100] transition-all duration-500",
-          "h-[64px] md:h-[72px] flex items-center px-8",
-          "bg-[rgba(7,7,15,0.7)] backdrop-blur-[32px] saturate-[180%] border-b border-[rgba(0,229,204,0.08)]",
-          "shadow-[0_1px_0_rgba(0,229,204,0.04),0_8px_32px_rgba(0,0,0,0.4)]"
-        )}
-      >
-        <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-        
-        {/* Scanning beam for navbar */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-          <div className="absolute inset-0 w-full h-[2px] bg-primary animate-[scanning-beam_8s_linear_infinite]" />
+    <motion.nav
+      initial={{ y: "-100%" }}
+      animate={{ y: 0 }}
+      transition={{ delay: 3.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed top-0 left-0 right-0 h-[64px] z-navbar flex items-center px-6 glass-standard !bg-[rgba(7,7,15,0.72)] !border-none !rounded-none border-b border-[rgba(0,229,204,0.07)] shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+    >
+      <div className="flex items-center gap-8 flex-1">
+        {/* LOGO IN NAV */}
+        <Link href="/" className="scale-[0.45] origin-left -ml-4">
+          <LuxeLogo showTagline={false} />
+        </Link>
+
+        {/* NAV LINKS */}
+        <div className="hidden lg:flex items-center gap-8">
+          {[
+            { name: "Collections", href: "/shop" },
+            { name: "The Archive", href: "/swipe" },
+            { name: "Neural DNA", href: "/profile" },
+            { name: "Build", href: "/build-outfit" },
+          ].map((link) => (
+            <Link
+              key={link.name}
+              href={link.href}
+              className={cn(
+                "relative text-[12px] font-rajdhani tracking-[0.3em] uppercase transition-colors group",
+                pathname === link.href ? "text-accent-cyan" : "text-text-secondary hover:text-white"
+              )}
+            >
+              {link.name}
+              <motion.div
+                className="absolute -bottom-1 left-0 w-full h-[1px] bg-accent-cyan origin-left"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: pathname === link.href ? 1 : 0 }}
+                whileHover={{ scaleX: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+            </Link>
+          ))}
         </div>
+      </div>
 
-        <div className="max-w-[1800px] mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center gap-12">
-            <Magnetic>
-              <Link href="/" className="relative text-[26px] font-display font-black tracking-[0.2em] text-white group flex items-center gap-1">
-                <span className="relative z-10">LUXE</span>
-                <span className="text-primary animate-pulse">.</span>
-                {/* Logo scanning effect */}
-                <motion.div 
-                  className="absolute inset-0 bg-primary/10 blur-xl rounded-full"
-                  animate={{ opacity: [0.2, 0.4, 0.2] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                />
-              </Link>
-            </Magnetic>
-            
-            <div className="hidden lg:flex items-center gap-8">
-              {navLinks.map((link) => {
-                const isActive = pathname === link.href;
-                return (
-                  <Magnetic key={link.name}>
-                    <Link
-                      href={link.href}
-                      className={cn(
-                        "relative text-[10px] font-mono font-medium tracking-[0.4em] transition-all uppercase group py-2",
-                        isActive ? "text-primary" : "text-white/40 hover:text-white"
-                      )}
-                    >
-                      <span className="relative z-10">{link.name}</span>
-                      {isActive && (
-                        <motion.span 
-                          layoutId="nav-active"
-                          className="absolute inset-0 bg-primary/5 border-x border-primary/20 -mx-4"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                        />
-                      )}
-                      <span className={cn(
-                        "absolute -bottom-1 left-0 h-[1px] bg-primary transition-all duration-500 ease-luxury",
-                        isActive ? "w-full opacity-100" : "w-0 opacity-0 group-hover:w-full group-hover:opacity-50"
-                      )} />
-                    </Link>
-                  </Magnetic>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-8">
-            {/* System Status HUD */}
-            <div className="hidden xl:flex items-center gap-4 px-4 py-2 border-x border-white/5 bg-white/[0.02]">
-              <div className="flex flex-col items-end">
-                <div className="flex items-center gap-2">
-                  <span className="text-[8px] font-mono tracking-[0.2em] text-white/30 uppercase">Neural Status</span>
-                  <motion.div 
-                    className="w-1 h-1 rounded-full bg-primary shadow-[0_0_8px_#00E5CC]"
-                    animate={{ opacity: [0.4, 1, 0.4] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                </div>
-                <span className="text-[9px] font-mono tracking-[0.1em] text-primary uppercase">Synchronized</span>
-              </div>
-              <div className="h-6 w-[1px] bg-white/5" />
-              <div className="flex flex-col items-start">
-                <span className="text-[8px] font-mono tracking-[0.2em] text-white/30 uppercase">Auth Level</span>
-                <span className="text-[9px] font-mono tracking-[0.1em] text-white/80 uppercase">Tier 01 // Admin</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <Magnetic>
-                <button 
-                  onClick={() => setIsSearchOpen(true)}
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-white/40 hover:text-primary border border-transparent hover:border-primary/20 transition-all hover:bg-primary/5"
-                >
-                  <Search size={16} strokeWidth={1.5} />
-                </button>
-              </Magnetic>
-              
-              <Magnetic>
-                <button className="w-9 h-9 rounded-full flex items-center justify-center text-white/40 hover:text-primary border border-transparent hover:border-primary/20 transition-all hover:bg-primary/5 relative group">
-                  <ShoppingBag size={16} strokeWidth={1.5} />
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center text-[8px] font-mono font-bold text-black shadow-[0_0_10px_#00E5CC]">
-                    02
-                  </span>
-                </button>
-              </Magnetic>
-
-              <div className="h-4 w-[1px] bg-white/10 mx-2" />
-
-              <Magnetic>
-                <button className="flex items-center gap-3 px-4 py-2 bg-primary text-black rounded-sm font-mono text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white transition-all shadow-[0_0_20px_rgba(0,229,204,0.3)]">
-                  <User size={14} />
-                  <span>Access</span>
-                </button>
-              </Magnetic>
-
-              <button 
-                className="lg:hidden w-10 h-10 flex items-center justify-center text-white/60 hover:text-primary transition-all"
-                onClick={() => setIsMobileMenuOpen(true)}
-              >
-                <Menu size={20} strokeWidth={1.5} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </motion.nav>
-
-      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-
-      <AnimatePresence>
-        {isMobileMenuOpen && (
+      <div className="flex items-center gap-6">
+        {/* NEURAL SYNC BADGE */}
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 glass-standard !rounded-full border-[rgba(0,229,204,0.1)] group relative overflow-hidden">
+          <div className="w-1.5 h-1.5 rounded-full bg-accent-cyan shadow-[0_0_8px_#00E5CC] animate-pulse" />
+          <span className="text-[9px] font-orbitron text-accent-cyan tracking-widest uppercase">Neural Sync</span>
+          
+          {/* Scanline Sweep */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-3xl lg:hidden flex flex-col"
-          >
-            <div className="p-10 flex flex-col h-full">
-              <div className="flex justify-between items-center mb-16">
-                <span className="text-[28px] font-display font-black tracking-[0.15em] text-white">LUXE<span className="text-primary">.</span></span>
-                <button 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white/60"
-                >
-                  <X size={24} strokeWidth={1.5} />
-                </button>
-              </div>
+            className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[20deg]"
+            animate={{ left: ["-100%", "200%"] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          />
+        </div>
 
-              <div className="flex flex-col gap-8">
-                {navLinks.map((link, i) => (
-                  <motion.div
-                    key={link.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                  >
-                    <Link
-                      href={link.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-5xl font-display font-black tracking-tight text-white/60 hover:text-white transition-all uppercase"
-                    >
-                      {link.name}
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+        {/* ICONS */}
+        <div className="flex items-center gap-5">
+          <button className="text-text-secondary hover:text-accent-cyan transition-all hover:drop-shadow-[0_0_8px_rgba(0,229,204,0.3)]">
+            <Search size={20} strokeWidth={1.5} />
+          </button>
+          
+          <button className="relative text-text-secondary hover:text-accent-cyan transition-all hover:drop-shadow-[0_0_8px_rgba(0,229,204,0.3)]">
+            <ShoppingBag size={20} strokeWidth={1.5} />
+            <motion.span 
+              className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-accent-cyan text-black text-[8px] font-bold rounded-full flex items-center justify-center"
+              whileTap={{ scale: 1.3 }}
+            >
+              0
+            </motion.span>
+          </button>
+
+          <Link href="/profile" className="text-text-secondary hover:text-accent-cyan transition-all hover:drop-shadow-[0_0_8px_rgba(0,229,204,0.3)]">
+            <User size={20} strokeWidth={1.5} />
+          </Link>
+
+          <button className="lg:hidden text-text-secondary">
+            <Menu size={20} />
+          </button>
+        </div>
+      </div>
+    </motion.nav>
   );
 };
 

@@ -1,15 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Bebas_Neue, Rajdhani, Sora, Orbitron } from "next/font/google";
+import { Bebas_Neue, Rajdhani, Sora, Orbitron, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import WhatsAppWidget from "@/components/WhatsAppWidget";
 import BackToTop from "@/components/BackToTop";
 import { CurrencyProvider } from "@/lib/contexts/CurrencyContext";
 import Sidebar from "@/components/Sidebar";
-import AIChatbot from "@/components/ai/AIChatbot";
+import ZyraChat from "@/components/ZyraChat";
 import { CinematicAtmosphere } from "@/components/CinematicAtmosphere";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { CustomCursor } from "@/components/CustomCursor";
+import CustomCursor from "@/components/CustomCursor";
+import LuxeIntro from "@/components/LuxeIntro";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -30,6 +31,13 @@ const sora = Sora({
 
 const orbitron = Orbitron({
   variable: "--font-orbitron",
+  subsets: ["latin"],
+});
+
+const cormorant = Cormorant_Garamond({
+  weight: "400",
+  style: "italic",
+  variable: "--font-cormorant",
   subsets: ["latin"],
 });
 
@@ -54,23 +62,24 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} h-full antialiased dark scroll-smooth`}
+      className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col bg-black text-white selection:bg-primary selection:text-black relative cursor-none">
+      <body className="min-h-full flex flex-col bg-[#07070F] text-white selection:bg-accent-cyan selection:text-black relative overflow-x-hidden">
         <div className="film-grain" />
-        <div className="watermark-vertical">LUXE SYSTEM // CORE V4.2 // NEURAL SYNC</div>
+        <div className="watermark-vertical hidden lg:block">LUXE SYSTEM // CORE V4.2 // NEURAL SYNC</div>
+        <LuxeIntro />
         <CustomCursor />
         <CinematicAtmosphere />
         <CurrencyProvider>
           <Navbar />
           <Sidebar />
-          <div className="relative z-10 flex-grow lg:pl-[90px] transition-all duration-500 flex flex-col">
-            <div className="flex-grow">
+          <div className="relative z-10 flex-grow lg:pl-[90px] flex flex-col">
+            <div className="flex-grow pt-16">
               {children}
             </div>
             <Footer />
           </div>
-          <AIChatbot />
+          <ZyraChat />
           <WhatsAppWidget />
           <BackToTop />
         </CurrencyProvider>
