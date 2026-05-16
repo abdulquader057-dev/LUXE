@@ -63,7 +63,7 @@ const Sidebar = () => {
         transition={{ delay: 3.4, duration: 0.5 }}
         className="lg:hidden fixed bottom-6 left-6 right-6 h-16 z-max glass-standard !bg-[rgba(15,15,28,0.88)] !rounded-full flex items-center justify-around px-4 border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
       >
-        {[...mainLinks.slice(0, 3), { name: "Identity", href: "/profile", icon: Fingerprint }].map((link) => {
+        {[...mainLinks.slice(0, 3), { name: "Identity", href: "/profile", icon: Fingerprint }, { name: "Settings", href: "/settings", icon: Settings2 }].map((link) => {
           const isActive = pathname === link.href;
           return (
             <Link key={link.name} href={link.href} className="relative flex flex-col items-center gap-1 group">
