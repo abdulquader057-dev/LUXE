@@ -326,6 +326,9 @@ export default function ProfilePage() {
                 ))}
               </div>
             </div>
+          </motion.div>
+        )}
+
         {/* Settings / Control Hub Section */}
         {activeSection === "settings" && (
           <motion.div

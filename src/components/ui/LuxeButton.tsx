@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-interface LuxeButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface LuxeButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
+  children?: React.ReactNode;
   variant?: "primary" | "outline" | "ghost" | "hud";
   size?: "sm" | "md" | "lg";
   icon?: React.ReactNode;
@@ -61,3 +62,5 @@ export const LuxeButton = ({
     </motion.button>
   );
 };
+
+export default LuxeButton;

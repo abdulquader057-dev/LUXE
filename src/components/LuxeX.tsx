@@ -20,7 +20,7 @@ export const LuxeX = ({ className, size = 96, isSmall = false, delayOffset = 0 }
 
   const transition = {
     duration: 0.8,
-    ease: [0.16, 1, 0.3, 1],
+    ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
     delay: 0.35 + delayOffset,
   };
 
@@ -118,7 +118,7 @@ export const LuxeX = ({ className, size = 96, isSmall = false, delayOffset = 0 }
         <motion.g
           initial={{ opacity: 0, scale: 0.2, rotate: -120 }}
           animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 0.6, delay: 1.65 + delayOffset, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.6, delay: 1.65 + delayOffset, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
         >
           <circle
             cx={center.x}

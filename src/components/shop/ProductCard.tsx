@@ -11,17 +11,20 @@ interface ProductCardProps {
     name: string;
     price: number;
     originalPrice?: number;
-    image: string;
+    image?: string;
+    images?: string[];
     category: string;
     momentum?: number;
   };
-  index: number;
+  index?: number;
 }
 
-const ProductCard = ({ product, index }: ProductCardProps) => {
+const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const cardRef = useRef(null);
   const isInView = useInView(cardRef, { once: true, amount: 0.15 });
+  
+  const imageSrc = product.image || (product.images && product.images[0]) || "";
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const card = e.currentTarget;
@@ -75,7 +78,7 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
         {/* Image Container */}
         <div className="aspect-[3/4] overflow-hidden bg-black">
           <motion.img
-            src={product.image}
+            src={imageSrc}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
