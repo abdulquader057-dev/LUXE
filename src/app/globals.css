@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@theme {
+  --font-sora: var(--font-sora);
+  --font-rajdhani: var(--font-rajdhani);
+  --font-orbitron: var(--font-orbitron);
+  --font-bebas: var(--font-bebas);
+  --font-cormorant: var(--font-cormorant);
+}
+
 :root {
   --bg-base: #07070F;
   --bg-surface: #0F0F1C;
@@ -26,11 +34,20 @@
 
 @layer base {
   body {
-    @apply bg-[var(--bg-base)] text-[var(--text-primary)] font-sora selection:bg-[var(--accent-cyan)] selection:text-black;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-sora), sans-serif;
+  }
+
+  body::selection {
+    background-color: var(--accent-cyan);
+    color: #000000;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-rajdhani font-semibold tracking-wider;
+    font-family: var(--font-rajdhani), sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
   }
 }
 
