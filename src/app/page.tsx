@@ -1,126 +1,150 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion";
 import Hero from "@/components/home/Hero";
-import ProductCard from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
-const products = [
+const collections = [
   {
-    id: "1",
-    name: "CYBER-LACE HOODIE",
-    price: 450,
-    originalPrice: 580,
-    image: "/hero-1.jpg",
-    category: "Upper",
-    momentum: 24,
-    rarity: "ULTRA RARE" as const,
+    id: "blush-tailoring",
+    title: "Blush Tailoring",
+    subtitle: "SS.27 Editorial",
+    image: "/hero-1.jpg", 
+    size: "large", // spans 2 cols, 2 rows
+    align: "bottom-left"
   },
   {
-    id: "2",
-    name: "NEURAL GRID RUNNER",
-    price: 890,
+    id: "neo-utility",
+    title: "Neo Utility",
+    subtitle: "Structural Forms",
     image: "/hero-2.jpg",
-    category: "Footwear",
-    momentum: 18,
-    rarity: "EXCLUSIVE" as const,
+    size: "tall", // spans 1 col, 2 rows
+    align: "top-right"
   },
   {
-    id: "3",
-    name: "VOID-TECH CARGO",
-    price: 620,
+    id: "obsidian-core",
+    title: "Obsidian Core",
+    subtitle: "The Foundation",
     image: "/hero-3.jpg",
-    category: "Lower",
-    rarity: "LIMITED" as const,
+    size: "wide", // spans 2 cols, 1 row
+    align: "center"
   },
   {
-    id: "4",
-    name: "ORBITAL SHELL V2",
-    price: 1200,
-    originalPrice: 1500,
+    id: "neural-layering",
+    title: "Neural Layering",
+    subtitle: "Adaptive Fabrics",
     image: "/hero-4.jpg",
-    category: "Outerwear",
-    momentum: 42,
-    rarity: "ULTRA RARE" as const,
+    size: "standard", // 1 col, 1 row
+    align: "bottom-right"
   },
-];
-
-const categories = [
-  { id: "all", label: "All DNA" },
-  { id: "Upper", label: "Uppers" },
-  { id: "Lower", label: "Lowers" },
-  { id: "Footwear", label: "Footwear" },
-  { id: "Outerwear", label: "Outerwear" },
+  {
+    id: "street-atelier",
+    title: "Street Atelier",
+    subtitle: "Urban Luxe",
+    image: "/hero-1.jpg",
+    size: "standard",
+    align: "center"
+  },
+  {
+    id: "luxe-objects",
+    title: "Luxe Objects",
+    subtitle: "Hardware & Accessories",
+    image: "/hero-2.jpg",
+    size: "wide",
+    align: "bottom-left"
+  }
 ];
 
 export default function Home() {
-  const [activeCategory, setActiveCategory] = useState("all");
-
-  const filteredProducts = activeCategory === "all" 
-    ? products 
-    : products.filter(p => p.category === activeCategory);
-
   return (
-    <main className="flex flex-col overflow-hidden" style={{ opacity: 0 }}>
+    <main className="flex flex-col overflow-hidden bg-bg-base" style={{ opacity: 0 }}>
       <Hero />
 
-      <motion.section 
-        initial={{ opacity: 0, y: 32, scale: 0.97 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="container mx-auto px-6 py-24"
-      >
-        {/* CATEGORY CHIPS */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mb-20 relative z-brand">
-          {categories.map((cat, i) => (
-            <motion.button
-              key={cat.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 + (i * 0.07), duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              onClick={() => setActiveCategory(cat.id)}
-              className={cn(
-                "px-8 py-3 rounded-full font-rajdhani text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase transition-all duration-300 relative group overflow-hidden clickable",
-                activeCategory === cat.id 
-                  ? "text-black bg-white shadow-[0_0_20px_rgba(255,255,255,0.4)]" 
-                  : "text-white/40 glass-standard border-white/5 hover:text-white hover:border-accent-cyan/50"
-              )}
-            >
-              <span className="relative z-10">{cat.label}</span>
-              {activeCategory !== cat.id && (
-                <motion.div 
-                  className="absolute inset-0 bg-accent-cyan/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"
-                />
-              )}
-            </motion.button>
-          ))}
-        </div>
-
-        {/* PRODUCT GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 relative z-brand">
-          <AnimatePresence mode="popLayout">
-            {filteredProducts.map((product, idx) => (
-              <ProductCard key={product.id} product={product} index={idx} />
-            ))}
-          </AnimatePresence>
-        </div>
-
-        {/* NEURAL FOOTER TAG */}
+      <section className="relative z-10 container mx-auto px-6 py-32 md:py-48">
+        
+        {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 32, scale: 0.97 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, amount: 0.15 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-32 text-center"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1, ease: [0.25, 1, 0.15, 1] }}
+          className="mb-24 md:mb-32 flex flex-col md:flex-row justify-between items-end gap-8"
         >
-          <span className="text-[10px] font-orbitron text-accent-cyan/40 tracking-[0.8em] uppercase">
-            End of Neural Sequence // 0x4F2A
-          </span>
+          <div>
+            <span className="text-[10px] font-sora text-rose-gold uppercase tracking-[0.3em] block mb-4">
+              Curated Selection
+            </span>
+            <h3 className="text-4xl md:text-6xl font-cormorant font-light tracking-tight">
+              Featured <br />
+              <span className="italic text-white/50">Collections</span>
+            </h3>
+          </div>
+          <Link href="/shop" className="text-xs font-sora uppercase tracking-[0.2em] border-b border-rose-gold/30 hover:border-rose-gold text-white/70 hover:text-white transition-colors pb-1">
+            View Complete Archive
+          </Link>
         </motion.div>
-      </motion.section>
+
+        {/* Asymmetrical Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 auto-rows-[300px] md:auto-rows-[400px]">
+          {collections.map((collection, i) => {
+            
+            // Layout mapping
+            const sizeClasses = {
+              "large": "md:col-span-2 md:row-span-2",
+              "tall": "md:col-span-1 md:row-span-2",
+              "wide": "md:col-span-2 lg:col-span-2 md:row-span-1",
+              "standard": "md:col-span-1 lg:col-span-1 md:row-span-1"
+            };
+
+            const alignClasses = {
+              "bottom-left": "justify-end items-start",
+              "top-right": "justify-start items-end text-right",
+              "center": "justify-center items-center text-center",
+              "bottom-right": "justify-end items-end text-right"
+            };
+
+            return (
+              <motion.div
+                key={collection.id}
+                initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
+                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 1.2, delay: i * 0.1, ease: [0.25, 1, 0.15, 1] }}
+                className={cn(
+                  "group relative overflow-hidden bg-bg-surface rounded-sm clickable border border-white/5",
+                  sizeClasses[collection.size as keyof typeof sizeClasses]
+                )}
+              >
+                {/* Image & Parallax wrapper */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center transform scale-100 group-hover:scale-110 transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.15,1)] opacity-40 group-hover:opacity-70 grayscale group-hover:grayscale-0"
+                    style={{ backgroundImage: `url(${collection.image})` }}
+                  />
+                  {/* Luxury Glow Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-bg-base/90 via-bg-base/20 to-transparent mix-blend-multiply" />
+                  <div className="absolute inset-0 bg-rose-gold/0 group-hover:bg-rose-gold/10 transition-colors duration-1000 mix-blend-overlay" />
+                </div>
+
+                {/* Content */}
+                <div className={cn("absolute inset-0 p-8 md:p-12 flex flex-col z-10", alignClasses[collection.align as keyof typeof alignClasses])}>
+                  <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.15,1)]">
+                    <span className="text-[9px] font-sora uppercase tracking-[0.4em] text-rose-gold-light/70 block mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
+                      {collection.subtitle}
+                    </span>
+                    <h4 className="text-2xl md:text-4xl font-cormorant font-light tracking-tight text-white group-hover:text-rose-gold-light transition-colors duration-700">
+                      {collection.title}
+                    </h4>
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+
+      </section>
     </main>
   );
 }

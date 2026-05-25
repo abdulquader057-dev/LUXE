@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import { motion } from "framer-motion";
 
 export const CinematicAtmosphere = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,25 +22,25 @@ export const CinematicAtmosphere = () => {
     window.addEventListener("resize", handleResize);
 
     const isMobile = window.innerWidth < 768;
-    const particleCount = isMobile ? 25 : 50;
+    const particleCount = isMobile ? 20 : 40;
 
     const colors = [
-      "rgba(201,169,110,0.7)",  // gold
-      "rgba(0,229,204,0.5)",    // cyan
-      "rgba(108,63,232,0.5)"    // violet
+      "rgba(183,110,121,0.6)",  // rose gold
+      "rgba(244,194,194,0.5)",  // blush
+      "rgba(166,124,82,0.4)"    // warm bronze
     ];
 
     particles = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height, // Initial random distribution
-      size: Math.random() * 1.5 + 1, // 1px to 2.5px
-      speed: Math.random() * 0.4 + 0.1, // mapped to 6s to 18s roughly
+      y: Math.random() * canvas.height,
+      size: Math.random() * 1.5 + 0.5,
+      speed: Math.random() * 0.3 + 0.1,
       opacity: 0,
       color: colors[Math.floor(Math.random() * colors.length)],
-      duration: Math.random() * 8000 + 6000, 
+      duration: Math.random() * 10000 + 8000, 
       time: Math.random() * 10000,
-      swaySpeed: Math.random() * 0.002 + 0.001,
-      swayAmount: Math.random() * 0.5 + 0.2,
+      swaySpeed: Math.random() * 0.001 + 0.0005,
+      swayAmount: Math.random() * 0.4 + 0.1,
     }));
 
     let lastTime = performance.now();
@@ -55,15 +54,11 @@ export const CinematicAtmosphere = () => {
       particles.forEach((p) => {
         p.time += dt;
         
-        // Opacity 0 -> 0.8 -> 0
         const progress = (p.time % p.duration) / p.duration;
-        p.opacity = Math.sin(progress * Math.PI) * 0.8;
+        p.opacity = Math.sin(progress * Math.PI) * 0.7;
         
         ctx.beginPath();
-        
-        // Sway logic
-        const currentX = p.x + Math.sin(p.time * p.swaySpeed) * p.swayAmount * 10;
-        
+        const currentX = p.x + Math.sin(p.time * p.swaySpeed) * p.swayAmount * 15;
         ctx.arc(currentX, p.y, p.size, 0, Math.PI * 2);
         
         const colorMatch = p.color.match(/rgba\((\d+),(\d+),(\d+),([\d.]+)\)/);
@@ -99,12 +94,12 @@ export const CinematicAtmosphere = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-bg pointer-events-none overflow-hidden select-none" style={{ backgroundColor: "#03030A" }}>
+    <div className="fixed inset-0 z-bg pointer-events-none overflow-hidden select-none" style={{ backgroundColor: "#020202" }}>
       {/* LAYER 1: Base Gradient */}
       <div 
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at 50% 0%, #150D2E 0%, #0A0718 35%, #06050F 65%, #03030A 100%)",
+          background: "radial-gradient(ellipse at 50% 0%, #1A1A1A 0%, #0A0A0A 35%, #050505 65%, #020202 100%)",
           zIndex: 0
         }}
       />
@@ -113,74 +108,74 @@ export const CinematicAtmosphere = () => {
       <div 
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 30%, rgba(201,169,110,0.08) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 30%, rgba(224,191,184,0.05) 0%, transparent 70%)",
           zIndex: 1
         }}
       />
 
-      {/* LAYER 3: Violet Ambient Orb Left */}
+      {/* LAYER 3: Rose Gold Ambient Orb Left */}
       <div 
-        className="absolute w-[700px] h-[700px] rounded-full"
+        className="absolute w-[800px] h-[800px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(108,63,232,0.22) 0%, transparent 70%)",
-          filter: "blur(80px)",
-          top: "-200px",
-          left: "-200px",
+          background: "radial-gradient(circle, rgba(183,110,121,0.12) 0%, transparent 60%)",
+          filter: "blur(90px)",
+          top: "-250px",
+          left: "-250px",
           zIndex: 1,
-          animation: "orbDriftLeft 25s ease-in-out infinite alternate",
+          animation: "orbDriftLeft 30s ease-in-out infinite alternate",
         }}
       />
 
-      {/* LAYER 4: Cyan Ambient Orb Right */}
+      {/* LAYER 4: Blush Ambient Orb Right */}
       <div 
-        className="absolute w-[500px] h-[500px] rounded-full"
+        className="absolute w-[600px] h-[600px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(0,229,204,0.14) 0%, transparent 70%)",
-          filter: "blur(80px)",
-          bottom: "-100px",
-          right: "-100px",
+          background: "radial-gradient(circle, rgba(244,194,194,0.08) 0%, transparent 60%)",
+          filter: "blur(90px)",
+          bottom: "-150px",
+          right: "-150px",
           zIndex: 1,
-          animation: "orbDriftRight 20s ease-in-out infinite alternate",
+          animation: "orbDriftRight 25s ease-in-out infinite alternate",
         }}
       />
 
-      {/* LAYER 5: Deep Indigo Pulse Center */}
+      {/* LAYER 5: Deep Bronze Pulse Center */}
       <div 
-        className="absolute w-[900px] h-[900px] rounded-full top-1/2 left-1/2"
+        className="absolute w-[1000px] h-[1000px] rounded-full top-1/2 left-1/2"
         style={{
-          background: "radial-gradient(circle, rgba(58,12,163,0.18) 0%, transparent 60%)",
-          filter: "blur(120px)",
+          background: "radial-gradient(circle, rgba(166,124,82,0.08) 0%, transparent 50%)",
+          filter: "blur(140px)",
           transform: "translate(-50%, -50%)",
           zIndex: 1,
-          animation: "centerPulse 18s ease-in-out infinite alternate",
+          animation: "centerPulse 20s ease-in-out infinite alternate",
         }}
       />
 
-      {/* LAYER 6: Noise Grain Texture */}
+      {/* LAYER 6: Noise Grain Texture (Subtler) */}
       <div 
         className="absolute inset-0"
         style={{
-          opacity: 0.035,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          opacity: 0.02,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
           zIndex: 2,
         }}
       />
 
-      {/* LAYER 7: Ultra Fine Grid */}
+      {/* LAYER 7: Ultra Fine Grid (More spread out, editorial) */}
       <div 
         className="absolute inset-0"
         style={{
-          backgroundImage: "linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px)",
+          backgroundSize: "120px 120px",
           zIndex: 2,
         }}
       />
 
-      {/* LAYER 8: Gold Vignette Bottom */}
+      {/* LAYER 8: Blush Vignette Bottom */}
       <div 
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(to top, rgba(201,169,110,0.04) 0%, transparent 40%)",
+          background: "linear-gradient(to top, rgba(224,191,184,0.02) 0%, transparent 35%)",
           zIndex: 3,
         }}
       />
@@ -192,27 +187,27 @@ export const CinematicAtmosphere = () => {
         style={{ zIndex: 4, mixBlendMode: "screen" }}
       />
 
-      {/* LAYER 10: Vignette Edges */}
+      {/* LAYER 10: Vignette Edges (Obsidian framing) */}
       <div 
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 40%, rgba(3,3,10,0.6) 100%)",
+          background: "radial-gradient(ellipse at center, transparent 30%, rgba(2,2,2,0.85) 100%)",
           zIndex: 5,
         }}
       />
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes orbDriftLeft {
-          from { transform: translate(0px, 0px); }
-          to   { transform: translate(60px, 80px); }
+          from { transform: translate(0px, 0px) scale(1); }
+          to   { transform: translate(80px, 100px) scale(1.1); }
         }
         @keyframes orbDriftRight {
-          from { transform: translate(0px, 0px); }
-          to   { transform: translate(-50px, -60px); }
+          from { transform: translate(0px, 0px) scale(1); }
+          to   { transform: translate(-70px, -90px) scale(1.15); }
         }
         @keyframes centerPulse {
-          from { transform: translate(-50%,-50%) scale(1.0); opacity: 0.8; }
-          to   { transform: translate(-50%,-50%) scale(1.2); opacity: 1.0; }
+          from { transform: translate(-50%,-50%) scale(0.9); opacity: 0.7; }
+          to   { transform: translate(-50%,-50%) scale(1.1); opacity: 1.0; }
         }
       `}} />
     </div>

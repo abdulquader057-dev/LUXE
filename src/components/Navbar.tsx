@@ -26,10 +26,12 @@ const Navbar = () => {
   }, []);
 
   const links = [
-    { name: "Collections", href: "/shop" },
+    { name: "Collections", href: "/" },
     { name: "Drops", href: "/drops" },
     { name: "Feed", href: "/feed" },
     { name: "Build Fit", href: "/build-outfit" },
+    { name: "Archive", href: "/shop" },
+    { name: "Identity", href: "/profile" },
   ];
 
   // Dummy function to simulate adding an item
@@ -75,7 +77,7 @@ const Navbar = () => {
           <Search size={20} strokeWidth={1.5} />
         </button>
         <button aria-label="Cart" onClick={handleCartClick} className="clickable relative">
-          <motion.div animate={cartControls} className="absolute inset-0 bg-accent-cyan rounded-full mix-blend-overlay opacity-0 scale-0 origin-center" />
+          <motion.div animate={cartControls} className="absolute inset-0 bg-[#E0BFB8] rounded-full mix-blend-overlay opacity-0 scale-0 origin-center" />
           <ShoppingBag size={20} strokeWidth={1.5} />
         </button>
         <Link href="/profile" passHref legacyBehavior>
