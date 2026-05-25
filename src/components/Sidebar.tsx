@@ -19,9 +19,11 @@ import {
   Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Menu, X } from "lucide-react";
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   const mainLinks = [
     { name: "Home", href: "/", icon: Home, subtitle: "Dashboard" },
@@ -46,7 +48,27 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="w-[280px] h-screen flex-shrink-0 bg-[#0A0A0F] border-r border-white/5 flex flex-col overflow-hidden relative z-50">
+    <>
+      {/* Mobile Toggle Button */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="md:hidden fixed top-4 left-4 z-[60] p-2 bg-[#050508]/80 backdrop-blur-md border border-white/10 rounded-md text-white/70 hover:text-white"
+      >
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[50]"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      <aside className={cn(
+        "w-[280px] h-screen flex-shrink-0 bg-[#0A0A0F] border-r border-white/5 flex flex-col overflow-hidden fixed md:relative z-[55] transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]",
+        isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      )}>
       
       {/* Brand Header */}
       <div className="p-6 flex items-center gap-3">
