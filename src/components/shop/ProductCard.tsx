@@ -85,17 +85,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
           {/* Layered Fog Gradients */}
           <div className="absolute inset-0 bg-gradient-to-t from-bg-surface via-transparent to-transparent opacity-80" />
           <div className="absolute inset-0 bg-rose-gold/0 group-hover:bg-rose-gold/5 transition-colors duration-[1.5s] mix-blend-overlay" />
-
-          {/* Elite Acquire Button - Lower Right Quadrant */}
-          <div className="absolute bottom-6 right-6 z-20 opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-700 ease-[0.25,1,0.5,1]">
-            <motion.button 
-              whileTap={{ scale: 0.96 }}
-              className="glass-pill px-5 py-2.5 flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 transition-colors shadow-lg"
-            >
-              <Plus size={14} strokeWidth={1.5} />
-              <span className="font-sora text-[9px] tracking-[0.2em] uppercase">Acquire</span>
-            </motion.button>
-          </div>
         </div>
 
         {/* Card Info - Typography Isolation & Spatial Depth */}
@@ -109,15 +98,25 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             </h3>
           </div>
           
-          <div className="flex items-center gap-4 pt-4 border-t border-white/10 relative z-10">
-            <span className="font-sora text-[10px] tracking-[0.3em] text-white/70 shadow-sm">
-              USD {product.price}
-            </span>
-            {product.originalPrice && (
-              <span className="text-white/20 font-sora text-[9px] line-through tracking-[0.3em]">
-                {product.originalPrice}
+          <div className="flex items-center justify-between pt-4 border-t border-white/10 relative z-10 w-full mt-4">
+            <div className="flex items-center gap-4">
+              <span className="font-sora text-[10px] tracking-[0.3em] text-white/70 shadow-sm">
+                USD {product.price}
               </span>
-            )}
+              {product.originalPrice && (
+                <span className="text-white/20 font-sora text-[9px] line-through tracking-[0.3em]">
+                  {product.originalPrice}
+                </span>
+              )}
+            </div>
+            {/* Contained Footer Action Buttons */}
+            <motion.button 
+              whileTap={{ scale: 0.96 }}
+              className="glass-pill px-4 py-2 flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <Plus size={12} strokeWidth={1.5} />
+              <span className="font-sora text-[9px] tracking-[0.2em] uppercase whitespace-nowrap">Acquire</span>
+            </motion.button>
           </div>
         </div>
       </motion.div>

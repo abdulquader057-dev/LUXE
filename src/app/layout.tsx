@@ -4,10 +4,6 @@ import "./globals.css";
 import WhatsAppWidget from "@/components/WhatsAppWidget";
 import BackToTop from "@/components/BackToTop";
 import { CurrencyProvider } from "@/lib/contexts/CurrencyContext";
-import Sidebar from "@/components/Sidebar";
-import ZyraChat from "@/components/ZyraChat";
-import { CinematicAtmosphere } from "@/components/CinematicAtmosphere";
-import SplashScreen from "@/components/SplashScreen";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
@@ -67,25 +63,20 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col bg-[#07070F] text-white selection:bg-accent-cyan selection:text-black relative overflow-x-hidden">
+      <body className="min-h-full flex flex-col bg-[#050508] text-white selection:bg-white selection:text-black relative overflow-x-hidden">
         <ScrollProgress />
         <div className="film-grain" />
-        <div className="watermark-vertical hidden lg:block">LUXE SYSTEM // CORE V4.2 // NEURAL SYNC</div>
         <CustomCursor />
-        <CinematicAtmosphere />
-        <SplashScreen />
+        
         <CurrencyProvider>
           <Navbar />
-          <Sidebar />
-          <div className="relative z-10 flex-grow lg:pl-[90px] flex flex-col">
-            <div className="flex-grow pt-16">
+          {/* GLOBAL CONTAINMENT ARCHITECTURE */}
+          <main className="relative z-10 flex-grow flex flex-col w-full max-w-[1440px] mx-auto">
+            <div className="flex-grow pt-16 md:pt-24 w-full">
               {children}
             </div>
             <Footer />
-          </div>
-          <ZyraChat />
-          <WhatsAppWidget />
-          <BackToTop />
+          </main>
         </CurrencyProvider>
       </body>
     </html>

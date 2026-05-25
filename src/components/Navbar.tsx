@@ -47,7 +47,7 @@ const Navbar = () => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 1.5, duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
       className={cn(
-        "fixed top-0 left-0 right-0 z-navbar flex items-center justify-between px-6 md:px-12 transition-all duration-700 ease-[0.25,1,0.5,1]",
+        "fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-12 transition-all duration-700 ease-[0.25,1,0.5,1]",
         isScrolled 
           ? "h-16 bg-[rgba(8,8,10,0.85)] backdrop-blur-[24px] border-b border-white/[0.03] shadow-[0_4px_32px_rgba(0,0,0,0.5)]" 
           : "h-24 bg-transparent border-b border-transparent"
