@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Heart, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -23,20 +23,28 @@ interface ProductCardProps {
 const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
-  const cardRef = useRef(null);
-  const isInView = useInView(cardRef, { once: true, amount: 0.15 });
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(cardRef, { once: true, amount: 0.1 });
   
   const imageSrc = product.image || (product.images && product.images[0]) || "";
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = e.currentTarget;
+    const card = cardRef.current;
+    if (!card) return;
+    
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    
+    // For cursor spotlight
+    card.style.setProperty('--mouse-x', `${x}px`);
+    card.style.setProperty('--mouse-y', `${y}px`);
+
+    // Subtle Parallax Tilt
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const rotateX = (y - centerY) / 30;
-    const rotateY = (centerX - x) / 30;
+    const rotateX = (y - centerY) / 40; // reduced tilt for stability
+    const rotateY = (centerX - x) / 40;
 
     setRotate({ x: rotateX, y: rotateY });
   };
@@ -49,64 +57,64 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
+      initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
       animate={isInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
       transition={{ 
-        duration: 1, 
+        duration: 1.2, 
         delay: index * 0.1,
-        ease: [0.25, 1, 0.15, 1] 
+        ease: [0.25, 1, 0.5, 1] // ease-cinematic
       }}
-      className="group perspective-1000"
+      className="group perspective-1000 w-full h-full"
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
     >
       <motion.div
         animate={{ rotateX: rotate.x, rotateY: rotate.y }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="relative bg-bg-surface border border-white/5 rounded-sm overflow-hidden transition-all duration-[800ms] ease-luxury group-hover:-translate-y-2 group-hover:border-rose-gold-light/20 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.8)]"
+        transition={{ type: "spring", stiffness: 200, damping: 30 }}
+        className="relative bg-bg-surface border border-white/5 rounded-sm overflow-hidden h-full flex flex-col cursor-spotlight-card"
       >
         {/* Image Container with Fabric Texture Hover */}
-        <div className="aspect-[3/4] overflow-hidden bg-bg-elevated relative fabric-texture">
+        <div className="aspect-[3/4] overflow-hidden bg-bg-elevated relative fabric-texture flex-shrink-0">
           <motion.img
             src={imageSrc}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-[1.5s] ease-[0.25,1,0.15,1] group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-[2s] ease-[0.25,1,0.5,1] group-hover:scale-[1.03]"
           />
           
-          <div className="absolute inset-0 bg-bg-base/10 group-hover:bg-transparent transition-colors duration-[1s]" />
+          {/* Layered Fog Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-bg-surface via-transparent to-transparent opacity-80" />
+          <div className="absolute inset-0 bg-rose-gold/0 group-hover:bg-rose-gold/5 transition-colors duration-[1.5s] mix-blend-overlay" />
 
-          {/* Quick Add Overlay */}
-          <div className="absolute inset-x-0 bottom-0 p-6 translate-y-[120%] group-hover:translate-y-0 transition-transform duration-700 ease-[0.25,1,0.15,1] bg-gradient-to-t from-bg-base/90 to-transparent">
-            <button className="w-full h-[44px] flex items-center justify-center gap-2 bg-white text-black font-sora font-medium text-[10px] tracking-[0.2em] uppercase hover:bg-rose-gold-light transition-colors">
+          {/* Elite Acquire Button - Lower Right Quadrant */}
+          <div className="absolute bottom-6 right-6 z-20 opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-700 ease-[0.25,1,0.5,1]">
+            <motion.button 
+              whileTap={{ scale: 0.97 }}
+              className="glass-pill px-5 py-2.5 flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 transition-colors shadow-lg"
+            >
               <Plus size={14} strokeWidth={1.5} />
-              Acquire
-            </button>
+              <span className="font-sora text-[9px] tracking-[0.2em] uppercase">Acquire</span>
+            </motion.button>
           </div>
         </div>
 
-        {/* Card Info */}
-        <div className="p-6 space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <span className="text-[9px] font-sora uppercase tracking-[0.3em] text-white/40 block mb-2">
-                {product.category}
-              </span>
-              <h3 className="text-lg font-cormorant font-light text-white tracking-wide truncate max-w-full group-hover:text-rose-gold-light transition-colors">
-                {product.name}
-              </h3>
-            </div>
-            <button className="text-white/40 hover:text-rose-gold-light transition-colors" aria-label="Like">
-              <Heart size={16} strokeWidth={1.5} />
-            </button>
+        {/* Card Info - Typography Isolation */}
+        <div className="p-6 md:p-8 flex-1 flex flex-col justify-between space-y-8 bg-bg-surface z-10 relative">
+          <div>
+            <span className="text-[9px] font-sora uppercase tracking-[0.4em] text-white/30 block mb-3">
+              {product.category}
+            </span>
+            <h3 className="text-xl md:text-2xl font-cormorant font-light text-white tracking-wide leading-tight group-hover:text-rose-gold transition-colors duration-700">
+              {product.name}
+            </h3>
           </div>
           
-          <div className="flex items-center gap-4">
-            <span className="font-sora text-[11px] tracking-widest text-white/90">
+          <div className="flex items-center gap-4 pt-4 border-t border-white/5">
+            <span className="font-sora text-[10px] tracking-[0.3em] text-white/70">
               USD {product.price}
             </span>
             {product.originalPrice && (
-              <span className="text-white/30 font-sora text-[10px] line-through tracking-widest">
+              <span className="text-white/20 font-sora text-[9px] line-through tracking-[0.3em]">
                 {product.originalPrice}
               </span>
             )}

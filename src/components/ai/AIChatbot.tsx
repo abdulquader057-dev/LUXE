@@ -108,7 +108,7 @@ const AIChatbot = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-8 right-8 z-[100] group"
+            className="fixed bottom-8 left-8 z-[100] group"
           >
             <div className="relative w-14 h-14 flex items-center justify-center">
               {/* Ambient Glow */}
@@ -138,10 +138,10 @@ const AIChatbot = () => {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-8 right-8 z-[100] w-[420px] max-w-[calc(100vw-2rem)] h-[580px] rounded-[28px] overflow-hidden flex flex-col border border-white/[0.06]"
+            transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+            className="fixed bottom-8 left-8 z-[100] w-[420px] max-w-[calc(100vw-2rem)] h-[580px] rounded-[28px] overflow-hidden flex flex-col border border-white/[0.06] glass-pill"
             style={{
-              background: "rgba(8, 8, 12, 0.92)",
+              background: "rgba(5, 5, 5, 0.8)",
               backdropFilter: "blur(40px)",
               WebkitBackdropFilter: "blur(40px)",
               boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 120px rgba(0,242,255,0.03)",

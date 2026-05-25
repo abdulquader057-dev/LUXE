@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Clock, ShieldCheck, Bell, ChevronRight, ShoppingBag, Users, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import { Bell, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import { LIVE_DROPS } from "@/data/ecosystem";
 import { LiveDrop } from "@/types";
@@ -41,21 +41,28 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
       initial={{ opacity: 0, y: 60, scale: 0.98 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.1 }}
-      transition={{ delay: index * 0.2, duration: 1.2, ease: [0.25, 1, 0.15, 1] }}
-      className="relative group w-full h-[80vh] md:h-[90vh] overflow-hidden bg-bg-surface border border-white/5"
+      transition={{ delay: index * 0.2, duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
+      className="relative group w-full h-[80vh] md:h-[90vh] overflow-hidden bg-bg-surface border border-white/5 cursor-spotlight-card"
+      onMouseMove={(e) => {
+        const card = e.currentTarget;
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+      }}
     >
-      {/* Background Image (Cinematic scale) */}
-      <div className="absolute inset-0">
+      {/* Background Image (Cinematic scale & depth) */}
+      <div className="absolute inset-0 z-0">
         <Image
           src={drop.product.images[0]}
           alt={drop.product.name}
           fill
           sizes="100vw"
-          className="object-cover transition-transform duration-[3s] ease-[cubic-bezier(0.25,1,0.15,1)] group-hover:scale-105"
+          className="object-cover transition-transform duration-[4s] ease-[0.25,1,0.5,1] group-hover:scale-[1.03]"
         />
-        {/* Luxury Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-base via-bg-base/60 to-transparent mix-blend-multiply" />
-        <div className="absolute inset-0 bg-gradient-to-r from-bg-base via-bg-base/20 to-transparent" />
+        {/* Layered Fog Gradients for Depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-bg-base via-bg-base/60 to-transparent mix-blend-multiply opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg-base via-bg-base/30 to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-rose-gold/0 group-hover:bg-rose-gold/5 transition-colors duration-[2s] mix-blend-overlay" />
       </div>
 
       {/* Content */}
@@ -75,16 +82,16 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
           <button
             onClick={() => setIsNotified(!isNotified)}
             className={cn(
-              "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500",
-              isNotified ? "bg-rose-gold text-bg-base" : "border border-white/10 text-white/50 hover:border-rose-gold hover:text-white"
+              "glass-pill w-12 h-12 flex items-center justify-center transition-all duration-500",
+              isNotified ? "text-rose-gold bg-rose-gold/10" : "text-white/50 hover:text-white"
             )}
           >
             <Bell size={18} strokeWidth={1.5} />
           </button>
         </div>
 
-        {/* Bottom: Typography & CTA */}
-        <div className="max-w-4xl">
+        {/* Bottom: Typography & Elite CTA */}
+        <div className="max-w-4xl relative">
           <h2 className="text-5xl md:text-8xl lg:text-9xl font-cormorant font-light tracking-tighter text-white mb-4 leading-[0.9]">
             {drop.product.name}
           </h2>
@@ -112,36 +119,43 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
               ))}
             </div>
 
-            {/* Price & Action */}
-            <div className="flex flex-col items-start md:items-end gap-6">
-              <div className="text-right">
-                <div className="text-3xl font-sora font-light text-rose-gold mb-2">
-                  USD {drop.product.price}
-                </div>
-                <div className="flex items-center justify-end gap-4">
-                  <span className="text-[9px] font-sora tracking-widest text-white/40 uppercase">
-                    Availability
-                  </span>
-                  <div className="w-32 h-1 bg-white/10 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${stockPercentage}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.5, delay: 0.5, ease: [0.25, 1, 0.15, 1] }}
-                      className="h-full bg-rose-gold"
-                    />
-                  </div>
+            {/* Price Details */}
+            <div className="text-left md:text-right mb-16 md:mb-0">
+              <div className="text-3xl font-sora font-light text-rose-gold mb-2">
+                USD {drop.product.price}
+              </div>
+              <div className="flex items-center justify-start md:justify-end gap-4">
+                <span className="text-[9px] font-sora tracking-widest text-white/40 uppercase">
+                  Availability
+                </span>
+                <div className="w-32 h-1 bg-white/10 overflow-hidden rounded-full">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${stockPercentage}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.5, delay: 0.5, ease: [0.25, 1, 0.5, 1] }}
+                    className="h-full bg-rose-gold"
+                  />
                 </div>
               </div>
-
-              <button className="px-8 py-4 bg-white text-black font-sora text-[10px] tracking-[0.2em] uppercase hover:bg-rose-gold-light hover:text-black transition-colors duration-500 flex items-center gap-3">
-                <ShoppingBag size={14} strokeWidth={1.5} /> 
-                Secure Allocation
-              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Elite Action Button - STRICTLY Lower Right Quadrant */}
+      <div className="absolute bottom-8 md:bottom-16 right-8 md:right-16 z-20">
+        <motion.button 
+          whileTap={{ scale: 0.97 }}
+          className="metal-pill px-8 py-4 flex items-center gap-3 text-white hover:text-white transition-colors duration-500 shadow-[0_10px_40px_rgba(183,110,121,0.15)] group/btn"
+        >
+          <ShoppingBag size={14} strokeWidth={1.5} className="text-rose-gold group-hover/btn:scale-110 transition-transform" /> 
+          <span className="font-sora text-[10px] tracking-[0.3em] uppercase text-white/90">
+            Secure Allocation
+          </span>
+        </motion.button>
+      </div>
+
     </motion.div>
   );
 }
@@ -150,12 +164,18 @@ export default function DropsPage() {
   return (
     <main className="min-h-screen bg-bg-base text-white pt-24 md:pt-32 pb-40 relative overflow-hidden">
       
+      {/* Background Depth & Textures */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
+        <div className="absolute top-[10%] right-[-10%] w-[60%] h-[60%] bg-rose-gold/5 blur-[150px] rounded-full mix-blend-screen" />
+      </div>
+
       {/* Header section */}
       <div className="max-w-[1400px] mx-auto px-6 relative z-10 mb-20 md:mb-32">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.25, 1, 0.15, 1] }}
+          transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
           className="flex flex-col md:flex-row md:items-end justify-between gap-8"
         >
           <div>
@@ -168,12 +188,12 @@ export default function DropsPage() {
             </h1>
           </div>
           
-          <div className="max-w-xs text-right">
-            <p className="text-xs font-sora text-white/40 leading-relaxed mb-6">
-              Highly curated pieces released in absolute limited quantities. Enter the protocol to secure your allocation.
+          <div className="max-w-xs text-left md:text-right">
+            <p className="text-[11px] font-sora text-white/40 leading-relaxed mb-6 tracking-wide">
+              Highly curated pieces released in absolute limited quantities. Enter the protocol to secure your allocation before synchronization ends.
             </p>
-            <div className="flex justify-end gap-4">
-              <div className="flex items-center gap-2 border-b border-rose-gold/30 pb-1">
+            <div className="flex justify-start md:justify-end gap-4">
+              <div className="flex items-center gap-3 border-b border-rose-gold/30 pb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-rose-gold animate-pulse" />
                 <span className="text-[9px] font-sora tracking-widest uppercase text-rose-gold">Live</span>
               </div>
