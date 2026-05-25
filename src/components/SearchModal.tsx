@@ -7,7 +7,7 @@ import { MOCK_PRODUCTS } from "@/data/products";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 import ProductCard from "@/components/shop/ProductCard";
 
 interface SearchModalProps {
@@ -19,7 +19,7 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState(MOCK_PRODUCTS.slice(0, 4));
   const inputRef = useRef<HTMLInputElement>(null);
-  const { formatPrice } = useCurrency();
+  const { formatPrice } = useCommerce();
 
   useEffect(() => {
     if (isOpen) {

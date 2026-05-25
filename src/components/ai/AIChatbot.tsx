@@ -13,7 +13,7 @@ import Image from "next/image";
 import { Product } from "@/types";
 import { aiService, ChatMessage } from "@/lib/services/ai";
 import { useSpeechRecognition } from "@/lib/hooks/useSpeechRecognition";
-import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 interface Message {
   role: string;
@@ -89,7 +89,7 @@ const AIChatbot = () => {
     }
   };
 
-  const { formatPrice } = useCurrency();
+  const { formatPrice } = useCommerce();
 
   const toggleVoice = () => {
     if (isListening) stopListening();

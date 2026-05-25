@@ -11,7 +11,7 @@ import Link from "next/link";
 import { MOCK_PRODUCTS } from "@/data/products";
 import { Product } from "@/types";
 import { cn } from "@/lib/utils";
-import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 type SwipeDirection = "left" | "right" | "up" | null;
 
@@ -21,7 +21,7 @@ export default function SwipePage() {
   const [liked, setLiked] = useState<Product[]>([]);
   const [saved, setSaved] = useState<Product[]>([]);
   const [showMatch, setShowMatch] = useState(false);
-  const { formatPrice } = useCurrency();
+  const { formatPrice } = useCommerce();
 
   const currentProduct = MOCK_PRODUCTS[currentIndex % MOCK_PRODUCTS.length];
   const nextProduct = MOCK_PRODUCTS[(currentIndex + 1) % MOCK_PRODUCTS.length];

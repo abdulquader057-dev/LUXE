@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Heart, ShoppingCart } from "lucide-react";
-import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
+import Link from "next/link";
 
 interface Product {
   id: string;
@@ -16,7 +17,7 @@ interface Product {
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
-  const { formatPrice } = useCurrency();
+  const { convertPrice, addToCart } = useCommerce();
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -30,7 +31,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Top Image Section */}
-      <div className="relative h-[240px] w-full overflow-hidden bg-[#0A0A0F]">
+      <Link href={`/product/${product.id}`} className="relative h-[240px] w-full overflow-hidden bg-[#0A0A0F] block">
         <div 
           className={`absolute inset-0 bg-cover bg-center transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.15,1)] ${isHovered ? 'scale-110 rotate-2' : 'scale-100 rotate-0'}`}
           style={{ backgroundImage: `url(${product.images[0]})` }}
@@ -62,7 +63,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         >
           <Heart size={14} className={isLiked ? 'fill-[#D4AF37]' : ''} />
         </button>
-      </div>
+      </Link>
 
       {/* Info Section Bottom */}
       <div className="flex-1 p-5 flex flex-col justify-between relative z-10 bg-gradient-to-b from-transparent to-[#0A0A0C]">
@@ -79,11 +80,11 @@ const ProductCard = ({ product }: { product: Product }) => {
           <div>
             {/* Fake original price for dashboard aesthetic */}
             <div className="text-[9px] font-sora text-white/30 line-through tracking-wider mb-0.5">
-              {formatPrice(product.price * 1.35)}
+              {convertPrice(product.price * 1.35).symbol}{convertPrice(product.price * 1.35).amount}
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[14px] font-orbitron font-bold text-white tracking-wider">
-                {formatPrice(product.price)}
+                {convertPrice(product.price).symbol}{convertPrice(product.price).amount}
               </span>
               <span className="px-1.5 py-0.5 rounded-sm bg-red-500/20 text-red-400 text-[8px] font-sora font-bold tracking-widest border border-red-500/30">
                 -35%
@@ -91,7 +92,17 @@ const ProductCard = ({ product }: { product: Product }) => {
             </div>
           </div>
 
-          <button className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/70 flex items-center justify-center hover:bg-white hover:text-black hover:shadow-[0_5px_15px_rgba(255,255,255,0.2)] transition-all duration-300 transform hover:scale-105 active:scale-95">
+          <button 
+            onClick={() => addToCart({
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              image: product.images[0],
+              quantity: 1,
+              size: "L" // Default size, product page will let them choose
+            })}
+            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/70 flex items-center justify-center hover:bg-white hover:text-black hover:shadow-[0_5px_15px_rgba(255,255,255,0.2)] transition-all duration-300 transform hover:scale-105 active:scale-95"
+          >
             <ShoppingCart size={16} />
           </button>
         </div>

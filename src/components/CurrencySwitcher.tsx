@@ -1,13 +1,13 @@
 "use client";
 
 import React from "react";
-import { useCurrency } from "../lib/contexts/CurrencyContext";
+import { useCommerce } from "../lib/contexts/CommerceContext";
 import { Currency } from "../lib/services/commerce";
 import { Globe } from "lucide-react";
 import { cn } from "../lib/utils";
 
 export const CurrencySwitcher = () => {
-  const { currency, setCurrency } = useCurrency();
+  const { currency, setCurrency } = useCommerce();
   const currencies: Currency[] = ["INR", "USD", "EUR", "GBP"];
 
   return (

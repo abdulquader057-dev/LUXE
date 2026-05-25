@@ -11,13 +11,13 @@ import { COMMUNITY_FITS, MOCK_OUTFITS } from "@/data/ecosystem";
 import { MOCK_PRODUCTS } from "@/data/products";
 import { CommunityFit } from "@/types";
 import { cn } from "@/lib/utils";
-import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 import Image from "next/image";
 
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("trending");
   const [votedFits, setVotedFits] = useState<Set<string>>(new Set());
-  const { formatPrice } = useCurrency();
+  const { formatPrice } = useCommerce();
 
   const toggleVote = (fitId: string) => {
     setVotedFits((prev) => {

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Hero from "@/components/home/Hero";
 import ProductCard from "@/components/shop/ProductCard";
 
@@ -58,6 +59,24 @@ const recommendedPicks = [
 
 export default function Home() {
   const [activeFilter, setActiveFilter] = useState("ALL COLLECTIONS");
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/shop?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  const handleFilterClick = (filter: string) => {
+    setActiveFilter(filter);
+    if (filter !== "ALL COLLECTIONS") {
+      router.push(`/shop?cat=${encodeURIComponent(filter)}`);
+    } else {
+      router.push(`/shop`);
+    }
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
@@ -67,14 +86,18 @@ export default function Home() {
       <div className="flex flex-col lg:flex-row items-center gap-6 mb-10 w-full">
         {/* Search Bar */}
         <div className="relative w-full lg:w-1/3 flex-shrink-0">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search size={18} className="text-white/50" />
-          </div>
-          <input 
-            type="text" 
-            placeholder="Search products..." 
-            className="w-full bg-[#0A0A0C] border border-white/10 rounded-full py-3.5 pl-12 pr-4 text-white text-[11px] font-sora tracking-wide focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
-          />
+          <form onSubmit={handleSearch} className="w-full">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search size={18} className="text-white/50" />
+            </div>
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products..." 
+              className="w-full bg-[#0A0A0C] border border-white/10 rounded-full py-3.5 pl-12 pr-4 text-white text-[11px] font-sora tracking-wide focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
+            />
+          </form>
           <button className="absolute inset-y-1 right-1 px-4 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center border border-white/5 transition-colors">
             <SlidersHorizontal size={14} className="text-white/70" />
             <span className="ml-2 text-[9px] font-sora tracking-widest text-white/70">FILTERS</span>
@@ -87,7 +110,7 @@ export default function Home() {
             {filters.map((filter) => (
               <button
                 key={filter}
-                onClick={() => setActiveFilter(filter)}
+                onClick={() => handleFilterClick(filter)}
                 className={`px-5 py-2.5 rounded-full text-[10px] font-sora font-bold tracking-widest uppercase transition-all duration-300 border ${
                   activeFilter === filter 
                     ? "bg-white/10 border-white/50 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]" 

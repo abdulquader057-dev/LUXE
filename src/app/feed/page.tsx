@@ -11,7 +11,7 @@ import Image from "next/image";
 import { FASHION_REELS } from "@/data/ecosystem";
 import { FashionReel } from "@/types";
 import { cn } from "@/lib/utils";
-import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 import Link from "next/link";
 
 export default function FeedPage() {
@@ -20,7 +20,7 @@ export default function FeedPage() {
   const [savedReels, setSavedReels] = useState<Set<string>>(new Set());
   const [isMuted, setIsMuted] = useState(true);
   const [showBuyOverlay, setShowBuyOverlay] = useState(false);
-  const { formatPrice } = useCurrency();
+  const { formatPrice } = useCommerce();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const currentReel = FASHION_REELS[currentIndex];

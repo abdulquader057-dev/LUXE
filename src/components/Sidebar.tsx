@@ -181,7 +181,7 @@ const Sidebar = () => {
           {bottomLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
-              <Link key={link.name} href={link.href}>
+              <Link key={link.name} href={link.href} onClick={() => setIsOpen(false)}>
                 <div className={cn(
                   "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden",
                   link.isPremium && "bg-gradient-to-r from-[#D4AF37]/5 to-transparent border border-[#D4AF37]/20",
@@ -205,7 +205,7 @@ const Sidebar = () => {
           })}
 
           {user ? (
-            <button onClick={() => signOut()} className="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden text-red-400 hover:bg-red-500/10">
+            <button onClick={() => { signOut(); setIsOpen(false); }} className="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden text-red-400 hover:bg-red-500/10">
               <div className="transition-colors group-hover:text-red-500">
                 <LogOut size={20} strokeWidth={1.5} />
               </div>
@@ -215,7 +215,7 @@ const Sidebar = () => {
               </div>
             </button>
           ) : (
-            <Link href="/auth">
+            <Link href="/auth" onClick={() => setIsOpen(false)}>
               <div className="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden text-white/60 hover:bg-white/5 hover:text-white">
                 <div className="transition-colors group-hover:text-white">
                   <LogIn size={20} strokeWidth={1.5} />

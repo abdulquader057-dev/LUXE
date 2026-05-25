@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Search } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -14,10 +15,22 @@ import MagneticWrapper from "@/components/MagneticWrapper";
 
 const ShopContent = () => {
   const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("category");
+  const router = useRouter();
   
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory || "all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const initialCategory = searchParams.get("category") || searchParams.get("cat") || "all";
+  const initialSearch = searchParams.get("q") || "";
+  
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+
+  // Sync state when URL changes
+  useEffect(() => {
+    const cat = searchParams.get("category") || searchParams.get("cat");
+    if (cat) setSelectedCategory(cat);
+    
+    const q = searchParams.get("q");
+    if (q) setSearchQuery(q);
+  }, [searchParams]);
 
   const categories = [
     { id: "all", name: "Complete Archive" },
@@ -29,7 +42,11 @@ const ShopContent = () => {
   ];
 
   const filteredProducts = MOCK_PRODUCTS.filter((p) => {
-    const matchesCategory = selectedCategory === "all" || p.category === selectedCategory || (p.category.toLowerCase() === selectedCategory.toLowerCase());
+    // If editorial, only show editorial products (we can use isNew or add a tag)
+    if (selectedCategory === "intel") return p.category === "streetwear"; // Just an example mapping
+    if (selectedCategory === "collections") return p.category !== "streetwear"; 
+
+    const matchesCategory = selectedCategory === "all" || p.category.toLowerCase() === selectedCategory.toLowerCase();
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           p.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -81,7 +98,10 @@ const ShopContent = () => {
         {categories.map((cat) => (
           <MagneticWrapper key={cat.id}>
             <button
-              onClick={() => setSelectedCategory(cat.id)}
+              onClick={() => {
+                setSelectedCategory(cat.id);
+                router.push(`/shop?cat=${cat.id}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`);
+              }}
               className={cn(
                 "glass-pill px-6 py-3 text-[9px] font-sora uppercase tracking-[0.3em] transition-all duration-700 ease-[0.25,1,0.5,1]",
                 selectedCategory === cat.id 
@@ -162,10 +182,9 @@ const ShopPage = () => {
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-rose-gold/5 blur-[120px] rounded-full mix-blend-screen" />
       </div>
 
-      <Navbar />
-      
+
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center relative z-10">
+        <div className="min-h-screen flex items-center justify-center relative z-10 pt-24">
           <div className="flex flex-col items-center gap-8">
              <div className="w-16 h-16 border border-white/5 border-t-rose-gold/50 rounded-full animate-spin" />
              <p className="text-[9px] font-sora tracking-[0.5em] text-rose-gold/50 uppercase">Syncing Archive...</p>
@@ -175,8 +194,7 @@ const ShopPage = () => {
         <ShopContent />
       </Suspense>
       
-      <Footer />
-      <AIChatbot />
+
     </main>
   );
 };

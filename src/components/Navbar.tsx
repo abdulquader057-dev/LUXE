@@ -4,17 +4,21 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useAnimation } from "framer-motion";
-import { Search, ShoppingBag, User, Menu, Zap, LogIn } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, Zap, LogIn, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { useCommerce, Currency } from "@/lib/contexts/CommerceContext";
+import { CountrySelectorModal } from "./CountrySelectorModal";
 
 const Navbar = () => {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
   const cartControls = useAnimation();
   const { t } = useLanguage();
   const { user } = useAuth();
+  const { currency, setCurrency, cartCount } = useCommerce();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,12 +76,13 @@ const Navbar = () => {
         <div className="flex items-center gap-6 ml-auto">
           {/* Currency Pills */}
           <div className="hidden md:flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10">
-            {["INR", "USD", "EUR", "GBP"].map((cur) => (
+            {(["INR", "USD", "EUR", "GBP"] as Currency[]).map((cur) => (
               <button 
                 key={cur}
+                onClick={() => setCurrency(cur)}
                 className={cn(
                   "text-[9px] font-sora font-bold tracking-wider transition-colors",
-                  cur === "USD" ? "text-white" : "text-white/40 hover:text-white/80"
+                  currency === cur ? "text-white" : "text-white/40 hover:text-white/80"
                 )}
               >
                 {cur}
@@ -86,14 +91,24 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors">
-              <Search size={16} />
+            <Link href="/shop">
+              <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+                <Search size={16} />
+              </button>
+            </Link>
+            <button 
+              onClick={() => setIsCountryModalOpen(true)}
+              className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <Globe size={16} />
             </button>
             <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors relative">
               <ShoppingBag size={16} />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#D4AF37] rounded-full flex items-center justify-center text-[7px] font-bold text-[#050508] shadow-[0_0_8px_rgba(212,175,55,0.4)]">
-                3
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#D4AF37] rounded-full flex items-center justify-center text-[7px] font-bold text-[#050508] shadow-[0_0_8px_rgba(212,175,55,0.4)]">
+                  {cartCount}
+                </span>
+              )}
             </button>
             <Link href={user ? "/profile" : "/auth"}>
               <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors">
@@ -116,6 +131,11 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+      
+      <CountrySelectorModal 
+        isOpen={isCountryModalOpen} 
+        onClose={() => setIsCountryModalOpen(false)} 
+      />
     </motion.nav>
   );
 };

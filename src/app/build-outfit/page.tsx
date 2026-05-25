@@ -13,7 +13,7 @@ import { MOCK_OUTFITS, VIRTUAL_STYLISTS } from "@/data/ecosystem";
 import { MOCK_PRODUCTS } from "@/data/products";
 import { AIOutfit, VirtualStylist } from "@/types";
 import { cn } from "@/lib/utils";
-import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 const PROMPTS = [
   { label: "Minimal Black Fit", icon: Moon, aesthetic: "Cyber-Minimal" },
@@ -36,7 +36,7 @@ export default function BuildOutfitPage() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [revealPhase, setRevealPhase] = useState(0);
   const [likedOutfits, setLikedOutfits] = useState<Set<string>>(new Set());
-  const { formatPrice } = useCurrency();
+  const { formatPrice } = useCommerce();
 
   const handleGenerate = useCallback((prompt: string) => {
     setSelectedPrompt(prompt);

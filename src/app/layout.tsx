@@ -4,7 +4,7 @@ import "./globals.css";
 import ZyraChat from "@/components/ZyraChat";
 import BackToTop from "@/components/BackToTop";
 import Sidebar from "@/components/Sidebar";
-import { CurrencyProvider } from "@/lib/contexts/CurrencyContext";
+import { CommerceProvider } from "@/lib/contexts/CommerceContext";
 import { LanguageProvider } from "@/lib/contexts/LanguageContext";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
@@ -77,7 +77,7 @@ export default function RootLayout({
         
         <LanguageProvider>
         <AuthProvider>
-        <CurrencyProvider>
+        <CommerceProvider>
           <Sidebar />
           
           <main className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative scroll-smooth custom-scrollbar">
@@ -93,7 +93,7 @@ export default function RootLayout({
             <ZyraChat />
             <BackToTop />
           </div>
-        </CurrencyProvider>
+        </CommerceProvider>
         </AuthProvider>
         </LanguageProvider>
       </body>

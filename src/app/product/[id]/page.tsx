@@ -33,7 +33,7 @@ import ProductCard from "@/components/shop/ProductCard";
 import { usePersonalization } from "@/lib/hooks/usePersonalization";
 import { useEffect } from "react";
 
-import { useCurrency } from "@/lib/contexts/CurrencyContext";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -44,7 +44,7 @@ const ProductPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [isStyleAnalysisOpen, setIsStyleAnalysisOpen] = useState(false);
   const { trackView, getOutfitPairing } = usePersonalization();
-  const { currency, formatPrice } = useCurrency();
+  const { convertPrice, addToCart } = useCommerce();
 
   useEffect(() => {
     if (product) {
@@ -58,7 +58,7 @@ const ProductPage = () => {
   const outfitPairings = getOutfitPairing(product.id);
 
   const handleWhatsAppBuy = () => {
-    const formattedPrice = formatPrice(product.price);
+    const formattedPrice = `${convertPrice(product.price).symbol}${convertPrice(product.price).amount}`;
     const message = `Hi Luxe! I want to buy:\n\n*Product:* ${product.name}\n*Price:* ${formattedPrice}\n*Size:* ${selectedSize || 'N/A'}\n*Color:* ${selectedColor || 'N/A'}\n*Quantity:* ${quantity}\n\nCan you help me complete my order?`;
     window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(message)}`, "_blank");
   };
@@ -117,9 +117,9 @@ const ProductPage = () => {
                 <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.8] uppercase">{product.name}</h1>
                 
                 <div className="flex items-baseline gap-6 mb-12">
-                  <p className="text-5xl font-black tracking-tighter text-gradient">{formatPrice(product.price)}</p>
+                  <p className="text-5xl font-black tracking-tighter text-gradient">{convertPrice(product.price).symbol}{convertPrice(product.price).amount}</p>
                   {product.discount && (
-                    <p className="text-2xl font-black tracking-tighter text-white/10 line-through">{formatPrice(Math.round(product.price * (1 + product.discount/100)))}</p>
+                    <p className="text-2xl font-black tracking-tighter text-white/10 line-through">{convertPrice(Math.round(product.price * (1 + product.discount/100))).symbol}{convertPrice(Math.round(product.price * (1 + product.discount/100))).amount}</p>
                   )}
                 </div>
 
@@ -199,7 +199,17 @@ const ProductPage = () => {
               {/* Action Buttons - Transaction Layer */}
               <div className="flex flex-col sm:flex-row gap-6 mb-20">
                 <Magnetic>
-                  <button className="w-full py-6 glass rounded-[24px] border border-white/10 flex items-center justify-center gap-4 hover:bg-white/5 hover:border-white/20 transition-all duration-700 [transition-timing-function:var(--ease-out-expo)] group overflow-hidden">
+                  <button 
+                    onClick={() => addToCart({
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.images[0],
+                      quantity: quantity,
+                      size: selectedSize || "One Size"
+                    })}
+                    className="w-full py-6 glass rounded-[24px] border border-white/10 flex items-center justify-center gap-4 hover:bg-white/5 hover:border-white/20 transition-all duration-700 [transition-timing-function:var(--ease-out-expo)] group overflow-hidden"
+                  >
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 [transition-timing-function:var(--ease-out-expo)]" />
                     <ShoppingCart size={20} className="text-primary group-hover:scale-110 transition-transform duration-700 [transition-timing-function:var(--ease-out-expo)]" />
                     <span className="text-xs font-black tracking-[0.3em] uppercase">Add to Cart</span>
