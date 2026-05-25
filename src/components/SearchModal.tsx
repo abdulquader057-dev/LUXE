@@ -19,7 +19,7 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState(MOCK_PRODUCTS.slice(0, 4));
   const inputRef = useRef<HTMLInputElement>(null);
-  const { formatPrice } = useCommerce();
+  const { convertPrice } = useCommerce();
 
   useEffect(() => {
     if (isOpen) {
@@ -162,7 +162,7 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                                  className="object-cover group-hover:scale-110 transition-transform duration-1000" 
                                />
                                <div className="absolute top-4 right-4 glass-panel !px-3 py-1.5 !rounded-xl border-white/20">
-                                  <span className="text-[10px] font-black text-white">{formatPrice(product.price)}</span>
+                                  <span className="text-[10px] font-black text-white">{convertPrice(product.price)}</span>
                                </div>
                             </div>
                             <div className="px-2">

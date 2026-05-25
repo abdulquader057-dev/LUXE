@@ -17,7 +17,7 @@ import Image from "next/image";
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("trending");
   const [votedFits, setVotedFits] = useState<Set<string>>(new Set());
-  const { formatPrice } = useCommerce();
+  const { convertPrice } = useCommerce();
 
   const toggleVote = (fitId: string) => {
     setVotedFits((prev) => {

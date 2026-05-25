@@ -36,7 +36,7 @@ export default function BuildOutfitPage() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [revealPhase, setRevealPhase] = useState(0);
   const [likedOutfits, setLikedOutfits] = useState<Set<string>>(new Set());
-  const { formatPrice } = useCommerce();
+  const { convertPrice } = useCommerce();
 
   const handleGenerate = useCallback((prompt: string) => {
     setSelectedPrompt(prompt);
@@ -388,7 +388,7 @@ export default function BuildOutfitPage() {
                       {/* Product info */}
                       <div className="absolute bottom-0 left-0 right-0 p-5">
                         <h4 className="text-sm font-black tracking-wider uppercase mb-1 truncate">{product.name}</h4>
-                        <p className="text-lg font-black text-gradient">{formatPrice(product.price)}</p>
+                        <p className="text-lg font-black text-gradient">{convertPrice(product.price)}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -404,7 +404,7 @@ export default function BuildOutfitPage() {
               >
                 <div>
                   <div className="text-[10px] font-black tracking-[0.4em] text-white/30 uppercase mb-1">Complete Outfit</div>
-                  <div className="text-4xl font-black tracking-tighter text-gradient">{formatPrice(generatedOutfit.totalPrice)}</div>
+                  <div className="text-4xl font-black tracking-tighter text-gradient">{convertPrice(generatedOutfit.totalPrice)}</div>
                 </div>
                 <div className="flex gap-4">
                   <button

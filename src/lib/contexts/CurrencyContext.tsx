@@ -6,7 +6,7 @@ import { Currency, commerceService } from "../services/commerce";
 interface CurrencyContextType {
   currency: Currency;
   setCurrency: (currency: Currency) => void;
-  formatPrice: (amount: number) => string;
+  convertPrice: (amount: number) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -24,12 +24,12 @@ export const CurrencyProvider = ({ children }: { children: React.ReactNode }) =>
     localStorage.setItem("luxe_currency", newCurrency);
   };
 
-  const formatPrice = (amount: number) => {
-    return commerceService.formatPrice(amount, currency);
+  const convertPrice = (amount: number) => {
+    return commerceService.convertPrice(amount, currency);
   };
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, convertPrice }}>
       {children}
     </CurrencyContext.Provider>
   );
