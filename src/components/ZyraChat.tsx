@@ -23,6 +23,12 @@ export default function ZyraChat() {
   ]);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const handleOpenZyra = () => setIsOpen(true);
+    window.addEventListener("open-zyra", handleOpenZyra);
+    return () => window.removeEventListener("open-zyra", handleOpenZyra);
+  }, []);
+
   // Update initial message when language changes if no other messages exist
   useEffect(() => {
     if (messages.length === 1) {
