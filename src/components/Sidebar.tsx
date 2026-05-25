@@ -45,7 +45,8 @@ const Sidebar = () => {
 
   const bottomLinks = [
     { name: "LUXE Plus", href: "/profile", icon: Crown, subtitle: "Exclusive Access", isPremium: true },
-    { name: "WhatsApp", href: "https://wa.me/1234567890", icon: MessageCircle, subtitle: "Support & Queries", isPremium: false },
+    { name: "WhatsApp (Primary)", href: "https://wa.me/917995338472", icon: MessageCircle, subtitle: "Support & Queries", isPremium: false },
+    { name: "WhatsApp (Alt)", href: "https://wa.me/917337246297", icon: MessageCircle, subtitle: "Secondary Contact", isPremium: false },
     { name: "Settings", href: "/settings", icon: Settings, subtitle: "Preferences", isPremium: false },
   ];
 
