@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useAnimation } from "framer-motion";
-import { Search, ShoppingBag, User, Menu } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Navbar = () => {
@@ -26,47 +26,24 @@ const Navbar = () => {
   }, []);
 
   const links = [
-    { name: "Collections", href: "/" },
-    { name: "Drops", href: "/drops" },
-    { name: "Feed", href: "/feed" },
-    { name: "Build Fit", href: "/build-outfit" },
-    { name: "Archive", href: "/shop" },
-    { name: "Identity", href: "/profile" },
+    { name: "Collections", href: "/collections" },
+    { name: "Neural Drops", href: "/drops" },
+    { name: "Intel", href: "/intel" },
+    { name: "Cognition", href: "/cognition" },
   ];
-
-  const handleCartClick = () => {
-    cartControls.start({
-      scale: [1, 1.4, 0.9, 1],
-      transition: { duration: 0.4, ease: "easeInOut" }
-    });
-  };
 
   return (
     <motion.nav
-      initial={{ y: "-100%", opacity: 0 }}
+      initial={{ y: -50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 1.5, duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
+      transition={{ duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
       className={cn(
-        "fixed top-0 left-0 right-0 z-[100] flex flex-col px-6 md:px-12 py-6 transition-all duration-700 ease-[0.25,1,0.5,1]",
-        isScrolled 
-          ? "bg-[#0B0B0E] border-b border-white/[0.03] shadow-[0_4px_32px_rgba(0,0,0,0.5)]" 
-          : "bg-[#0B0B0E] border-b border-transparent"
+        "absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-8 py-4 transition-all duration-300 backdrop-blur-md bg-[#050508]/80 border-b border-white/5",
       )}
     >
-      {/* 1. FORCE HEADER UNCOUPLING: Logo independent block */}
-      <div 
-        className="logo-container !p-0"
-        style={{ position: "relative", display: "block", marginBottom: "32px", zIndex: 10 }}
-      >
-        <Link href="/" className="!p-0 !flex-row !gap-1 flex items-center">
-          <span className="logo-luxe !text-2xl md:!text-3xl !text-[#FFFFFF]">LUXE</span>
-          <span className="text-rose-gold !text-2xl md:!text-3xl">.</span>
-        </Link>
-      </div>
-
-      <div className="flex items-center justify-between w-full">
-        {/* Navigation links strictly below logo */}
-        <div className="nav-links flex gap-6 lg:gap-10 overflow-hidden">
+      <div className="flex items-center gap-10 w-full">
+        {/* Left Links */}
+        <div className="hidden lg:flex items-center gap-8">
           {links.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -74,38 +51,61 @@ const Navbar = () => {
                 key={link.name}
                 href={link.href}
                 className={cn(
-                  "relative font-sora text-[10px] tracking-[0.2em] uppercase transition-colors duration-500",
-                  isActive ? "text-[#FFFFFF]" : "text-[#FFFFFF]/50 hover:text-[#FFFFFF]"
+                  "text-[11px] font-sora font-semibold tracking-widest uppercase transition-colors duration-300 relative",
+                  isActive ? "text-[#00F0FF]" : "text-white/60 hover:text-white"
                 )}
               >
                 {link.name}
                 {isActive && (
-                  <motion.div 
-                    layoutId="navbar-indicator"
-                    className="absolute -bottom-2 left-0 right-0 h-[1px] bg-[#FFFFFF]"
-                    transition={{ ease: [0.25, 1, 0.5, 1], duration: 0.5 }}
-                  />
+                  <div className="absolute -bottom-5 left-0 right-0 h-[2px] bg-[#00F0FF] shadow-[0_0_10px_rgba(0,240,255,0.5)]" />
                 )}
               </Link>
             );
           })}
         </div>
 
-        {/* Actions right */}
-        <div className="utility-icons flex gap-5 shrink-0">
-          <button aria-label="Search" className="text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors duration-500">
-            <Search size={18} strokeWidth={1.5} />
-          </button>
-          <button aria-label="Cart" onClick={handleCartClick} className="relative text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors duration-500">
-            <motion.div animate={cartControls} className="absolute inset-0 bg-[#FFFFFF]/10 rounded-full mix-blend-overlay opacity-0 scale-0 origin-center" />
-            <ShoppingBag size={18} strokeWidth={1.5} />
-          </button>
-          <Link href="/profile" className="hidden md:block text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors duration-500">
-            <User size={18} strokeWidth={1.5} />
-          </Link>
-          <button aria-label="Menu" className="lg:hidden text-[#FFFFFF]/50 hover:text-[#FFFFFF] transition-colors duration-500">
-            <Menu size={20} strokeWidth={1.5} />
-          </button>
+        {/* Right Utilities */}
+        <div className="flex items-center gap-6 ml-auto">
+          {/* Currency Pills */}
+          <div className="hidden md:flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10">
+            {["INR", "USD", "EUR", "GBP"].map((cur) => (
+              <button 
+                key={cur}
+                className={cn(
+                  "text-[9px] font-sora font-bold tracking-wider",
+                  cur === "USD" ? "text-[#00F0FF]" : "text-white/40 hover:text-white/80"
+                )}
+              >
+                {cur}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+              <Search size={16} />
+            </button>
+            <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors relative">
+              <ShoppingBag size={16} />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#B52BFF] rounded-full flex items-center justify-center text-[7px] font-bold text-white shadow-[0_0_8px_rgba(181,43,255,0.6)]">
+                3
+              </span>
+            </button>
+            <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+              <User size={16} />
+            </button>
+          </div>
+
+          {/* Neural Sync Badge */}
+          <div className="hidden xl:flex items-center gap-3 pl-4 border-l border-white/10">
+            <div className="text-right">
+              <div className="text-[10px] font-sora font-bold tracking-widest text-[#00F0FF]">NEURAL SYNC</div>
+              <div className="text-[9px] font-sora tracking-widest text-white/40">ACTIVE CORE V4.2</div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-[#00F0FF]/10 flex items-center justify-center border border-[#00F0FF]/30">
+              <Zap size={14} className="text-[#00F0FF]" />
+            </div>
+          </div>
         </div>
       </div>
     </motion.nav>

@@ -1,127 +1,102 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import { Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Heart, ShoppingCart } from "lucide-react";
+import { useCurrency } from "@/lib/contexts/CurrencyContext";
 
-interface ProductCardProps {
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    originalPrice?: number;
-    image?: string;
-    images?: string[];
-    category: string;
-    momentum?: number;
-    rarity?: "ULTRA RARE" | "EXCLUSIVE" | "LIMITED" | "STANDARD";
-  };
-  index?: number;
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  category: string;
+  isNew?: boolean;
 }
 
-const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
-  const [rotate, setRotate] = useState({ x: 0, y: 0 });
+const ProductCard = ({ product }: { product: Product }) => {
+  const { formatPrice } = useCurrency();
   const [isHovered, setIsHovered] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(cardRef, { once: true, amount: 0.1 });
-  
-  const imageSrc = product.image || (product.images && product.images[0]) || "";
+  const [isLiked, setIsLiked] = useState(false);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = cardRef.current;
-    if (!card) return;
-    
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // For cursor spotlight
-    card.style.setProperty('--mouse-x', `${x}px`);
-    card.style.setProperty('--mouse-y', `${y}px`);
-
-    // Subtle Parallax Tilt
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = (y - centerY) / 40; // reduced tilt for stability
-    const rotateY = (centerX - x) / 40;
-
-    setRotate({ x: rotateX, y: rotateY });
-  };
-
-  const handleMouseLeave = () => {
-    setRotate({ x: 0, y: 0 });
-    setIsHovered(false);
-  };
+  // Fake random AI match score for effect
+  const matchScore = Math.floor(Math.random() * 15) + 85; 
 
   return (
-    <motion.div
-      ref={cardRef}
-      initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-      animate={isInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
-      transition={{ 
-        duration: 1.2, 
-        delay: index * 0.1,
-        ease: [0.25, 1, 0.5, 1] // ease-cinematic
-      }}
-      className="group perspective-1000 w-full h-full"
-      onMouseMove={handleMouseMove}
+    <div 
+      className="group relative rounded-xl overflow-hidden bg-[#050508] border border-white/5 transition-all duration-500 hover:border-[#00F0FF]/30 hover:shadow-[0_0_30px_rgba(0,240,255,0.15)] flex flex-col h-[400px]"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <motion.div
-        animate={{ rotateX: rotate.x, rotateY: rotate.y }}
-        transition={{ type: "spring", stiffness: 200, damping: 30 }}
-        className="product-card relative bg-bg-surface border border-white/5 rounded-sm flex flex-col cursor-spotlight-card"
-        style={{ minHeight: "450px" }}
-      >
-        {/* Image Container with Fabric Texture Hover */}
-        <div className="relative fabric-texture flex-shrink-0">
-          <motion.img
-            src={imageSrc}
-            alt={product.name}
-            className="product-image transition-transform duration-[2s] ease-[0.25,1,0.5,1] group-hover:scale-[1.03]"
-          />
-          
-          {/* Layered Fog Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-surface via-transparent to-transparent opacity-80" />
-          <div className="absolute inset-0 bg-rose-gold/0 group-hover:bg-rose-gold/5 transition-colors duration-[1.5s] mix-blend-overlay" />
+      {/* Top Image Section */}
+      <div className="relative h-[240px] w-full overflow-hidden bg-[#0A0A0F]">
+        <div 
+          className={`absolute inset-0 bg-cover bg-center transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.15,1)] ${isHovered ? 'scale-110' : 'scale-100'}`}
+          style={{ backgroundImage: `url(${product.images[0]})` }}
+        />
+        
+        {/* Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-transparent opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050508]/60 via-transparent to-transparent opacity-90" />
+
+        {/* AI Badge Top Left */}
+        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-sm bg-[#00F0FF]/10 border border-[#00F0FF]/30 backdrop-blur-md flex items-center gap-1.5 shadow-[0_0_10px_rgba(0,240,255,0.2)]">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#00F0FF] animate-pulse" />
+          <span className="text-[9px] font-sora font-bold text-[#00F0FF] tracking-widest">
+            AI MATCH {matchScore}%
+          </span>
         </div>
 
-        {/* Card Info - Typography Isolation & Spatial Depth */}
-        <div className="p-6 md:p-8 flex-1 flex flex-col justify-between space-y-8 frosted-wrapper border-t border-white/5 z-10 relative">
-          <div className="relative z-10">
-            <span className="text-[9px] font-sora uppercase tracking-[0.4em] text-white/30 block mb-3">
-              {product.category}
-            </span>
-            <h3 className="text-xl md:text-2xl font-cormorant font-light text-white tracking-wide leading-tight group-hover:text-rose-gold transition-colors duration-700">
-              {product.name}
-            </h3>
-          </div>
-          
-          <div className="action-row flex items-center justify-between pt-4 border-t border-white/10 relative z-10 w-full mt-4">
-            <div className="flex items-center gap-4">
-              <span className="font-sora text-[10px] tracking-[0.3em] text-white/70 shadow-sm">
-                USD {product.price}
-              </span>
-              {product.originalPrice && (
-                <span className="text-white/20 font-sora text-[9px] line-through tracking-[0.3em]">
-                  {product.originalPrice}
-                </span>
-              )}
-            </div>
-            {/* Contained Footer Action Buttons */}
-            <motion.button 
-              whileTap={{ scale: 0.96 }}
-              className="glass-pill px-4 py-2 flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <Plus size={12} strokeWidth={1.5} />
-              <span className="font-sora text-[9px] tracking-[0.2em] uppercase whitespace-nowrap">Acquire</span>
-            </motion.button>
-          </div>
+        {/* Heart Icon Top Right */}
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            setIsLiked(!isLiked);
+          }}
+          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all ${
+            isLiked 
+              ? 'bg-[#B52BFF]/20 border border-[#B52BFF]/50 text-[#B52BFF] shadow-[0_0_15px_rgba(181,43,255,0.4)]' 
+              : 'bg-black/40 border border-white/10 text-white/50 hover:bg-black/60 hover:text-white'
+          }`}
+        >
+          <Heart size={14} className={isLiked ? 'fill-[#B52BFF]' : ''} />
+        </button>
+      </div>
+
+      {/* Info Section Bottom */}
+      <div className="flex-1 p-5 flex flex-col justify-between relative z-10 bg-gradient-to-b from-[#050508]/0 to-[#0A0A0F]">
+        <div>
+          <h3 className="text-[13px] font-sora font-bold text-white tracking-widest uppercase mb-1.5 line-clamp-1 group-hover:text-[#00F0FF] transition-colors">
+            {product.name}
+          </h3>
+          <p className="text-[10px] font-sora text-white/40 tracking-wider line-clamp-2">
+            {product.description}
+          </p>
         </div>
-      </motion.div>
-    </motion.div>
+
+        <div className="mt-4 pt-4 border-t border-white/10 flex items-end justify-between">
+          <div>
+            {/* Fake original price for dashboard aesthetic */}
+            <div className="text-[9px] font-sora text-white/30 line-through tracking-wider mb-0.5">
+              {formatPrice(product.price * 1.35)}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[14px] font-orbitron font-bold text-white tracking-wider">
+                {formatPrice(product.price)}
+              </span>
+              <span className="px-1.5 py-0.5 rounded-sm bg-red-500/20 text-red-400 text-[8px] font-sora font-bold tracking-widest border border-red-500/30">
+                -35%
+              </span>
+            </div>
+          </div>
+
+          <button className="w-10 h-10 rounded-full bg-[#00F0FF]/10 border border-[#00F0FF]/30 text-[#00F0FF] flex items-center justify-center hover:bg-[#00F0FF] hover:text-black hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] transition-all duration-300 transform hover:scale-110 active:scale-95">
+            <ShoppingCart size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

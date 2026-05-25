@@ -1,150 +1,128 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Search, SlidersHorizontal, Sparkles } from "lucide-react";
 import Hero from "@/components/home/Hero";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
+import ProductCard from "@/components/shop/ProductCard";
 
-const collections = [
+const filters = [
+  "ALL COLLECTIONS",
+  "MODEST TECH",
+  "SNEAKERS",
+  "WATCHES",
+  "ACCESSORIES",
+  "STREETWEAR",
+  "LUXURY"
+];
+
+// Mock products for the homepage
+const neuralPicks = [
   {
-    id: "blush-tailoring",
-    title: "Blush Tailoring",
-    subtitle: "SS.27 Editorial",
-    image: "/hero-1.jpg", 
-    size: "large", // spans 2 cols, 2 rows
-    align: "bottom-left"
+    id: "prod-1",
+    name: "AERO-WEAVE COMBAT JACKET",
+    description: "Adaptive thermal regulation with nano-fiber mesh.",
+    price: 890,
+    images: ["/hero-1.jpg"],
+    category: "STREETWEAR",
+    isNew: true,
   },
   {
-    id: "neo-utility",
-    title: "Neo Utility",
-    subtitle: "Structural Forms",
-    image: "/hero-2.jpg",
-    size: "tall", // spans 1 col, 2 rows
-    align: "top-right"
+    id: "prod-2",
+    name: "OBSIDIAN TECH-HOODIE",
+    description: "Vantablack absorption fabric. Neural weave.",
+    price: 450,
+    images: ["/hero-2.jpg"],
+    category: "MODEST TECH",
+    isNew: false,
   },
   {
-    id: "obsidian-core",
-    title: "Obsidian Core",
-    subtitle: "The Foundation",
-    image: "/hero-3.jpg",
-    size: "wide", // spans 2 cols, 1 row
-    align: "center"
+    id: "prod-3",
+    name: "QUANTUM RUNNERS V2",
+    description: "Kinetic energy displacement soles.",
+    price: 320,
+    images: ["/hero-3.jpg"],
+    category: "SNEAKERS",
+    isNew: true,
   },
   {
-    id: "neural-layering",
-    title: "Neural Layering",
-    subtitle: "Adaptive Fabrics",
-    image: "/hero-4.jpg",
-    size: "standard", // 1 col, 1 row
-    align: "bottom-right"
-  },
-  {
-    id: "street-atelier",
-    title: "Street Atelier",
-    subtitle: "Urban Luxe",
-    image: "/hero-1.jpg",
-    size: "standard",
-    align: "center"
-  },
-  {
-    id: "luxe-objects",
-    title: "Luxe Objects",
-    subtitle: "Hardware & Accessories",
-    image: "/hero-2.jpg",
-    size: "wide",
-    align: "bottom-left"
+    id: "prod-4",
+    name: "SYNTH-LEATHER TRENCH",
+    description: "Waterproof, breathable lab-grown leather.",
+    price: 1200,
+    images: ["/hero-4.jpg"],
+    category: "LUXURY",
+    isNew: true,
   }
 ];
 
 export default function Home() {
+  const [activeFilter, setActiveFilter] = useState("ALL COLLECTIONS");
+
   return (
-    <main className="flex flex-col overflow-hidden bg-bg-base" style={{ opacity: 0 }}>
+    <div className="px-6 md:px-8 w-full max-w-[1600px] mx-auto">
       <Hero />
 
-      <section className="relative z-10 container mx-auto px-6 py-32 md:py-48">
-        
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
-          className="mb-24 md:mb-32 flex flex-col md:flex-row justify-between items-end gap-8"
-        >
-          <div>
-            <span className="text-[10px] font-sora text-rose-gold uppercase tracking-[0.3em] block mb-4">
-              Curated Selection
-            </span>
-            <h3 className="text-4xl md:text-6xl font-cormorant font-light tracking-tight">
-              Featured <br />
-              <span className="italic text-white/50">Collections</span>
-            </h3>
+      {/* Search and Filters Section */}
+      <div className="flex flex-col lg:flex-row items-center gap-6 mb-10 w-full">
+        {/* Search Bar */}
+        <div className="relative w-full lg:w-1/3 flex-shrink-0">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search size={18} className="text-[#00F0FF]" />
           </div>
-          <Link href="/shop" className="text-xs font-sora uppercase tracking-[0.2em] border-b border-rose-gold/30 hover:border-rose-gold text-white/70 hover:text-white transition-colors pb-1">
-            View Complete Archive
-          </Link>
-        </motion.div>
-
-        {/* Asymmetrical Grid (Mobile: Vertical Storytelling) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 auto-rows-[450px] md:auto-rows-[400px]">
-          {collections.map((collection, i) => {
-            
-            // Layout mapping
-            const sizeClasses = {
-              "large": "md:col-span-2 md:row-span-2",
-              "tall": "md:col-span-1 md:row-span-2",
-              "wide": "md:col-span-2 lg:col-span-2 md:row-span-1",
-              "standard": "md:col-span-1 lg:col-span-1 md:row-span-1"
-            };
-
-            const alignClasses = {
-              "bottom-left": "justify-end items-start",
-              "top-right": "justify-start items-end text-right",
-              "center": "justify-center items-center text-center",
-              "bottom-right": "justify-end items-end text-right"
-            };
-
-            return (
-              <motion.div
-                key={collection.id}
-                initial={{ opacity: 0, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, filter: "blur(0px)" }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 1.2, delay: i * 0.1, ease: [0.25, 1, 0.5, 1] }}
-                className={cn(
-                  "group relative overflow-hidden bg-bg-surface rounded-sm clickable border border-white/5",
-                  sizeClasses[collection.size as keyof typeof sizeClasses]
-                )}
-              >
-                {/* Image & Parallax wrapper */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center transform scale-100 group-hover:scale-110 transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.15,1)] opacity-40 group-hover:opacity-70 grayscale group-hover:grayscale-0"
-                    style={{ backgroundImage: `url(${collection.image})` }}
-                  />
-                  {/* Luxury Glow Gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-bg-base/90 via-bg-base/20 to-transparent mix-blend-multiply" />
-                  <div className="absolute inset-0 bg-rose-gold/0 group-hover:bg-rose-gold/10 transition-colors duration-1000 mix-blend-overlay" />
-                </div>
-
-                {/* Content - Touch-first mobile typography */}
-                <div className={cn("absolute inset-0 p-8 md:p-12 flex flex-col z-10", alignClasses[collection.align as keyof typeof alignClasses])}>
-                  <div className="transform translate-y-0 md:translate-y-4 md:group-hover:translate-y-0 transition-transform duration-700 ease-[0.25,1,0.5,1]">
-                    <span className="text-[9px] font-sora uppercase tracking-[0.4em] text-rose-gold-light/70 block mb-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-700 delay-100">
-                      {collection.subtitle}
-                    </span>
-                    <h4 className="text-3xl md:text-4xl font-cormorant font-light tracking-tight text-white group-hover:text-rose-gold transition-colors duration-700 shadow-sm">
-                      {collection.title}
-                    </h4>
-                  </div>
-                </div>
-              </motion.div>
-            )
-          })}
+          <input 
+            type="text" 
+            placeholder="Search neural base..." 
+            className="w-full bg-[#050508] border border-white/10 rounded-full py-3.5 pl-12 pr-4 text-white text-[11px] font-sora tracking-wide focus:outline-none focus:border-[#00F0FF]/50 focus:ring-1 focus:ring-[#00F0FF]/50 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
+          />
+          <button className="absolute inset-y-1 right-1 px-4 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center border border-white/5 transition-colors">
+            <SlidersHorizontal size={14} className="text-white/70" />
+            <span className="ml-2 text-[9px] font-sora tracking-widest text-white/70">FILTERS</span>
+          </button>
         </div>
 
-      </section>
-    </main>
+        {/* Filter Pills */}
+        <div className="flex-1 w-full overflow-x-auto custom-scrollbar pb-2 lg:pb-0">
+          <div className="flex items-center gap-3 w-max">
+            {filters.map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-5 py-2.5 rounded-full text-[10px] font-sora font-bold tracking-widest uppercase transition-all duration-300 border ${
+                  activeFilter === filter 
+                    ? "bg-[#00F0FF]/10 border-[#00F0FF]/50 text-[#00F0FF] shadow-[0_0_15px_rgba(0,240,255,0.2)]" 
+                    : "bg-transparent border-white/10 text-white/50 hover:border-white/30 hover:text-white"
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* NEURAL PICKS Grid */}
+      <div className="mb-16">
+        <div className="flex items-center gap-3 mb-8">
+          <Sparkles size={20} className="text-[#B52BFF]" />
+          <h2 className="text-2xl font-orbitron font-bold text-white tracking-wide">NEURAL PICKS FOR YOU</h2>
+          <div className="h-[1px] flex-1 bg-gradient-to-r from-[#B52BFF]/30 to-transparent ml-4" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {neuralPicks.map((product, i) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * i, duration: 0.6 }}
+            >
+              <ProductCard product={product} />
+            </motion.div>
+          ))}
+        </div>
+      </div>
+      
+    </div>
   );
 }

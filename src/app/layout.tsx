@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Rajdhani, Sora, Orbitron, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-import WhatsAppWidget from "@/components/WhatsAppWidget";
 import ZyraChat from "@/components/ZyraChat";
 import BackToTop from "@/components/BackToTop";
+import Sidebar from "@/components/Sidebar";
 import { CurrencyProvider } from "@/lib/contexts/CurrencyContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -64,26 +64,25 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col bg-[#050508] text-white selection:bg-white selection:text-black relative overflow-x-hidden">
+      <body className="min-h-full flex bg-[#050508] text-white selection:bg-[#00F0FF]/30 selection:text-white relative overflow-hidden h-screen w-screen">
         <ScrollProgress />
-        <div className="film-grain" />
+        <div className="film-grain opacity-20 mix-blend-overlay pointer-events-none" />
         <CustomCursor />
         
         <CurrencyProvider>
-          <Navbar />
-          {/* GLOBAL CONTAINMENT ARCHITECTURE */}
-          <main 
-            className="relative z-10 w-full max-w-[1440px] mx-auto pt-16 md:pt-24"
-            style={{ display: "block", minHeight: "100vh", visibility: "visible", opacity: 1 }}
-          >
-            {children}
+          <Sidebar />
+          
+          <main className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative scroll-smooth custom-scrollbar">
+            <Navbar />
+            <div className="flex-1 w-full relative z-10 pt-24 pb-12">
+              {children}
+            </div>
             <Footer />
           </main>
           
           {/* FLOATING COMPONENTS GEOMETRY LOCK */}
           <div style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 9999, display: "flex", flexDirection: "column", gap: "16px", alignItems: "flex-end" }}>
             <ZyraChat />
-            <WhatsAppWidget />
             <BackToTop />
           </div>
         </CurrencyProvider>

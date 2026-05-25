@@ -10,14 +10,14 @@ const ZyraChat = () => {
   const [message, setMessage] = useState("");
 
   return (
-    <div className="fixed bottom-6 left-6 z-max">
+    <div className="relative z-[9999]">
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="absolute bottom-20 left-0 w-[320px] md:w-[380px] h-[500px] glass-elevated overflow-hidden flex flex-col border border-accent-cyan/20 shadow-[0_32px_64px_rgba(0,0,0,0.6)]"
+            className="absolute bottom-20 right-0 w-[320px] md:w-[380px] h-[500px] bg-[#050508]/90 backdrop-blur-md rounded-2xl overflow-hidden flex flex-col border border-[#00F0FF]/30 shadow-[0_0_40px_rgba(0,240,255,0.2)]"
           >
             {/* Header */}
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/40">
@@ -32,7 +32,7 @@ const ZyraChat = () => {
                 </div>
                 <div>
                   <h3 className="text-[11px] font-orbitron text-white tracking-widest uppercase">ZYRA AI</h3>
-                  <p className="text-[9px] font-rajdhani text-accent-cyan/70 tracking-wider">Neural Assistant Active</p>
+                  <p className="text-[9px] font-sora text-[#00F0FF]/70 tracking-wider">Neural Assistant Active</p>
                 </div>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white transition-colors">
@@ -43,9 +43,12 @@ const ZyraChat = () => {
             {/* Messages Area */}
             <div className="flex-1 p-6 overflow-y-auto space-y-4 font-rajdhani text-sm">
               <div className="flex flex-col gap-1 max-w-[80%]">
-                <span className="text-[8px] font-orbitron text-accent-cyan/50 tracking-widest uppercase ml-2">Zyra</span>
-                <div className="p-3 glass-standard !rounded-2xl !rounded-tl-none text-white/90">
-                  Welcome to the LUXE ecosystem. I am ZYRA, your neural fashion architect. How may I refine your aesthetic today?
+                <span className="text-[8px] font-orbitron text-[#00F0FF]/50 tracking-widest uppercase ml-2">Zyra</span>
+                <div className="p-3 bg-white/5 border border-white/10 rounded-2xl rounded-tr-none text-white/90 text-xs">
+                  Hey! I found some perfect picks for your style today.
+                  <button className="mt-2 w-full py-2 bg-[#00F0FF]/10 text-[#00F0FF] rounded-lg border border-[#00F0FF]/30 text-[10px] font-bold tracking-widest">
+                    SHOW MY STYLE &rarr;
+                  </button>
                 </div>
               </div>
             </div>
@@ -76,11 +79,11 @@ const ZyraChat = () => {
         whileTap={{ scale: 0.95 }}
         className="w-14 h-14 rounded-full bg-gradient-to-br from-accent-cyan to-accent-violet p-[1px] shadow-[0_8px_32px_rgba(0,229,204,0.3)] relative group"
       >
-        <div className="w-full h-full rounded-full bg-[#07070F] flex items-center justify-center relative overflow-hidden">
-          <MessageSquare size={24} className="text-white relative z-10" />
+        <div className="w-full h-full rounded-full bg-[#050508] flex items-center justify-center relative overflow-hidden">
+          <MessageSquare size={24} className="text-[#00F0FF] relative z-10" />
           
           {/* Animated Glow */}
-          <div className="absolute inset-0 bg-accent-cyan/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-[#00F0FF]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
         
         {/* Pulse Ring */}

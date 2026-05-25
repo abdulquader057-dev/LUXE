@@ -116,7 +116,7 @@ const ShopContent = () => {
                   key={p.id} 
                   className="flex flex-col min-h-[500px]" // Stable aspect ratios, stretch to fit
                 >
-                  <ProductCard product={p} index={idx} />
+                  <ProductCard product={p} />
                 </motion.div>
               ))}
             </motion.div>
