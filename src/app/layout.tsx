@@ -7,6 +7,7 @@ import { CurrencyProvider } from "@/lib/contexts/CurrencyContext";
 import Sidebar from "@/components/Sidebar";
 import ZyraChat from "@/components/ZyraChat";
 import { CinematicAtmosphere } from "@/components/CinematicAtmosphere";
+import SplashScreen from "@/components/SplashScreen";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
@@ -72,6 +73,7 @@ export default function RootLayout({
         <div className="watermark-vertical hidden lg:block">LUXE SYSTEM // CORE V4.2 // NEURAL SYNC</div>
         <CustomCursor />
         <CinematicAtmosphere />
+        <SplashScreen />
         <CurrencyProvider>
           <Navbar />
           <Sidebar />

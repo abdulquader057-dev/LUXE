@@ -62,7 +62,7 @@ export default function Home() {
     : products.filter(p => p.category === activeCategory);
 
   return (
-    <main className="flex flex-col overflow-hidden">
+    <main className="flex flex-col overflow-hidden" style={{ opacity: 0 }}>
       <Hero />
 
       <motion.section 
