@@ -559,7 +559,7 @@ button, a, .clickable {
 
 .product-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
   gap: 32px !important;
   visibility: visible !important;
   opacity: 1 !important;

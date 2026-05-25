@@ -71,10 +71,11 @@ export default function RootLayout({
         <CurrencyProvider>
           <Navbar />
           {/* GLOBAL CONTAINMENT ARCHITECTURE */}
-          <main className="relative z-10 flex-grow flex flex-col w-full max-w-[1440px] mx-auto">
-            <div className="flex-grow pt-16 md:pt-24 w-full">
-              {children}
-            </div>
+          <main 
+            className="relative z-10 w-full max-w-[1440px] mx-auto pt-16 md:pt-24"
+            style={{ display: "block", minHeight: "100vh", visibility: "visible", opacity: 1 }}
+          >
+            {children}
             <Footer />
           </main>
         </CurrencyProvider>
