@@ -60,7 +60,7 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState("ALL COLLECTIONS");
 
   return (
-    <div className="px-6 md:px-8 w-full max-w-[1600px] mx-auto">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
       <Hero />
 
       {/* Search and Filters Section */}
@@ -115,7 +115,7 @@ export default function Home() {
               key={product.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * i, duration: 0.6 }}
+              transition={{ delay: 0.2 + (0.1 * i), duration: 1.2, ease: "easeOut" }}
             >
               <ProductCard product={product} />
             </motion.div>

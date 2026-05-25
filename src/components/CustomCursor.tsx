@@ -45,7 +45,7 @@ const CustomCursor = () => {
           left: -20,
           top: -20,
         }}
-        className="w-10 h-10 border border-accent-cyan/30 rounded-full opacity-60"
+        className="absolute w-10 h-10 border border-white/30 rounded-full opacity-60"
         animate={{
           scale: isVisible ? 1 : 0,
           opacity: isVisible ? 0.6 : 0
@@ -60,7 +60,7 @@ const CustomCursor = () => {
           left: -3,
           top: -3,
         }}
-        className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_#fff,0_0_20px_#00E5CC]"
+        className="absolute w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_#fff,0_0_20px_rgba(255,255,255,0.5)]"
         animate={{
           scale: isVisible ? 1 : 0,
         }}
@@ -74,7 +74,7 @@ const CustomCursor = () => {
           left: -40,
           top: -40,
         }}
-        className="w-20 h-20 bg-accent-cyan/5 blur-[30px] rounded-full"
+        className="absolute w-20 h-20 bg-white/5 blur-[30px] rounded-full"
         animate={{
           scale: isVisible ? 1.5 : 0,
         }}

@@ -32,7 +32,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       {/* Top Image Section */}
       <div className="relative h-[240px] w-full overflow-hidden bg-[#0A0A0F]">
         <div 
-          className={`absolute inset-0 bg-cover bg-center transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.15,1)] ${isHovered ? 'scale-110' : 'scale-100'}`}
+          className={`absolute inset-0 bg-cover bg-center transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.15,1)] ${isHovered ? 'scale-110 rotate-2' : 'scale-100 rotate-0'}`}
           style={{ backgroundImage: `url(${product.images[0]})` }}
         />
         

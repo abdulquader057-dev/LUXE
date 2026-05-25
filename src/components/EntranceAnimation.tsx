@@ -41,7 +41,7 @@ const EntranceAnimation = () => {
               transition={{ duration: 1.2, ease: "easeOut" }}
               className="relative"
             >
-              <div className="text-4xl md:text-6xl font-orbitron font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-400 via-white to-gray-400 tracking-[0.5em] ml-[0.5em] drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+              <div className="text-4xl md:text-6xl font-orbitron font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-400 via-white to-gray-400 tracking-[0.5em] ml-[0.5em] drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
                 LUXE
               </div>
             </motion.div>
@@ -49,9 +49,9 @@ const EntranceAnimation = () => {
             {/* Neural Initializing Bar */}
             <motion.div 
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: "200px", opacity: 1 }}
-              transition={{ delay: 0.5, duration: 1.5, ease: "easeInOut" }}
-              className="h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent mt-6 relative"
+              animate={{ width: "250px", opacity: 1 }}
+              transition={{ delay: 0.6, duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+              className="h-[1px] bg-gradient-to-r from-transparent via-white/70 to-transparent mt-8 relative"
             >
               <motion.div
                 initial={{ x: "-100%" }}
@@ -62,10 +62,10 @@ const EntranceAnimation = () => {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.8 }}
-              className="mt-4 flex flex-col items-center gap-1"
+              initial={{ opacity: 0, y: 10, filter: "blur(5px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ delay: 1.2, duration: 1.2 }}
+              className="mt-6 flex flex-col items-center gap-1.5"
             >
               <div className="text-[10px] font-sora tracking-[0.3em] text-white/80 uppercase">
                 Smart Fashion OS

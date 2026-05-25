@@ -16,7 +16,8 @@ import {
   Briefcase,
   Award,
   Crown,
-  Settings
+  Settings,
+  MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
@@ -44,7 +45,8 @@ const Sidebar = () => {
 
   const bottomLinks = [
     { name: "LUXE Plus", href: "/profile", icon: Crown, subtitle: "Exclusive Access", isPremium: true },
-    { name: "Settings", href: "/settings", icon: Settings, subtitle: "Preferences" },
+    { name: "WhatsApp", href: "https://wa.me/1234567890", icon: MessageCircle, subtitle: "Support & Queries", isPremium: false },
+    { name: "Settings", href: "/settings", icon: Settings, subtitle: "Preferences", isPremium: false },
   ];
 
   return (

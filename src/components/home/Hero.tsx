@@ -6,11 +6,14 @@ import { Sparkles, TrendingUp } from "lucide-react";
 
 const Hero = () => {
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden bg-[#050508] border border-white/5 mb-8 min-h-[400px] flex items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+    <div className="relative w-full rounded-2xl overflow-hidden bg-[#050508] border border-white/5 mb-8 min-h-[300px] md:min-h-[400px] flex items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
       
       {/* Background Cyberpunk Image layer */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-screen transition-transform duration-[10s] hover:scale-105"
+      <motion.div 
+        initial={{ scale: 1.1, opacity: 0 }}
+        animate={{ scale: 1, opacity: 0.4 }}
+        transition={{ duration: 2, ease: "easeOut" }}
+        className="absolute inset-0 bg-cover bg-center mix-blend-screen transition-transform duration-[10s] hover:scale-105"
         style={{ backgroundImage: "url('/hero-1.jpg')" }}
       />
       
