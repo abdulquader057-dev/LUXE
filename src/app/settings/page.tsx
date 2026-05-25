@@ -8,10 +8,15 @@ import {
   Bell, HelpCircle, Camera, Cpu, 
   History, Share2, MessageSquare, 
   CheckCircle2, ChevronRight, X,
-  LogOut, Globe, Moon, Eye, Sparkles, Diamond, ShoppingBag
+  LogOut, Globe, Moon, Eye, Sparkles, Diamond, ShoppingBag, Palette
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import LuxeButton from "@/components/ui/LuxeButton";
+import { ARScannerModal } from "@/components/ui/ARScannerModal";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 const SETTINGS_MENU = [
   { id: "account", label: "Account", icon: User, color: "#00f2ff" },
@@ -24,6 +29,13 @@ const SETTINGS_MENU = [
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("account");
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Session Terminated.");
+    router.push("/auth");
+  };
 
   const renderSection = () => {
     switch (activeTab) {
@@ -96,7 +108,10 @@ export default function SettingsPage() {
 
             {/* Logout / Secondary Action */}
             <div className="pt-8 border-t border-white/[0.03]">
-              <button className="w-full flex items-center gap-4 px-6 py-4 text-red-400/60 hover:text-red-400 transition-colors group">
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center gap-4 px-6 py-4 text-red-400/60 hover:text-red-400 transition-colors group"
+              >
                 <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
                 <span className="text-[10px] font-mono font-bold tracking-[0.3em] uppercase">Terminate Session</span>
               </button>
@@ -178,6 +193,8 @@ function AccountSettings() {
 }
 
 function ClothingPreferences() {
+  const [isAROpen, setIsAROpen] = React.useState(false);
+
   return (
     <div className="space-y-12">
       <div className="flex items-center justify-between">
@@ -189,11 +206,12 @@ function ClothingPreferences() {
         <div className="space-y-8">
           <div>
             <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em] mb-6">Interactive Size Guide</h3>
-            <div className="aspect-video rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-center relative overflow-hidden group">
+            <div onClick={() => setIsAROpen(true)} className="cursor-pointer aspect-video rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-center relative overflow-hidden group">
                <Camera size={40} className="text-primary opacity-20 group-hover:scale-110 transition-transform duration-500" />
                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,229,204,0.1),transparent)] opacity-0 group-hover:opacity-100 transition-opacity" />
                <span className="absolute bottom-4 text-[8px] font-mono text-primary uppercase tracking-[0.5em]">Initialize AR Scanner</span>
             </div>
+            <ARScannerModal isOpen={isAROpen} onClose={() => setIsAROpen(false)} />
           </div>
 
           <div className="space-y-4">
@@ -276,30 +294,77 @@ function SubscriptionServices() {
     <div className="space-y-12">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-display font-light italic">Elite Membership</h2>
-        <div className="text-[8px] font-mono text-red-400 bg-red-400/10 px-3 py-1 rounded-full uppercase tracking-widest">Tier 1</div>
+        <div className="text-[8px] font-mono text-red-400 bg-red-400/10 px-3 py-1 rounded-full uppercase tracking-widest">Manage Tiers</div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-         <div className="p-8 rounded-[32px] bg-gradient-to-br from-primary/10 to-accent/10 border border-white/10 space-y-6 relative overflow-hidden group">
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 blur-3xl rounded-full group-hover:scale-150 transition-transform duration-1000" />
-            <Crown className="text-primary" size={32} />
+      <div className="grid md:grid-cols-3 gap-6">
+         {/* TIER 1 */}
+         <div className="p-6 rounded-[32px] bg-gradient-to-br from-primary/5 to-accent/5 border border-white/5 space-y-6 relative overflow-hidden group hover:border-primary/30 transition-all">
+            <Crown className="text-primary/60" size={24} />
             <div className="space-y-2">
-               <h3 className="text-2xl font-display font-light italic">Luxe Elite</h3>
-               <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest leading-relaxed">
-                  Priority drops, free global teleport shipping, and direct neural link to master stylists.
+               <h3 className="text-xl font-display font-light italic">Luxe Insider</h3>
+               <p className="text-[9px] font-mono text-white/40 uppercase tracking-widest leading-relaxed">
+                  Basic drops, standard shipping, and early access.
                </p>
             </div>
-            <div className="text-3xl font-display font-light">$49<span className="text-sm">/MO</span></div>
-            <LuxeButton className="w-full">Renew Status</LuxeButton>
+            <div className="text-2xl font-display font-light">$19<span className="text-xs">/MO</span></div>
+            <LuxeButton variant="outline" className="w-full">Downgrade</LuxeButton>
          </div>
 
-         <div className="space-y-6">
-            <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em]">Elite Benefits</h3>
+         {/* TIER 2 (Current) */}
+         <div className="p-6 rounded-[32px] bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/50 space-y-6 relative overflow-hidden group shadow-[0_0_30px_rgba(0,242,255,0.1)]">
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 blur-3xl rounded-full group-hover:scale-150 transition-transform duration-1000" />
+            <Crown className="text-primary" size={28} />
+            <div className="space-y-2">
+               <h3 className="text-xl font-display font-light italic">Luxe Elite</h3>
+               <p className="text-[9px] font-mono text-white/40 uppercase tracking-widest leading-relaxed">
+                  Priority drops, global teleport shipping, and master stylists.
+               </p>
+            </div>
+            <div className="text-2xl font-display font-light">$49<span className="text-xs">/MO</span></div>
+            <LuxeButton className="w-full">Current Plan</LuxeButton>
+         </div>
+
+         {/* TIER 3 */}
+         <div className="p-6 rounded-[32px] bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-white/5 space-y-6 relative overflow-hidden group hover:border-purple-500/30 transition-all">
+            <Diamond className="text-purple-400/80" size={24} />
+            <div className="space-y-2">
+               <h3 className="text-xl font-display font-light italic text-purple-200">Neural Vanguard</h3>
+               <p className="text-[9px] font-mono text-purple-200/40 uppercase tracking-widest leading-relaxed">
+                  Bespoke 1-of-1 pieces, 24/7 holographic styling, VIP event access.
+               </p>
+            </div>
+            <div className="text-2xl font-display font-light text-purple-200">$199<span className="text-xs">/MO</span></div>
+            <LuxeButton variant="outline" className="w-full text-purple-400 border-purple-500/20 hover:bg-purple-500/10">Upgrade</LuxeButton>
+         </div>
+      </div>
+
+      <div className="space-y-6">
+         <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em]">Elite Benefits & Customization</h3>
+         <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-4">
                <BenefitItem label="Priority Access" active />
                <BenefitItem label="Master Stylist Sessions" active />
                <BenefitItem label="Neural Style Guides" active />
-               <BenefitItem label="Custom UI Theme" />
+               <BenefitItem label="Vanguard UI Access" active={false} />
+            </div>
+            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+               <div className="flex items-center gap-3 mb-4">
+                  <Palette size={16} className="text-primary" />
+                  <span className="text-[10px] font-mono font-bold tracking-widest uppercase">Custom UI Theme</span>
+               </div>
+               <p className="text-[9px] font-mono text-white/40 uppercase leading-relaxed mb-6">
+                  Select your neural interface colorway. (Requires Elite or higher)
+               </p>
+               <div className="flex gap-4">
+                  {['#00f2ff', '#c084fc', '#ff4466', '#00ff9d'].map((color) => (
+                    <button 
+                      key={color} 
+                      className="w-8 h-8 rounded-full border-2 border-transparent hover:border-white transition-all cursor-pointer shadow-lg"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+               </div>
             </div>
          </div>
       </div>
@@ -341,11 +406,35 @@ function NotificationSettings() {
 }
 
 function SupportCenter() {
+  const { user } = useAuth();
+  const [orders, setOrders] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchOrders() {
+      if (user) {
+        const { data, error } = await supabase
+          .from("orders")
+          .select("*")
+          .eq("customer_id", user.id)
+          .order("created_at", { ascending: false });
+        
+        if (!error && data) {
+          setOrders(data);
+        }
+      }
+      setLoading(false);
+    }
+    fetchOrders();
+  }, [user]);
+
   return (
     <div className="space-y-12">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-display font-light italic">Support Terminal</h2>
-        <div className="text-[8px] font-mono text-white/30 bg-white/5 px-3 py-1 rounded-full uppercase tracking-widest">V.4.2</div>
+        <div className="text-[8px] font-mono text-white/30 bg-white/5 px-3 py-1 rounded-full uppercase tracking-widest">
+          {user ? "Authenticated" : "Guest Mode"}
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
@@ -362,7 +451,7 @@ function SupportCenter() {
                        <p className="text-[9px] font-mono text-white/30 uppercase">Estimated response: 2m</p>
                     </div>
                  </div>
-                 <LuxeButton size="sm" className="w-full">Initialize Chat</LuxeButton>
+                 <LuxeButton size="sm" className="w-full" onClick={() => toast("Live Concierge currently offline.")}>Initialize Chat</LuxeButton>
               </div>
 
               <div className="p-6 rounded-[24px] bg-accent/5 border border-accent/20 space-y-4">
@@ -375,7 +464,7 @@ function SupportCenter() {
                        <p className="text-[9px] font-mono text-white/30 uppercase">Next Slot: 14:00 GMT</p>
                     </div>
                  </div>
-                 <LuxeButton variant="outline" size="sm" className="w-full">Schedule Session</LuxeButton>
+                 <LuxeButton variant="outline" size="sm" className="w-full" onClick={() => toast("Session Scheduled.")}>Schedule Session</LuxeButton>
               </div>
             </div>
          </div>
@@ -383,10 +472,10 @@ function SupportCenter() {
          <div className="space-y-6">
             <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em]">Transmission</h3>
             <div className="space-y-4">
-               <LuxeButton variant="outline" className="w-full justify-between">
+               <LuxeButton variant="outline" className="w-full justify-between" onClick={() => toast("Opening Archive...")}>
                   OPEN FAQ ARCHIVE <ChevronRight size={14} />
                </LuxeButton>
-               <LuxeButton variant="outline" className="w-full justify-between">
+               <LuxeButton variant="outline" className="w-full justify-between" onClick={() => toast("Feedback Form opened.")}>
                   SUBMIT SYSTEM FEEDBACK <ChevronRight size={14} />
                </LuxeButton>
             </div>
@@ -396,8 +485,24 @@ function SupportCenter() {
       <div className="p-8 rounded-[32px] bg-white/[0.02] border border-white/5">
          <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em] mb-6">Recent Order Logs</h3>
          <div className="space-y-4">
-            <OrderRow id="LX-9942" status="In Transit" date="May 14, 2026" />
-            <OrderRow id="LX-9831" status="Delivered" date="May 10, 2026" />
+            {loading ? (
+               <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Accessing Neural Database...</div>
+            ) : user ? (
+               orders.length > 0 ? (
+                 orders.map((order) => (
+                   <OrderRow 
+                     key={order.id} 
+                     id={`LX-${order.id.slice(0, 4).toUpperCase()}`} 
+                     status={order.status || "Processing"} 
+                     date={new Date(order.created_at).toLocaleDateString()} 
+                   />
+                 ))
+               ) : (
+                 <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">No order records found in your archive.</div>
+               )
+            ) : (
+               <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Please authenticate to view order logs.</div>
+            )}
          </div>
       </div>
     </div>

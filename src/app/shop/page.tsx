@@ -8,12 +8,19 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/ai/AIChatbot";
 import ProductCard from "@/components/shop/ProductCard";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import MagneticWrapper from "@/components/MagneticWrapper";
 
 const ShopContent = () => {
+  const [dbProducts, setDbProducts] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    supabase.from("products").select("*").then(({ data }) => {
+      if (data) setDbProducts(data);
+    });
+  }, []);
   const searchParams = useSearchParams();
   const router = useRouter();
   
@@ -41,7 +48,7 @@ const ShopContent = () => {
     { id: "accessories", name: "Hardware" },
   ];
 
-  const filteredProducts = MOCK_PRODUCTS.filter((p) => {
+  const filteredProducts = dbProducts.filter((p) => {
     // If editorial, only show editorial products (we can use isNew or add a tag)
     if (selectedCategory === "intel") return p.category === "streetwear"; // Just an example mapping
     if (selectedCategory === "collections") return p.category !== "streetwear"; 
@@ -164,7 +171,7 @@ const ShopContent = () => {
       {/* Pagination / Load More */}
       <div className="flex flex-col items-center justify-center gap-8 py-32 mt-16">
         <p className="text-[9px] font-sora tracking-[0.4em] text-white/30 uppercase">
-          Displaying {filteredProducts.length} of {MOCK_PRODUCTS.length}
+          Displaying {filteredProducts.length} of {dbProducts.length}
         </p>
         <div className="w-px h-16 bg-gradient-to-b from-white/20 to-transparent" />
       </div>
@@ -200,3 +207,4 @@ const ShopPage = () => {
 };
 
 export default ShopPage;
+

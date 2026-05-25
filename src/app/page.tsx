@@ -17,50 +17,19 @@ const filters = [
   "LUXURY"
 ];
 
-// Mock products for the homepage
-const recommendedPicks = [
-  {
-    id: "prod-1",
-    name: "AERO-WEAVE COMBAT JACKET",
-    description: "Adaptive thermal regulation with nano-fiber mesh.",
-    price: 890,
-    images: ["/hero-1.jpg"],
-    category: "STREETWEAR",
-    isNew: true,
-  },
-  {
-    id: "prod-2",
-    name: "OBSIDIAN HOODIE",
-    description: "Premium heavyweight fabric. Thermal control.",
-    price: 450,
-    images: ["/hero-2.jpg"],
-    category: "MODEST TECH",
-    isNew: false,
-  },
-  {
-    id: "prod-3",
-    name: "QUANTUM RUNNERS V2",
-    description: "Kinetic energy displacement soles.",
-    price: 320,
-    images: ["/hero-3.jpg"],
-    category: "SNEAKERS",
-    isNew: true,
-  },
-  {
-    id: "prod-4",
-    name: "SYNTH-LEATHER TRENCH",
-    description: "Waterproof, breathable lab-grown leather.",
-    price: 1200,
-    images: ["/hero-4.jpg"],
-    category: "LUXURY",
-    isNew: true,
-  }
-];
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const [activeFilter, setActiveFilter] = useState("ALL COLLECTIONS");
   const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState<any[]>([]);
   const router = useRouter();
+
+  React.useEffect(() => {
+    supabase.from("products").select("*").then(({ data }) => {
+      if (data) setProducts(data);
+    });
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,7 +102,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {recommendedPicks.map((product, i) => (
+          {products.map((product, i) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 20 }}
@@ -149,3 +118,4 @@ export default function Home() {
     </div>
   );
 }
+

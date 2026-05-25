@@ -162,7 +162,7 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                                  className="object-cover group-hover:scale-110 transition-transform duration-1000" 
                                />
                                <div className="absolute top-4 right-4 glass-panel !px-3 py-1.5 !rounded-xl border-white/20">
-                                  <span className="text-[10px] font-black text-white">{convertPrice(product.price)}</span>
+                                  <span className="text-[10px] font-black text-white">{convertPrice(product.price).symbol}{convertPrice(product.price).amount}</span>
                                </div>
                             </div>
                             <div className="px-2">
@@ -206,3 +206,4 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
     </AnimatePresence>
   );
 };
+

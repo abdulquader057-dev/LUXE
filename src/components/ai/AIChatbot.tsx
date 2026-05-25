@@ -210,7 +210,7 @@ const AIChatbot = () => {
                           <h4 className="font-display font-black text-xs tracking-tight truncate">{m.product.name}</h4>
                           <p className="text-[10px] text-white/30 mt-0.5 line-clamp-1">{m.product.description}</p>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-primary font-black text-xs">{convertPrice(m.product.price)}</span>
+                            <span className="text-primary font-black text-xs">{convertPrice(m.product.price).symbol}{convertPrice(m.product.price).amount}</span>
                             <button className="text-[8px] font-black tracking-widest bg-white/5 border border-white/10 text-white/50 px-3 py-1.5 rounded-lg uppercase hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all">
                               View
                             </button>
@@ -320,3 +320,4 @@ const AIChatbot = () => {
 };
 
 export default AIChatbot;
+

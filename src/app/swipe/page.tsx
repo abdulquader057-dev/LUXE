@@ -193,7 +193,7 @@ export default function SwipePage() {
                   </div>
                 </div>
                 <h2 className="text-3xl font-black tracking-tighter uppercase mb-2">{currentProduct.name}</h2>
-                <p className="text-2xl font-black text-gradient mb-3">{convertPrice(currentProduct.price)}</p>
+                <p className="text-2xl font-black text-gradient mb-3">{convertPrice(currentProduct.price).symbol}{convertPrice(currentProduct.price).amount}</p>
                 <p className="text-sm text-white/40 line-clamp-2">{currentProduct.description}</p>
               </div>
 
@@ -283,3 +283,4 @@ export default function SwipePage() {
     </main>
   );
 }
+

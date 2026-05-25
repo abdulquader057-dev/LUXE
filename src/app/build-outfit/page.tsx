@@ -388,7 +388,7 @@ export default function BuildOutfitPage() {
                       {/* Product info */}
                       <div className="absolute bottom-0 left-0 right-0 p-5">
                         <h4 className="text-sm font-black tracking-wider uppercase mb-1 truncate">{product.name}</h4>
-                        <p className="text-lg font-black text-gradient">{convertPrice(product.price)}</p>
+                        <p className="text-lg font-black text-gradient">{(() => { const p = convertPrice(product.price); return `${p.symbol}${p.amount}`; })()}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -404,7 +404,7 @@ export default function BuildOutfitPage() {
               >
                 <div>
                   <div className="text-[10px] font-black tracking-[0.4em] text-white/30 uppercase mb-1">Complete Outfit</div>
-                  <div className="text-4xl font-black tracking-tighter text-gradient">{convertPrice(generatedOutfit.totalPrice)}</div>
+                    <div className="text-3xl md:text-5xl font-black tracking-tighter text-gradient">{(() => { const p = convertPrice(generatedOutfit.totalPrice); return `${p.symbol}${p.amount}`; })()}</div>
                 </div>
                 <div className="flex gap-4">
                   <button

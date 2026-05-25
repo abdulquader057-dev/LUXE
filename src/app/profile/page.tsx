@@ -54,7 +54,10 @@ export default function ProfilePage() {
     }
   }, [isLoading, user, router]);
 
-  const dna = DEFAULT_STYLE_DNA;
+  const dna = {
+    ...DEFAULT_STYLE_DNA,
+    ...(user?.user_metadata?.style_dna || {})
+  };
   const [activeSection, setActiveSection] = useState("overview");
   const xpProgress = ((dna.totalXP % XP_PER_LEVEL) / XP_PER_LEVEL) * 100;
   const xpToNext = XP_PER_LEVEL - (dna.totalXP % XP_PER_LEVEL);
@@ -96,7 +99,9 @@ export default function ProfilePage() {
             </CircularProgress>
           </div>
 
-          <h1 className="text-5xl font-display font-black tracking-tighter mb-2 uppercase">Your Style DNA</h1>
+          <h1 className="text-5xl font-display font-black tracking-tighter mb-2 uppercase">
+            {profile?.full_name || user?.email?.split('@')[0] || 'Your Style DNA'}
+          </h1>
           <p className="text-lg text-white/40 font-medium mb-4">{dna.stylePersonality} · {dna.fashionEra}</p>
           
           {/* XP Bar */}
@@ -173,7 +178,7 @@ export default function ProfilePage() {
             <div className="glass-panel !rounded-[32px] p-8 border border-white/5">
               <h3 className="text-[10px] font-black tracking-[0.4em] text-white/30 uppercase mb-6">Dominant Color Palette</h3>
               <div className="flex gap-4">
-                {dna.dominantColors.map((color) => (
+                {dna.dominantColors.map((color: string) => (
                   <div key={color} className="flex items-center gap-3 glass-panel !rounded-2xl px-5 py-3 border border-white/5">
                     <div className="w-6 h-6 rounded-full border border-white/20"
                       style={{ backgroundColor: color === "Obsidian Black" ? "#111" : color === "Cyber Cyan" ? "#00f2ff" : "#f8f8f8" }}
@@ -188,7 +193,7 @@ export default function ProfilePage() {
             <div className="glass-panel !rounded-[32px] p-8 border border-white/5">
               <h3 className="text-[10px] font-black tracking-[0.4em] text-white/30 uppercase mb-6">Preferred Aesthetics</h3>
               <div className="flex flex-wrap gap-3">
-                {dna.preferredAesthetics.map((aesthetic) => (
+                {dna.preferredAesthetics.map((aesthetic: string) => (
                   <span key={aesthetic} className="bg-primary/10 border border-primary/20 px-5 py-2.5 rounded-full text-xs font-black tracking-wider text-primary">
                     {aesthetic}
                   </span>
@@ -206,7 +211,7 @@ export default function ProfilePage() {
             className="grid grid-cols-2 md:grid-cols-4 gap-4"
           >
             {ALL_BADGES.map((badge, i) => {
-              const isUnlocked = dna.badges.some((b) => b.id === badge.id);
+              const isUnlocked = dna.badges.some((b: any) => b.id === badge.id);
               return (
                 <motion.div
                   key={badge.id}
@@ -363,6 +368,7 @@ export default function ProfilePage() {
             
             <div className="space-y-4 max-w-md">
               <h3 className="text-3xl font-display font-light italic">System Configuration</h3>
+
               <p className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em] leading-relaxed">
                 Initialize the primary command center to manage your identity, neural style preferences, and elite membership status.
               </p>

@@ -176,7 +176,7 @@ export default function FeedPage() {
                       </div>
                       <div className="text-left">
                         <div className="text-xs font-black tracking-wider uppercase truncate max-w-[200px]">{currentReel.product.name}</div>
-                        <div className="text-sm font-black text-primary">{convertPrice(currentReel.product.price)}</div>
+                        <div className="text-sm font-black text-primary">{convertPrice(currentReel.product.price).symbol}{convertPrice(currentReel.product.price).amount}</div>
                       </div>
                       <ShoppingBag size={16} className="text-white/40 group-hover:text-primary transition-colors ml-auto" />
                     </button>
@@ -271,7 +271,7 @@ export default function FeedPage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-black tracking-wider uppercase">{currentReel.product.name}</h3>
-                <p className="text-2xl font-black text-gradient">{convertPrice(currentReel.product.price)}</p>
+                <p className="text-2xl font-black text-gradient">{convertPrice(currentReel.product.price).symbol}{convertPrice(currentReel.product.price).amount}</p>
               </div>
             </div>
             <div className="flex gap-4">
@@ -298,3 +298,4 @@ export default function FeedPage() {
     </main>
   );
 }
+

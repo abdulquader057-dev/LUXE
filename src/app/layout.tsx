@@ -13,6 +13,7 @@ import CustomCursor from "@/components/CustomCursor";
 import ScrollProgress from "@/components/ScrollProgress";
 import EntranceAnimation from "@/components/EntranceAnimation";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import { Toaster } from "react-hot-toast";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -96,6 +97,7 @@ export default function RootLayout({
         </CommerceProvider>
         </AuthProvider>
         </LanguageProvider>
+        <Toaster position="top-center" toastOptions={{ style: { background: '#050508', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' } }} />
       </body>
     </html>
   );
