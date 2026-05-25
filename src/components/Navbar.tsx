@@ -26,10 +26,10 @@ const Navbar = () => {
   }, []);
 
   const links = [
-    { name: "Collections", href: "/collections" },
-    { name: "Neural Drops", href: "/drops" },
-    { name: "Intel", href: "/intel" },
-    { name: "Cognition", href: "/cognition" },
+    { name: "Collections", href: "/shop?cat=collections" },
+    { name: "Neural Drops", href: "/shop?sort=new" },
+    { name: "Intel", href: "/shop?cat=intel" },
+    { name: "Cognition", href: "/ai-style" },
   ];
 
   return (

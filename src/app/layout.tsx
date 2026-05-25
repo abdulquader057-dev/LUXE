@@ -9,6 +9,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
 import ScrollProgress from "@/components/ScrollProgress";
+import EntranceAnimation from "@/components/EntranceAnimation";
+import AnimatedBackground from "@/components/AnimatedBackground";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -64,7 +66,9 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth`}
     >
-      <body className="min-h-full flex bg-[#050508] text-white selection:bg-[#00F0FF]/30 selection:text-white relative overflow-hidden h-screen w-screen">
+      <body className="min-h-full flex bg-transparent text-white selection:bg-[#00F0FF]/30 selection:text-white relative overflow-hidden h-screen w-screen">
+        <AnimatedBackground />
+        <EntranceAnimation />
         <ScrollProgress />
         <div className="film-grain opacity-20 mix-blend-overlay pointer-events-none" />
         <CustomCursor />
