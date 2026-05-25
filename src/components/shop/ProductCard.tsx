@@ -73,6 +73,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
         animate={{ rotateX: rotate.x, rotateY: rotate.y }}
         transition={{ type: "spring", stiffness: 200, damping: 30 }}
         className="product-card relative bg-bg-surface border border-white/5 rounded-sm flex flex-col cursor-spotlight-card"
+        style={{ minHeight: "450px" }}
       >
         {/* Image Container with Fabric Texture Hover */}
         <div className="relative fabric-texture flex-shrink-0">
@@ -98,7 +99,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             </h3>
           </div>
           
-          <div className="action-row relative z-10 w-full mt-4">
+          <div className="action-row flex items-center justify-between pt-4 border-t border-white/10 relative z-10 w-full mt-4">
             <div className="flex items-center gap-4">
               <span className="font-sora text-[10px] tracking-[0.3em] text-white/70 shadow-sm">
                 USD {product.price}

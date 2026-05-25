@@ -56,7 +56,7 @@ const Navbar = () => {
       {/* 1. FORCE HEADER UNCOUPLING: Logo independent block */}
       <div 
         className="logo-container !p-0"
-        style={{ display: "block", width: "fit-content", clear: "both", position: "relative", marginBottom: "40px" }}
+        style={{ position: "relative", display: "block", marginBottom: "32px", zIndex: 10 }}
       >
         <Link href="/" className="!p-0 !flex-row !gap-1 flex items-center">
           <span className="logo-luxe !text-2xl md:!text-3xl !text-[#FFFFFF]">LUXE</span>

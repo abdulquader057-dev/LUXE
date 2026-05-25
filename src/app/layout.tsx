@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Rajdhani, Sora, Orbitron, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import WhatsAppWidget from "@/components/WhatsAppWidget";
+import ZyraChat from "@/components/ZyraChat";
 import BackToTop from "@/components/BackToTop";
 import { CurrencyProvider } from "@/lib/contexts/CurrencyContext";
 import Navbar from "@/components/Navbar";
@@ -78,6 +79,13 @@ export default function RootLayout({
             {children}
             <Footer />
           </main>
+          
+          {/* FLOATING COMPONENTS GEOMETRY LOCK */}
+          <div style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 9999, display: "flex", flexDirection: "column", gap: "16px", alignItems: "flex-end" }}>
+            <ZyraChat />
+            <WhatsAppWidget />
+            <BackToTop />
+          </div>
         </CurrencyProvider>
       </body>
     </html>
