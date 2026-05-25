@@ -6,6 +6,7 @@ import BackToTop from "@/components/BackToTop";
 import Sidebar from "@/components/Sidebar";
 import { CurrencyProvider } from "@/lib/contexts/CurrencyContext";
 import { LanguageProvider } from "@/lib/contexts/LanguageContext";
+import { AuthProvider } from "@/lib/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
@@ -75,6 +76,7 @@ export default function RootLayout({
         <CustomCursor />
         
         <LanguageProvider>
+        <AuthProvider>
         <CurrencyProvider>
           <Sidebar />
           
@@ -92,6 +94,7 @@ export default function RootLayout({
             <BackToTop />
           </div>
         </CurrencyProvider>
+        </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

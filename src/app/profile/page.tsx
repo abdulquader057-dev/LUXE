@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import { motion } from "framer-motion";
 import LuxeButton from "@/components/ui/LuxeButton";
 import {
@@ -43,6 +45,15 @@ function CircularProgress({ value, size = 120, strokeWidth = 8, color = "#00f2ff
 }
 
 export default function ProfilePage() {
+  const { user, profile, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/auth");
+    }
+  }, [isLoading, user, router]);
+
   const dna = DEFAULT_STYLE_DNA;
   const [activeSection, setActiveSection] = useState("overview");
   const xpProgress = ((dna.totalXP % XP_PER_LEVEL) / XP_PER_LEVEL) * 100;
@@ -63,6 +74,11 @@ export default function ProfilePage() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-accent/8 blur-[200px] rounded-full" />
       </div>
 
+      {isLoading || !user ? (
+        <div className="fixed inset-0 flex items-center justify-center bg-black z-50">
+           <div className="w-16 h-16 border-t-2 border-primary rounded-full animate-spin"></div>
+        </div>
+      ) : (
       <div className="max-w-5xl mx-auto px-6 relative z-10">
         {/* Profile Header */}
         <motion.div
@@ -358,6 +374,7 @@ export default function ProfilePage() {
           </motion.div>
         )}
       </div>
+      )}
     </main>
   );
 }

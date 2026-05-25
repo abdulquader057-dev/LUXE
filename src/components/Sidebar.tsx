@@ -20,13 +20,15 @@ import {
   MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Menu, X, Globe } from "lucide-react";
+import { Menu, X, Globe, LogIn, LogOut } from "lucide-react";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 const Sidebar = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const { t, language, setLanguage, availableLanguages } = useLanguage();
+  const { user, signOut, isAdmin } = useAuth();
 
   const mainLinks = [
     { name: t("nav.home"), href: "/", icon: Home, subtitle: "Dashboard" },
@@ -47,6 +49,7 @@ const Sidebar = () => {
 
   const bottomLinks = [
     { name: t("bot.luxePlus"), href: "/profile", icon: Crown, subtitle: "Exclusive Access", isPremium: true },
+    ...(isAdmin ? [{ name: "Admin OS", href: "/admin", icon: Settings, subtitle: "Control Center", isPremium: true }] : []),
     { name: t("bot.whatsappPrimary"), href: "https://wa.me/917995338472", icon: MessageCircle, subtitle: "Support & Queries", isPremium: false },
     { name: t("bot.whatsappAlt"), href: "https://wa.me/917337246297", icon: MessageCircle, subtitle: "Secondary Contact", isPremium: false },
     { name: t("bot.settings"), href: "/settings", icon: Settings, subtitle: "Preferences", isPremium: false },
@@ -200,6 +203,30 @@ const Sidebar = () => {
               </Link>
             );
           })}
+
+          {user ? (
+            <button onClick={() => signOut()} className="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden text-red-400 hover:bg-red-500/10">
+              <div className="transition-colors group-hover:text-red-500">
+                <LogOut size={20} strokeWidth={1.5} />
+              </div>
+              <div className="text-left">
+                <div className="text-[13px] font-medium tracking-wide">Sign Out</div>
+                <div className="text-[10px] text-red-400/50 mt-0.5">Disconnect Session</div>
+              </div>
+            </button>
+          ) : (
+            <Link href="/auth">
+              <div className="flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden text-white/60 hover:bg-white/5 hover:text-white">
+                <div className="transition-colors group-hover:text-white">
+                  <LogIn size={20} strokeWidth={1.5} />
+                </div>
+                <div>
+                  <div className="text-[13px] font-medium tracking-wide">Sign In</div>
+                  <div className="text-[10px] text-white/30 mt-0.5">Neural Auth</div>
+                </div>
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </aside>

@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { 
   AdminSidebar 
 } from "@/components/admin/AdminSidebar";
@@ -19,9 +22,78 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboard() {
+  const { user, isAdmin, isLoading: authLoading } = useAuth();
+  const router = useRouter();
+
   const [activeTab, setActiveTab] = useState("overview");
   const [isBooting, setIsBooting] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // Real Data States
+  const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  // Security Check
+  useEffect(() => {
+    if (!authLoading && !isAdmin) {
+      if (user) router.push("/profile");
+      else router.push("/auth");
+    }
+  }, [authLoading, isAdmin, user, router]);
+
+  // Fetch Data
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!isAdmin) return;
+      try {
+        const [ordersRes, productsRes] = await Promise.all([
+          supabase.from('orders').select('*, profiles(full_name)').order('created_at', { ascending: false }),
+          supabase.from('products').select('*').order('created_at', { ascending: false })
+        ]);
+        
+        // Format orders for UI
+        if (ordersRes.data) {
+          const formattedOrders = ordersRes.data.map(o => ({
+            ...o,
+            customer_name: o.profiles?.full_name || 'Unknown'
+          }));
+          setOrders(formattedOrders);
+        }
+        
+        if (productsRes.data) setProducts(productsRes.data);
+      } catch (error) {
+        console.error("Error fetching admin data:", error);
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    
+    if (isAdmin) fetchData();
+  }, [isAdmin]);
+
+  const handleDelete = async (id: string, type: 'orders' | 'products') => {
+    if (confirm(`Are you sure you want to delete this ${type === 'orders' ? 'order' : 'product'}?`)) {
+      try {
+        const { error } = await supabase.from(type).delete().eq('id', id);
+        if (error) throw error;
+        
+        if (type === 'orders') setOrders(orders.filter(o => o.id !== id));
+        else setProducts(products.filter(p => p.id !== id));
+      } catch (err: any) {
+        console.error("Error deleting:", err);
+        alert(err.message);
+      }
+    }
+  };
+
+  const handleAdd = (type: 'orders' | 'products') => {
+    alert(`To add a new ${type === 'orders' ? 'order' : 'product'} to the live database, use the Supabase Studio Dashboard while we build the dedicated Admin Form UI.`);
+  };
+
+  const handleEdit = (item: any) => {
+    alert(`To edit item #${item.id} in the live database, use the Supabase Studio Dashboard while we build the dedicated Admin Form UI.`);
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setIsBooting(false), 2000);
@@ -32,18 +104,9 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  // Mock Data (Preserving structural logic while upgrading visuals)
-  const orders = [
-    { id: 1, customer_name: "CYBER_NOMAD", total_price: 1240.00, status: "processing", items: [{}, {}] },
-    { id: 2, customer_name: "NEURAL_ENTITY", total_price: 850.00, status: "delivered", items: [{}] },
-    { id: 3, customer_name: "TECH_PRIEST", total_price: 2100.50, status: "shipped", items: [{}, {}, {}] },
-  ];
-
-  const products = [
-    { id: 1, name: "Neural Overlay V1", price: 450, stock_quantity: 12, category: "Headwear", image_url: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200&h=200&fit=crop" },
-    { id: 2, name: "Kinetic Exo-Shell", price: 1200, stock_quantity: 5, category: "Outerwear", image_url: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=200&h=200&fit=crop" },
-    { id: 3, name: "Data-Stream Joggers", price: 280, stock_quantity: 45, category: "Bottoms", image_url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&h=200&fit=crop" },
-  ];
+  if (authLoading || (!isAdmin && !authLoading)) {
+    return <div className="min-h-screen bg-black" />; // Hidden while checking
+  }
 
   if (isBooting) {
     return (
@@ -176,7 +239,13 @@ export default function AdminDashboard() {
                   exit={{ opacity: 0, scale: 1.05 }}
                   className="h-full"
                 >
-                  <ManagementHub type="orders" data={orders} />
+                  <ManagementHub 
+                    type="orders" 
+                    data={orders} 
+                    onAdd={() => handleAdd('orders')}
+                    onEdit={handleEdit}
+                    onDelete={(id) => handleDelete(id, 'orders')}
+                  />
                 </motion.div>
               )}
 
@@ -188,7 +257,13 @@ export default function AdminDashboard() {
                   exit={{ opacity: 0, scale: 1.05 }}
                   className="h-full"
                 >
-                  <ManagementHub type="products" data={products} />
+                  <ManagementHub 
+                    type="products" 
+                    data={products} 
+                    onAdd={() => handleAdd('products')}
+                    onEdit={handleEdit}
+                    onDelete={(id) => handleDelete(id, 'products')}
+                  />
                 </motion.div>
               )}
 

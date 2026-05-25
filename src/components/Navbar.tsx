@@ -4,15 +4,17 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useAnimation } from "framer-motion";
-import { Search, ShoppingBag, User, Menu, Zap } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, Zap, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 const Navbar = () => {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const cartControls = useAnimation();
   const { t } = useLanguage();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -93,16 +95,20 @@ const Navbar = () => {
                 3
               </span>
             </button>
-            <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors">
-              <User size={16} />
-            </button>
+            <Link href={user ? "/profile" : "/auth"}>
+              <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+                {user ? <User size={16} /> : <LogIn size={16} />}
+              </button>
+            </Link>
           </div>
 
           {/* System Sync Badge */}
           <div className="hidden xl:flex items-center gap-3 pl-4 border-l border-white/10">
             <div className="text-right">
               <div className="text-[10px] font-sora font-bold tracking-widest text-white">SYSTEM SYNC</div>
-              <div className="text-[9px] font-sora tracking-widest text-white/40">ONLINE V4.2</div>
+              <div className="text-[9px] font-sora tracking-widest text-white/40">
+                {user ? "SECURE UPLINK" : "OFFLINE V4.2"}
+              </div>
             </div>
             <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
               <Zap size={14} className="text-white" />

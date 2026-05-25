@@ -12,9 +12,12 @@ import { cn } from "@/lib/utils";
 interface ManagementHubProps {
   type: "orders" | "products";
   data: any[];
+  onAdd?: () => void;
+  onEdit?: (item: any) => void;
+  onDelete?: (id: string) => void;
 }
 
-export const ManagementHub = ({ type, data }: ManagementHubProps) => {
+export const ManagementHub = ({ type, data, onAdd, onEdit, onDelete }: ManagementHubProps) => {
   return (
     <div className="space-y-8 h-full flex flex-col">
       {/* Header Actions */}
@@ -39,7 +42,10 @@ export const ManagementHub = ({ type, data }: ManagementHubProps) => {
             <button className="glass border-white/10 p-4 rounded-2xl hover:bg-white/5 transition-all text-white/40 hover:text-white">
                <Filter size={20} />
             </button>
-            <button className="bg-white text-black px-8 py-4 rounded-2xl text-xs font-black tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-2xl">
+            <button 
+               onClick={onAdd}
+               className="bg-white text-black px-8 py-4 rounded-2xl text-xs font-black tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-2xl"
+            >
                Add {type === "orders" ? "Node" : "Asset"}
             </button>
          </div>
@@ -136,10 +142,16 @@ export const ManagementHub = ({ type, data }: ManagementHubProps) => {
                         <button className="w-10 h-10 rounded-xl glass border border-white/5 flex items-center justify-center text-white/20 hover:text-white hover:border-white/20 transition-all">
                            <Eye size={16} />
                         </button>
-                        <button className="w-10 h-10 rounded-xl glass border border-white/5 flex items-center justify-center text-white/20 hover:text-primary hover:border-primary/20 transition-all">
+                        <button 
+                           onClick={() => onEdit && onEdit(item)}
+                           className="w-10 h-10 rounded-xl glass border border-white/5 flex items-center justify-center text-white/20 hover:text-primary hover:border-primary/20 transition-all"
+                        >
                            <Edit size={16} />
                         </button>
-                        <button className="w-10 h-10 rounded-xl glass border border-white/5 flex items-center justify-center text-white/20 hover:text-red-500 hover:border-red-500/20 transition-all">
+                        <button 
+                           onClick={() => onDelete && onDelete(item.id)}
+                           className="w-10 h-10 rounded-xl glass border border-white/5 flex items-center justify-center text-white/20 hover:text-red-500 hover:border-red-500/20 transition-all"
+                        >
                            <Trash2 size={16} />
                         </button>
                      </div>
