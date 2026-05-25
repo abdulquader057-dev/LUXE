@@ -146,7 +146,7 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
       {/* Elite Action Button - STRICTLY Lower Right Quadrant */}
       <div className="absolute bottom-8 md:bottom-16 right-8 md:right-16 z-20">
         <motion.button 
-          whileTap={{ scale: 0.97 }}
+          whileTap={{ scale: 0.96 }}
           className="metal-pill px-8 py-4 flex items-center gap-3 text-white hover:text-white transition-colors duration-500 shadow-[0_10px_40px_rgba(183,110,121,0.15)] group/btn"
         >
           <ShoppingBag size={14} strokeWidth={1.5} className="text-rose-gold group-hover/btn:scale-110 transition-transform" /> 

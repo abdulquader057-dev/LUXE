@@ -89,7 +89,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
           {/* Elite Acquire Button - Lower Right Quadrant */}
           <div className="absolute bottom-6 right-6 z-20 opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-700 ease-[0.25,1,0.5,1]">
             <motion.button 
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: 0.96 }}
               className="glass-pill px-5 py-2.5 flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 transition-colors shadow-lg"
             >
               <Plus size={14} strokeWidth={1.5} />
@@ -98,9 +98,9 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
           </div>
         </div>
 
-        {/* Card Info - Typography Isolation */}
-        <div className="p-6 md:p-8 flex-1 flex flex-col justify-between space-y-8 bg-bg-surface z-10 relative">
-          <div>
+        {/* Card Info - Typography Isolation & Spatial Depth */}
+        <div className="p-6 md:p-8 flex-1 flex flex-col justify-between space-y-8 frosted-wrapper border-t border-white/5 z-10 relative">
+          <div className="relative z-10">
             <span className="text-[9px] font-sora uppercase tracking-[0.4em] text-white/30 block mb-3">
               {product.category}
             </span>
@@ -109,8 +109,8 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             </h3>
           </div>
           
-          <div className="flex items-center gap-4 pt-4 border-t border-white/5">
-            <span className="font-sora text-[10px] tracking-[0.3em] text-white/70">
+          <div className="flex items-center gap-4 pt-4 border-t border-white/10 relative z-10">
+            <span className="font-sora text-[10px] tracking-[0.3em] text-white/70 shadow-sm">
               USD {product.price}
             </span>
             {product.originalPrice && (

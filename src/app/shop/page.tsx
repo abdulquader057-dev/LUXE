@@ -104,9 +104,9 @@ const ShopContent = () => {
           {filteredProducts.length > 0 ? (
             <motion.div 
               key={selectedCategory + searchQuery}
-              initial={{ opacity: 0, filter: "blur(8px)" }}
+              initial={{ opacity: 0, filter: "blur(10px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, filter: "blur(8px)" }}
+              exit={{ opacity: 0, filter: "blur(10px)" }}
               transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
             >
@@ -123,9 +123,9 @@ const ShopContent = () => {
           ) : (
             <motion.div 
               key="empty"
-              initial={{ opacity: 0, filter: "blur(8px)" }}
+              initial={{ opacity: 0, filter: "blur(10px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, filter: "blur(8px)" }}
+              exit={{ opacity: 0, filter: "blur(10px)" }}
               transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
               className="absolute inset-0 flex flex-col items-center justify-center py-40 border border-white/5 bg-bg-surface/30 backdrop-blur-md rounded-2xl"
             >
