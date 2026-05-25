@@ -10,7 +10,6 @@ import { CinematicAtmosphere } from "@/components/CinematicAtmosphere";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
-import LuxeIntro from "@/components/LuxeIntro";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -35,8 +34,8 @@ const orbitron = Orbitron({
 });
 
 const cormorant = Cormorant_Garamond({
-  weight: "400",
-  style: "italic",
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
   variable: "--font-cormorant",
   subsets: ["latin"],
 });
@@ -67,7 +66,6 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[#07070F] text-white selection:bg-accent-cyan selection:text-black relative overflow-x-hidden">
         <div className="film-grain" />
         <div className="watermark-vertical hidden lg:block">LUXE SYSTEM // CORE V4.2 // NEURAL SYNC</div>
-        <LuxeIntro />
         <CustomCursor />
         <CinematicAtmosphere />
         <CurrencyProvider>

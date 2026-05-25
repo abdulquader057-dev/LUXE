@@ -1,113 +1,158 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import LuxeLogo from "../LuxeLogo";
-import { cn } from "@/lib/utils";
 
 const Hero = () => {
-  const containerRef = useRef(null);
-  const { scrollY } = useScroll();
-  
-  const y1 = useTransform(scrollY, [0, 500], [0, -100]);
-  const y2 = useTransform(scrollY, [0, 500], [0, -150]);
-  const y3 = useTransform(scrollY, [0, 500], [0, -80]);
-  const y4 = useTransform(scrollY, [0, 500], [0, -120]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let particles: Array<{ x: number; y: number; size: number; speed: number; opacity: number }> = [];
+
+    const handleResize = () => {
+      canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
+      canvas.height = canvas.parentElement?.clientHeight || window.innerHeight;
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 15 : 40;
+
+    particles = Array.from({ length: particleCount }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 1.2 + 0.4,
+      speed: Math.random() * 0.3 + 0.1,
+      opacity: Math.random() * 0.35 + 0.05,
+    }));
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(201, 169, 110, ${p.opacity})`;
+        ctx.fill();
+
+        p.y -= p.speed;
+        if (p.y < 0) {
+          p.y = canvas.height;
+          p.x = Math.random() * canvas.width;
+        }
+      });
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
 
   return (
-    <section 
-      ref={containerRef}
-      className="relative min-h-[90vh] flex items-center justify-center pt-20 overflow-hidden"
-    >
-      {/* BACKGROUND ELEMENTS */}
-      <div className="absolute inset-0 z-bg pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent-gold/5 blur-[120px] rounded-full" />
-      </div>
+    <section className="hero">
+      {/* BACKGROUND AREA (Z-INDEX 0) */}
+      <div className="hero-background">
+        {/* Layer 1: The Image itself (z-index: 0, opacity animated from 2.2s) */}
+        <motion.img
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1.0 }}
+          transition={{ delay: 2.2, duration: 0.6, ease: "easeOut" }}
+          src="/hero-1.jpg"
+          alt="Cyberpunk Fashion Model"
+          className="hero-bg-image"
+        />
 
-      <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 items-center gap-12 relative z-brand">
-        {/* LEFT CONTENT */}
-        <div className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-12">
-          <LuxeLogo className="scale-90 md:scale-110 lg:origin-left" />
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 3.2, duration: 0.8 }}
-            className="flex flex-col gap-6"
-          >
-            <p className="max-w-md text-text-secondary font-sora text-sm md:text-base leading-relaxed tracking-wide">
-              Experience the evolution of digital identity. Neural-powered luxury curation 
-              for the architects of the next-gen fashion universe.
-            </p>
-            
-            <div className="flex items-center gap-6">
-              <button className="px-8 py-4 bg-white text-black font-rajdhani font-bold text-xs tracking-[0.2em] uppercase rounded-full hover:bg-accent-cyan transition-colors">
-                Initialize Search
-              </button>
-              <button className="px-8 py-4 glass-standard border-white/10 font-rajdhani font-bold text-xs tracking-[0.2em] uppercase rounded-full hover:border-accent-cyan transition-colors">
-                Explore Drops
-              </button>
-            </div>
-          </motion.div>
-        </div>
+        {/* Layer 2: Base dark gradient (z-index: 1) */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.2, duration: 0.6 }}
+          className="hero-overlay-base" 
+        />
 
-        {/* RIGHT CONTENT: FLOATING EDITORIAL IMAGES */}
-        <div className="hidden lg:block relative h-[600px] w-full">
-          {/* Image 1 */}
-          <motion.div
-            style={{ y: y1 }}
-            className="absolute top-0 right-[10%] w-[280px] h-[380px] z-editorial group"
-          >
-            <div className="w-full h-full rounded-radius-lg overflow-hidden border border-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.5)] rotate-[-3deg] animate-float transition-all duration-500 group-hover:rotate-0 group-hover:scale-[1.02]">
-              <img src="/hero-1.jpg" alt="Editorial 1" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </motion.div>
+        {/* Layer 3: Vignette overlay (z-index: 2) */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.2, duration: 0.6 }}
+          className="hero-overlay-vignette" 
+        />
 
-          {/* Image 2 */}
-          <motion.div
-            style={{ y: y2 }}
-            className="absolute top-[80px] right-[40%] w-[200px] h-[280px] z-[19] group"
-          >
-            <div className="w-full h-full rounded-radius-lg overflow-hidden border border-accent-cyan/30 shadow-[0_20px_60px_rgba(0,0,0,0.5)] rotate-[5deg] animate-float [animation-delay:2s] transition-all duration-500 group-hover:rotate-0 group-hover:scale-[1.02]">
-              <img src="/hero-2.jpg" alt="Editorial 2" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
+        {/* Layer 4: Ambient color tint (z-index: 3) */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.2, duration: 0.6 }}
+          className="hero-overlay-tint" 
+        />
 
-          {/* Image 3 */}
-          <motion.div
-            style={{ y: y3 }}
-            className="absolute bottom-[40px] right-[5%] w-[160px] h-[220px] z-[18] group"
-          >
-            <div className="w-full h-full rounded-radius-lg overflow-hidden border border-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.5)] rotate-[-7deg] animate-float [animation-delay:4s] transition-all duration-500 group-hover:rotate-0 group-hover:scale-[1.02]">
-              <img src="/hero-3.jpg" alt="Editorial 3" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-accent-violet/10 mix-blend-overlay" />
-            </div>
-          </motion.div>
+        {/* Layer 5: Particles canvas (z-index: 4) */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 pointer-events-none z-[4] opacity-30"
+          style={{ mixBlendMode: "screen" }}
+        />
 
-          {/* Image 4 */}
-          <motion.div
-            style={{ y: y4 }}
-            className="absolute top-[200px] right-0 w-[120px] h-[160px] z-[17] opacity-50 blur-[1px] group"
-          >
-            <div className="w-full h-full rounded-radius-lg overflow-hidden border border-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.5)] animate-float [animation-delay:1s]">
-              <img src="/hero-4.jpg" alt="Editorial 4" className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-        </div>
-
-        {/* MOBILE EDITORIAL BANNER */}
-        <div className="lg:hidden w-full mt-12 rounded-radius-lg overflow-hidden border border-white/5 shadow-2xl">
-           <img src="/hero-1.jpg" alt="Editorial Banner" className="w-full h-64 object-cover" />
+        {/* Layer 6: Ambient orbiting ring (z-index: 5, below hero-content at 10) */}
+        <div 
+          className="absolute bottom-[8%] md:bottom-[12%] left-1/2 -translate-x-1/2 w-[280px] md:w-[520px] h-[60px] md:h-[120px] border border-[rgba(201,169,110,0.15)] rounded-full pointer-events-none z-[5]"
+          style={{ transform: "translateX(-50%) rotateX(75deg)" }}
+        >
+          {/* Orbiting glowing point */}
+          <div 
+            className="absolute top-0 left-1/2 w-1.5 h-1.5 bg-[#00E5CC] rounded-full blur-[1px] animate-spin-slow origin-[0_30px] md:origin-[0_60px]"
+            style={{ animationDuration: "12s" }}
+          />
         </div>
       </div>
 
-      {/* Decorative Scanline */}
-      <motion.div
-        className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-accent-cyan/20 to-transparent"
-        animate={{ opacity: [0.2, 0.5, 0.2] }}
-        transition={{ duration: 4, repeat: Infinity }}
-      />
+      {/* HERO CONTENT (Z-INDEX 10) */}
+      <div className="hero-content">
+        {/* Row 1: Logo fades in as one unit (600ms - 1200ms) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+          className="w-full flex justify-center"
+        >
+          <LuxeLogo />
+        </motion.div>
+
+        {/* Row 2: Subtitle fades in (1200ms - 2000ms) */}
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2, duration: 0.5, ease: "easeOut" }}
+          className="hero-subtitle"
+        >
+          Experience the evolution of digital identity.
+          Neural-powered luxury curation for the 
+          architects of the next-gen fashion universe.
+        </motion.p>
+
+        {/* Row 3: Buttons fade in (1800ms - 2400ms) */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.8, duration: 0.4, ease: "easeOut" }}
+          className="hero-buttons"
+        >
+          <button className="btn-primary">Initialize Search</button>
+          <button className="btn-secondary">Explore Drops</button>
+        </motion.div>
+      </div>
     </section>
   );
 };
