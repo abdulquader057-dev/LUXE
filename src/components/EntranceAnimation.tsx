@@ -68,10 +68,10 @@ const EntranceAnimation = () => {
               className="mt-4 flex flex-col items-center gap-1"
             >
               <div className="text-[10px] font-sora tracking-[0.3em] text-white/80 uppercase">
-                Cognitive Fashion OS
+                Smart Fashion OS
               </div>
               <div className="text-[8px] font-rajdhani tracking-[0.2em] text-white/40">
-                Neural Sync... Active
+                System Sync... Active
               </div>
             </motion.div>
           </div>

@@ -27,9 +27,9 @@ const Navbar = () => {
 
   const links = [
     { name: "Collections", href: "/shop?cat=collections" },
-    { name: "Neural Drops", href: "/shop?sort=new" },
-    { name: "Intel", href: "/shop?cat=intel" },
-    { name: "Cognition", href: "/ai-style" },
+    { name: "New Arrivals", href: "/shop?sort=new" },
+    { name: "Editorial", href: "/shop?cat=intel" },
+    { name: "AI Stylist", href: "/ai-style" },
   ];
 
   return (
@@ -38,7 +38,7 @@ const Navbar = () => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
       className={cn(
-        "absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-8 py-4 transition-all duration-300 backdrop-blur-md bg-[#050508]/80 border-b border-white/5",
+        "absolute top-0 left-0 right-0 z-40 flex items-center justify-between pl-20 pr-8 py-4 transition-all duration-300 backdrop-blur-md bg-[#050508]/80 border-b border-white/5",
       )}
     >
       <div className="flex items-center gap-10 w-full">
@@ -96,11 +96,11 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Neural Sync Badge */}
+          {/* System Sync Badge */}
           <div className="hidden xl:flex items-center gap-3 pl-4 border-l border-white/10">
             <div className="text-right">
-              <div className="text-[10px] font-sora font-bold tracking-widest text-white">NEURAL SYNC</div>
-              <div className="text-[9px] font-sora tracking-widest text-white/40">ACTIVE CORE V4.2</div>
+              <div className="text-[10px] font-sora font-bold tracking-widest text-white">SYSTEM SYNC</div>
+              <div className="text-[9px] font-sora tracking-widest text-white/40">ONLINE V4.2</div>
             </div>
             <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
               <Zap size={14} className="text-white" />

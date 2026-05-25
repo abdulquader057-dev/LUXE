@@ -17,7 +17,7 @@ const filters = [
 ];
 
 // Mock products for the homepage
-const neuralPicks = [
+const recommendedPicks = [
   {
     id: "prod-1",
     name: "AERO-WEAVE COMBAT JACKET",
@@ -29,8 +29,8 @@ const neuralPicks = [
   },
   {
     id: "prod-2",
-    name: "OBSIDIAN TECH-HOODIE",
-    description: "Vantablack absorption fabric. Neural weave.",
+    name: "OBSIDIAN HOODIE",
+    description: "Premium heavyweight fabric. Thermal control.",
     price: 450,
     images: ["/hero-2.jpg"],
     category: "MODEST TECH",
@@ -72,7 +72,7 @@ export default function Home() {
           </div>
           <input 
             type="text" 
-            placeholder="Search neural base..." 
+            placeholder="Search products..." 
             className="w-full bg-[#0A0A0C] border border-white/10 rounded-full py-3.5 pl-12 pr-4 text-white text-[11px] font-sora tracking-wide focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
           />
           <button className="absolute inset-y-1 right-1 px-4 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center border border-white/5 transition-colors">
@@ -101,16 +101,16 @@ export default function Home() {
         </div>
       </div>
 
-      {/* NEURAL PICKS Grid */}
+      {/* RECOMMENDED PICKS Grid */}
       <div className="mb-16">
         <div className="flex items-center gap-3 mb-8">
           <Sparkles size={20} className="text-white/70" />
-          <h2 className="text-2xl font-orbitron font-bold text-white tracking-wide">NEURAL PICKS FOR YOU</h2>
+          <h2 className="text-2xl font-orbitron font-bold text-white tracking-wide">RECOMMENDED FOR YOU</h2>
           <div className="h-[1px] flex-1 bg-gradient-to-r from-white/20 to-transparent ml-4" />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {neuralPicks.map((product, i) => (
+          {recommendedPicks.map((product, i) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 20 }}

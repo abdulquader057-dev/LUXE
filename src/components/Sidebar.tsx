@@ -49,10 +49,11 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile Toggle Button */}
+      {/* Universal Toggle Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 left-4 z-[60] p-2 bg-[#050508]/80 backdrop-blur-md border border-white/10 rounded-md text-white/70 hover:text-white"
+        onMouseEnter={() => setIsOpen(true)}
+        className="fixed top-4 left-4 z-[60] p-2 bg-[#0A0A0F]/80 backdrop-blur-md border border-white/10 rounded-md text-white/70 hover:text-white shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-colors duration-300"
       >
         {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -65,10 +66,13 @@ const Sidebar = () => {
         />
       )}
 
-      <aside className={cn(
-        "w-[280px] h-screen flex-shrink-0 bg-[#0A0A0F] border-r border-white/5 flex flex-col overflow-hidden fixed md:relative z-[55] transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]",
-        isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-      )}>
+      <aside 
+        onMouseLeave={() => setIsOpen(false)}
+        className={cn(
+          "w-[280px] h-screen flex-shrink-0 bg-[#0A0A0F] border-r border-white/5 flex flex-col overflow-hidden fixed z-[55] transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[20px_0_40px_rgba(0,0,0,0.8)] pt-16",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
       
       {/* Brand Header */}
       <div className="p-6 flex items-center gap-3">
