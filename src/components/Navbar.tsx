@@ -54,15 +54,15 @@ const Navbar = () => {
       )}
     >
       {/* Brand logo left (Absolute Spatial Isolation) */}
-      <div className="w-[150px] shrink-0 flex items-center">
-        <Link href="/" className="logo-container !p-0 !flex-row !gap-1">
+      <div className="logo-container !p-0 !flex-row !gap-1">
+        <Link href="/" className="!p-0 !flex-row !gap-1 flex items-center">
           <span className="logo-luxe !text-2xl md:!text-3xl">LUXE</span>
           <span className="text-rose-gold !text-2xl md:!text-3xl">.</span>
         </Link>
       </div>
 
       {/* Navigation links center (Flex isolation, no overlap) */}
-      <div className="hidden lg:flex flex-1 justify-center items-center gap-10">
+      <div className="nav-links hidden lg:flex">
         {links.map((link) => {
           const isActive = pathname === link.href;
           return (
@@ -88,7 +88,7 @@ const Navbar = () => {
       </div>
 
       {/* Actions right (Absolute Spatial Isolation) */}
-      <div className="w-[150px] shrink-0 flex items-center justify-end gap-5">
+      <div className="utility-icons">
         <button aria-label="Search" className="text-white/50 hover:text-rose-gold transition-colors duration-500">
           <Search size={18} strokeWidth={1.5} />
         </button>

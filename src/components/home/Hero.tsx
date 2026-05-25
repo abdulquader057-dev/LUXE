@@ -31,45 +31,46 @@ const Hero = () => {
         />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center text-center w-full max-w-5xl mx-auto gap-8">
-        
-        {/* LOGO */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 1.2, ease: [0.25, 1, 0.15, 1] }}
-          className="w-full flex justify-center mb-4"
-        >
-          <LuxeLogo />
-        </motion.div>
+      <div className="hero-container relative z-10 w-full max-w-5xl mx-auto">
+        <div className="hero-text">
+          {/* LOGO */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 1.2, ease: [0.25, 1, 0.15, 1] }}
+            className="w-full flex justify-center mb-4"
+          >
+            <LuxeLogo />
+          </motion.div>
 
-        {/* EDITORIAL STATEMENT */}
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2, duration: 1, ease: [0.25, 1, 0.15, 1] }}
-          className="font-cormorant font-light tracking-tight text-white leading-tight mb-2 text-[clamp(2.5rem,5vw,5rem)] w-full max-w-4xl"
-        >
-          <span className="text-rose-gold font-normal italic pr-2">Where</span> obsidian meets <br />
-          the blush of dawn
-        </motion.h2>
+          {/* EDITORIAL STATEMENT */}
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 1, ease: [0.25, 1, 0.15, 1] }}
+            className="font-cormorant font-light tracking-tight text-white leading-tight mb-2 text-[clamp(2.5rem,5vw,5rem)] w-full max-w-4xl mx-auto"
+          >
+            <span className="text-rose-gold font-normal italic pr-2">Where</span> obsidian meets <br />
+            the blush of dawn
+          </motion.h2>
 
-        {/* SUBTEXT */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 1, ease: [0.25, 1, 0.15, 1] }}
-          className="text-[clamp(10px,1.5vw,14px)] font-sora tracking-[0.3em] uppercase text-white/50 mb-8 w-full max-w-2xl"
-        >
-          Engineered couture for the next century
-        </motion.p>
+          {/* SUBTEXT */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.5, duration: 1, ease: [0.25, 1, 0.15, 1] }}
+            className="text-[clamp(10px,1.5vw,14px)] font-sora tracking-[0.3em] uppercase text-white/50 mb-8 w-full max-w-2xl mx-auto"
+          >
+            Engineered couture for the next century
+          </motion.p>
+        </div>
 
         {/* CTA BUTTON SYSTEM */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.8, duration: 1, ease: [0.25, 1, 0.15, 1] }}
-          className="flex flex-col sm:flex-row gap-6 items-center justify-center w-full"
+          className="hero-buttons w-full"
         >
           <MagneticWrapper>
             <button className="metal-pill px-8 py-4 flex items-center justify-center gap-2 group relative overflow-hidden transition-all duration-500 hover:shadow-[0_8px_32px_rgba(224,191,184,0.15)] w-full sm:w-auto">

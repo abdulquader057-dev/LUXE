@@ -72,14 +72,14 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
       <motion.div
         animate={{ rotateX: rotate.x, rotateY: rotate.y }}
         transition={{ type: "spring", stiffness: 200, damping: 30 }}
-        className="relative bg-bg-surface border border-white/5 rounded-sm overflow-hidden h-full flex flex-col cursor-spotlight-card"
+        className="product-card relative bg-bg-surface border border-white/5 rounded-sm flex flex-col cursor-spotlight-card"
       >
         {/* Image Container with Fabric Texture Hover */}
-        <div className="aspect-[3/4] overflow-hidden bg-bg-elevated relative fabric-texture flex-shrink-0">
+        <div className="relative fabric-texture flex-shrink-0">
           <motion.img
             src={imageSrc}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-[2s] ease-[0.25,1,0.5,1] group-hover:scale-[1.03]"
+            className="product-image transition-transform duration-[2s] ease-[0.25,1,0.5,1] group-hover:scale-[1.03]"
           />
           
           {/* Layered Fog Gradients */}
@@ -98,7 +98,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
             </h3>
           </div>
           
-          <div className="flex items-center justify-between pt-4 border-t border-white/10 relative z-10 w-full mt-4">
+          <div className="action-row relative z-10 w-full mt-4">
             <div className="flex items-center gap-4">
               <span className="font-sora text-[10px] tracking-[0.3em] text-white/70 shadow-sm">
                 USD {product.price}

@@ -108,8 +108,7 @@ const ShopContent = () => {
               animate={{ opacity: 1, filter: "blur(0px)" }}
               exit={{ opacity: 0, filter: "blur(10px)" }}
               transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
-              className="grid gap-8 items-stretch"
-              style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}
+              className="product-grid"
             >
               {filteredProducts.map((p, idx) => (
                 <motion.div 
