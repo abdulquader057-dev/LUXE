@@ -5,6 +5,7 @@ import ZyraChat from "@/components/ZyraChat";
 import BackToTop from "@/components/BackToTop";
 import Sidebar from "@/components/Sidebar";
 import { CurrencyProvider } from "@/lib/contexts/CurrencyContext";
+import { LanguageProvider } from "@/lib/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
@@ -73,6 +74,7 @@ export default function RootLayout({
         <div className="film-grain opacity-20 mix-blend-overlay pointer-events-none" />
         <CustomCursor />
         
+        <LanguageProvider>
         <CurrencyProvider>
           <Sidebar />
           
@@ -90,6 +92,7 @@ export default function RootLayout({
             <BackToTop />
           </div>
         </CurrencyProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

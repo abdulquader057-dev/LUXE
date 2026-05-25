@@ -20,34 +20,36 @@ import {
   MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Globe } from "lucide-react";
+import { useLanguage } from "@/lib/contexts/LanguageContext";
 
 const Sidebar = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { t, language, setLanguage, availableLanguages } = useLanguage();
 
   const mainLinks = [
-    { name: "Home", href: "/", icon: Home, subtitle: "Dashboard" },
-    { name: "AI Stylist", href: "/ai-style", icon: Sparkles, subtitle: "Your Personal Stylist" },
-    { name: "Collections", href: "/shop?cat=collections", icon: Grid, subtitle: "Curated for You" },
-    { name: "Shop", href: "/shop", icon: ShoppingBag, subtitle: "Explore Products" },
-    { name: "New Arrivals", href: "/shop?sort=new", icon: Zap, subtitle: "Fresh & Trendy" },
-    { name: "Trending", href: "/shop?sort=trending", icon: TrendingUp, subtitle: "Popular Now" },
+    { name: t("nav.home"), href: "/", icon: Home, subtitle: "Dashboard" },
+    { name: t("nav.aiStylist"), href: "/ai-style", icon: Sparkles, subtitle: "Your Personal Stylist" },
+    { name: t("nav.collections"), href: "/shop?cat=collections", icon: Grid, subtitle: "Curated for You" },
+    { name: t("nav.shop"), href: "/shop", icon: ShoppingBag, subtitle: "Explore Products" },
+    { name: t("nav.newArrivals"), href: "/shop?sort=new", icon: Zap, subtitle: "Fresh & Trendy" },
+    { name: t("nav.trending"), href: "/shop?sort=trending", icon: TrendingUp, subtitle: "Popular Now" },
   ];
 
   const categoryLinks = [
-    { name: "Sneakers", href: "/shop?cat=sneakers", icon: Footprints, subtitle: "Premium Kicks" },
-    { name: "Accessories", href: "/shop?cat=accessories", icon: Award, subtitle: "Elevate Your Fit" },
-    { name: "Watches", href: "/shop?cat=watches", icon: Watch, subtitle: "Timeless Style" },
-    { name: "Bags", href: "/shop?cat=bags", icon: Briefcase, subtitle: "Carry the Future" },
-    { name: "Brands", href: "/shop?cat=brands", icon: Award, subtitle: "Top Rated Brands" },
+    { name: t("cat.sneakers"), href: "/shop?cat=sneakers", icon: Footprints, subtitle: "Premium Kicks" },
+    { name: t("cat.accessories"), href: "/shop?cat=accessories", icon: Award, subtitle: "Elevate Your Fit" },
+    { name: t("cat.watches"), href: "/shop?cat=watches", icon: Watch, subtitle: "Timeless Style" },
+    { name: t("cat.bags"), href: "/shop?cat=bags", icon: Briefcase, subtitle: "Carry the Future" },
+    { name: t("cat.brands"), href: "/shop?cat=brands", icon: Award, subtitle: "Top Rated Brands" },
   ];
 
   const bottomLinks = [
-    { name: "LUXE Plus", href: "/profile", icon: Crown, subtitle: "Exclusive Access", isPremium: true },
-    { name: "WhatsApp (Primary)", href: "https://wa.me/917995338472", icon: MessageCircle, subtitle: "Support & Queries", isPremium: false },
-    { name: "WhatsApp (Alt)", href: "https://wa.me/917337246297", icon: MessageCircle, subtitle: "Secondary Contact", isPremium: false },
-    { name: "Settings", href: "/settings", icon: Settings, subtitle: "Preferences", isPremium: false },
+    { name: t("bot.luxePlus"), href: "/profile", icon: Crown, subtitle: "Exclusive Access", isPremium: true },
+    { name: t("bot.whatsappPrimary"), href: "https://wa.me/917995338472", icon: MessageCircle, subtitle: "Support & Queries", isPremium: false },
+    { name: t("bot.whatsappAlt"), href: "https://wa.me/917337246297", icon: MessageCircle, subtitle: "Secondary Contact", isPremium: false },
+    { name: t("bot.settings"), href: "/settings", icon: Settings, subtitle: "Preferences", isPremium: false },
   ];
 
   return (
@@ -78,10 +80,29 @@ const Sidebar = () => {
       >
       
       {/* Brand Header */}
-      <div className="p-6 flex items-center gap-3">
+      <div className="p-6 flex items-center justify-between">
         <Link href="/">
           <img src="/logo.jpeg" alt="Brand Logo" className="h-10 w-auto rounded-md object-contain" />
         </Link>
+        <div className="relative group/lang">
+          <button className="flex items-center justify-center p-2 rounded-lg bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-colors">
+            <Globe size={18} />
+          </button>
+          <div className="absolute right-0 top-full mt-2 w-32 bg-[#050508] border border-white/10 rounded-xl overflow-hidden opacity-0 invisible group-hover/lang:opacity-100 group-hover/lang:visible transition-all z-[70] shadow-xl">
+            {availableLanguages.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => setLanguage(lang.code as any)}
+                className={cn(
+                  "w-full text-left px-4 py-3 text-xs font-sora hover:bg-white/10 transition-colors",
+                  language === lang.code ? "text-white bg-white/5" : "text-white/50"
+                )}
+              >
+                {lang.nativeName}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Scrollable Nav Area */}

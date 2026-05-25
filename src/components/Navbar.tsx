@@ -6,11 +6,13 @@ import { usePathname } from "next/navigation";
 import { motion, useAnimation } from "framer-motion";
 import { Search, ShoppingBag, User, Menu, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/contexts/LanguageContext";
 
 const Navbar = () => {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const cartControls = useAnimation();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,10 +28,10 @@ const Navbar = () => {
   }, []);
 
   const links = [
-    { name: "Collections", href: "/shop?cat=collections" },
-    { name: "New Arrivals", href: "/shop?sort=new" },
-    { name: "Editorial", href: "/shop?cat=intel" },
-    { name: "AI Stylist", href: "/ai-style" },
+    { name: t("nav.collections"), href: "/shop?cat=collections" },
+    { name: t("nav.newArrivals"), href: "/shop?sort=new" },
+    { name: t("nav.editorial"), href: "/shop?cat=intel" },
+    { name: t("nav.aiStylist"), href: "/ai-style" },
   ];
 
   return (

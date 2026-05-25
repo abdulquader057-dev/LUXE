@@ -2,13 +2,19 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Send, Sparkles, Loader2 } from "lucide-react";
+import { MessageSquare, X, Send, Sparkles, Loader2, Mic, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/contexts/LanguageContext";
 
 export default function ZyraChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  
+  const { t, currentLangData } = useLanguage();
+  
   const [messages, setMessages] = useState([
     {
       role: "model",
@@ -17,16 +23,70 @@ export default function ZyraChat() {
   ]);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
+  // Update initial message when language changes if no other messages exist
+  useEffect(() => {
+    if (messages.length === 1) {
+       setMessages([{
+         role: "model",
+         content: t("chat.placeholder").replace("...", "") // Simple translated greeting
+       }]);
+    }
+  }, [currentLangData]);
+
   useEffect(() => {
     if (endOfMessagesRef.current) {
       endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isOpen]);
 
-  const handleSendMessage = async () => {
-    if (!message.trim()) return;
+  const speak = (text: string) => {
+    if (!voiceEnabled || !window.speechSynthesis) return;
+    
+    // Stop any current speech
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = currentLangData.speechCode;
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    
+    window.speechSynthesis.speak(utterance);
+  };
 
-    const userMessage = { role: "user", content: message };
+  const startListening = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = currentLangData.speechCode;
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsListening(true);
+    
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setMessage(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => setIsListening(false);
+
+    recognition.start();
+  };
+
+  const handleSendMessage = async (textToProcess?: string) => {
+    const text = textToProcess || message;
+    if (!text.trim()) return;
+
+    const userMessage = { role: "user", content: text };
     setMessages((prev) => [...prev, userMessage]);
     setMessage("");
     setIsLoading(true);
@@ -35,7 +95,10 @@ export default function ZyraChat() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
+        body: JSON.stringify({ 
+          messages: [...messages, userMessage],
+          language: currentLangData.name 
+        }),
       });
 
       if (!response.ok) {
@@ -44,9 +107,13 @@ export default function ZyraChat() {
 
       const data = await response.json();
       setMessages((prev) => [...prev, { role: "model", content: data.message }]);
+      
+      // Auto-play the response if voice is enabled
+      speak(data.message);
+      
     } catch (error) {
       console.error(error);
-      setMessages((prev) => [...prev, { role: "model", content: "System Offline. Neural link severed. Please try again later." }]);
+      setMessages((prev) => [...prev, { role: "model", content: "System Offline. Neural link severed." }]);
     } finally {
       setIsLoading(false);
     }
@@ -75,12 +142,22 @@ export default function ZyraChat() {
                 </div>
                 <div>
                   <h3 className="text-[11px] font-orbitron text-white tracking-widest uppercase">LUXE AI</h3>
-                  <p className="text-[9px] font-sora text-white/50 tracking-wider">System Sync Online</p>
+                  <p className="text-[9px] font-sora text-white/50 tracking-wider">{t("chat.online")}</p>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white transition-colors">
-                <X size={20} />
-              </button>
+              
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setVoiceEnabled(!voiceEnabled)} 
+                  className={cn("transition-colors", voiceEnabled ? "text-[#00F0FF]" : "text-white/40 hover:text-white")}
+                  title="Toggle Voice Output"
+                >
+                  {voiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                </button>
+                <button onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Messages Area */}
@@ -115,22 +192,36 @@ export default function ZyraChat() {
 
             {/* Input Area */}
             <div className="p-4 border-t border-white/5 bg-black/40">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                  placeholder="Ask LUXE AI..."
-                  className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 py-2 pr-12 text-white font-rajdhani placeholder:text-white/30 focus:outline-none focus:border-white/50 transition-colors"
-                />
+              <div className="relative flex items-center gap-2">
                 <button 
-                  onClick={handleSendMessage}
-                  disabled={isLoading}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors disabled:opacity-50"
+                  onClick={startListening}
+                  className={cn(
+                    "p-3 rounded-xl border transition-all flex-shrink-0",
+                    isListening 
+                      ? "bg-red-500/20 border-red-500 text-red-500 animate-pulse" 
+                      : "bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10"
+                  )}
+                  title="Speech to Text"
                 >
-                  <Send size={18} />
+                  <Mic size={18} />
                 </button>
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                    placeholder={isListening ? t("chat.listening") : t("chat.placeholder")}
+                    className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 py-2 pr-10 text-white font-rajdhani placeholder:text-white/30 focus:outline-none focus:border-white/50 transition-colors"
+                  />
+                  <button 
+                    onClick={() => handleSendMessage()}
+                    disabled={isLoading || !message.trim()}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    <Send size={18} />
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
