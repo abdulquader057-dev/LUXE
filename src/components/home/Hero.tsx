@@ -37,7 +37,7 @@ const Hero = () => {
             </h1>
             
             <p className="text-[11px] font-sora text-white/50 tracking-widest leading-relaxed mb-8 max-w-sm">
-              Synthesized by ZYRA Intelligence. <br/>
+              Synthesized by LUXE Intelligence. <br/>
               Engineered for the future. <br/>
               Explore the global digital wardrobe.
             </p>

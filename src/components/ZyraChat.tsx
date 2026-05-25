@@ -31,7 +31,7 @@ const ZyraChat = () => {
                   <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#00FF00] rounded-full border-2 border-black" />
                 </div>
                 <div>
-                  <h3 className="text-[11px] font-orbitron text-white tracking-widest uppercase">ZYRA AI</h3>
+                  <h3 className="text-[11px] font-orbitron text-white tracking-widest uppercase">LUXE AI</h3>
                   <p className="text-[9px] font-sora text-[#00F0FF]/70 tracking-wider">Neural Assistant Active</p>
                 </div>
               </div>
@@ -43,7 +43,7 @@ const ZyraChat = () => {
             {/* Messages Area */}
             <div className="flex-1 p-6 overflow-y-auto space-y-4 font-rajdhani text-sm">
               <div className="flex flex-col gap-1 max-w-[80%]">
-                <span className="text-[8px] font-orbitron text-[#00F0FF]/50 tracking-widest uppercase ml-2">Zyra</span>
+                <span className="text-[8px] font-orbitron text-[#00F0FF]/50 tracking-widest uppercase ml-2">LUXE</span>
                 <div className="p-3 bg-white/5 border border-white/10 rounded-2xl rounded-tr-none text-white/90 text-xs">
                   Hey! I found some perfect picks for your style today.
                   <button className="mt-2 w-full py-2 bg-[#00F0FF]/10 text-[#00F0FF] rounded-lg border border-[#00F0FF]/30 text-[10px] font-bold tracking-widest">
@@ -60,7 +60,7 @@ const ZyraChat = () => {
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Ask Zyra..."
+                  placeholder="Ask LUXE AI..."
                   className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white font-rajdhani placeholder:text-white/20 focus:outline-none focus:border-accent-cyan/50 transition-colors"
                 />
                 <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-accent-cyan hover:scale-110 transition-transform">

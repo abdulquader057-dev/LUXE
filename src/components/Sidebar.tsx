@@ -25,11 +25,11 @@ const Sidebar = () => {
 
   const mainLinks = [
     { name: "Home", href: "/", icon: Home, subtitle: "Dashboard" },
-    { name: "AI Stylist", href: "/ai", icon: Sparkles, subtitle: "Your Personal Stylist" },
-    { name: "Collections", href: "/collections", icon: Grid, subtitle: "Curated for You" },
+    { name: "AI Stylist", href: "/ai-style", icon: Sparkles, subtitle: "Your Personal Stylist" },
+    { name: "Collections", href: "/shop?cat=collections", icon: Grid, subtitle: "Curated for You" },
     { name: "Shop", href: "/shop", icon: ShoppingBag, subtitle: "Explore Products" },
-    { name: "New Arrivals", href: "/new", icon: Zap, subtitle: "Fresh & Trendy" },
-    { name: "Trending", href: "/trending", icon: TrendingUp, subtitle: "Popular Now" },
+    { name: "New Arrivals", href: "/shop?sort=new", icon: Zap, subtitle: "Fresh & Trendy" },
+    { name: "Trending", href: "/shop?sort=trending", icon: TrendingUp, subtitle: "Popular Now" },
   ];
 
   const categoryLinks = [
@@ -37,11 +37,11 @@ const Sidebar = () => {
     { name: "Accessories", href: "/shop?cat=accessories", icon: Award, subtitle: "Elevate Your Fit" },
     { name: "Watches", href: "/shop?cat=watches", icon: Watch, subtitle: "Timeless Style" },
     { name: "Bags", href: "/shop?cat=bags", icon: Briefcase, subtitle: "Carry the Future" },
-    { name: "Brands", href: "/brands", icon: Award, subtitle: "Top Rated Brands" },
+    { name: "Brands", href: "/shop?cat=brands", icon: Award, subtitle: "Top Rated Brands" },
   ];
 
   const bottomLinks = [
-    { name: "ZyVORA Plus", href: "/plus", icon: Crown, subtitle: "Exclusive Access", isPremium: true },
+    { name: "LUXE Plus", href: "/profile", icon: Crown, subtitle: "Exclusive Access", isPremium: true },
     { name: "Settings", href: "/settings", icon: Settings, subtitle: "Preferences" },
   ];
 
