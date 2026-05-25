@@ -3,6 +3,7 @@
 import React, { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import LuxeLogo from "../LuxeLogo";
+import MagneticWrapper from "../MagneticWrapper";
 
 const Hero = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -14,7 +15,7 @@ const Hero = () => {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let particles: Array<{ x: number; y: number; size: number; speed: number; opacity: number }> = [];
+    let particles: Array<{ x: number; y: number; size: number; speed: number; opacity: number; color: string; duration: number; time: number }> = [];
 
     const handleResize = () => {
       canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
@@ -24,35 +25,69 @@ const Hero = () => {
     window.addEventListener("resize", handleResize);
 
     const isMobile = window.innerWidth < 768;
-    const particleCount = isMobile ? 15 : 40;
+    const particleCount = isMobile ? 20 : 50;
+
+    const colors = [
+      "rgba(201,169,110,0.6)", // gold
+      "rgba(0,229,204,0.4)",   // cyan
+      "rgba(108,63,232,0.4)"   // violet
+    ];
 
     particles = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      size: Math.random() * 1.2 + 0.4,
-      speed: Math.random() * 0.3 + 0.1,
-      opacity: Math.random() * 0.35 + 0.05,
+      size: Math.random() * 2 + 1, // 1-3px
+      speed: Math.random() * 0.5 + 0.1, // very slow
+      opacity: 0,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      duration: Math.random() * 12000 + 8000, // 8-20s
+      time: Math.random() * 10000,
     }));
 
-    const animate = () => {
+    let lastTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const dt = currentTime - lastTime;
+      lastTime = currentTime;
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((p) => {
+        p.time += dt;
+        
+        // Calculate opacity based on sine wave for fade in/out
+        const progress = (p.time % p.duration) / p.duration;
+        p.opacity = Math.sin(progress * Math.PI) * (isMobile ? 0.5 : 1);
+        
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(201, 169, 110, ${p.opacity})`;
+        
+        // Apply calculated opacity to the color string
+        const colorMatch = p.color.match(/rgba\((\d+),(\d+),(\d+),([\d.]+)\)/);
+        if (colorMatch) {
+          const r = colorMatch[1];
+          const g = colorMatch[2];
+          const b = colorMatch[3];
+          const maxAlpha = parseFloat(colorMatch[4]);
+          ctx.fillStyle = `rgba(${r},${g},${b},${Math.max(0, p.opacity * maxAlpha)})`;
+        } else {
+          ctx.fillStyle = p.color;
+        }
+        
         ctx.fill();
 
-        p.y -= p.speed;
-        if (p.y < 0) {
-          p.y = canvas.height;
+        p.y -= p.speed * (dt / 16);
+        if (p.y < -10) {
+          p.y = canvas.height + 10;
           p.x = Math.random() * canvas.width;
+          p.time = 0; // reset cycle
         }
       });
 
       animationFrameId = requestAnimationFrame(animate);
     };
-    animate();
+    
+    animationFrameId = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -64,17 +99,17 @@ const Hero = () => {
     <section className="hero">
       {/* BACKGROUND AREA (Z-INDEX 0) */}
       <div className="hero-background">
-        {/* Layer 1: The Image itself (z-index: 0, opacity animated from 2.2s) */}
+        {/* Layer 1: The Image itself */}
         <motion.img
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1.0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ delay: 2.2, duration: 0.6, ease: "easeOut" }}
           src="/hero-1.jpg"
           alt="Cyberpunk Fashion Model"
           className="hero-bg-image"
         />
 
-        {/* Layer 2: Base dark gradient (z-index: 1) */}
+        {/* Layer 2: Base dark gradient */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -82,59 +117,38 @@ const Hero = () => {
           className="hero-overlay-base" 
         />
 
-        {/* Layer 3: Vignette overlay (z-index: 2) */}
+        {/* Layer 3: Ambient Particles */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 pointer-events-none z-[4] mix-blend-screen"
+        />
+
+        {/* Layer 4: Vignette overlay */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2.2, duration: 0.6 }}
           className="hero-overlay-vignette" 
         />
-
-        {/* Layer 4: Ambient color tint (z-index: 3) */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.2, duration: 0.6 }}
-          className="hero-overlay-tint" 
-        />
-
-        {/* Layer 5: Particles canvas (z-index: 4) */}
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 pointer-events-none z-[4] opacity-30"
-          style={{ mixBlendMode: "screen" }}
-        />
-
-        {/* Layer 6: Ambient orbiting ring (z-index: 5, below hero-content at 10) */}
-        <div 
-          className="absolute bottom-[8%] md:bottom-[12%] left-1/2 -translate-x-1/2 w-[280px] md:w-[520px] h-[60px] md:h-[120px] border border-[rgba(201,169,110,0.15)] rounded-full pointer-events-none z-[5]"
-          style={{ transform: "translateX(-50%) rotateX(75deg)" }}
-        >
-          {/* Orbiting glowing point */}
-          <div 
-            className="absolute top-0 left-1/2 w-1.5 h-1.5 bg-[#00E5CC] rounded-full blur-[1px] animate-spin-slow origin-[0_30px] md:origin-[0_60px]"
-            style={{ animationDuration: "12s" }}
-          />
-        </div>
       </div>
 
       {/* HERO CONTENT (Z-INDEX 10) */}
       <div className="hero-content">
-        {/* Row 1: Logo fades in as one unit (600ms - 1200ms) */}
+        {/* Row 1: Logo fades in as one unit */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+          initial={{ opacity: 0, y: 32, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.6, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="w-full flex justify-center"
         >
           <LuxeLogo />
         </motion.div>
 
-        {/* Row 2: Subtitle fades in (1200ms - 2000ms) */}
+        {/* Row 2: Subtitle fades in */}
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2, duration: 0.5, ease: "easeOut" }}
+          initial={{ opacity: 0, y: 32, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 1.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="hero-subtitle"
         >
           Experience the evolution of digital identity.
@@ -142,15 +156,19 @@ const Hero = () => {
           architects of the next-gen fashion universe.
         </motion.p>
 
-        {/* Row 3: Buttons fade in (1800ms - 2400ms) */}
+        {/* Row 3: Buttons fade in */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.8, duration: 0.4, ease: "easeOut" }}
+          initial={{ opacity: 0, y: 32, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 1.8, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="hero-buttons"
         >
-          <button className="btn-primary">Initialize Search</button>
-          <button className="btn-secondary">Explore Drops</button>
+          <MagneticWrapper>
+            <button className="btn-primary clickable">Initialize Search</button>
+          </MagneticWrapper>
+          <MagneticWrapper>
+            <button className="btn-secondary clickable">Explore Drops</button>
+          </MagneticWrapper>
         </motion.div>
       </div>
     </section>

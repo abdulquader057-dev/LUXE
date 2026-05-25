@@ -10,6 +10,7 @@ import { CinematicAtmosphere } from "@/components/CinematicAtmosphere";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
+import ScrollProgress from "@/components/ScrollProgress";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -18,17 +19,19 @@ const bebasNeue = Bebas_Neue({
 });
 
 const rajdhani = Rajdhani({
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-rajdhani",
   subsets: ["latin"],
 });
 
 const sora = Sora({
+  weight: ["300", "400", "500"],
   variable: "--font-sora",
   subsets: ["latin"],
 });
 
 const orbitron = Orbitron({
+  weight: ["400", "500", "600"],
   variable: "--font-orbitron",
   subsets: ["latin"],
 });
@@ -64,6 +67,7 @@ export default function RootLayout({
       className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-[#07070F] text-white selection:bg-accent-cyan selection:text-black relative overflow-x-hidden">
+        <ScrollProgress />
         <div className="film-grain" />
         <div className="watermark-vertical hidden lg:block">LUXE SYSTEM // CORE V4.2 // NEURAL SYNC</div>
         <CustomCursor />

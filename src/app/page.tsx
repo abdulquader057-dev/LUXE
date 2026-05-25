@@ -15,6 +15,7 @@ const products = [
     image: "/hero-1.jpg",
     category: "Upper",
     momentum: 24,
+    rarity: "ULTRA RARE" as const,
   },
   {
     id: "2",
@@ -23,6 +24,7 @@ const products = [
     image: "/hero-2.jpg",
     category: "Footwear",
     momentum: 18,
+    rarity: "EXCLUSIVE" as const,
   },
   {
     id: "3",
@@ -30,6 +32,7 @@ const products = [
     price: 620,
     image: "/hero-3.jpg",
     category: "Lower",
+    rarity: "LIMITED" as const,
   },
   {
     id: "4",
@@ -39,6 +42,7 @@ const products = [
     image: "/hero-4.jpg",
     category: "Outerwear",
     momentum: 42,
+    rarity: "ULTRA RARE" as const,
   },
 ];
 
@@ -58,21 +62,28 @@ export default function Home() {
     : products.filter(p => p.category === activeCategory);
 
   return (
-    <main className="flex flex-col">
+    <main className="flex flex-col overflow-hidden">
       <Hero />
 
-      <section className="container mx-auto px-6 py-24">
+      <motion.section 
+        initial={{ opacity: 0, y: 32, scale: 0.97 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="container mx-auto px-6 py-24"
+      >
         {/* CATEGORY CHIPS */}
         <div className="flex flex-wrap items-center justify-center gap-4 mb-20 relative z-brand">
           {categories.map((cat, i) => (
             <motion.button
               key={cat.id}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 3.5 + (i * 0.05) }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 + (i * 0.07), duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               onClick={() => setActiveCategory(cat.id)}
               className={cn(
-                "px-8 py-3 rounded-full font-rajdhani text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase transition-all duration-300 relative group overflow-hidden",
+                "px-8 py-3 rounded-full font-rajdhani text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase transition-all duration-300 relative group overflow-hidden clickable",
                 activeCategory === cat.id 
                   ? "text-black bg-white shadow-[0_0_20px_rgba(255,255,255,0.4)]" 
                   : "text-white/40 glass-standard border-white/5 hover:text-white hover:border-accent-cyan/50"
@@ -99,15 +110,17 @@ export default function Home() {
 
         {/* NEURAL FOOTER TAG */}
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 32, scale: 0.97 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mt-32 text-center"
         >
           <span className="text-[10px] font-orbitron text-accent-cyan/40 tracking-[0.8em] uppercase">
             End of Neural Sequence // 0x4F2A
           </span>
         </motion.div>
-      </section>
+      </motion.section>
     </main>
   );
 }

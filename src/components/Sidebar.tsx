@@ -66,7 +66,7 @@ const Sidebar = () => {
       <motion.nav
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
-        transition={{ delay: 3.0, duration: 0.4, ease: "easeOut" }}
+        transition={{ delay: 3.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="lg:hidden bottom-nav"
       >
         {navLinks.map((link) => {
@@ -77,7 +77,7 @@ const Sidebar = () => {
               href={link.href}
               className={cn("bottom-tab-icon", isActive && "active")}
             >
-              <link.icon size={20} strokeWidth={isActive ? 2 : 1.2} />
+              <link.icon size={20} strokeWidth={isActive ? 2 : 1.2} className="relative z-10" />
               <span className="bottom-tab-label">{link.name}</span>
             </Link>
           );
