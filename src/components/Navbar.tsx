@@ -52,12 +52,12 @@ const Navbar = () => {
                 href={link.href}
                 className={cn(
                   "text-[11px] font-sora font-semibold tracking-widest uppercase transition-colors duration-300 relative",
-                  isActive ? "text-[#00F0FF]" : "text-white/60 hover:text-white"
+                  isActive ? "text-white" : "text-white/60 hover:text-white"
                 )}
               >
                 {link.name}
                 {isActive && (
-                  <div className="absolute -bottom-5 left-0 right-0 h-[2px] bg-[#00F0FF] shadow-[0_0_10px_rgba(0,240,255,0.5)]" />
+                  <div className="absolute -bottom-5 left-0 right-0 h-[2px] bg-white shadow-[0_0_10px_rgba(255,255,255,0.3)]" />
                 )}
               </Link>
             );
@@ -72,8 +72,8 @@ const Navbar = () => {
               <button 
                 key={cur}
                 className={cn(
-                  "text-[9px] font-sora font-bold tracking-wider",
-                  cur === "USD" ? "text-[#00F0FF]" : "text-white/40 hover:text-white/80"
+                  "text-[9px] font-sora font-bold tracking-wider transition-colors",
+                  cur === "USD" ? "text-white" : "text-white/40 hover:text-white/80"
                 )}
               >
                 {cur}
@@ -87,7 +87,7 @@ const Navbar = () => {
             </button>
             <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors relative">
               <ShoppingBag size={16} />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#B52BFF] rounded-full flex items-center justify-center text-[7px] font-bold text-white shadow-[0_0_8px_rgba(181,43,255,0.6)]">
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#D4AF37] rounded-full flex items-center justify-center text-[7px] font-bold text-[#050508] shadow-[0_0_8px_rgba(212,175,55,0.4)]">
                 3
               </span>
             </button>
@@ -99,11 +99,11 @@ const Navbar = () => {
           {/* Neural Sync Badge */}
           <div className="hidden xl:flex items-center gap-3 pl-4 border-l border-white/10">
             <div className="text-right">
-              <div className="text-[10px] font-sora font-bold tracking-widest text-[#00F0FF]">NEURAL SYNC</div>
+              <div className="text-[10px] font-sora font-bold tracking-widest text-white">NEURAL SYNC</div>
               <div className="text-[9px] font-sora tracking-widest text-white/40">ACTIVE CORE V4.2</div>
             </div>
-            <div className="w-8 h-8 rounded-full bg-[#00F0FF]/10 flex items-center justify-center border border-[#00F0FF]/30">
-              <Zap size={14} className="text-[#00F0FF]" />
+            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+              <Zap size={14} className="text-white" />
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -85,32 +85,38 @@ const Sidebar = () => {
           {mainLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
-              <Link key={link.name} href={link.href}>
-                <div className={cn(
-                  "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden",
-                  isActive ? "bg-white/5 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"
-                )}>
-                  {/* Neon active border */}
-                  {isActive && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#00F0FF] to-[#B52BFF]" />
-                  )}
-                  {isActive && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#00F0FF]/10 to-transparent opacity-50" />
-                  )}
-                  
-                  <div className={cn(
-                    "relative z-10 transition-colors", 
-                    isActive ? "text-[#00F0FF]" : "group-hover:text-white"
+              <Link 
+                key={link.name}
+                href={link.href}
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  "flex flex-col gap-1 py-3 px-4 rounded-lg transition-all duration-300 relative group",
+                  isActive ? "bg-white/5" : "hover:bg-white/5"
+                )}
+              >
+                {/* Left Accent line - Chrome instead of Cyan */}
+                {isActive && (
+                  <motion.div 
+                    layoutId="activeTab"
+                    className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-white rounded-r-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                  />
+                )}
+                
+                <div className="flex items-center gap-3">
+                  <link.icon size={18} className={cn(
+                    "transition-colors duration-300",
+                    isActive ? "text-white" : "text-white/40 group-hover:text-white/80"
+                  )} />
+                  <span className={cn(
+                    "text-[13px] font-sora font-semibold tracking-wide transition-colors",
+                    isActive ? "text-white" : "text-white/60 group-hover:text-white"
                   )}>
-                    <link.icon size={20} strokeWidth={isActive ? 2 : 1.5} />
-                  </div>
-                  <div className="relative z-10">
-                    <div className="text-[13px] font-medium tracking-wide">{link.name}</div>
-                    <div className={cn("text-[10px] mt-0.5", isActive ? "text-[#00F0FF]/60" : "text-white/30")}>
-                      {link.subtitle}
-                    </div>
-                  </div>
+                    {link.name}
+                  </span>
                 </div>
+                <span className="text-[10px] font-sora text-white/30 tracking-wider pl-[30px]">
+                  {link.subtitle}
+                </span>
               </Link>
             );
           })}
@@ -121,7 +127,7 @@ const Sidebar = () => {
           {categoryLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
-              <Link key={link.name} href={link.href}>
+              <Link key={link.name} href={link.href} onClick={() => setIsOpen(false)}>
                 <div className={cn(
                   "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 relative group",
                   isActive ? "bg-white/5 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"
@@ -147,17 +153,17 @@ const Sidebar = () => {
               <Link key={link.name} href={link.href}>
                 <div className={cn(
                   "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden",
-                  link.isPremium && "bg-gradient-to-r from-[#B52BFF]/10 to-transparent border border-[#B52BFF]/20",
+                  link.isPremium && "bg-gradient-to-r from-[#D4AF37]/5 to-transparent border border-[#D4AF37]/20",
                   isActive ? "text-white" : "text-white/60 hover:bg-white/5 hover:text-white"
                 )}>
                   <div className={cn(
                     "transition-colors", 
-                    link.isPremium ? "text-[#B52BFF]" : "group-hover:text-white"
+                    link.isPremium ? "text-[#D4AF37]" : "group-hover:text-white"
                   )}>
                     <link.icon size={20} strokeWidth={link.isPremium ? 2 : 1.5} />
                   </div>
                   <div>
-                    <div className={cn("text-[13px] font-medium tracking-wide", link.isPremium && "text-[#B52BFF]")}>
+                    <div className={cn("text-[13px] font-medium tracking-wide", link.isPremium && "text-[#D4AF37]")}>
                       {link.name}
                     </div>
                     <div className="text-[10px] text-white/30 mt-0.5">{link.subtitle}</div>
@@ -169,6 +175,7 @@ const Sidebar = () => {
         </div>
       </div>
     </aside>
+    </>
   );
 };
 

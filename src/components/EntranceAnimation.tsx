@@ -41,7 +41,7 @@ const EntranceAnimation = () => {
               transition={{ duration: 1.2, ease: "easeOut" }}
               className="relative"
             >
-              <div className="text-4xl md:text-6xl font-orbitron font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#00F0FF] via-white to-[#B52BFF] tracking-[0.5em] ml-[0.5em] drop-shadow-[0_0_20px_rgba(0,240,255,0.4)]">
+              <div className="text-4xl md:text-6xl font-orbitron font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-400 via-white to-gray-400 tracking-[0.5em] ml-[0.5em] drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                 LUXE
               </div>
             </motion.div>
@@ -51,13 +51,13 @@ const EntranceAnimation = () => {
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: "200px", opacity: 1 }}
               transition={{ delay: 0.5, duration: 1.5, ease: "easeInOut" }}
-              className="h-[1px] bg-gradient-to-r from-transparent via-[#00F0FF] to-transparent mt-6 relative"
+              className="h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent mt-6 relative"
             >
               <motion.div
                 initial={{ x: "-100%" }}
                 animate={{ x: "200px" }}
                 transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                className="absolute top-[-1px] left-0 w-10 h-[3px] bg-[#00F0FF] blur-[2px]"
+                className="absolute top-[-1px] left-0 w-10 h-[3px] bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
               />
             </motion.div>
 
@@ -67,7 +67,7 @@ const EntranceAnimation = () => {
               transition={{ delay: 1, duration: 0.8 }}
               className="mt-4 flex flex-col items-center gap-1"
             >
-              <div className="text-[10px] font-sora tracking-[0.3em] text-[#00F0FF]/80 uppercase">
+              <div className="text-[10px] font-sora tracking-[0.3em] text-white/80 uppercase">
                 Cognitive Fashion OS
               </div>
               <div className="text-[8px] font-rajdhani tracking-[0.2em] text-white/40">

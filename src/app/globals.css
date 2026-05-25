@@ -9,20 +9,19 @@
 }
 
 :root {
-  /* BACKGROUND SYSTEM - DEEP OBSIDIAN GRADIENT */
-  --bg-void: #020202;
-  --bg-base: #08080A; /* From #050505 to #08080A */
-  --bg-surface: #111115; /* From #0A0A0A to #111115 */
-  --bg-elevated: #16161B;
-  --bg-glass: rgba(17, 17, 21, 0.4);
+  /* BACKGROUND SYSTEM - DEEP CINEMATIC AMBIENT */
+  --bg-void: #020203;
+  --bg-base: #06070B; 
+  --bg-surface: #0A0D14;
+  --bg-elevated: #10141D;
+  --bg-glass: rgba(10, 13, 20, 0.4);
 
-  /* ACCENT COLORS - ROSE GOLD / BLUSH / BRONZE */
-  --gold-primary: #D4AF37; /* classic gold */
-  --rose-gold: #B76E79;
-  --rose-gold-light: #E0BFB8;
-  --blush-primary: #F4C2C2;
-  --blush-glow: rgba(244, 194, 194, 0.15);
-  --bronze-dark: #6D4C41;
+  /* ACCENT COLORS - CHROME & MICRO-GOLD */
+  --chrome-primary: #E5E7EB; 
+  --chrome-muted: #9CA3AF;
+  --chrome-dark: #4B5563;
+  --gold-accent: #D4AF37;
+  --deep-blue: #050A15;
 
   /* GRADIENTS */
   --grad-luxury: linear-gradient(135deg, #B76E79 0%, #E0BFB8 50%, #D4AF37 100%);
@@ -30,24 +29,19 @@
   --grad-obsidian: radial-gradient(ellipse at 50% 0%, #1A1A1A 0%, #050505 80%);
 
   /* TEXT COLORS */
-  --text-primary: #FDFBF7; /* Pearl white */
-  --text-secondary: #A0A0A0;
-  --text-muted: #555555;
-  --text-accent: #E0BFB8;
+  --text-primary: #F9FAFB; /* Off-white */
+  --text-secondary: #D1D5DB; /* Silver */
+  --text-muted: #6B7280;
+  --text-accent: #E5E7EB;
 
-  /* GLOW SHADOWS */
-  --glow-blush: 0 0 30px rgba(244, 194, 194, 0.2);
-  --glow-rose: 0 0 40px rgba(183, 110, 121, 0.25);
-  --glow-obsidian: 0 20px 60px rgba(0, 0, 0, 0.8);
+  /* CINEMATIC SHADOWS */
+  --shadow-ambient: 0 10px 40px rgba(0, 0, 0, 0.9);
+  --glow-chrome: 0 0 15px rgba(229, 231, 235, 0.1);
+  --glow-gold: 0 0 10px rgba(212, 175, 55, 0.3);
 
-  /* CYBERPUNK NEON SYSTEM */
-  --neon-cyan: #00F0FF;
-  --neon-purple: #B52BFF;
-  --neon-blue: #0044FF;
-  --grad-zyvora: linear-gradient(90deg, #B52BFF 0%, #00F0FF 100%);
-  --grad-cyber-dark: linear-gradient(135deg, rgba(20,20,30,0.8) 0%, rgba(5,5,10,0.9) 100%);
-  --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4);
-  --glow-purple: 0 0 20px rgba(181, 43, 255, 0.4);
+  /* BRAND GRADIENTS */
+  --grad-zyvora: linear-gradient(90deg, #9CA3AF 0%, #F9FAFB 100%);
+  --grad-cyber-dark: linear-gradient(135deg, #0A0D14 0%, #020203 100%);
   
   --radius-sm: 4px;
   --radius-md: 8px;

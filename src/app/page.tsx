@@ -68,12 +68,12 @@ export default function Home() {
         {/* Search Bar */}
         <div className="relative w-full lg:w-1/3 flex-shrink-0">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search size={18} className="text-[#00F0FF]" />
+            <Search size={18} className="text-white/50" />
           </div>
           <input 
             type="text" 
             placeholder="Search neural base..." 
-            className="w-full bg-[#050508] border border-white/10 rounded-full py-3.5 pl-12 pr-4 text-white text-[11px] font-sora tracking-wide focus:outline-none focus:border-[#00F0FF]/50 focus:ring-1 focus:ring-[#00F0FF]/50 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
+            className="w-full bg-[#0A0A0C] border border-white/10 rounded-full py-3.5 pl-12 pr-4 text-white text-[11px] font-sora tracking-wide focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
           />
           <button className="absolute inset-y-1 right-1 px-4 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center border border-white/5 transition-colors">
             <SlidersHorizontal size={14} className="text-white/70" />
@@ -90,7 +90,7 @@ export default function Home() {
                 onClick={() => setActiveFilter(filter)}
                 className={`px-5 py-2.5 rounded-full text-[10px] font-sora font-bold tracking-widest uppercase transition-all duration-300 border ${
                   activeFilter === filter 
-                    ? "bg-[#00F0FF]/10 border-[#00F0FF]/50 text-[#00F0FF] shadow-[0_0_15px_rgba(0,240,255,0.2)]" 
+                    ? "bg-white/10 border-white/50 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]" 
                     : "bg-transparent border-white/10 text-white/50 hover:border-white/30 hover:text-white"
                 }`}
               >
@@ -104,9 +104,9 @@ export default function Home() {
       {/* NEURAL PICKS Grid */}
       <div className="mb-16">
         <div className="flex items-center gap-3 mb-8">
-          <Sparkles size={20} className="text-[#B52BFF]" />
+          <Sparkles size={20} className="text-white/70" />
           <h2 className="text-2xl font-orbitron font-bold text-white tracking-wide">NEURAL PICKS FOR YOU</h2>
-          <div className="h-[1px] flex-1 bg-gradient-to-r from-[#B52BFF]/30 to-transparent ml-4" />
+          <div className="h-[1px] flex-1 bg-gradient-to-r from-white/20 to-transparent ml-4" />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -25,7 +25,7 @@ const ProductCard = ({ product }: { product: Product }) => {
 
   return (
     <div 
-      className="group relative rounded-xl overflow-hidden bg-[#050508] border border-white/5 transition-all duration-500 hover:border-[#00F0FF]/30 hover:shadow-[0_0_30px_rgba(0,240,255,0.15)] flex flex-col h-[400px]"
+      className="group relative rounded-xl overflow-hidden bg-[#0A0A0C] border border-white/5 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.15,1)] hover:border-white/20 hover:shadow-[0_20px_40px_rgba(0,0,0,0.8)] flex flex-col h-[400px]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -41,9 +41,9 @@ const ProductCard = ({ product }: { product: Product }) => {
         <div className="absolute inset-0 bg-gradient-to-b from-[#050508]/60 via-transparent to-transparent opacity-90" />
 
         {/* AI Badge Top Left */}
-        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-sm bg-[#00F0FF]/10 border border-[#00F0FF]/30 backdrop-blur-md flex items-center gap-1.5 shadow-[0_0_10px_rgba(0,240,255,0.2)]">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#00F0FF] animate-pulse" />
-          <span className="text-[9px] font-sora font-bold text-[#00F0FF] tracking-widest">
+        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-sm bg-black/60 border border-white/10 backdrop-blur-md flex items-center gap-1.5 shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+          <div className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
+          <span className="text-[9px] font-sora font-bold text-white/90 tracking-widest">
             AI MATCH {matchScore}%
           </span>
         </div>
@@ -54,20 +54,20 @@ const ProductCard = ({ product }: { product: Product }) => {
             e.preventDefault();
             setIsLiked(!isLiked);
           }}
-          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all ${
+          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
             isLiked 
-              ? 'bg-[#B52BFF]/20 border border-[#B52BFF]/50 text-[#B52BFF] shadow-[0_0_15px_rgba(181,43,255,0.4)]' 
+              ? 'bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.2)]' 
               : 'bg-black/40 border border-white/10 text-white/50 hover:bg-black/60 hover:text-white'
           }`}
         >
-          <Heart size={14} className={isLiked ? 'fill-[#B52BFF]' : ''} />
+          <Heart size={14} className={isLiked ? 'fill-[#D4AF37]' : ''} />
         </button>
       </div>
 
       {/* Info Section Bottom */}
-      <div className="flex-1 p-5 flex flex-col justify-between relative z-10 bg-gradient-to-b from-[#050508]/0 to-[#0A0A0F]">
+      <div className="flex-1 p-5 flex flex-col justify-between relative z-10 bg-gradient-to-b from-transparent to-[#0A0A0C]">
         <div>
-          <h3 className="text-[13px] font-sora font-bold text-white tracking-widest uppercase mb-1.5 line-clamp-1 group-hover:text-[#00F0FF] transition-colors">
+          <h3 className="text-[13px] font-sora font-bold text-white tracking-widest uppercase mb-1.5 line-clamp-1 group-hover:text-white/80 transition-colors">
             {product.name}
           </h3>
           <p className="text-[10px] font-sora text-white/40 tracking-wider line-clamp-2">
@@ -91,7 +91,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             </div>
           </div>
 
-          <button className="w-10 h-10 rounded-full bg-[#00F0FF]/10 border border-[#00F0FF]/30 text-[#00F0FF] flex items-center justify-center hover:bg-[#00F0FF] hover:text-black hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] transition-all duration-300 transform hover:scale-110 active:scale-95">
+          <button className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/70 flex items-center justify-center hover:bg-white hover:text-black hover:shadow-[0_5px_15px_rgba(255,255,255,0.2)] transition-all duration-300 transform hover:scale-105 active:scale-95">
             <ShoppingCart size={16} />
           </button>
         </div>
