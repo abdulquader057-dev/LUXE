@@ -159,7 +159,7 @@ function AccountSettings() {
           <div className="space-y-4">
              <InputField label="Name" placeholder="Abdul Quader" />
              <InputField label="Email" placeholder="abdul@luxe.ai" />
-             <LuxeButton size="sm">Update Identity</LuxeButton>
+             <LuxeButton size="sm" onClick={() => toast.success("Identity vectors updated.")}>Update Identity</LuxeButton>
           </div>
         </div>
 
@@ -176,7 +176,7 @@ function AccountSettings() {
                 </div>
                 <Toggle active={true} />
              </div>
-             <LuxeButton variant="outline" size="sm" className="w-full">Modify Password</LuxeButton>
+             <LuxeButton variant="outline" size="sm" className="w-full" onClick={() => toast.success("Password reset protocol initiated.")}>Modify Password</LuxeButton>
           </div>
         </div>
       </div>
@@ -194,6 +194,8 @@ function AccountSettings() {
 
 function ClothingPreferences() {
   const [isAROpen, setIsAROpen] = React.useState(false);
+  const [activeMaterial, setActiveMaterial] = React.useState("Silk");
+  const [activeFit, setActiveFit] = React.useState("Oversized");
 
   return (
     <div className="space-y-12">
@@ -218,7 +220,14 @@ function ClothingPreferences() {
             <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em]">Material Filter</h3>
             <div className="flex flex-wrap gap-2">
                {["Silk", "Merino Wool", "Bioplastic", "Chrome Fiber", "Organic Cotton"].map(m => (
-                 <button key={m} className="px-4 py-2 rounded-full border border-white/10 text-[9px] font-mono uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-all">
+                 <button 
+                   key={m} 
+                   onClick={() => setActiveMaterial(m)}
+                   className={cn(
+                     "px-4 py-2 rounded-full border text-[9px] font-mono uppercase tracking-widest transition-all",
+                     activeMaterial === m ? "bg-primary text-black border-primary" : "border-white/10 text-white hover:border-primary/40 hover:text-primary"
+                   )}
+                 >
                    {m}
                  </button>
                ))}
@@ -231,10 +240,14 @@ function ClothingPreferences() {
               <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em]">Fit Profile</h3>
               <div className="grid grid-cols-3 gap-2">
                  {["Oversized", "Athletic", "Skin"].map(f => (
-                   <button key={f} className={cn(
-                     "p-4 rounded-2xl border text-[9px] font-mono uppercase tracking-widest transition-all",
-                     f === "Oversized" ? "bg-primary text-black border-primary" : "border-white/5 text-white/40"
-                   )}>
+                   <button 
+                     key={f} 
+                     onClick={() => setActiveFit(f)}
+                     className={cn(
+                       "p-4 rounded-2xl border text-[9px] font-mono uppercase tracking-widest transition-all",
+                       activeFit === f ? "bg-primary text-black border-primary" : "border-white/5 text-white/40 hover:border-primary/40"
+                     )}
+                   >
                      {f}
                    </button>
                  ))}
@@ -280,8 +293,8 @@ function AccessoryHub() {
                <span className="text-[10px] font-mono text-primary/40 uppercase tracking-[1em] animate-pulse">Initializing Virtual Turntable</span>
             </div>
             <div className="flex justify-center gap-4">
-               <LuxeButton size="sm" variant="outline">Calibrate View</LuxeButton>
-               <LuxeButton size="sm">Capture Snapshot</LuxeButton>
+               <LuxeButton size="sm" variant="outline" onClick={() => toast.success("Turntable calibrated.")}>Calibrate View</LuxeButton>
+               <LuxeButton size="sm" onClick={() => toast.success("High-res snapshot saved to archive.")}>Capture Snapshot</LuxeButton>
             </div>
          </div>
       </div>

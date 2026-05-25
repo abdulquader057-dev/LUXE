@@ -18,7 +18,7 @@ const Navbar = () => {
   const cartControls = useAnimation();
   const { t } = useLanguage();
   const { user } = useAuth();
-  const { currency, setCurrency, cartCount } = useCommerce();
+  const { currency, setCurrency, cartCount, toggleCart } = useCommerce();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -102,7 +102,7 @@ const Navbar = () => {
             >
               <Globe size={16} />
             </button>
-            <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors relative">
+            <button onClick={toggleCart} className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors relative">
               <ShoppingBag size={16} />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#D4AF37] rounded-full flex items-center justify-center text-[7px] font-bold text-[#050508] shadow-[0_0_8px_rgba(212,175,55,0.4)]">
@@ -141,3 +141,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

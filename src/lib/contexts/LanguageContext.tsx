@@ -42,6 +42,13 @@ const languages: Record<LanguageCode, LanguageData> = {
       "chat.placeholder": "Ask LUXE AI...",
       "chat.online": "System Sync Online",
       "chat.listening": "Listening...",
+      "hero.titleThe": "THE",
+      "hero.titleArchive": "ARCHIVE.",
+      "hero.subtitle": "Created by LUXE Intelligence. Engineered for the future. Explore the global wardrobe.",
+      "hero.exploreNow": "Explore Now",
+      "hero.styleMatch": "STYLE MATCH",
+      "hero.trending": "TRENDING",
+      "hero.aiRecommended": "AI RECOMMENDED",
     }
   },
   hi: {
@@ -292,3 +299,4 @@ export function useLanguage() {
   }
   return context;
 }
+

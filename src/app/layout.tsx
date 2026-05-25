@@ -7,6 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import { CommerceProvider } from "@/lib/contexts/CommerceContext";
 import { LanguageProvider } from "@/lib/contexts/LanguageContext";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
+import CartSidebar from "@/components/ui/CartSidebar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
@@ -79,7 +80,8 @@ export default function RootLayout({
         <LanguageProvider>
         <AuthProvider>
         <CommerceProvider>
-          <Sidebar />
+                  <Sidebar />
+          <CartSidebar />
           
           <main className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative scroll-smooth custom-scrollbar">
             <Navbar />
@@ -94,7 +96,7 @@ export default function RootLayout({
             <ZyraChat />
             <BackToTop />
           </div>
-        </CommerceProvider>
+                </CommerceProvider>
         </AuthProvider>
         </LanguageProvider>
         <Toaster position="top-center" toastOptions={{ style: { background: '#050508', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' } }} />
@@ -102,3 +104,4 @@ export default function RootLayout({
     </html>
   );
 }
+

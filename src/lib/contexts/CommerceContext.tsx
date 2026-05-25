@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 export type Currency = "INR" | "USD" | "EUR" | "GBP";
 
@@ -19,7 +20,11 @@ interface CommerceContextType {
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   cartCount: number;
+  totalPrice: number;
+  isCartOpen: boolean;
+  toggleCart: () => void;
   convertPrice: (priceUSD: number) => { amount: number; symbol: string };
 }
 
@@ -42,6 +47,7 @@ const currencySymbols = {
 export function CommerceProvider({ children }: { children: React.ReactNode }) {
   const [currency, setCurrency] = useState<Currency>("USD");
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const savedCurrency = localStorage.getItem("luxe-currency") as Currency;
@@ -64,13 +70,15 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
         newCart = prev.map((i) =>
           i.id === item.id && i.size === item.size ? { ...i, quantity: i.quantity + item.quantity } : i
         );
+        toast.success(`Increased quantity for ${item.name}`);
       } else {
         newCart = [...prev, item];
+        toast.success(`Added ${item.name} to Arsenal`);
       }
       localStorage.setItem("luxe-cart", JSON.stringify(newCart));
       return newCart;
     });
-    alert(`Added ${item.name} to cart!`);
+    setIsCartOpen(true);
   };
 
   const removeFromCart = (id: string) => {
@@ -79,9 +87,22 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("luxe-cart", JSON.stringify(newCart));
       return newCart;
     });
+    toast.error("Item removed from Arsenal");
   };
 
+  const updateQuantity = (id: string, quantity: number) => {
+    if (quantity < 1) return removeFromCart(id);
+    setCart((prev) => {
+      const newCart = prev.map(i => i.id === id ? { ...i, quantity } : i);
+      localStorage.setItem("luxe-cart", JSON.stringify(newCart));
+      return newCart;
+    });
+  };
+
+  const toggleCart = () => setIsCartOpen(!isCartOpen);
+
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const totalPrice = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
   const convertPrice = (priceUSD: number) => {
     const converted = priceUSD * exchangeRates[currency];
@@ -99,7 +120,11 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
         cart,
         addToCart,
         removeFromCart,
+        updateQuantity,
         cartCount,
+        totalPrice,
+        isCartOpen,
+        toggleCart,
         convertPrice,
       }}
     >

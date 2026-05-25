@@ -3,8 +3,14 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Sparkles, TrendingUp } from "lucide-react";
+import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const Hero = () => {
+  const { t } = useLanguage();
+  const router = useRouter();
+
   return (
     <div className="relative w-full rounded-2xl overflow-hidden bg-[#050508] border border-white/5 mb-8 min-h-[300px] md:min-h-[400px] flex items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
       
@@ -35,22 +41,20 @@ const Hero = () => {
             transition={{ delay: 0.2, duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
           >
             <h1 className="text-[clamp(3rem,6vw,6rem)] font-bebas leading-[0.85] tracking-tight text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] mb-4">
-              THE <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-white">ARCHIVE.</span>
+              {t("hero.titleThe")} <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-white">{t("hero.titleArchive")}</span>
             </h1>
             
             <p className="text-[11px] font-sora text-white/50 tracking-widest leading-relaxed mb-8 max-w-sm">
-              Created by LUXE Intelligence. <br/>
-              Engineered for the future. <br/>
-              Explore the global wardrobe.
+              {t("hero.subtitle")}
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              <button className="px-8 py-3 rounded-md bg-white text-black text-[10px] font-sora font-bold tracking-widest uppercase transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95">
-                Explore Now
+              <button onClick={() => router.push('/shop')} className="px-8 py-3 rounded-md bg-white text-black text-[10px] font-sora font-bold tracking-widest uppercase transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95">
+                {t("hero.exploreNow")}
               </button>
               
-              <button className="px-8 py-3 rounded-md bg-white/5 border border-white/10 text-white text-[10px] font-sora font-bold tracking-widest uppercase transition-all hover:bg-white/10 flex items-center gap-2 group">
+              <button onClick={() => toast("AI Stylist sequence initialized. Opening Zyra...")} className="px-8 py-3 rounded-md bg-white/5 border border-white/10 text-white text-[10px] font-sora font-bold tracking-widest uppercase transition-all hover:bg-white/10 flex items-center gap-2 group">
                 AI Stylist
                 <Sparkles size={14} className="text-white group-hover:animate-pulse" />
               </button>
@@ -68,7 +72,7 @@ const Hero = () => {
             className="bg-[#050508]/80 backdrop-blur-md border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center relative overflow-hidden"
           >
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-50" />
-            <div className="text-[9px] font-sora text-white/70 tracking-widest font-bold mb-2">STYLE MATCH</div>
+            <div className="text-[9px] font-sora text-white/70 tracking-widest font-bold mb-2">{t("hero.styleMatch")}</div>
             <div className="text-3xl font-orbitron font-bold text-white">98<span className="text-sm text-white/50">%</span></div>
           </motion.div>
 
@@ -80,7 +84,7 @@ const Hero = () => {
             className="bg-[#050508]/80 backdrop-blur-md border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center relative overflow-hidden"
           >
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-50" />
-            <div className="text-[9px] font-sora text-white/70 tracking-widest font-bold mb-2">TRENDING</div>
+            <div className="text-[9px] font-sora text-white/70 tracking-widest font-bold mb-2">{t("hero.trending")}</div>
             <div className="text-3xl font-orbitron font-bold text-white flex items-center gap-2">
               #1
               <TrendingUp size={20} className="text-white/70" />
@@ -94,7 +98,7 @@ const Hero = () => {
             transition={{ delay: 0.8, duration: 1.2, ease: "easeOut" }}
             className="bg-[#050508]/80 backdrop-blur-md border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center relative overflow-hidden"
           >
-            <div className="text-[9px] font-sora text-white/50 tracking-widest font-bold mb-3">AI RECOMMENDED</div>
+            <div className="text-[9px] font-sora text-white/50 tracking-widest font-bold mb-3">{t("hero.aiRecommended")}</div>
             <div className="flex items-end justify-center gap-1.5 h-6 w-full">
               {[40, 70, 45, 90, 60, 30, 80, 50].map((h, i) => (
                 <div key={i} className="w-1.5 bg-white rounded-t-sm opacity-50" style={{ height: `${h}%` }} />

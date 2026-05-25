@@ -41,11 +41,14 @@ const ShopContent = () => {
 
   const categories = [
     { id: "all", name: "Complete Archive" },
+    { id: "sneakers", name: "Sneakers" },
+    { id: "streetwear", name: "Streetwear" },
+    { id: "luxury", name: "Luxury" },
+    { id: "accessories", name: "Accessories" },
+    { id: "watches", name: "Watches" },
+    { id: "Outerwear", name: "Outerwear" },
     { id: "Upper", name: "Uppers" },
     { id: "Lower", name: "Lowers" },
-    { id: "Footwear", name: "Footwear" },
-    { id: "Outerwear", name: "Outerwear" },
-    { id: "accessories", name: "Hardware" },
   ];
 
   const filteredProducts = dbProducts.filter((p) => {
