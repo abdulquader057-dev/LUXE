@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, BrainCircuit, Wand2, Palette, Ruler, ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { MOCK_PRODUCTS } from "@/data/products";
 import ProductCard from "@/components/shop/ProductCard";
 
 const AIStylePage = () => {
@@ -14,9 +15,19 @@ const AIStylePage = () => {
   const [allProducts, setAllProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("products").select("*").then(({ data }) => {
-      if (data && data.length > 0) setAllProducts(data);
-    });
+    async function fetchProducts() {
+      try {
+        const { data } = await supabase.from("products").select("*");
+        if (data && data.length > 0) {
+          setAllProducts(data);
+        } else {
+          setAllProducts(MOCK_PRODUCTS);
+        }
+      } catch (err) {
+        setAllProducts(MOCK_PRODUCTS);
+      }
+    }
+    fetchProducts();
   }, []);
 
   const nextStep = () => setStep(step + 1);

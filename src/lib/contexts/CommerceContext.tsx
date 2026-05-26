@@ -55,6 +55,10 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
 
     const savedCart = localStorage.getItem("luxe-cart");
     if (savedCart) setCart(JSON.parse(savedCart));
+
+    // Load saved UI Theme color
+    const savedTheme = localStorage.getItem("luxe-theme-color") || "#00f2ff";
+    document.documentElement.style.setProperty("--primary-color", savedTheme);
   }, []);
 
   const handleSetCurrency = (cur: Currency) => {

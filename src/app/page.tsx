@@ -18,6 +18,7 @@ const filters = [
 ];
 
 import { supabase } from "@/lib/supabase";
+import { MOCK_PRODUCTS } from "@/data/products";
 
 export default function Home() {
   const [activeFilter, setActiveFilter] = useState("ALL COLLECTIONS");
@@ -26,9 +27,19 @@ export default function Home() {
   const router = useRouter();
 
   React.useEffect(() => {
-    supabase.from("products").select("*").then(({ data }) => {
-      if (data) setProducts(data);
-    });
+    async function fetchProducts() {
+      try {
+        const { data } = await supabase.from("products").select("*");
+        if (data && data.length > 0) {
+          setProducts(data);
+        } else {
+          setProducts(MOCK_PRODUCTS);
+        }
+      } catch (err) {
+        setProducts(MOCK_PRODUCTS);
+      }
+    }
+    fetchProducts();
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {

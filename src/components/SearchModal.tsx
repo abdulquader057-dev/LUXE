@@ -8,6 +8,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import { supabase } from "@/lib/supabase";
+import { MOCK_PRODUCTS } from "@/data/products";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -24,12 +25,18 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
 
   // Load products from Supabase on mount
   useEffect(() => {
-    supabase.from("products").select("*").then(({ data }) => {
-      if (data && data.length > 0) {
-        setAllProducts(data);
-        setResults(data.slice(0, 4));
+    async function fetchProducts() {
+      try {
+        const { data } = await supabase.from("products").select("*");
+        const prodList = data && data.length > 0 ? data : MOCK_PRODUCTS;
+        setAllProducts(prodList);
+        setResults(prodList.slice(0, 4));
+      } catch (err) {
+        setAllProducts(MOCK_PRODUCTS);
+        setResults(MOCK_PRODUCTS.slice(0, 4));
       }
-    });
+    }
+    fetchProducts();
   }, []);
 
   useEffect(() => {

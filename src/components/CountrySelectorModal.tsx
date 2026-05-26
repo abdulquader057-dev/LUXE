@@ -18,11 +18,7 @@ const countries = [
   { code: "ar", currency: "USD", name: "Saudi Arabia", flag: "🇸🇦" },
   { code: "en", currency: "EUR", name: "France", flag: "🇫🇷" },
   { code: "en", currency: "EUR", name: "Germany", flag: "🇩🇪" },
-  { code: "hi", currency: "INR", name: "India (Hindi)", flag: "🇮🇳" },
-  { code: "te", currency: "INR", name: "India (Telugu)", flag: "🇮🇳" },
-  { code: "ta", currency: "INR", name: "India (Tamil)", flag: "🇮🇳" },
-  { code: "mr", currency: "INR", name: "India (Marathi)", flag: "🇮🇳" },
-  { code: "ml", currency: "INR", name: "India (Malayalam)", flag: "🇮🇳" },
+  { code: "en", currency: "INR", name: "India", flag: "🇮🇳" },
   { code: "ur", currency: "INR", name: "Pakistan", flag: "🇵🇰" },
 ];
 
@@ -46,7 +42,7 @@ export const CountrySelectorModal = ({ isOpen, onClose }: CountrySelectorModalPr
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/85 backdrop-blur-md"
         />
         
         <motion.div 
@@ -54,31 +50,31 @@ export const CountrySelectorModal = ({ isOpen, onClose }: CountrySelectorModalPr
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-2xl bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[80vh]"
+          className="relative w-full max-w-2xl bg-[#0a0a0f]/95 border border-white/10 backdrop-blur-2xl rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,240,255,0.05)] flex flex-col max-h-[80vh]"
         >
           {/* Header */}
-          <div className="flex flex-col items-center justify-center py-6 border-b border-gray-100 relative bg-white">
+          <div className="flex flex-col items-center justify-center py-6 border-b border-white/5 relative bg-transparent">
             <button 
               onClick={onClose}
-              className="absolute right-4 top-4 p-2 text-gray-400 hover:text-black transition-colors rounded-full hover:bg-gray-100"
+              className="absolute right-4 top-4 p-2 text-white/40 hover:text-white transition-colors rounded-full hover:bg-white/5"
             >
               <X size={20} />
             </button>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Welcome to LUXE</h2>
-            <p className="text-sm text-gray-500">Please select your country for shopping</p>
+            <h2 className="text-xl font-display font-light italic text-white mb-1">Welcome to LUXE</h2>
+            <p className="text-xs font-sora text-white/40 uppercase tracking-wider">Please select your country for shopping</p>
           </div>
 
           {/* Grid */}
-          <div className="overflow-y-auto p-4 custom-scrollbar bg-white">
+          <div className="overflow-y-auto p-4 custom-scrollbar bg-transparent">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
               {countries.map((country, i) => (
                 <button
                   key={i}
                   onClick={() => handleSelect(country)}
-                  className="flex flex-col items-center justify-center p-4 border border-gray-100 rounded-xl hover:border-black hover:shadow-md transition-all group bg-white"
+                  className="flex flex-col items-center justify-center p-4 border border-white/5 bg-white/[0.02] rounded-xl hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg transition-all group"
                 >
                   <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">{country.flag}</span>
-                  <span className="text-xs font-semibold text-gray-800 text-center">{country.name}</span>
+                  <span className="text-[11px] font-sora font-semibold text-white/70 text-center uppercase tracking-wider">{country.name}</span>
                 </button>
               ))}
             </div>

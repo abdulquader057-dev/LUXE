@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @theme {
+  --color-primary: var(--primary-color, #00f2ff);
+  --color-accent: var(--accent-color, #c084fc);
   --font-sora: var(--font-sora);
   --font-rajdhani: var(--font-rajdhani);
   --font-orbitron: var(--font-orbitron);
@@ -9,6 +11,8 @@
 }
 
 :root {
+  --primary-color: #00f2ff;
+  --accent-color: #c084fc;
   /* BACKGROUND SYSTEM - DEEP CINEMATIC AMBIENT */
   --bg-void: #020203;
   --bg-base: #06070B; 

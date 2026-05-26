@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import AIChatbot from "@/components/ai/AIChatbot";
 import ProductCard from "@/components/shop/ProductCard";
 import { supabase } from "@/lib/supabase";
+import { MOCK_PRODUCTS } from "@/data/products";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import MagneticWrapper from "@/components/MagneticWrapper";
@@ -17,9 +18,19 @@ const ShopContent = () => {
   const [dbProducts, setDbProducts] = React.useState<any[]>([]);
 
   React.useEffect(() => {
-    supabase.from("products").select("*").then(({ data }) => {
-      if (data) setDbProducts(data);
-    });
+    async function fetchProducts() {
+      try {
+        const { data } = await supabase.from("products").select("*");
+        if (data && data.length > 0) {
+          setDbProducts(data);
+        } else {
+          setDbProducts(MOCK_PRODUCTS);
+        }
+      } catch (err) {
+        setDbProducts(MOCK_PRODUCTS);
+      }
+    }
+    fetchProducts();
   }, []);
   const searchParams = useSearchParams();
   const router = useRouter();
