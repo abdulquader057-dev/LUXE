@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const API_KEYS = [
   process.env.NEXT_PUBLIC_GEMINI_API_KEY || '',
-  'AIzaSyBaY7RnDcRRxE3ytOZfirGDC1OXR4C1urk'
+  process.env.NEXT_PUBLIC_GEMINI_API_KEY_2 || 'AIzaSyBaY7RnDcRRxE3ytOZfirGDC1OXR4C1urk',
 ].filter(Boolean);
 
 let currentKeyIndex = 0;
