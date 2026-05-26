@@ -18,11 +18,24 @@ export default function AuthPortal() {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
-  const { loginAsDemo } = useAuth();
+  const { user, isAdmin, isLoading: authLoading, loginAsDemo } = useAuth();
+
+  React.useEffect(() => {
+    if (!authLoading && user) {
+      if (isAdmin) {
+        router.push("/admin");
+      } else {
+        router.push("/profile");
+      }
+    }
+  }, [user, isAdmin, authLoading, router]);
 
   const handleBypassAuth = () => {
     loginAsDemo();
-    router.push("/profile");
+    // Wait a brief moment for state to sync before router push
+    setTimeout(() => {
+      router.push("/profile");
+    }, 100);
   };
 
   const handleAuth = async (e: React.FormEvent) => {

@@ -55,8 +55,20 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [cardCvv, setCardCvv] = useState("");
   const [upiCopied, setUpiCopied] = useState(false);
 
+  // Compliance Identifiers
+  const [invoiceNo, setInvoiceNo] = useState("");
+  const [gstin] = useState("36ABCDE1234F1Z5");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Generate unique invoice number on open
+  useEffect(() => {
+    if (isOpen) {
+      const orderIdNumber = Math.floor(100000 + Math.random() * 900000);
+      setInvoiceNo(`INV/2026/ORD-${orderIdNumber}`);
+    }
+  }, [isOpen]);
 
   // Automatically adjust payment method if COD becomes blocked
   const isCodBlocked = totalPrice > 1999;
@@ -74,8 +86,28 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   };
 
   // Get shipping cost
+  const [activePlan, setActivePlan] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      const plan = localStorage.getItem("luxe-active-plan");
+      setActivePlan(plan);
+    }
+  }, [isOpen]);
+
+  const getDiscountRate = () => {
+    if (activePlan === "Luxe Insider") return 0.05;
+    if (activePlan === "Luxe Elite") return 0.15;
+    if (activePlan === "Neural Vanguard") return 0.25;
+    return 0;
+  };
+
+  const discountRate = getDiscountRate();
+  const discountAmount = Math.round(totalPrice * discountRate);
+  const discountedSubtotal = totalPrice - discountAmount;
+
   const getDeliveryFee = () => {
-    if (totalPrice > 1999) return 0; // Free delivery for orders > 1999
+    if (discountedSubtotal > 1999) return 0; // Free delivery for orders > 1999
     if (distance !== null) {
       if (distance <= 5) return 0;
       return Math.round(distance * 7.5); // 7.5 per km overall
@@ -84,11 +116,23 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   };
 
   const deliveryFee = getDeliveryFee();
-  const gstRate = totalPrice <= 1000 ? 0.05 : 0.12;
-  const gstAmount = Math.round(totalPrice * gstRate);
-  const cgstAmount = Math.round(gstAmount / 2);
-  const sgstAmount = gstAmount - cgstAmount;
-  const grandTotal = totalPrice + gstAmount + deliveryFee;
+
+  // Item-by-item GST Calculation
+  let cgstAmount = 0;
+  let sgstAmount = 0;
+  
+  cart.forEach((item) => {
+    // Apply discount rate to item price
+    const discountedItemPrice = item.price * (1 - discountRate);
+    const rate = discountedItemPrice <= 1000 ? 0.05 : 0.12;
+    const itemCgst = Math.round((discountedItemPrice * (rate / 2)) * item.quantity);
+    const itemSgst = Math.round((discountedItemPrice * (rate / 2)) * item.quantity);
+    cgstAmount += itemCgst;
+    sgstAmount += itemSgst;
+  });
+
+  const gstAmount = cgstAmount + sgstAmount;
+  const grandTotal = discountedSubtotal + gstAmount + deliveryFee;
 
   // Auto-detect address using Geolocation and Nominatim
   const detectLocation = () => {
@@ -176,8 +220,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     setLoading(true);
 
     try {
-      const orderIdNumber = Math.floor(1000 + Math.random() * 9000);
+      const orderIdNumber = invoiceNo.replace("INV/2026/ORD-", "");
       const generatedOrderId = `LX-ORD${orderIdNumber}`;
+      const invoiceNumber = invoiceNo;
       
       const fullDeliveryAddress = `${address}, Landmark: ${landmark || "None"}, City: ${city}, State: ${state}, ZIP: ${pincode}, Instructions: ${instructions || "None"}`;
 
@@ -218,8 +263,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
       // 3. Format the dispatch payload for WhatsApp message
       const itemsText = cart
-        .map((i) => `- ${i.name} (Size: ${i.size || "Standard"}) x${i.quantity} | ${formatPrice(i.price * i.quantity)}`)
-        .join("\n");
+        .map((i) => `${i.name} (${i.color || "White"}, Size ${i.size || "L"})\n₹${i.price} × ${i.quantity} = ₹${i.price * i.quantity}`)
+        .join("\n\n");
 
       const paymentMethodNames = {
         card: "Visa / Credit Card",
@@ -227,42 +272,49 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         cod: "Cash on Delivery (COD)"
       };
 
-      const messageText = `🌟 LUXE OS DISPATCH UPLINK 🌟
-------------------------------
-Order ID: ${generatedOrderId}
-Date: ${new Date().toLocaleString()}
+      const addressVerifiedFlag = coords 
+        ? "✅ GPS Verified" 
+        : "⚠️ Pending Verification (Manual Entry)";
 
-👤 CUSTOMER DIRECTIVE:
+      const messageText = `🌟 LUXE ORDER DISPATCH 🌟
+━━━━━━━━━━━━━━━━━━━━━━━
+🆔 Order ID: ${generatedOrderId}
+📅 Date: ${new Date().toLocaleDateString('en-GB')}, ${new Date().toLocaleTimeString()}
+🧾 Invoice No: ${invoiceNumber}
+🏢 GSTIN: 36ABCDE1234F1Z5
+🔍 Location Status: ${addressVerifiedFlag}
+
+👤 Customer Details
 Name: ${name}
 Phone: ${phone}
 Email: ${email}
 
-📍 COORDINATES (ADDRESS):
-Address: ${address}
-Landmark: ${landmark || "N/A"}
-City: ${city}
-State: ${state}
-Pincode/ZIP: ${pincode}
-Instructions: ${instructions || "None"}
-Distance from Base: ${distance ? `${distance.toFixed(2)} km` : "Not calculated"}
+📍 Delivery Address
+${address}
+${city}, ${state} - ${pincode}
+📝 Note: ${instructions || "None"}
+📍 Distance: ${distance ? `${distance.toFixed(1)} km from Base` : "Not calculated"}
 
-💳 PAYMENT METRIC:
-Mode: ${paymentMethodNames[paymentMethod]}
-Status: ${paymentMethod === "cod" ? "Pay on Delivery" : "Prepaid Transfer Pending"}
-${couponCode ? `Prepaid Reward Coupon: ${couponCode} (10% OFF Saved)` : ""}
-
-🛍️ ARTIFACT DETAILS:
+🛍️ Order Summary
 ${itemsText}
 
-------------------------------
-SUBTOTAL: ${formatPrice(totalPrice)}
-CGST (${(gstRate * 100 / 2).toFixed(1)}%): ${formatPrice(cgstAmount)}
-SGST (${(gstRate * 100 / 2).toFixed(1)}%): ${formatPrice(sgstAmount)}
-TOTAL GST (${Math.round(gstRate * 100)}%): ${formatPrice(gstAmount)}
-DELIVERY: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
-------------------------------
-GRAND TOTAL: ${formatPrice(grandTotal)}
-------------------------------
+💳 Payment Mode
+${paymentMethodNames[paymentMethod]} - Status: ${paymentMethod === "cod" ? "Pay on Delivery" : "Prepaid (Pending Verification)"}
+${couponCode ? `Prepaid Reward Coupon: ${couponCode} (10% OFF Saved)` : ""}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+💰 Bill Breakdown
+Subtotal: ${formatPrice(totalPrice)}
+${discountAmount > 0 ? `Membership Discount (${Math.round(discountRate * 100)}%): -${formatPrice(discountAmount)}\nDiscounted Subtotal: ${formatPrice(discountedSubtotal)}` : ""}
+CGST (${discountedSubtotal <= 1000 ? "2.5%" : "6.0%"}): ${formatPrice(cgstAmount)}
+SGST (${discountedSubtotal <= 1000 ? "2.5%" : "6.0%"}): ${formatPrice(sgstAmount)}
+Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
+━━━━━━━━━━━━━━━━━━━━━━━
+🧾 Total Payable: ${formatPrice(grandTotal)}
+━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ Please confirm availability before dispatch.
+🚚 Dispatch after confirmation only.
 *This dispatch has been synced with LUXE OS. The owner (+91 79953 38472) will coordinate immediate shipping.*`;
 
       // 4. Clear Cart & Close modals
@@ -637,21 +689,41 @@ GRAND TOTAL: ${formatPrice(grandTotal)}
                   <span>Subtotal</span>
                   <span className="text-white">{formatPrice(totalPrice)}</span>
                 </div>
+                {discountAmount > 0 && (
+                  <>
+                    <div className="flex justify-between text-green-400">
+                      <span>Membership Discount ({Math.round(discountRate * 100)}%)</span>
+                      <span>-{formatPrice(discountAmount)}</span>
+                    </div>
+                    <div className="flex justify-between text-white/60">
+                      <span>Discounted Subtotal</span>
+                      <span>{formatPrice(discountedSubtotal)}</span>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between">
-                  <span>CGST ({(gstRate * 100 / 2).toFixed(1)}%)</span>
+                  <span>CGST ({discountedSubtotal <= 1000 ? "2.5%" : "6.0%"})</span>
                   <span className="text-white">{formatPrice(cgstAmount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>SGST ({(gstRate * 100 / 2).toFixed(1)}%)</span>
+                  <span>SGST ({discountedSubtotal <= 1000 ? "2.5%" : "6.0%"})</span>
                   <span className="text-white">{formatPrice(sgstAmount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Total GST ({Math.round(gstRate * 100)}%)</span>
+                  <span>Total GST ({discountedSubtotal <= 1000 ? "5%" : "12%"})</span>
                   <span className="text-white">{formatPrice(gstAmount)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery Charges</span>
                   <span className="text-white">{deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}</span>
+                </div>
+                <div className="flex justify-between border-t border-white/5 pt-2 text-[8px] text-white/30">
+                  <span>GSTIN Compliance</span>
+                  <span>{gstin}</span>
+                </div>
+                <div className="flex justify-between text-[8px] text-white/30">
+                  <span>Invoice Identifier</span>
+                  <span>{invoiceNo}</span>
                 </div>
                 {distance !== null && (
                   <div className="text-[8px] text-white/20 text-right">

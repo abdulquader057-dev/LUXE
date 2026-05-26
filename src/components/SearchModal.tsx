@@ -167,58 +167,97 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
 
                {/* Right Column: Results */}
                <div>
-                  <div className="flex items-center justify-between mb-6 md:mb-8">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
                      <h4 className="text-[9px] md:text-[10px] font-bold tracking-[0.3em] md:tracking-[0.5em] text-white/20 uppercase">
                         {query ? "SEARCH RESULTS" : "FEATURED"}
                      </h4>
+                     {query && results.length > 0 && (
+                       <div className="flex items-center gap-2 text-[9px] font-mono text-[#00f2ff] bg-[#00f2ff]/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                          <Sparkles size={10} className="animate-pulse" />
+                          <span>We found {results.length} products matching your request. Tap to inspect.</span>
+                       </div>
+                     )}
                      <span className="text-[9px] md:text-[10px] font-bold text-white/20 uppercase">
                         {results.length} found
                      </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                     {results.map((product, i) => (
-                       <motion.div
-                         key={product.id}
-                         initial={{ opacity: 0, y: 20 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         transition={{ delay: i * 0.05 }}
-                       >
-                         <Link 
-                           href={`/product/${product.id}`}
-                           onClick={onClose}
-                           className="group block bg-white/3 border border-white/5 hover:border-white/15 rounded-2xl p-4 transition-all"
+                     {results.map((product, i) => {
+                       const stockVal = product.stock !== undefined ? product.stock : (product.stock_quantity !== undefined ? product.stock_quantity : 0);
+                       const isAvailable = stockVal > 0;
+                       return (
+                         <motion.div
+                           key={product.id}
+                           initial={{ opacity: 0, y: 20 }}
+                           animate={{ opacity: 1, y: 0 }}
+                           transition={{ delay: i * 0.05 }}
                          >
-                            <div className="aspect-[4/3] rounded-xl overflow-hidden relative mb-4 bg-white/5">
-                               <Image 
-                                 src={getProductImage(product)} 
-                                 alt={product.name} 
-                                 fill 
-                                 className="object-cover group-hover:scale-105 transition-transform duration-700" 
-                               />
-                               <div className="absolute top-3 right-3 px-2 py-1 bg-black/70 rounded-lg border border-white/10">
-                                  <span className="text-[10px] font-orbitron font-bold text-white">{convertPrice(product.price).symbol}{convertPrice(product.price).amount}</span>
-                               </div>
-                            </div>
-                            <div className="px-1">
-                               <div className="flex justify-between items-start mb-1">
-                                  <h5 className="font-sora font-bold text-sm tracking-wide text-white group-hover:text-white/80 transition-colors line-clamp-1">{product.name}</h5>
-                                  <Zap size={14} className="text-white/30 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                               </div>
-                               <p className="text-[10px] text-white/30 uppercase tracking-widest font-sora">{product.category}</p>
-                            </div>
-                         </Link>
-                       </motion.div>
-                     ))}
+                           <Link 
+                             href={`/product/${product.id}`}
+                             onClick={onClose}
+                             className="group block bg-white/3 border border-white/5 hover:border-white/15 rounded-2xl p-4 transition-all"
+                           >
+                              <div className="aspect-[4/3] rounded-xl overflow-hidden relative mb-4 bg-white/5">
+                                 <Image 
+                                   src={getProductImage(product)} 
+                                   alt={product.name} 
+                                   fill 
+                                   className="object-cover group-hover:scale-105 transition-transform duration-700" 
+                                 />
+                                 <div className="absolute top-3 right-3 px-2 py-1 bg-black/70 rounded-lg border border-white/10">
+                                    <span className="text-[10px] font-orbitron font-bold text-white">{convertPrice(product.price).symbol}{convertPrice(product.price).amount}</span>
+                                 </div>
+                              </div>
+                              <div className="px-1">
+                                 <div className="flex justify-between items-start mb-1">
+                                    <h5 className="font-sora font-bold text-sm tracking-wide text-white group-hover:text-white/80 transition-colors line-clamp-1">{product.name}</h5>
+                                    <Zap size={14} className="text-white/30 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                                 </div>
+                                 <div className="flex justify-between items-center mt-1">
+                                    <p className="text-[10px] text-white/30 uppercase tracking-widest font-sora">{product.category}</p>
+                                    <span className={cn(
+                                      "text-[9px] font-mono uppercase tracking-wider font-bold",
+                                      isAvailable ? "text-green-400" : "text-red-500"
+                                    )}>
+                                      {isAvailable ? "✅ In Stock" : "❌ Out of Stock"}
+                                    </span>
+                                 </div>
+                              </div>
+                           </Link>
+                         </motion.div>
+                       );
+                     })}
                   </div>
 
                   {results.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-20 text-center">
-                       <div className="w-20 h-20 rounded-full bg-white/3 border border-white/5 flex items-center justify-center mb-6 text-white/10">
+                    <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
+                       <div className="w-20 h-20 rounded-full bg-white/3 border border-white/5 flex items-center justify-center text-white/10">
                           <Search size={40} />
                        </div>
-                       <h5 className="text-xl font-orbitron font-bold mb-2 text-white/50">NO RESULTS</h5>
-                       <p className="text-white/30 text-sm font-sora">Try searching for "abaya", "sneakers", or "watches".</p>
+                       <h5 className="text-xl font-orbitron font-bold text-white/50 tracking-widest">NO MATCHING DROPS</h5>
+                       <p className="text-white/40 text-xs font-mono max-w-md bg-red-500/5 border border-red-500/10 rounded-2xl p-4 leading-relaxed uppercase tracking-wider">
+                          Notice: No matching drops found. Try asking our AI Chatbot in the bottom-right corner to check custom orders!
+                       </p>
+                       <button
+                         onClick={() => {
+                           onClose();
+                           try {
+                             const chatBtn = document.getElementById("zyrachat-trigger") || document.querySelector(".zyrachat-btn");
+                             if (chatBtn) {
+                               (chatBtn as HTMLElement).click();
+                             } else {
+                               localStorage.setItem("zyrachat-open", "true");
+                               window.dispatchEvent(new Event("storage"));
+                             }
+                           } catch (e) {
+                             console.error("Chat trigger error:", e);
+                           }
+                         }}
+                         className="px-6 py-3 bg-[#00f2ff] hover:bg-[#00f2ff]/80 text-black text-[10px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer shadow-[0_0_15px_rgba(0,242,255,0.3)]"
+                       >
+                         Launch AI Chatbot
+                       </button>
                     </div>
                   )}
                </div>

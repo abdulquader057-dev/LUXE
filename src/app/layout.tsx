@@ -15,6 +15,7 @@ import ScrollProgress from "@/components/ScrollProgress";
 import EntranceAnimation from "@/components/EntranceAnimation";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { Toaster } from "react-hot-toast";
+import ThemeColorLoader from "@/components/ThemeColorLoader";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -71,6 +72,7 @@ export default function RootLayout({
       className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth`}
     >
       <body className="min-h-full flex bg-transparent text-white selection:bg-[#00F0FF]/30 selection:text-white relative overflow-hidden h-screen w-screen">
+        <ThemeColorLoader />
         <AnimatedBackground />
         <EntranceAnimation />
         <ScrollProgress />

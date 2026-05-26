@@ -94,7 +94,7 @@ const ProductPage = () => {
           {/* Left: Image Architecture */}
           <MotionContainer animation="stagger" className="space-y-8">
             <MotionItem animation="scale" className="relative group w-full">
-              <ProductViewer3D images={product.images} productName={product.name} />
+              <ProductViewer3D images={product.images} productName={product.name} selectedColor={selectedColor} />
             </MotionItem>
             
             <div className="flex gap-6 overflow-x-auto pb-4 no-scrollbar">

@@ -18,8 +18,10 @@ import {
   ShoppingBag, Users, Zap, 
   BarChart3, BrainCircuit, Activity,
   Database, ShieldCheck, Terminal,
-  Cpu, Network
+  Cpu, Network, X
 } from "lucide-react";
+import { MOCK_PRODUCTS } from "@/data/products";
+import toast from "react-hot-toast";
 
 export default function AdminDashboard() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -34,6 +36,20 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
+  // Product Modal Forms state
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any | null>(null);
+  const [formName, setFormName] = useState("");
+  const [formPrice, setFormPrice] = useState(549);
+  const [formCategory, setFormCategory] = useState("streetwear");
+  const [formStock, setFormStock] = useState(100);
+  const [formSizes, setFormSizes] = useState("M, L, XL, XXL");
+  const [formColors, setFormColors] = useState("White, Sky Blue, Pink");
+  const [formDescription, setFormDescription] = useState("");
+  const [formImageUrl, setFormImageUrl] = useState("/brand/linen_model_front.png");
+  const [formOffer, setFormOffer] = useState("Buy One Get One Free");
+  const [formIsTrending, setFormIsTrending] = useState(false);
+
   // Security Check
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -46,6 +62,20 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       if (!isAdmin) return;
+
+      // 1. Initial load from local storage
+      const localCat = localStorage.getItem("luxe-catalog");
+      if (localCat) {
+        try {
+          setProducts(JSON.parse(localCat));
+        } catch (e) {
+          setProducts(MOCK_PRODUCTS);
+        }
+      } else {
+        setProducts(MOCK_PRODUCTS);
+        localStorage.setItem("luxe-catalog", JSON.stringify(MOCK_PRODUCTS));
+      }
+
       try {
         const [ordersRes, productsRes] = await Promise.all([
           supabase.from('orders').select('*, profiles(full_name)').order('created_at', { ascending: false }),
@@ -61,7 +91,13 @@ export default function AdminDashboard() {
           setOrders(formattedOrders);
         }
         
-        if (productsRes.data) setProducts(productsRes.data);
+        if (productsRes.data && productsRes.data.length > 0) {
+          const hasLinen = productsRes.data.some(p => p.name.toLowerCase().includes("linen"));
+          if (hasLinen) {
+            setProducts(productsRes.data);
+            localStorage.setItem("luxe-catalog", JSON.stringify(productsRes.data));
+          }
+        }
       } catch (error) {
         console.error("Error fetching admin data:", error);
       } finally {
@@ -79,20 +115,136 @@ export default function AdminDashboard() {
         if (error) throw error;
         
         if (type === 'orders') setOrders(orders.filter(o => o.id !== id));
-        else setProducts(products.filter(p => p.id !== id));
+        else {
+          const updatedProds = products.filter(p => p.id !== id);
+          setProducts(updatedProds);
+          localStorage.setItem("luxe-catalog", JSON.stringify(updatedProds));
+          toast.success("Product deleted successfully.");
+        }
       } catch (err: any) {
-        console.error("Error deleting:", err);
-        alert(err.message);
+        console.warn("Supabase delete failed, using local fallback:", err.message);
+        if (type === 'products') {
+          const updatedProds = products.filter(p => p.id !== id);
+          setProducts(updatedProds);
+          localStorage.setItem("luxe-catalog", JSON.stringify(updatedProds));
+          toast.success("Product deleted from local cache.");
+        }
       }
     }
   };
 
   const handleAdd = (type: 'orders' | 'products') => {
-    alert(`To add a new ${type === 'orders' ? 'order' : 'product'} to the live database, use the Supabase Studio Dashboard while we build the dedicated Admin Form UI.`);
+    if (type === 'products') {
+      setEditingProduct(null);
+      setFormName("");
+      setFormPrice(549);
+      setFormCategory("streetwear");
+      setFormStock(100);
+      setFormSizes("M, L, XL, XXL");
+      setFormColors("White, Sky Blue, Pink, Olive Green, Tan Beige, Cocoa Brown, Navy Blue, Carbon Black");
+      setFormDescription("");
+      setFormImageUrl("/brand/linen_model_front.png");
+      setFormOffer("Buy One Get One Free");
+      setFormIsTrending(false);
+      setShowProductModal(true);
+    } else {
+      alert("Order node creation is automated via the checkout terminal.");
+    }
   };
 
   const handleEdit = (item: any) => {
-    alert(`To edit item #${item.id} in the live database, use the Supabase Studio Dashboard while we build the dedicated Admin Form UI.`);
+    setEditingProduct(item);
+    setFormName(item.name || "");
+    setFormPrice(item.price || 0);
+    setFormCategory(item.category || "streetwear");
+    const itemStock = item.stock !== undefined ? item.stock : (item.stock_quantity !== undefined ? item.stock_quantity : 100);
+    setFormStock(itemStock);
+    setFormSizes(Array.isArray(item.sizes) ? item.sizes.join(", ") : "M, L, XL, XXL");
+    setFormColors(Array.isArray(item.colors) ? item.colors.join(", ") : "White, Sky Blue, Pink");
+    setFormDescription(item.description || "");
+    const imgUrl = item.image_url || (Array.isArray(item.images) && item.images.length > 0 ? item.images[0] : "") || "/brand/linen_model_front.png";
+    setFormImageUrl(imgUrl);
+    setFormOffer(item.offer || "");
+    setFormIsTrending(!!item.isTrending);
+    setShowProductModal(true);
+  };
+
+  const handleSaveProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const sizesArr = formSizes.split(",").map(s => s.trim()).filter(Boolean);
+    const colorsArr = formColors.split(",").map(c => c.trim()).filter(Boolean);
+
+    const productData = {
+      id: editingProduct ? editingProduct.id : `luxe-${formCategory.toLowerCase()}-${Date.now()}`,
+      name: formName,
+      description: formDescription,
+      price: Number(formPrice),
+      currency: "INR",
+      category: formCategory,
+      images: [formImageUrl],
+      image_url: formImageUrl,
+      stock: Number(formStock),
+      stock_quantity: Number(formStock),
+      isTrending: formIsTrending,
+      sizes: sizesArr,
+      colors: colorsArr,
+      offer: formOffer,
+      ratings: editingProduct?.ratings || 4.8,
+      reviewsCount: editingProduct?.reviewsCount || 1,
+      discount: editingProduct?.discount || 0
+    };
+
+    let updatedProducts = [...products];
+
+    // Try to sync to Supabase (non-blocking)
+    try {
+      if (editingProduct) {
+        const { error } = await supabase
+          .from('products')
+          .update({
+            name: formName,
+            description: formDescription,
+            price: Number(formPrice),
+            category: formCategory,
+            image_url: formImageUrl,
+            stock_quantity: Number(formStock),
+            offer: formOffer
+          })
+          .eq('id', editingProduct.id);
+        
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('products')
+          .insert([{
+            id: productData.id,
+            name: formName,
+            description: formDescription,
+            price: Number(formPrice),
+            category: formCategory,
+            image_url: formImageUrl,
+            stock_quantity: Number(formStock),
+            offer: formOffer
+          }]);
+          
+        if (error) throw error;
+      }
+    } catch (dbErr: any) {
+      console.warn("Supabase CRUD sync failed, updating local state only:", dbErr.message);
+    }
+
+    if (editingProduct) {
+      updatedProducts = products.map(p => p.id === editingProduct.id ? productData : p);
+      toast.success("Product updated in local registry.");
+    } else {
+      updatedProducts = [productData, ...products];
+      toast.success("New product initialized in local registry.");
+    }
+
+    setProducts(updatedProducts);
+    localStorage.setItem("luxe-catalog", JSON.stringify(updatedProducts));
+    setShowProductModal(false);
   };
 
   useEffect(() => {
@@ -299,6 +451,179 @@ export default function AdminDashboard() {
            </AnimatePresence>
 
         </div>
+
+         {/* Product Management CRUD Modal */}
+         <AnimatePresence>
+           {showProductModal && (
+             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+               <motion.div 
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 exit={{ opacity: 0 }}
+                 onClick={() => setShowProductModal(false)}
+                 className="fixed inset-0 bg-black/85 backdrop-blur-md"
+               />
+               <motion.div 
+                 initial={{ scale: 0.95, opacity: 0, y: 30 }}
+                 animate={{ scale: 1, opacity: 1, y: 0 }}
+                 exit={{ scale: 0.95, opacity: 0, y: 30 }}
+                 className="relative w-full max-w-xl bg-[#08080c] border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative z-10 flex flex-col max-h-[85vh] text-left"
+               >
+                 <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#00f2ff]/50 to-transparent" />
+                 <div className="flex justify-between items-center px-8 py-6 border-b border-white/5 bg-white/[0.01]">
+                   <div>
+                     <h3 className="text-lg font-display italic text-white">{editingProduct ? "Modify Product Asset" : "Initialize New Asset"}</h3>
+                     <p className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Luxe OS Asset Manifest</p>
+                   </div>
+                   <button 
+                     onClick={() => setShowProductModal(false)}
+                     className="p-2 text-white/40 hover:text-white rounded-full hover:bg-white/5 cursor-pointer"
+                   >
+                     <X size={18} />
+                   </button>
+                 </div>
+
+                 <form onSubmit={handleSaveProduct} className="p-8 space-y-4 overflow-y-auto max-h-[65vh] custom-scrollbar">
+                   <div className="space-y-1.5">
+                     <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Product Name</label>
+                     <input
+                       type="text"
+                       required
+                       value={formName}
+                       onChange={(e) => setFormName(e.target.value)}
+                       placeholder="E.g., Luxe Linen Shirt - Sky Blue"
+                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                     />
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-1.5">
+                       <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Price (INR)</label>
+                       <input
+                         type="number"
+                         required
+                         value={formPrice}
+                         onChange={(e) => setFormPrice(Number(e.target.value))}
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                       />
+                     </div>
+                     <div className="space-y-1.5">
+                       <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Stock Units</label>
+                       <input
+                         type="number"
+                         required
+                         value={formStock}
+                         onChange={(e) => setFormStock(Number(e.target.value))}
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                       />
+                     </div>
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-1.5">
+                       <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Category</label>
+                       <select
+                         value={formCategory}
+                         onChange={(e) => setFormCategory(e.target.value)}
+                         className="w-full bg-white/[0.02] border border-white/10 border-white/20 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all uppercase bg-[#08080c]"
+                       >
+                         <option value="streetwear">Streetwear</option>
+                         <option value="accessories">Accessories</option>
+                         <option value="outerwear">Outerwear</option>
+                         <option value="formal">Formal</option>
+                       </select>
+                     </div>
+                     <div className="space-y-1.5">
+                       <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Offer Text</label>
+                       <input
+                         type="text"
+                         value={formOffer}
+                         onChange={(e) => setFormOffer(e.target.value)}
+                         placeholder="E.g., Buy One Get One Free"
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                       />
+                     </div>
+                   </div>
+
+                   <div className="space-y-1.5">
+                     <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Image URL / Path</label>
+                     <input
+                       type="text"
+                       required
+                       value={formImageUrl}
+                       onChange={(e) => setFormImageUrl(e.target.value)}
+                       placeholder="/brand/linen_model_front.png"
+                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                     />
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-1.5">
+                       <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Sizes (Comma separated)</label>
+                       <input
+                         type="text"
+                         value={formSizes}
+                         onChange={(e) => setFormSizes(e.target.value)}
+                         placeholder="M, L, XL, XXL"
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all uppercase"
+                       />
+                     </div>
+                     <div className="space-y-1.5">
+                       <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Colors (Comma separated)</label>
+                       <input
+                         type="text"
+                         value={formColors}
+                         onChange={(e) => setFormColors(e.target.value)}
+                         placeholder="White, Sky Blue, Pink"
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                       />
+                     </div>
+                   </div>
+
+                   <div className="space-y-1.5">
+                     <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Description</label>
+                     <textarea
+                       rows={3}
+                       value={formDescription}
+                       onChange={(e) => setFormDescription(e.target.value)}
+                       placeholder="Enter garment styling specifics..."
+                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl p-4 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all resize-none"
+                     />
+                   </div>
+
+                   <div className="flex items-center gap-3 p-3 bg-white/[0.01] border border-white/5 rounded-xl">
+                     <input
+                       type="checkbox"
+                       checked={formIsTrending}
+                       onChange={(e) => setFormIsTrending(e.target.checked)}
+                       id="is-trending-checkbox"
+                       className="w-4 h-4 accent-primary rounded cursor-pointer"
+                     />
+                     <label htmlFor="is-trending-checkbox" className="text-[10px] font-mono text-white/50 uppercase tracking-widest cursor-pointer select-none">
+                       Feature on Storefront Trending Drop
+                     </label>
+                   </div>
+
+                   <div className="pt-4 flex gap-4">
+                     <button
+                       type="button"
+                       onClick={() => setShowProductModal(false)}
+                       className="flex-1 py-3.5 border border-white/10 rounded-xl text-xs font-mono uppercase tracking-widest hover:bg-white/5 transition-colors cursor-pointer text-center text-white"
+                     >
+                       Cancel
+                     </button>
+                     <button
+                       type="submit"
+                       className="flex-1 py-3.5 bg-white text-black rounded-xl text-xs font-mono font-bold uppercase tracking-widest hover:bg-gray-200 transition-colors cursor-pointer text-center"
+                     >
+                       {editingProduct ? "Update Asset" : "Initialize Asset"}
+                     </button>
+                   </div>
+                 </form>
+               </motion.div>
+             </div>
+           )}
+         </AnimatePresence>
 
         {/* Global OS Accents */}
         <div className="absolute top-0 right-0 w-1/2 h-full pointer-events-none">

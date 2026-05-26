@@ -8,7 +8,7 @@ import {
   Bell, HelpCircle, Camera, Cpu, 
   History, Share2, MessageSquare, 
   CheckCircle2, ChevronRight, X,
-  LogOut, Globe, Moon, Eye, Sparkles, Diamond, ShoppingBag, Palette, Calendar, Send
+  LogOut, Globe, Moon, Eye, Sparkles, Diamond, ShoppingBag, Palette, Calendar, Send, Clipboard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import LuxeButton from "@/components/ui/LuxeButton";
@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
+import confetti from "canvas-confetti";
 
 const SETTINGS_MENU = [
   { id: "account", label: "Account", icon: User, color: "#00f2ff" },
@@ -236,6 +237,7 @@ function AccountSettings() {
     const mockUserStr = localStorage.getItem("luxe-mock-user");
     if (mockUserStr) {
       const mockUser = JSON.parse(mockUserStr);
+      mockUser.email = email;
       mockUser.user_metadata.full_name = name;
       mockUser.user_metadata.phone_number = phone;
       localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
@@ -243,12 +245,38 @@ function AccountSettings() {
       const mockProfileStr = localStorage.getItem("luxe-mock-profile");
       if (mockProfileStr) {
         const mockProfile = JSON.parse(mockProfileStr);
+        mockProfile.email = email;
         mockProfile.full_name = name;
         mockProfile.phone_number = phone;
+        mockProfile.role = email === "abdulquader057@gmail.com" ? "admin" : "customer";
         localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
       }
+    } else {
+      const mockUser = {
+        id: email === "abdulquader057@gmail.com" ? "admin-id-123" : "mock-user-12345",
+        email: email,
+        user_metadata: {
+          full_name: name || "Luxe Client",
+          phone_number: phone || "",
+          style_dna: { wardrobeCompletion: 50, level: 1 }
+        }
+      };
+      const mockProfile = {
+        id: mockUser.id,
+        email: email,
+        full_name: name || "Luxe Client",
+        phone_number: phone || "",
+        role: email === "abdulquader057@gmail.com" ? "admin" : "customer"
+      };
+      localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
+      localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
     }
     toast.success("Identity vectors updated successfully!");
+
+    // Reload page to re-evaluate AuthContext states
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   const handleModifyPassword = () => {
@@ -284,11 +312,11 @@ function AccountSettings() {
              <div className="space-y-2">
                <label className="text-[9px] font-mono text-white/30 uppercase tracking-widest ml-4">Email</label>
                <input 
-                 type="text" 
+                 type="email" 
                  value={email}
-                 disabled
+                 onChange={(e) => setEmail(e.target.value)}
                  placeholder="client@luxe.ai"
-                 className="w-full bg-white/[0.01] border border-white/5 opacity-50 rounded-2xl px-6 py-4 text-sm font-mono focus:outline-none text-white/60 cursor-not-allowed"
+                 className="w-full bg-white/[0.02] border border-white/10 rounded-2xl px-6 py-4 text-sm font-mono focus:outline-none focus:border-primary/40 transition-all text-white"
                />
              </div>
              <div className="space-y-2">
@@ -675,16 +703,34 @@ function AccessoryHub() {
 }
 
 function SubscriptionServices() {
-  const { convertPrice, currency } = useCommerce();
+  const { convertPrice } = useCommerce();
   const { user } = useAuth();
   
   // Tiers and pricing details
-  const [insiderBase, setInsiderBase] = useState(1599);
-  const [eliteBase, setEliteBase] = useState(3999);
-  const [vanguardBase, setVanguardBase] = useState(16599);
+  const [insiderBase, setInsiderBase] = useState(450);
+  const [eliteBase, setEliteBase] = useState(3500);
+  const [vanguardBase, setVanguardBase] = useState(5000);
   const [isAdminMode, setIsAdminMode] = useState(false);
 
   const [activePlan, setActivePlan] = useState("Luxe Elite");
+  const [spotsLeft, setSpotsLeft] = useState(94);
+
+  // Payment modal state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPlanName, setSelectedPlanName] = useState("");
+  const [selectedPlanPrice, setSelectedPlanPrice] = useState(0);
+  const [usePromoSlot, setUsePromoSlot] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [upiCopied, setUpiCopied] = useState(false);
+  const [paying, setPaying] = useState(false);
+
+  // Success Celebration state
+  const [showSuccessCelebration, setShowSuccessCelebration] = useState(false);
+  const [celebrationPlanName, setCelebrationPlanName] = useState("");
 
   const isAdmin = user?.email === "abdulquader057@gmail.com";
 
@@ -692,12 +738,21 @@ function SubscriptionServices() {
     const p1 = localStorage.getItem("price-insider");
     const p2 = localStorage.getItem("price-elite");
     const p3 = localStorage.getItem("price-vanguard");
-    if (p1) setInsiderBase(parseInt(p1));
-    if (p2) setEliteBase(parseInt(p2));
-    if (p3) setVanguardBase(parseInt(p3));
+    setInsiderBase(p1 ? parseInt(p1) : 450);
+    setEliteBase(p2 ? parseInt(p2) : 3500);
+    setVanguardBase(p3 ? parseInt(p3) : 5000);
 
     const savedPlan = localStorage.getItem("luxe-active-plan");
     if (savedPlan) setActivePlan(savedPlan);
+
+    const savedSpots = localStorage.getItem("luxe-promo-spots");
+    if (savedSpots) {
+      setSpotsLeft(parseInt(savedSpots));
+    } else {
+      const initialSpots = Math.floor(Math.random() * 9) + 90; // 90 to 98
+      localStorage.setItem("luxe-promo-spots", initialSpots.toString());
+      setSpotsLeft(initialSpots);
+    }
   }, []);
 
   const handleSavePrices = () => {
@@ -708,10 +763,49 @@ function SubscriptionServices() {
     setIsAdminMode(false);
   };
 
-  const handleUpgradePlan = (plan: string) => {
-    setActivePlan(plan);
-    localStorage.setItem("luxe-active-plan", plan);
-    toast.success(`Upgraded to ${plan}! Syncing details...`);
+  const openPaymentModal = (planName: string, price: number) => {
+    setSelectedPlanName(planName);
+    setSelectedPlanPrice(price);
+    setUsePromoSlot(false);
+    setShowPaymentModal(true);
+  };
+
+  const handleConfirmPayment = () => {
+    setPaying(true);
+    setTimeout(() => {
+      // Complete payment
+      setActivePlan(selectedPlanName);
+      localStorage.setItem("luxe-active-plan", selectedPlanName);
+      
+      if (usePromoSlot) {
+        const newSpots = Math.max(0, spotsLeft - 1);
+        setSpotsLeft(newSpots);
+        localStorage.setItem("luxe-promo-spots", newSpots.toString());
+      }
+
+      setPaying(false);
+      setShowPaymentModal(false);
+      
+      // Fire confetti
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+
+      // Show success overlay
+      setCelebrationPlanName(selectedPlanName);
+      setShowSuccessCelebration(true);
+      
+      // Close success overlay after 3.5 seconds
+      setTimeout(() => {
+        setShowSuccessCelebration(false);
+        // Force full page reload or state updates
+        window.location.reload();
+      }, 3500);
+
+      toast.success(`Synched with ${selectedPlanName}! Enjoy your perks.`);
+    }, 1500);
   };
 
   const handleSetTheme = (color: string) => {
@@ -730,7 +824,7 @@ function SubscriptionServices() {
   const vanguardConverted = convertPrice(vanguardBase);
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 text-left">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-display font-light italic">Elite Membership</h2>
         <div className="flex gap-2">
@@ -745,6 +839,29 @@ function SubscriptionServices() {
           <div className="text-[8px] font-mono text-red-400 bg-red-400/10 px-3 py-1 rounded-full uppercase tracking-widest">Active Plan: {activePlan}</div>
         </div>
       </div>
+
+      {spotsLeft > 0 && (
+         <div className="p-6 rounded-3xl bg-gradient-to-r from-primary/10 via-[#00f2ff]/5 to-transparent border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-1">
+               <span className="text-[8px] font-mono text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest font-bold">Limited Promotion</span>
+               <h4 className="text-lg font-display font-light italic">First 100 Customers Upgrade Free!</h4>
+               <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                  Only <span className="text-primary font-bold">{spotsLeft} slots remaining</span> in the neural registry.
+               </p>
+            </div>
+            <LuxeButton 
+              size="sm" 
+              onClick={() => {
+                setSelectedPlanName("Luxe Elite");
+                setSelectedPlanPrice(0);
+                setUsePromoSlot(true);
+                setShowPaymentModal(true);
+              }}
+            >
+              Claim Elite Access (Free)
+            </LuxeButton>
+         </div>
+      )}
 
       {isAdminMode && (
         <div className="p-6 rounded-2xl bg-yellow-400/5 border border-yellow-400/20 space-y-4 mb-4">
@@ -784,8 +901,8 @@ function SubscriptionServices() {
 
       <div className="grid md:grid-cols-3 gap-6">
          {/* TIER 1 */}
-         <div className={cn("p-6 rounded-[32px] border space-y-6 relative overflow-hidden group transition-all",
-           activePlan === "Luxe Insider" ? "border-primary bg-primary/5" : "border-white/5 bg-gradient-to-br from-primary/5 to-accent/5 hover:border-primary/30")}>
+         <div className={cn("p-6 rounded-[32px] border space-y-6 relative overflow-hidden group transition-all text-left",
+            activePlan === "Luxe Insider" ? "border-primary bg-primary/5" : "border-white/5 bg-gradient-to-br from-primary/5 to-accent/5 hover:border-primary/30")}>
             <Crown className="text-primary/60" size={24} />
             <div className="space-y-2">
                <h3 className="text-xl font-display font-light italic">Luxe Insider</h3>
@@ -797,13 +914,13 @@ function SubscriptionServices() {
             {activePlan === "Luxe Insider" ? (
               <LuxeButton className="w-full cursor-default">Current Plan</LuxeButton>
             ) : (
-              <LuxeButton variant="outline" className="w-full" onClick={() => handleUpgradePlan("Luxe Insider")}>Downgrade</LuxeButton>
+              <LuxeButton variant="outline" className="w-full" onClick={() => openPaymentModal("Luxe Insider", insiderBase)}>Downgrade</LuxeButton>
             )}
          </div>
 
          {/* TIER 2 */}
-         <div className={cn("p-6 rounded-[32px] border space-y-6 relative overflow-hidden group transition-all shadow-[0_0_30px_rgba(0,242,255,0.05)]",
-           activePlan === "Luxe Elite" ? "border-primary bg-primary/20" : "border-white/5 bg-gradient-to-br from-primary/10 to-accent/10 hover:border-primary/50")}>
+         <div className={cn("p-6 rounded-[32px] border space-y-6 relative overflow-hidden group transition-all shadow-[0_0_30px_rgba(0,242,255,0.05)] text-left",
+            activePlan === "Luxe Elite" ? "border-primary bg-primary/20" : "border-white/5 bg-gradient-to-br from-primary/10 to-accent/10 hover:border-primary/50")}>
             <Crown className="text-primary" size={28} />
             <div className="space-y-2">
                <h3 className="text-xl font-display font-light italic">Luxe Elite</h3>
@@ -811,17 +928,17 @@ function SubscriptionServices() {
                   Priority drops, global teleport shipping, and master stylists.
                </p>
             </div>
-            <div className="text-2xl font-display font-light">{eliteConverted.symbol}{eliteConverted.amount}<span className="text-xs">/MO</span></div>
+            <div className="text-2xl font-display font-light">{eliteConverted.symbol}{eliteConverted.amount}<span className="text-xs">/YR</span></div>
             {activePlan === "Luxe Elite" ? (
               <LuxeButton className="w-full cursor-default">Current Plan</LuxeButton>
             ) : (
-              <LuxeButton className="w-full" onClick={() => handleUpgradePlan("Luxe Elite")}>Select Plan</LuxeButton>
+              <LuxeButton className="w-full" onClick={() => openPaymentModal("Luxe Elite", eliteBase)}>Select Plan</LuxeButton>
             )}
          </div>
 
          {/* TIER 3 */}
-         <div className={cn("p-6 rounded-[32px] border space-y-6 relative overflow-hidden group transition-all",
-           activePlan === "Neural Vanguard" ? "border-purple-500 bg-purple-500/10 text-purple-200" : "border-white/5 bg-gradient-to-br from-purple-500/10 to-pink-500/10 hover:border-purple-500/30")}>
+         <div className={cn("p-6 rounded-[32px] border space-y-6 relative overflow-hidden group transition-all text-left",
+            activePlan === "Neural Vanguard" ? "border-purple-500 bg-purple-500/10 text-purple-200" : "border-white/5 bg-gradient-to-br from-purple-500/10 to-pink-500/10 hover:border-purple-500/30")}>
             <Diamond className="text-purple-400/80" size={24} />
             <div className="space-y-2">
                <h3 className="text-xl font-display font-light italic text-purple-200">Neural Vanguard</h3>
@@ -829,11 +946,11 @@ function SubscriptionServices() {
                   Bespoke 1-of-1 pieces, 24/7 holographic styling, VIP event access.
                </p>
             </div>
-            <div className="text-2xl font-display font-light text-purple-200">{vanguardConverted.symbol}{vanguardConverted.amount}<span className="text-xs">/MO</span></div>
+            <div className="text-2xl font-display font-light text-purple-200">{vanguardConverted.symbol}{vanguardConverted.amount}<span className="text-xs">/YR</span></div>
             {activePlan === "Neural Vanguard" ? (
               <LuxeButton className="w-full text-purple-400 border-purple-500/40 bg-purple-500/15 cursor-default">Current Plan</LuxeButton>
             ) : (
-              <LuxeButton variant="outline" className="w-full text-purple-400 border-purple-500/20 hover:bg-purple-500/10" onClick={() => handleUpgradePlan("Neural Vanguard")}>Upgrade</LuxeButton>
+              <LuxeButton variant="outline" className="w-full text-purple-400 border-purple-500/20 hover:bg-purple-500/10" onClick={() => openPaymentModal("Neural Vanguard", vanguardBase)}>Upgrade</LuxeButton>
             )}
          </div>
       </div>
@@ -842,10 +959,10 @@ function SubscriptionServices() {
          <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em]">Elite Benefits & Customization</h3>
          <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-4">
-               <BenefitItem label="Priority Access" active />
-               <BenefitItem label="Master Stylist Sessions" active />
-               <BenefitItem label="Neural Style Guides" active />
-               <BenefitItem label="Vanguard UI Access" active={activePlan === "Neural Vanguard"} />
+               <BenefitItem label="5% - 25% purchase discount" active />
+               <BenefitItem label="Master Stylist Sessions" active={activePlan !== "Luxe Insider"} />
+               <BenefitItem label="Free Delivery & Priority Support" active={activePlan !== "Luxe Insider"} />
+               <BenefitItem label="Theme customization & Custom UI" active={activePlan !== "Luxe Insider"} />
             </div>
             <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
                <div className="flex items-center gap-3 mb-4">
@@ -872,6 +989,216 @@ function SubscriptionServices() {
        </div>
 
        <CouponsDisplay />
+
+       {/* Interactive Payment Gateway Modal */}
+       <AnimatePresence>
+         {showPaymentModal && (
+           <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+             <motion.div 
+               initial={{ opacity: 0 }} 
+               animate={{ opacity: 1 }} 
+               exit={{ opacity: 0 }} 
+               onClick={() => setShowPaymentModal(false)} 
+               className="absolute inset-0 bg-black/85 backdrop-blur-md" 
+             />
+             <motion.div 
+               initial={{ scale: 0.95, opacity: 0 }} 
+               animate={{ scale: 1, opacity: 1 }} 
+               exit={{ scale: 0.95, opacity: 0 }} 
+               className="relative w-full max-w-md bg-[#07070a]/95 border border-white/10 p-8 rounded-3xl shadow-2xl relative z-10 text-left"
+             >
+               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#00f2ff]/50 to-transparent" />
+               <div className="flex justify-between items-center mb-6">
+                 <div>
+                   <h3 className="text-xl font-display font-light italic">Quantum Gateway</h3>
+                   <p className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Membership calibration fee</p>
+                 </div>
+                 <button 
+                   onClick={() => setShowPaymentModal(false)} 
+                   className="p-2 text-white/40 hover:text-white rounded-full hover:bg-white/5 cursor-pointer"
+                 >
+                   <X size={18} />
+                 </button>
+               </div>
+
+               {spotsLeft > 0 && selectedPlanName !== "Luxe Insider" && (
+                 <div className="p-4 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-between mb-6">
+                   <div className="space-y-1">
+                     <span className="text-[8px] font-mono text-primary uppercase font-bold tracking-wider">Promotional Slot Available</span>
+                     <p className="text-[10px] font-mono text-white/60 uppercase">Activate for free using registry spot</p>
+                   </div>
+                   <input
+                     type="checkbox"
+                     checked={usePromoSlot}
+                     onChange={(e) => {
+                       setUsePromoSlot(e.target.checked);
+                       if (e.target.checked) {
+                         setSelectedPlanPrice(0);
+                       } else {
+                         setSelectedPlanPrice(selectedPlanName === "Luxe Insider" ? insiderBase : selectedPlanName === "Luxe Elite" ? eliteBase : vanguardBase);
+                       }
+                     }}
+                     className="w-5 h-5 accent-primary rounded cursor-pointer"
+                   />
+                 </div>
+               )}
+
+               <div className="space-y-6">
+                 <div className="flex justify-between items-baseline border-b border-white/5 pb-4">
+                   <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">Calibrating Tier</span>
+                   <div className="text-right">
+                     <p className="text-lg font-display italic text-[#00f2ff]">{selectedPlanName}</p>
+                     <p className="text-xl font-mono font-bold text-white tracking-tight">
+                       {usePromoSlot ? "₹0 (Free Claim)" : `${convertPrice(selectedPlanPrice).symbol}${convertPrice(selectedPlanPrice).amount}`}
+                     </p>
+                   </div>
+                 </div>
+
+                 {!usePromoSlot && (
+                   <>
+                     <div className="grid grid-cols-2 gap-2 mb-4">
+                       <button
+                         type="button"
+                         onClick={() => setPaymentMethod("upi")}
+                         className={cn(
+                           "py-2.5 rounded-xl border font-mono text-[9px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5",
+                           paymentMethod === "upi" ? "border-primary bg-primary/10 text-white" : "border-white/5 bg-white/[0.02] text-white/40"
+                         )}
+                       >
+                         UPI QR / ID
+                       </button>
+                       <button
+                         type="button"
+                         onClick={() => setPaymentMethod("card")}
+                         className={cn(
+                           "py-2.5 rounded-xl border font-mono text-[9px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5",
+                           paymentMethod === "card" ? "border-primary bg-primary/10 text-white" : "border-white/5 bg-white/[0.02] text-white/40"
+                         )}
+                       >
+                         Visa / Card
+                       </button>
+                     </div>
+
+                     {paymentMethod === "upi" ? (
+                       <div className="space-y-4 text-center">
+                         <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 w-full justify-between">
+                           <span className="text-[10px] font-mono text-white tracking-widest">7995338472@ptaxis</span>
+                           <button
+                             type="button"
+                             onClick={() => {
+                               navigator.clipboard.writeText("7995338472@ptaxis");
+                               setUpiCopied(true);
+                               toast.success("UPI ID copied!");
+                               setTimeout(() => setUpiCopied(false), 2000);
+                             }}
+                             className="p-1 text-primary hover:text-white transition-colors cursor-pointer"
+                           >
+                             {upiCopied ? <CheckCircle2 size={14} className="text-green-400" /> : <Clipboard size={14} />}
+                           </button>
+                         </div>
+                         <div className="w-36 h-36 mx-auto relative border border-white/10 rounded-xl bg-white p-1">
+                           <img src="/upi-qr.jpg" alt="UPI QR" className="w-full h-full object-contain" />
+                         </div>
+                       </div>
+                     ) : (
+                       <div className="space-y-3">
+                         <input
+                           type="text"
+                           required
+                           value={cardName}
+                           onChange={(e) => setCardName(e.target.value)}
+                           placeholder="CARDHOLDER NAME"
+                           className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-2.5 text-[9px] font-mono focus:outline-none focus:border-primary/40 text-white placeholder:text-white/20 uppercase tracking-widest"
+                         />
+                         <input
+                           type="text"
+                           required
+                           value={cardNumber}
+                           onChange={(e) => setCardNumber(e.target.value.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim())}
+                           maxLength={19}
+                           placeholder="CARD NUMBER"
+                           className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-2.5 text-[9px] font-mono focus:outline-none focus:border-primary/40 text-white placeholder:text-white/20 tracking-widest"
+                         />
+                         <div className="grid grid-cols-2 gap-3">
+                           <input
+                             type="text"
+                             required
+                             value={cardExpiry}
+                             onChange={(e) => setCardExpiry(e.target.value)}
+                             placeholder="MM/YY"
+                             maxLength={5}
+                             className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-2.5 text-[9px] font-mono focus:outline-none focus:border-primary/40 text-white placeholder:text-white/20 text-center tracking-wider"
+                           />
+                           <input
+                             type="password"
+                             required
+                             value={cardCvv}
+                             onChange={(e) => setCardCvv(e.target.value)}
+                             placeholder="CVV"
+                             maxLength={3}
+                             className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-2.5 text-[9px] font-mono focus:outline-none focus:border-primary/40 text-white placeholder:text-white/20 text-center tracking-wider"
+                           />
+                         </div>
+                       </div>
+                     )}
+                   </>
+                 )}
+
+                 {usePromoSlot && (
+                   <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-2xl text-[10px] font-mono uppercase tracking-wider text-green-400 text-center leading-relaxed">
+                     ✨ 100% OFF PROMO SLOT APPLIED! CLICK ACTIVATE PLAN TO CLAIM FREE MEMBERSHIP.
+                   </div>
+                 )}
+
+                 <LuxeButton
+                   onClick={handleConfirmPayment}
+                   disabled={paying}
+                   className="w-full py-4 text-center justify-center font-bold tracking-widest mt-4"
+                 >
+                   {paying ? "Verifying Transaction..." : usePromoSlot ? "ACTIVATE FREE MEMBERSHIP" : "CONFIRM TRANSACTION"}
+                 </LuxeButton>
+               </div>
+             </motion.div>
+           </div>
+         )}
+       </AnimatePresence>
+
+       {/* Full-Screen Congratulations Celebration Overlay */}
+       <AnimatePresence>
+         {showSuccessCelebration && (
+           <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black/95 backdrop-blur-2xl">
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,242,255,0.15),transparent_60%)] animate-pulse" />
+             <motion.div 
+               animate={{ rotate: 360 }}
+               transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+               className="w-64 h-64 border border-dashed border-primary/20 rounded-full absolute"
+             />
+             <motion.div 
+               animate={{ rotate: -360 }}
+               transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+               className="w-72 h-72 border border-dotted border-white/10 rounded-full absolute"
+             />
+
+             <motion.div
+               initial={{ scale: 0.8, opacity: 0 }}
+               animate={{ scale: 1, opacity: 1 }}
+               exit={{ scale: 0.8, opacity: 0 }}
+               className="text-center space-y-6 relative z-10"
+             >
+               <div className="w-24 h-24 mx-auto rounded-3xl bg-primary/10 border border-primary flex items-center justify-center shadow-[0_0_50px_rgba(0,242,255,0.4)]">
+                 <Crown size={48} className="text-primary animate-bounce" />
+               </div>
+               <div className="space-y-2">
+                 <h2 className="text-4xl font-display font-black tracking-[0.2em] text-gradient uppercase">Calibration Succeeded</h2>
+                 <p className="text-[10px] font-mono text-white/40 uppercase tracking-[0.4em]">NEURAL MEMBERSHIP INDEX UPDATED</p>
+               </div>
+               <div className="py-2 px-6 bg-white/5 border border-white/10 rounded-full w-fit mx-auto text-xs font-mono font-bold tracking-widest uppercase text-white/80">
+                 Welcome to {celebrationPlanName}
+               </div>
+             </motion.div>
+           </div>
+         )}
+       </AnimatePresence>
     </div>
   );
 }
@@ -914,55 +1241,126 @@ function CouponsDisplay() {
 }
 
 function NotificationSettings() {
-  const [orderUpdates, setOrderUpdates] = useState(true);
-  const [drops, setDrops] = useState(true);
-  const [insights, setInsights] = useState(false);
-  const [systemStatus, setSystemStatus] = useState(true);
+  const { user } = useAuth();
+  const [latestOrder, setLatestOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchLatestOrder() {
+      setLoading(true);
+      try {
+        if (user) {
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id);
+          const { data } = await supabase
+            .from("orders")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(1);
+          if (data && data.length > 0) {
+            setLatestOrder(data[0]);
+          }
+        }
+      } catch (e) {
+        console.warn("Error fetching latest order:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchLatestOrder();
+  }, [user]);
+
+  const orderId = latestOrder 
+    ? `LX-ORD${latestOrder.id.slice(0, 4).toUpperCase()}` 
+    : "LX-ORD5676";
+  const status = latestOrder?.status || "processing";
+  
+  let currentStep = 0;
+  if (status.toLowerCase().includes("deliver") && !status.toLowerCase().includes("out")) {
+    currentStep = 4;
+  } else if (status.toLowerCase().includes("out")) {
+    currentStep = 3;
+  } else if (status.toLowerCase().includes("dispatch")) {
+    currentStep = 2;
+  } else if (status.toLowerCase().includes("pack")) {
+    currentStep = 1;
+  } else {
+    currentStep = 0;
+  }
+
+  const steps = [
+    { label: "Confirmed", time: "09:30 AM", desc: "Order details synced to terminal" },
+    { label: "Packed", time: "11:45 AM", desc: "Premium luxury soft fabric packed" },
+    { label: "Dispatched", time: "02:15 PM", desc: "Leaving Hafiz Baba Nagar Hub" },
+    { label: "Out For Delivery", time: "04:30 PM", desc: "Courier on route in Hyderabad" },
+    { label: "Delivered", time: "Pending", desc: "Handover complete" }
+  ];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 text-left">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-display font-light italic">Status Feedback</h2>
-        <div className="text-[8px] font-mono text-green-400 bg-green-400/10 px-3 py-1 rounded-full uppercase tracking-widest">Connected</div>
+        <span className="text-[8px] font-mono text-[#00ff9d] bg-[#00ff9d]/10 px-3 py-1 rounded-full uppercase tracking-widest animate-pulse">Live Tracking</span>
       </div>
 
-      <div className="space-y-4">
-         <NotificationToggle 
-           title="Order Updates" 
-           desc="Real-time tracking and delivery sequence logs."
-           active={orderUpdates}
-           onChange={() => {
-             setOrderUpdates(!orderUpdates);
-             toast.success(!orderUpdates ? "Order updates enabled." : "Order updates disabled.");
-           }}
-         />
-         <NotificationToggle 
-           title="Exclusive Drops" 
-           desc="Neural alerts for limited edition artifacts."
-           active={drops}
-           onChange={() => {
-             setDrops(!drops);
-             toast.success(!drops ? "Drop alerts active." : "Drop alerts disabled.");
-           }}
-         />
-         <NotificationToggle 
-           title="Fashion Insights" 
-           desc="Weekly architectural digests and trend forecasts."
-           active={insights}
-           onChange={() => {
-             setInsights(!insights);
-             toast.success(!insights ? "Insights active." : "Insights disabled.");
-           }}
-         />
-         <NotificationToggle 
-           title="System Status" 
-           desc="Critical app updates and security protocols."
-           active={systemStatus}
-           onChange={() => {
-             setSystemStatus(!systemStatus);
-             toast.success(!systemStatus ? "System updates active." : "System updates paused.");
-           }}
-         />
+      <div className="p-8 rounded-3xl bg-white/[0.01] border border-white/5 space-y-8 relative overflow-hidden">
+         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/5">
+            <div>
+               <span className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Active Transmission</span>
+               <h3 className="text-lg font-mono font-bold tracking-widest text-[#00ff9d]">{orderId}</h3>
+            </div>
+            <div className="text-right">
+               <span className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Estimated Handoff</span>
+               <p className="text-xs font-mono text-white/80 uppercase tracking-wider">Today, before 8:00 PM</p>
+            </div>
+         </div>
+
+         <div className="relative py-4">
+            <div className="hidden md:block absolute top-[19px] left-8 right-8 h-[2px] bg-white/5 -z-10" />
+            <div 
+               className="hidden md:block absolute top-[19px] left-8 h-[2px] bg-gradient-to-r from-[#00ff9d] to-emerald-400 -z-10 transition-all duration-1000"
+               style={{ width: `${(currentStep / 4) * 85}%` }} 
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-4 relative z-10">
+               {steps.map((step, idx) => {
+                  const isCompleted = idx <= currentStep;
+                  const isActive = idx === currentStep;
+                  return (
+                     <div key={idx} className="flex md:flex-col items-start md:items-center text-left md:text-center gap-4 md:gap-3 group">
+                        <div className={cn(
+                           "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 shrink-0",
+                           isCompleted 
+                             ? "bg-black border-[#00ff9d] text-[#00ff9d] shadow-[0_0_15px_rgba(0,255,157,0.2)]" 
+                             : "bg-[#050508] border-white/10 text-white/20"
+                        )}>
+                           <CheckCircle2 size={16} className={cn("transition-transform duration-500", isActive && "scale-125")} />
+                        </div>
+                        
+                        <div className="space-y-1">
+                           <p className={cn(
+                              "text-[10px] font-mono font-bold uppercase tracking-widest",
+                              isCompleted ? "text-white" : "text-white/20"
+                           )}>
+                              {step.label}
+                           </p>
+                           <p className="text-[8px] font-mono text-white/40 uppercase">{isCompleted && idx !== currentStep ? step.time : step.label === "Delivered" && currentStep < 4 ? "Pending" : "Active"}</p>
+                           <p className="text-[8px] font-mono text-white/20 uppercase max-w-[150px] mx-auto leading-relaxed">{step.desc}</p>
+                        </div>
+                     </div>
+                  );
+               })}
+            </div>
+         </div>
+
+         <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 text-[9px] font-mono uppercase tracking-widest text-white/40 leading-relaxed">
+            <div className="flex items-center gap-2">
+               <MapPin size={12} className="text-[#00ff9d]" />
+               <span>Origin Hub: Hafiz Baba Nagar, Hyderabad, Telangana</span>
+            </div>
+            <div>
+               <span>Verification Status: <span className="text-green-400">✅ Synced with LUXE OS</span></span>
+            </div>
+         </div>
       </div>
     </div>
   );
@@ -1089,9 +1487,12 @@ function SupportCenter() {
       toast.error("Please enter feedback before submitting.");
       return;
     }
-    toast.success("Feedback submitted to neural archive. Thank you!");
+    toast.success("Redirecting to Google Reviews...");
     setFeedbackText("");
     setActiveModal(null);
+    setTimeout(() => {
+      window.open("https://www.google.com/search?q=luxe+fashion+hyderabad+reviews", "_blank");
+    }, 1000);
   };
 
   return (
@@ -1127,10 +1528,10 @@ function SupportCenter() {
                     </div>
                     <div>
                        <h4 className="text-sm font-mono font-bold tracking-widest uppercase">Expert Stylist</h4>
-                       <p className="text-[9px] font-mono text-white/30 uppercase">Next Slot: 14:00 GMT</p>
+                       <p className="text-[9px] font-mono text-yellow-500 uppercase font-bold">Stylists Offline (Fully Booked)</p>
                     </div>
                  </div>
-                 <LuxeButton variant="outline" size="sm" className="w-full" onClick={() => setActiveModal("stylist")}>Schedule Session</LuxeButton>
+                 <LuxeButton variant="outline" size="sm" className="w-full opacity-60" onClick={() => setActiveModal("stylist")}>Stylist Offline</LuxeButton>
               </div>
             </div>
          </div>
@@ -1205,16 +1606,20 @@ function SupportCenter() {
         {activeModal === "stylist" && (
           <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setActiveModal(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-md bg-[#0a0a0f] border border-white/10 p-8 rounded-3xl shadow-2xl relative z-10">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-md bg-[#0a0a0f] border border-white/10 p-8 rounded-3xl shadow-2xl relative z-10 text-left">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-display font-light italic">Schedule Expert Stylist</h3>
                 <button onClick={() => setActiveModal(null)} className="p-2 text-white/40 hover:text-white rounded-full hover:bg-white/5"><X size={18} /></button>
               </div>
-              <form onSubmit={handleScheduleStylist} className="space-y-4">
+              <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-500 text-[10px] font-mono uppercase tracking-wider mb-6 leading-relaxed">
+                ⚠️ Currently, our expert fashion designers are fully booked. Stylist services and scheduling numbers are temporarily unavailable at this time.
+              </div>
+              <form onSubmit={handleScheduleStylist} className="space-y-4 opacity-40 pointer-events-none">
                 <div className="space-y-2">
                   <label className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Select Date</label>
                   <input 
                     type="date" 
+                    disabled
                     value={stylistDate}
                     onChange={(e) => setStylistDate(e.target.value)}
                     className="w-full bg-black/60 border border-white/10 rounded-xl p-4 text-xs font-mono text-white"
@@ -1224,12 +1629,13 @@ function SupportCenter() {
                   <label className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Select Time Slot</label>
                   <input 
                     type="time" 
+                    disabled
                     value={stylistTime}
                     onChange={(e) => setStylistTime(e.target.value)}
                     className="w-full bg-black/60 border border-white/10 rounded-xl p-4 text-xs font-mono text-white"
                   />
                 </div>
-                <button type="submit" className="w-full py-4 bg-primary text-black rounded-xl text-xs font-mono uppercase tracking-widest font-bold mt-4">Confirm Schedule</button>
+                <button type="submit" disabled className="w-full py-4 bg-white/10 text-white/40 rounded-xl text-xs font-mono uppercase tracking-widest font-bold mt-4 cursor-not-allowed">Confirm Schedule</button>
               </form>
             </motion.div>
           </div>
