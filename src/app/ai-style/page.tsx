@@ -1,16 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, BrainCircuit, Wand2, Palette, Ruler, ShoppingCart, ArrowRight } from "lucide-react";
+import { Sparkles, BrainCircuit, Wand2, Palette, Ruler, ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { supabase } from "@/lib/supabase";
 import ProductCard from "@/components/shop/ProductCard";
 
 const AIStylePage = () => {
   const [step, setStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    supabase.from("products").select("*").then(({ data }) => {
+      if (data && data.length > 0) setAllProducts(data);
+    });
+  }, []);
 
   const nextStep = () => setStep(step + 1);
 
@@ -18,7 +25,11 @@ const AIStylePage = () => {
     setIsAnalyzing(true);
     setTimeout(() => {
       setIsAnalyzing(false);
-      setRecommendations(MOCK_PRODUCTS.slice(0, 3));
+      // Use real Supabase products, fallback to mock if DB empty
+      const pool = allProducts.length > 0 ? allProducts : [];
+      // Shuffle and take 3
+      const shuffled = [...pool].sort(() => 0.5 - Math.random());
+      setRecommendations(shuffled.slice(0, 3));
       setStep(5);
     }, 3000);
   };
@@ -29,24 +40,35 @@ const AIStylePage = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-primary to-accent mx-auto mb-8 flex items-center justify-center shadow-[0_0_40px_rgba(0,242,255,0.3)]"
+            className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-white/20 to-white/5 mx-auto mb-8 flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.1)] border border-white/10"
           >
-            <BrainCircuit size={40} className="text-black" />
+            <BrainCircuit size={40} className="text-white" />
           </motion.div>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6">FIND YOUR <span className="text-gradient">IDENTITY.</span></h1>
-          <p className="text-white/40 max-w-xl mx-auto font-medium tracking-wide">
+          <h1 className="text-5xl md:text-7xl font-orbitron font-bold tracking-tighter mb-6 text-white">FIND YOUR <span className="text-white/40 italic font-cormorant">IDENTITY.</span></h1>
+          <p className="text-white/40 max-w-xl mx-auto font-sora text-sm tracking-wide">
             Our AI engine will analyze your personality and aesthetics to curate the perfect futuristic silhouette for you.
           </p>
         </div>
 
-        <div className="glass-morphism rounded-[3rem] p-10 md:p-16 relative overflow-hidden">
+        <div className="bg-[#050508]/80 border border-white/10 backdrop-blur-2xl rounded-[3rem] p-10 md:p-16 relative overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.8)]">
           {/* Progress Bar */}
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-white/5">
+          <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
             <motion.div 
               initial={{ width: "0%" }}
               animate={{ width: `${(step / 5) * 100}%` }}
-              className="h-full bg-primary shadow-[0_0_15px_rgba(0,242,255,0.8)]"
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="h-full bg-white/40"
             />
+          </div>
+
+          {/* Step indicator */}
+          <div className="flex justify-center gap-2 mb-10">
+            {[1,2,3,4,5].map(s => (
+              <div key={s} className={cn(
+                "w-2 h-2 rounded-full transition-all duration-300",
+                s <= step ? "bg-white/70" : "bg-white/10"
+              )} />
+            ))}
           </div>
 
           <AnimatePresence mode="wait">
@@ -59,17 +81,17 @@ const AIStylePage = () => {
                 className="space-y-8"
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <Palette size={24} className="text-primary" />
-                  <h3 className="text-2xl font-black tracking-tight uppercase">What is your core aesthetic?</h3>
+                  <Palette size={24} className="text-white/60" />
+                  <h3 className="text-2xl font-orbitron font-bold tracking-tight uppercase text-white">What is your core aesthetic?</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {["CYBER TECHWEAR", "MINIMAL MODEST", "URBAN HYPED", "CLASSIC LUXE"].map((opt) => (
                     <button 
                       key={opt}
                       onClick={nextStep}
-                      className="p-8 rounded-2xl glass border border-white/5 text-left hover:border-primary transition-all group"
+                      className="p-8 rounded-2xl bg-white/3 border border-white/5 text-left hover:border-white/20 hover:bg-white/5 transition-all group"
                     >
-                      <span className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{opt}</span>
+                      <span className="text-xl font-orbitron font-bold tracking-tight text-white/60 group-hover:text-white transition-colors">{opt}</span>
                     </button>
                   ))}
                 </div>
@@ -85,13 +107,13 @@ const AIStylePage = () => {
                 className="space-y-8"
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <Wand2 size={24} className="text-primary" />
-                  <h3 className="text-2xl font-black tracking-tight uppercase">Select your primary color palette</h3>
+                  <Wand2 size={24} className="text-white/60" />
+                  <h3 className="text-2xl font-orbitron font-bold tracking-tight uppercase text-white">Select your primary color palette</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                   {[
                     { name: "NEON BLUE", class: "bg-blue-500" },
-                    { name: "PHANTOM BLACK", class: "bg-black" },
+                    { name: "PHANTOM BLACK", class: "bg-zinc-900 border border-white/20" },
                     { name: "CYBER PINK", class: "bg-pink-500" },
                     { name: "MATRIX GREEN", class: "bg-green-500" },
                     { name: "GHOST WHITE", class: "bg-white" },
@@ -102,8 +124,8 @@ const AIStylePage = () => {
                       onClick={nextStep}
                       className="flex flex-col items-center gap-4 group"
                     >
-                      <div className={cn("w-20 h-20 rounded-full border-4 border-white/5 group-hover:border-primary transition-all", color.class)} />
-                      <span className="text-[10px] font-bold tracking-widest text-white/40 uppercase">{color.name}</span>
+                      <div className={cn("w-20 h-20 rounded-full border-4 border-white/5 group-hover:border-white/30 group-hover:scale-110 transition-all", color.class)} />
+                      <span className="text-[10px] font-bold tracking-widest text-white/40 uppercase font-sora group-hover:text-white transition-colors">{color.name}</span>
                     </button>
                   ))}
                 </div>
@@ -119,17 +141,17 @@ const AIStylePage = () => {
                 className="space-y-8"
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <Ruler size={24} className="text-primary" />
-                  <h3 className="text-2xl font-black tracking-tight uppercase">What's your preferred fit?</h3>
+                  <Ruler size={24} className="text-white/60" />
+                  <h3 className="text-2xl font-orbitron font-bold tracking-tight uppercase text-white">What&apos;s your preferred fit?</h3>
                 </div>
                 <div className="space-y-4">
                   {["OVERSIZED & LOOSE", "REGULAR FIT", "SLIM & TAPERED", "TECHNICAL LAYERING"].map((opt) => (
                     <button 
                       key={opt}
                       onClick={nextStep}
-                      className="w-full p-6 rounded-2xl glass border border-white/5 text-left hover:border-primary transition-all"
+                      className="w-full p-6 rounded-2xl bg-white/3 border border-white/5 text-left hover:border-white/20 hover:bg-white/5 transition-all group"
                     >
-                      <span className="text-lg font-black tracking-tight">{opt}</span>
+                      <span className="text-lg font-orbitron font-bold tracking-tight text-white/60 group-hover:text-white transition-colors">{opt}</span>
                     </button>
                   ))}
                 </div>
@@ -146,30 +168,34 @@ const AIStylePage = () => {
               >
                 {!isAnalyzing ? (
                   <>
-                    <div className="w-24 h-24 rounded-full bg-primary/10 mx-auto flex items-center justify-center mb-10">
-                      <Sparkles size={40} className="text-primary animate-pulse" />
+                    <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 mx-auto flex items-center justify-center mb-10">
+                      <Sparkles size={40} className="text-white/60 animate-pulse" />
                     </div>
-                    <h3 className="text-3xl font-black tracking-tighter mb-6 uppercase">Ready for synthesis?</h3>
+                    <h3 className="text-3xl font-orbitron font-bold tracking-tighter mb-6 uppercase text-white">Ready for synthesis?</h3>
                     <button 
                       onClick={startAnalysis}
-                      className="px-12 py-5 bg-white text-black rounded-2xl font-black tracking-tight hover:bg-primary transition-colors"
+                      className="px-12 py-5 bg-white text-black rounded-2xl font-orbitron font-bold tracking-tight hover:bg-white/90 transition-colors flex items-center gap-3 mx-auto"
                     >
                       GENERATE RECOMMENDATIONS
+                      <ArrowRight size={18} />
                     </button>
                   </>
                 ) : (
                   <div className="space-y-10">
                     <div className="relative w-32 h-32 mx-auto">
-                      <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+                      <div className="absolute inset-0 rounded-full border-4 border-white/5" />
                       <motion.div 
                         animate={{ rotate: 360 }}
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent"
+                        className="absolute inset-0 rounded-full border-4 border-white/30 border-t-white"
                       />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Loader2 size={24} className="text-white/50 animate-spin" />
+                      </div>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black tracking-tight mb-2 uppercase animate-pulse">Analyzing Identity...</h3>
-                      <p className="text-white/40 text-xs tracking-widest font-bold">SCANNING NEURAL AESTHETIC PATTERNS</p>
+                      <h3 className="text-2xl font-orbitron font-bold tracking-tight mb-2 uppercase animate-pulse text-white">Analyzing Identity...</h3>
+                      <p className="text-white/40 text-xs tracking-widest font-sora font-bold">SCANNING NEURAL AESTHETIC PATTERNS</p>
                     </div>
                   </div>
                 )}
@@ -184,25 +210,31 @@ const AIStylePage = () => {
                 className="space-y-12"
               >
                 <div className="text-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-bold tracking-widest uppercase mb-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-bold tracking-widest uppercase mb-4">
                     <Sparkles size={12} /> Analysis Complete
                   </div>
-                  <h3 className="text-4xl font-black tracking-tighter uppercase">Your Curated Identity</h3>
+                  <h3 className="text-4xl font-orbitron font-bold tracking-tighter uppercase text-white">Your Curated Identity</h3>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {recommendations.map((p) => (
-                    <ProductCard key={p.id} product={p} />
-                  ))}
-                </div>
+                {recommendations.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {recommendations.map((p) => (
+                      <ProductCard key={p.id} product={p} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10">
+                    <p className="text-white/40 font-sora text-sm">Connecting to product database...</p>
+                  </div>
+                )}
 
-                <div className="p-8 rounded-3xl bg-primary/5 border border-primary/10">
+                <div className="p-8 rounded-3xl bg-white/3 border border-white/10">
                   <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                     <div>
-                      <h4 className="text-xl font-black tracking-tight uppercase mb-2">Buy the Full Bundle</h4>
-                      <p className="text-white/40 text-sm">Save 15% when you purchase the AI recommended ensemble.</p>
+                      <h4 className="text-xl font-orbitron font-bold tracking-tight uppercase mb-2 text-white">Buy the Full Bundle</h4>
+                      <p className="text-white/40 text-sm font-sora">Save 15% when you purchase the AI recommended ensemble.</p>
                     </div>
-                    <button className="px-8 py-4 bg-primary text-black rounded-xl font-black tracking-tight hover:scale-105 transition-transform flex items-center gap-2">
+                    <button className="px-8 py-4 bg-white text-black rounded-xl font-orbitron font-bold tracking-tight hover:scale-105 transition-transform flex items-center gap-2">
                       ADD BUNDLE TO CART <ArrowRight size={18} />
                     </button>
                   </div>
@@ -210,7 +242,7 @@ const AIStylePage = () => {
 
                 <button 
                   onClick={() => setStep(1)}
-                  className="w-full py-4 text-[10px] font-bold tracking-widest text-white/30 hover:text-white transition-colors"
+                  className="w-full py-4 text-[10px] font-bold tracking-widest text-white/30 hover:text-white transition-colors font-sora uppercase"
                 >
                   RE-ANALYZE STYLE
                 </button>

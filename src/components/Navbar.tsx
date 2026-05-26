@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useAnimation } from "framer-motion";
-import { Search, ShoppingBag, User, Menu, Zap, LogIn, Globe } from "lucide-react";
+import { Search, ShoppingBag, User, Zap, LogIn, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -24,13 +24,8 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 50);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -55,13 +50,13 @@ const Navbar = () => {
       )}
     >
       <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex items-center justify-between">
-        {/* Brand/Logo - Left aligned */}
+        {/* Brand/Logo */}
         <div className="flex items-center gap-8">
           <Link href="/" className="text-2xl font-display font-black tracking-tighter text-white hover:text-white/80 transition-colors">
             LUXE<span className="text-white/40">.</span>
           </Link>
           
-          {/* Main Navigation Links */}
+          {/* Main Nav Links */}
           <div className="hidden md:flex items-center gap-8 pl-8 border-l border-white/10">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -107,19 +102,27 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Search */}
             <button 
               onClick={() => setIsSearchModalOpen(true)}
               className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
             >
               <Search size={16} />
             </button>
+
+            {/* Country Selector */}
             <button 
               onClick={() => setIsCountryModalOpen(true)}
               className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
             >
               <Globe size={16} />
             </button>
-            <button onClick={toggleCart} className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors relative">
+
+            {/* Cart */}
+            <button 
+              onClick={toggleCart} 
+              className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors relative"
+            >
               <ShoppingBag size={16} />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#D4AF37] rounded-full flex items-center justify-center text-[7px] font-bold text-[#050508] shadow-[0_0_8px_rgba(212,175,55,0.4)]">
@@ -127,6 +130,8 @@ const Navbar = () => {
                 </span>
               )}
             </button>
+
+            {/* User / Login */}
             <Link href={user ? "/profile" : "/auth"}>
               <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors">
                 {user ? <User size={16} /> : <LogIn size={16} />}
@@ -134,16 +139,20 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* System Sync Badge */}
+          {/* System Status Badge */}
           <div className="hidden xl:flex items-center gap-3 pl-4 border-l border-white/10">
             <div className="text-right">
               <div className="text-[10px] font-sora font-bold tracking-widest text-white">SYSTEM SYNC</div>
               <div className="text-[9px] font-sora tracking-widest text-white/40">
-                {user ? "SECURE UPLINK" : "OFFLINE V4.2"}
+                {user ? "SECURE UPLINK" : "NEURAL LINK"}
               </div>
             </div>
-            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-              <Zap size={14} className="text-white" />
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${
+              user 
+                ? "bg-green-500/10 border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.2)]" 
+                : "bg-white/5 border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.05)]"
+            }`}>
+              <Zap size={14} className={user ? "text-green-400" : "text-white/50"} />
             </div>
           </div>
         </div>

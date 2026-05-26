@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import Link from "next/link";
@@ -11,9 +10,26 @@ interface Product {
   name: string;
   description: string;
   price: number;
-  images: string[];
+  images: string[] | string | any;
   category: string;
   isNew?: boolean;
+}
+
+// Safely extract first image from either array, JSON string, or plain URL
+function getFirstImage(images: any): string {
+  const fallback = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop";
+  if (!images) return fallback;
+  if (Array.isArray(images)) return images[0] || fallback;
+  if (typeof images === "string") {
+    try {
+      const parsed = JSON.parse(images);
+      if (Array.isArray(parsed)) return parsed[0] || fallback;
+      return String(parsed) || fallback;
+    } catch {
+      return images || fallback;
+    }
+  }
+  return fallback;
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
@@ -21,8 +37,8 @@ const ProductCard = ({ product }: { product: Product }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
 
-  // Fake random AI match score for effect
-  const matchScore = Math.floor(Math.random() * 15) + 85; 
+  const imageUrl = getFirstImage(product.images);
+  const matchScore = Math.floor(Math.random() * 15) + 85;
 
   return (
     <div 
@@ -34,7 +50,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       <Link href={`/product/${product.id}`} className="relative h-[240px] w-full overflow-hidden bg-[#0A0A0F] block">
         <div 
           className={`absolute inset-0 bg-cover bg-center transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.15,1)] ${isHovered ? 'scale-110 rotate-2' : 'scale-100 rotate-0'}`}
-          style={{ backgroundImage: `url(${product.images[0]})` }}
+          style={{ backgroundImage: `url(${imageUrl})` }}
         />
         
         {/* Gradients */}
@@ -78,7 +94,6 @@ const ProductCard = ({ product }: { product: Product }) => {
 
         <div className="mt-4 pt-4 border-t border-white/10 flex items-end justify-between">
           <div>
-            {/* Fake original price for dashboard aesthetic */}
             <div className="text-[9px] font-sora text-white/30 line-through tracking-wider mb-0.5">
               {convertPrice(product.price * 1.35).symbol}{convertPrice(product.price * 1.35).amount}
             </div>
@@ -97,9 +112,9 @@ const ProductCard = ({ product }: { product: Product }) => {
               id: product.id,
               name: product.name,
               price: product.price,
-              image: product.images[0],
+              image: imageUrl,
               quantity: 1,
-              size: "L" // Default size, product page will let them choose
+              size: "L"
             })}
             className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/70 flex items-center justify-center hover:bg-white hover:text-black hover:shadow-[0_5px_15px_rgba(255,255,255,0.2)] transition-all duration-300 transform hover:scale-105 active:scale-95"
           >
