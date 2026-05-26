@@ -21,6 +21,7 @@ interface CommerceContextType {
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string, size?: string) => void;
   updateQuantity: (id: string, quantity: number, size?: string) => void;
+  clearCart: () => void;
   cartCount: number;
   totalPrice: number;
   isCartOpen: boolean;
@@ -103,6 +104,11 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem("luxe-cart");
+  };
+
   const toggleCart = () => setIsCartOpen(!isCartOpen);
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
@@ -125,6 +131,7 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
         addToCart,
         removeFromCart,
         updateQuantity,
+        clearCart,
         cartCount,
         totalPrice,
         isCartOpen,

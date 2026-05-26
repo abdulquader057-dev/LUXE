@@ -81,11 +81,13 @@ export default function SettingsPage() {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
                 return (
-                  <button
+                  <motion.button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
+                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileTap={{ scale: 0.98 }}
                     className={cn(
-                      "w-full flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-500 group relative overflow-hidden",
+                      "w-full flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-500 group relative overflow-hidden cursor-pointer",
                       isActive 
                         ? "bg-primary/10 border border-primary/20 text-white" 
                         : "text-white/30 hover:text-white/60"
@@ -104,20 +106,22 @@ export default function SettingsPage() {
                     />
                     <span className="text-[10px] font-mono font-bold tracking-[0.3em] uppercase">{item.label}</span>
                     <ChevronRight size={14} className={cn("ml-auto transition-transform", isActive && "rotate-90")} />
-                  </button>
+                  </motion.button>
                 );
               })}
             </nav>
 
             {/* Logout / Secondary Action */}
             <div className="pt-8 border-t border-white/[0.03]">
-              <button 
+              <motion.button 
                 onClick={() => setShowConfirmLogout(true)}
-                className="w-full flex items-center gap-4 px-6 py-4 text-red-400/60 hover:text-red-400 transition-colors group"
+                whileHover={{ scale: 1.02, x: 4 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center gap-4 px-6 py-4 text-red-400/60 hover:text-red-400 transition-colors group cursor-pointer"
               >
                 <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
                 <span className="text-[10px] font-mono font-bold tracking-[0.3em] uppercase">Terminate Session</span>
-              </button>
+              </motion.button>
             </div>
           </aside>
 
@@ -165,18 +169,22 @@ export default function SettingsPage() {
                 Signing out will temporarily break your personalized style DNA calibration feed. Do you wish to proceed?
               </p>
               <div className="flex gap-4">
-                <button 
+                <motion.button 
                   onClick={() => setShowConfirmLogout(false)}
-                  className="flex-1 py-3 border border-white/10 rounded-xl text-xs font-mono uppercase tracking-widest hover:bg-white/5 transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1 py-3 border border-white/10 rounded-xl text-xs font-mono uppercase tracking-widest hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   Cancel
-                </button>
-                <button 
+                </motion.button>
+                <motion.button 
                   onClick={handleLogout}
-                  className="flex-1 py-3 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl text-xs font-mono uppercase tracking-widest hover:bg-red-500/30 transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1 py-3 bg-red-500/20 border border-red-500/40 text-red-300 rounded-xl text-xs font-mono uppercase tracking-widest hover:bg-red-500/30 transition-colors cursor-pointer"
                 >
                   Terminate
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           </div>
@@ -190,8 +198,10 @@ export default function SettingsPage() {
 
 function Toggle({ active, onChange }: { active: boolean; onChange?: () => void }) {
   return (
-    <div 
+    <motion.div 
       onClick={onChange}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       className={cn(
         "w-10 h-5 rounded-full relative transition-colors duration-500 cursor-pointer",
         active ? "bg-primary" : "bg-white/10"
@@ -201,7 +211,7 @@ function Toggle({ active, onChange }: { active: boolean; onChange?: () => void }
         animate={{ x: active ? 22 : 4 }}
         className="absolute top-1 w-3 h-3 rounded-full bg-white shadow-sm"
       />
-    </div>
+    </motion.div>
   );
 }
 
@@ -376,16 +386,18 @@ function ClothingPreferences() {
             <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em]">Material Filter</h3>
             <div className="flex flex-wrap gap-2">
                {["Silk", "Merino Wool", "Bioplastic", "Chrome Fiber", "Organic Cotton"].map(m => (
-                 <button 
+                 <motion.button 
                    key={m} 
                    onClick={() => handleMaterialChange(m)}
+                   whileHover={{ scale: 1.05 }}
+                   whileTap={{ scale: 0.95 }}
                    className={cn(
                      "px-4 py-2 rounded-full border text-[9px] font-mono uppercase tracking-widest transition-all cursor-pointer",
                      activeMaterial === m ? "bg-primary text-black border-primary" : "border-white/10 text-white hover:border-primary/40 hover:text-primary"
                    )}
                  >
                    {m}
-                 </button>
+                 </motion.button>
                ))}
             </div>
           </div>
@@ -396,16 +408,18 @@ function ClothingPreferences() {
               <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em]">Fit Profile</h3>
               <div className="grid grid-cols-3 gap-2">
                  {["Oversized", "Athletic", "Skin"].map(f => (
-                   <button 
+                   <motion.button 
                      key={f} 
                      onClick={() => handleFitChange(f)}
+                     whileHover={{ scale: 1.03, y: -2 }}
+                     whileTap={{ scale: 0.97 }}
                      className={cn(
                        "p-4 rounded-2xl border text-[9px] font-mono uppercase tracking-widest transition-all cursor-pointer",
                        activeFit === f ? "bg-primary text-black border-primary" : "border-white/5 text-white/40 hover:border-primary/40"
                      )}
                    >
                      {f}
-                   </button>
+                   </motion.button>
                  ))}
               </div>
            </div>
@@ -603,35 +617,41 @@ function AccessoryHub() {
       </div>
 
       <div className="grid grid-cols-3 gap-6">
-         <div 
+         <motion.div 
            onClick={() => handleCategorySelect("Horology")}
+           whileHover={{ scale: 1.03, y: -4 }}
+           whileTap={{ scale: 0.98 }}
            className={cn("p-6 rounded-2xl bg-white/[0.02] border transition-all cursor-pointer group",
              activeCategory === "Horology" ? "border-primary bg-primary/5" : "border-white/5 hover:border-primary/40")}
          >
            <Watch size={24} className={cn("mb-4 transition-colors", activeCategory === "Horology" ? "text-primary" : "text-primary/40 group-hover:text-primary")} />
            <h4 className="text-[10px] font-mono font-bold tracking-widest uppercase mb-1">Horology</h4>
            <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest">12 AR Artifacts</span>
-         </div>
+         </motion.div>
          
-         <div 
+         <motion.div 
            onClick={() => handleCategorySelect("Jewelry")}
+           whileHover={{ scale: 1.03, y: -4 }}
+           whileTap={{ scale: 0.98 }}
            className={cn("p-6 rounded-2xl bg-white/[0.02] border transition-all cursor-pointer group",
              activeCategory === "Jewelry" ? "border-primary bg-primary/5" : "border-white/5 hover:border-primary/40")}
          >
            <Diamond size={24} className={cn("mb-4 transition-colors", activeCategory === "Jewelry" ? "text-primary" : "text-primary/40 group-hover:text-primary")} />
            <h4 className="text-[10px] font-mono font-bold tracking-widest uppercase mb-1">Jewelry</h4>
            <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest">8 AR Artifacts</span>
-         </div>
+         </motion.div>
 
-         <div 
+         <motion.div 
            onClick={() => handleCategorySelect("Artifacts")}
+           whileHover={{ scale: 1.03, y: -4 }}
+           whileTap={{ scale: 0.98 }}
            className={cn("p-6 rounded-2xl bg-white/[0.02] border transition-all cursor-pointer group",
              activeCategory === "Artifacts" ? "border-primary bg-primary/5" : "border-white/5 hover:border-primary/40")}
          >
            <ShoppingBag size={24} className={cn("mb-4 transition-colors", activeCategory === "Artifacts" ? "text-primary" : "text-primary/40 group-hover:text-primary")} />
            <h4 className="text-[10px] font-mono font-bold tracking-widest uppercase mb-1">Artifacts</h4>
            <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest">24 AR Artifacts</span>
-         </div>
+         </motion.div>
       </div>
 
       <div className="glass-panel !rounded-[24px] p-8 border border-white/5 relative overflow-hidden">
@@ -837,10 +857,12 @@ function SubscriptionServices() {
                </p>
                <div className="flex gap-4">
                   {['#00f2ff', '#c084fc', '#ff4466', '#00ff9d'].map((color) => (
-                    <button 
+                    <motion.button 
                       key={color} 
                       onClick={() => handleSetTheme(color)}
-                      className="w-8 h-8 rounded-full border-2 border-transparent hover:border-white transition-all cursor-pointer shadow-lg active:scale-95"
+                      whileHover={{ scale: 1.2, rotate: 10 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="w-8 h-8 rounded-full border-2 border-transparent hover:border-white transition-all cursor-pointer shadow-lg"
                       style={{ backgroundColor: color }}
                     />
                   ))}
@@ -931,35 +953,62 @@ function SupportCenter() {
 
   React.useEffect(() => {
     async function fetchOrders() {
+      setLoading(true);
       if (user) {
-        if (user.id === "mock-user-12345" || user.id === "admin-id-123") {
-          setOrders([
-            {
-              id: "ord-98741",
-              created_at: new Date().toISOString(),
-              total_price: 4398,
-              status: "shipped",
-              delivery_address: "102 Cognitive Way, Bangalore, IN"
-            },
-            {
-              id: "ord-88321",
-              created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
-              total_price: 2999,
-              status: "delivered",
-              delivery_address: "102 Cognitive Way, Bangalore, IN"
+        try {
+          const isAdmin = user.email === "abdulquader057@gmail.com";
+          if (isAdmin) {
+            // Admin fetches all orders in the system
+            const { data, error } = await supabase
+              .from("orders")
+              .select("*")
+              .order("created_at", { ascending: false });
+            if (!error && data) {
+              setOrders(data);
+            } else {
+              setOrders([]);
             }
-          ]);
-        } else {
-          const { data, error } = await supabase
-            .from("orders")
-            .select("*")
-            .eq("customer_id", user.id)
-            .order("created_at", { ascending: false });
-          
-          if (!error && data) {
-            setOrders(data);
+          } else {
+            // Check if user.id is a valid UUID
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id);
+            if (isUuid) {
+              const { data, error } = await supabase
+                .from("orders")
+                .select("*")
+                .eq("customer_id", user.id)
+                .order("created_at", { ascending: false });
+              if (!error && data) {
+                setOrders(data);
+              } else {
+                setOrders([]);
+              }
+            } else {
+              // For fallback local mock accounts, they won't have real orders in DB
+              setOrders([]);
+            }
           }
+        } catch (err) {
+          console.error("Error fetching database orders:", err);
+          setOrders([]);
         }
+      } else {
+        // Unauthenticated Guest sees mock order logs to see how it works!
+        setOrders([
+          {
+            id: "ord-98741",
+            created_at: new Date().toISOString(),
+            total_price: 4398,
+            status: "shipped",
+            delivery_address: "102 Cognitive Way, Hyderabad, IN"
+          },
+          {
+            id: "ord-88321",
+            created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
+            total_price: 2999,
+            status: "delivered",
+            delivery_address: "102 Cognitive Way, Hyderabad, IN"
+          }
+        ]);
       }
       setLoading(false);
     }
@@ -1065,21 +1114,19 @@ function SupportCenter() {
          <div className="space-y-4">
             {loading ? (
                <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Accessing Neural Database...</div>
-            ) : user ? (
-               orders.length > 0 ? (
-                 orders.map((order) => (
-                   <OrderRow 
-                     key={order.id} 
-                     id={`LX-${order.id.slice(0, 4).toUpperCase()}`} 
-                     status={order.status || "Processing"} 
-                     date={new Date(order.created_at).toLocaleDateString()} 
-                   />
-                 ))
-               ) : (
-                 <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">No order records found in your archive.</div>
-               )
+            ) : orders.length > 0 ? (
+               orders.map((order) => (
+                 <OrderRow 
+                   key={order.id} 
+                   id={order.id.startsWith("ord-") ? `LX-${order.id.slice(4).toUpperCase()}` : `LX-${order.id.slice(0, 4).toUpperCase()}`} 
+                   status={order.status || "Processing"} 
+                   date={new Date(order.created_at).toLocaleDateString()} 
+                 />
+               ))
             ) : (
-               <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Please authenticate to view order logs.</div>
+               <div className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                 {user ? "No order records found in your archive." : "No orders placed yet."}
+               </div>
             )}
          </div>
       </div>
@@ -1222,10 +1269,14 @@ function SupportCenter() {
 
 function AddressCard({ type, address, isNew }: { type: string; address: string; isNew?: boolean }) {
   return (
-    <div className={cn(
-      "p-6 rounded-2xl border transition-all cursor-pointer group",
-      isNew ? "border-white/5 bg-white/[0.02] hover:border-primary/40" : "border-primary/20 bg-primary/5"
-    )}>
+    <motion.div 
+      whileHover={{ scale: 1.02, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      className={cn(
+        "p-6 rounded-2xl border transition-all cursor-pointer group",
+        isNew ? "border-white/5 bg-white/[0.02] hover:border-primary/40" : "border-primary/20 bg-primary/5"
+      )}
+    >
        <div className="flex justify-between items-start mb-4">
           <span className="text-[10px] font-mono font-bold tracking-widest uppercase">{type}</span>
           <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1233,7 +1284,7 @@ function AddressCard({ type, address, isNew }: { type: string; address: string; 
           </div>
        </div>
        <p className="text-[10px] font-mono text-white/30 uppercase leading-relaxed">{address}</p>
-    </div>
+    </motion.div>
   );
 }
 
@@ -1260,7 +1311,11 @@ function NotificationToggle({ title, desc, active, onChange }: { title: string; 
 
 function OrderRow({ id, status, date }: { id: string; status: string; date: string }) {
   return (
-    <div className="flex items-center justify-between p-4 rounded-xl hover:bg-white/[0.02] transition-all cursor-pointer group">
+    <motion.div 
+      whileHover={{ scale: 1.01, x: 2, backgroundColor: "rgba(255, 255, 255, 0.02)" }}
+      whileTap={{ scale: 0.99 }}
+      className="flex items-center justify-between p-4 rounded-xl transition-all cursor-pointer group"
+    >
        <div className="flex flex-col">
           <span className="text-[10px] font-mono font-bold tracking-widest uppercase">{id}</span>
           <span className="text-[8px] font-mono text-white/20 uppercase">{date}</span>
@@ -1268,10 +1323,10 @@ function OrderRow({ id, status, date }: { id: string; status: string; date: stri
        <div className="flex items-center gap-4">
           <span className={cn(
             "text-[8px] font-mono uppercase tracking-widest",
-            status === "Delivered" ? "text-primary" : "text-yellow-400"
+            status === "Delivered" || status === "delivered" ? "text-primary" : "text-yellow-400"
           )}>{status}</span>
           <ChevronRight size={14} className="text-white/10 group-hover:text-white/40 group-hover:translate-x-1 transition-all" />
        </div>
-    </div>
+    </motion.div>
   );
 }

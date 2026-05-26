@@ -148,8 +148,14 @@ export default function CognitionHub() {
             key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 + (i * 0.1) }}
-            className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-primary/30 hover:bg-primary/5 transition-all group flex flex-col justify-between"
+            whileHover={{ y: -8, scale: 1.02, backgroundColor: "rgba(0, 240, 255, 0.02)", border: "1px solid rgba(0, 240, 255, 0.2)" }}
+            transition={{ 
+              type: "spring",
+              stiffness: 150,
+              damping: 15,
+              delay: 0.2 + (i * 0.1) 
+            }}
+            className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 transition-all group flex flex-col justify-between"
           >
             <div>
               <div className="flex justify-between items-start mb-6">
@@ -165,12 +171,14 @@ export default function CognitionHub() {
               <p className="text-[11px] font-mono text-white/40 leading-relaxed uppercase mb-6">{node.desc}</p>
             </div>
             
-            <button 
+            <motion.button 
               onClick={() => setActiveNode(node)}
-              className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-[9px] font-mono tracking-widest uppercase hover:bg-primary hover:text-black hover:border-primary transition-all duration-300"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-[9px] font-mono tracking-widest uppercase hover:bg-primary hover:text-black hover:border-primary transition-all duration-300 cursor-pointer"
             >
               {node.btnText}
-            </button>
+            </motion.button>
           </motion.div>
         ))}
       </div>

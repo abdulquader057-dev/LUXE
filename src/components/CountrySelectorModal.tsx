@@ -68,14 +68,16 @@ export const CountrySelectorModal = ({ isOpen, onClose }: CountrySelectorModalPr
           <div className="overflow-y-auto p-4 custom-scrollbar bg-transparent">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
               {countries.map((country, i) => (
-                <button
+                <motion.button
                   key={i}
                   onClick={() => handleSelect(country)}
-                  className="flex flex-col items-center justify-center p-4 border border-white/5 bg-white/[0.02] rounded-xl hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg transition-all group"
+                  whileHover={{ scale: 1.05, y: -4 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex flex-col items-center justify-center p-4 border border-white/5 bg-white/[0.02] rounded-xl hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg transition-all group cursor-pointer"
                 >
                   <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">{country.flag}</span>
                   <span className="text-[11px] font-sora font-semibold text-white/70 text-center uppercase tracking-wider">{country.name}</span>
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
