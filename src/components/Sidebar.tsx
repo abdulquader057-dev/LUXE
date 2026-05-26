@@ -17,7 +17,8 @@ import {
   Award,
   Crown,
   Settings,
-  MessageCircle
+  MessageCircle,
+  Brain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Menu, X, Globe, LogIn, LogOut } from "lucide-react";
@@ -35,6 +36,7 @@ const Sidebar = () => {
     { name: t("nav.aiStylist"), href: "/ai-style", icon: Sparkles, subtitle: "Your Personal Stylist" },
     { name: t("nav.collections"), href: "/shop?cat=collections", icon: Grid, subtitle: "Curated for You" },
     { name: t("nav.shop"), href: "/shop", icon: ShoppingBag, subtitle: "Explore Products" },
+    { name: "Cognition Hub", href: "/cognition", icon: Brain, subtitle: "Neural Policy & Logistics" },
     { name: t("nav.newArrivals"), href: "/shop?sort=new", icon: Zap, subtitle: "Fresh & Trendy" },
     { name: t("nav.trending"), href: "/shop?sort=trending", icon: TrendingUp, subtitle: "Popular Now" },
   ];

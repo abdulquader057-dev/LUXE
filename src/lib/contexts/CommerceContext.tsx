@@ -19,22 +19,22 @@ interface CommerceContextType {
   setCurrency: (currency: Currency) => void;
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  removeFromCart: (id: string, size?: string) => void;
+  updateQuantity: (id: string, quantity: number, size?: string) => void;
   cartCount: number;
   totalPrice: number;
   isCartOpen: boolean;
   toggleCart: () => void;
-  convertPrice: (priceUSD: number) => { amount: number; symbol: string };
+  convertPrice: (priceINR: number) => { amount: number; symbol: string };
 }
 
 const CommerceContext = createContext<CommerceContextType | undefined>(undefined);
 
 const exchangeRates = {
-  USD: 1,
-  INR: 83.5,
-  EUR: 0.92,
-  GBP: 0.79,
+  INR: 1,
+  USD: 1 / 83.5,
+  EUR: 1 / 90.5,
+  GBP: 1 / 106.0,
 };
 
 const currencySymbols = {
@@ -81,19 +81,19 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
     setIsCartOpen(true);
   };
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = (id: string, size?: string) => {
     setCart((prev) => {
-      const newCart = prev.filter((i) => i.id !== id);
+      const newCart = prev.filter((i) => !(i.id === id && i.size === size));
       localStorage.setItem("luxe-cart", JSON.stringify(newCart));
       return newCart;
     });
     toast.error("Item removed from Arsenal");
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
-    if (quantity < 1) return removeFromCart(id);
+  const updateQuantity = (id: string, quantity: number, size?: string) => {
+    if (quantity < 1) return removeFromCart(id, size);
     setCart((prev) => {
-      const newCart = prev.map(i => i.id === id ? { ...i, quantity } : i);
+      const newCart = prev.map(i => (i.id === id && i.size === size) ? { ...i, quantity } : i);
       localStorage.setItem("luxe-cart", JSON.stringify(newCart));
       return newCart;
     });

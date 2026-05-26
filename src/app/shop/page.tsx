@@ -52,11 +52,59 @@ const ShopContent = () => {
   ];
 
   const filteredProducts = dbProducts.filter((p) => {
-    // If editorial, only show editorial products (we can use isNew or add a tag)
-    if (selectedCategory === "intel") return p.category === "streetwear"; // Just an example mapping
-    if (selectedCategory === "collections") return p.category !== "streetwear"; 
+    let matchesCategory = false;
+    if (selectedCategory === "all") {
+      matchesCategory = true;
+    } else {
+      const selCat = selectedCategory.toLowerCase();
+      const pCat = p.category.toLowerCase();
+      
+      if (selCat === "modest-wear" || selCat === "modest tech" || selCat === "modest wear") {
+        matchesCategory = pCat === "modest-wear";
+      } else if (selCat === "streetwear") {
+        matchesCategory = pCat === "streetwear";
+      } else if (selCat === "luxury") {
+        matchesCategory = pCat === "mixed-fashion" || p.name.toLowerCase().includes("luxury") || p.description.toLowerCase().includes("luxury");
+      } else if (selCat === "sneakers") {
+        matchesCategory = pCat === "sneakers";
+      } else if (selCat === "watches") {
+        matchesCategory = pCat === "watches";
+      } else if (selCat === "accessories") {
+        matchesCategory = pCat === "accessories";
+      } else if (selCat === "outerwear" || selCat === "hardwear" || selCat === "hard wear" || selCat === "outer wear") {
+        matchesCategory = p.name.toLowerCase().includes("jacket") || 
+                          p.name.toLowerCase().includes("coat") || 
+                          p.name.toLowerCase().includes("trench") || 
+                          p.name.toLowerCase().includes("hoodie") || 
+                          p.name.toLowerCase().includes("abaya") ||
+                          p.description.toLowerCase().includes("outerwear") ||
+                          p.description.toLowerCase().includes("jacket") ||
+                          p.description.toLowerCase().includes("coat") ||
+                          p.description.toLowerCase().includes("trench") ||
+                          p.description.toLowerCase().includes("hoodie");
+      } else if (selCat === "upper" || selCat === "upperwear" || selCat === "upper wear") {
+        matchesCategory = p.name.toLowerCase().includes("tunic") ||
+                          p.name.toLowerCase().includes("shirt") ||
+                          p.name.toLowerCase().includes("hoodie") ||
+                          p.name.toLowerCase().includes("jacket") ||
+                          p.name.toLowerCase().includes("abaya") ||
+                          p.description.toLowerCase().includes("upper") ||
+                          p.description.toLowerCase().includes("shirt") ||
+                          p.description.toLowerCase().includes("tunic") ||
+                          p.description.toLowerCase().includes("top");
+      } else if (selCat === "lower" || selCat === "lowerwear" || selCat === "lower wear") {
+        matchesCategory = p.name.toLowerCase().includes("pants") ||
+                          p.name.toLowerCase().includes("cargo") ||
+                          p.name.toLowerCase().includes("joggers") ||
+                          p.name.toLowerCase().includes("trousers") ||
+                          p.description.toLowerCase().includes("lower") ||
+                          p.description.toLowerCase().includes("pants") ||
+                          p.description.toLowerCase().includes("cargo");
+      } else {
+        matchesCategory = pCat === selCat;
+      }
+    }
 
-    const matchesCategory = selectedCategory === "all" || p.category.toLowerCase() === selectedCategory.toLowerCase();
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           p.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;

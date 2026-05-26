@@ -3,8 +3,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, BrainCircuit, Wand2, Palette, Ruler, ShoppingCart, ArrowRight } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
 import { MOCK_PRODUCTS } from "@/data/products";
 import ProductCard from "@/components/shop/ProductCard";
@@ -26,10 +24,7 @@ const AIStylePage = () => {
   };
 
   return (
-    <main className="min-h-screen pt-24 pb-20">
-      <Navbar />
-      
-      <div className="container mx-auto px-6 max-w-4xl">
+    <div className="container mx-auto px-6 max-w-4xl">
         <div className="text-center mb-16">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -224,9 +219,6 @@ const AIStylePage = () => {
           </AnimatePresence>
         </div>
       </div>
-
-      <Footer />
-    </main>
   );
 };
 

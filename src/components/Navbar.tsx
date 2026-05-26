@@ -10,11 +10,13 @@ import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useCommerce, Currency } from "@/lib/contexts/CommerceContext";
 import { CountrySelectorModal } from "./CountrySelectorModal";
+import { SearchModal } from "./SearchModal";
 
 const Navbar = () => {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const cartControls = useAnimation();
   const { t } = useLanguage();
   const { user } = useAuth();
@@ -33,43 +35,57 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const links = [
-    { name: t("nav.collections"), href: "/shop?cat=collections" },
-    { name: t("nav.newArrivals"), href: "/shop?sort=new" },
-    { name: t("nav.editorial"), href: "/shop?cat=intel" },
+  const navLinks = [
+    { name: t("nav.home"), href: "/" },
     { name: t("nav.aiStylist"), href: "/ai-style" },
+    { name: t("nav.collections"), href: "/shop?cat=collections" },
+    { name: t("nav.shop"), href: "/shop" },
   ];
 
   return (
     <motion.nav
-      initial={{ y: -50, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.8 }}
       className={cn(
-        "absolute top-0 left-0 right-0 z-40 flex items-center justify-between pl-20 pr-8 py-4 transition-all duration-300 backdrop-blur-md bg-[#050508]/80 border-b border-white/5",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6",
+        isScrolled 
+          ? "bg-[#050508]/85 backdrop-blur-md border-b border-white/5 py-4" 
+          : "bg-transparent"
       )}
     >
-      <div className="flex items-center gap-10 w-full">
-        {/* Left Links */}
-        <div className="hidden lg:flex items-center gap-8">
-          {links.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={cn(
-                  "text-[11px] font-sora font-semibold tracking-widest uppercase transition-colors duration-300 relative",
-                  isActive ? "text-white" : "text-white/60 hover:text-white"
-                )}
-              >
-                {link.name}
-                {isActive && (
-                  <div className="absolute -bottom-5 left-0 right-0 h-[2px] bg-white shadow-[0_0_10px_rgba(255,255,255,0.3)]" />
-                )}
-              </Link>
-            );
-          })}
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex items-center justify-between">
+        {/* Brand/Logo - Left aligned */}
+        <div className="flex items-center gap-8">
+          <Link href="/" className="text-2xl font-display font-black tracking-tighter text-white hover:text-white/80 transition-colors">
+            LUXE<span className="text-white/40">.</span>
+          </Link>
+          
+          {/* Main Navigation Links */}
+          <div className="hidden md:flex items-center gap-8 pl-8 border-l border-white/10">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link 
+                  key={link.name} 
+                  href={link.href}
+                  className={cn(
+                    "text-[10px] font-sora font-bold tracking-widest uppercase transition-colors relative py-2",
+                    isActive ? "text-white" : "text-white/40 hover:text-white"
+                  )}
+                >
+                  {link.name}
+                  {isActive && (
+                    <motion.div 
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 left-0 right-0 h-[2px] bg-white"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
         {/* Right Utilities */}
@@ -91,11 +107,12 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/shop">
-              <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors">
-                <Search size={16} />
-              </button>
-            </Link>
+            <button 
+              onClick={() => setIsSearchModalOpen(true)}
+              className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <Search size={16} />
+            </button>
             <button 
               onClick={() => setIsCountryModalOpen(true)}
               className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
@@ -136,9 +153,13 @@ const Navbar = () => {
         isOpen={isCountryModalOpen} 
         onClose={() => setIsCountryModalOpen(false)} 
       />
+
+      <SearchModal 
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+      />
     </motion.nav>
   );
 };
 
 export default Navbar;
-

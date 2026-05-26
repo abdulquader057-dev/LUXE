@@ -11,6 +11,7 @@ interface AuthContextType {
   isAdmin: boolean;
   profile: any | null;
   signOut: () => Promise<void>;
+  loginAsDemo: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,6 +30,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session
     const initializeAuth = async () => {
       try {
+        const savedMockUser = localStorage.getItem("luxe-mock-user");
+        const savedMockProfile = localStorage.getItem("luxe-mock-profile");
+        if (savedMockUser && savedMockProfile) {
+          setUser(JSON.parse(savedMockUser));
+          setProfile(JSON.parse(savedMockProfile));
+          setIsLoading(false);
+          return;
+        }
+
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (error) throw error;
@@ -87,8 +97,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const loginAsDemo = () => {
+    const demoUser = {
+      id: "mock-user-12345",
+      email: "demo@luxe.com",
+      user_metadata: {
+        full_name: "Demo Vanguard",
+        phone_number: "+919876543210",
+        style_dna: {
+          wardrobeCompletion: 92,
+          level: 5,
+        }
+      }
+    };
+    const demoProfile = {
+      id: "mock-user-12345",
+      email: "demo@luxe.com",
+      full_name: "Demo Vanguard",
+      phone_number: "+919876543210",
+      role: "customer"
+    };
+    setUser(demoUser as any);
+    setProfile(demoProfile);
+    localStorage.setItem("luxe-mock-user", JSON.stringify(demoUser));
+    localStorage.setItem("luxe-mock-profile", JSON.stringify(demoProfile));
+  };
+
   const signOut = async () => {
     try {
+      localStorage.removeItem("luxe-mock-user");
+      localStorage.removeItem("luxe-mock-profile");
+      setUser(null);
+      setProfile(null);
       await supabase.auth.signOut();
     } catch (error) {
       console.error("Error signing out:", error);
@@ -96,7 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, isAdmin, profile, signOut }}>
+    <AuthContext.Provider value={{ user, session, isLoading, isAdmin, profile, signOut, loginAsDemo }}>
       {children}
     </AuthContext.Provider>
   );

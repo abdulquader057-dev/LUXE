@@ -12,9 +12,9 @@ const Footer = () => {
           LUXE<span className="text-primary">.</span>
         </div>
         <div className="flex flex-wrap justify-center gap-10 text-[9px] font-black tracking-[0.4em] text-white/15 uppercase">
-          <Link href="#" className="hover:text-white/30 transition-colors">Neural Policy</Link>
-          <Link href="#" className="hover:text-white/30 transition-colors">Global Logistics</Link>
-          <Link href="#" className="hover:text-white/30 transition-colors">Cognition Hub</Link>
+          <Link href="/cognition" className="hover:text-white/30 transition-colors">Neural Policy</Link>
+          <Link href="/cognition" className="hover:text-white/30 transition-colors">Global Logistics</Link>
+          <Link href="/cognition" className="hover:text-white/30 transition-colors">Cognition Hub</Link>
         </div>
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-1.5 bg-green-500/60 rounded-full animate-pulse" />

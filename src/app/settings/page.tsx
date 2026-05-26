@@ -426,14 +426,33 @@ function SupportCenter() {
   React.useEffect(() => {
     async function fetchOrders() {
       if (user) {
-        const { data, error } = await supabase
-          .from("orders")
-          .select("*")
-          .eq("customer_id", user.id)
-          .order("created_at", { ascending: false });
-        
-        if (!error && data) {
-          setOrders(data);
+        if (user.id === "mock-user-12345") {
+          setOrders([
+            {
+              id: "ord-98741",
+              created_at: new Date().toISOString(),
+              total_price: 4398,
+              status: "shipped",
+              delivery_address: "102 Cognitive Way, Bangalore, IN"
+            },
+            {
+              id: "ord-88321",
+              created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
+              total_price: 2999,
+              status: "delivered",
+              delivery_address: "102 Cognitive Way, Bangalore, IN"
+            }
+          ]);
+        } else {
+          const { data, error } = await supabase
+            .from("orders")
+            .select("*")
+            .eq("customer_id", user.id)
+            .order("created_at", { ascending: false });
+          
+          if (!error && data) {
+            setOrders(data);
+          }
         }
       }
       setLoading(false);

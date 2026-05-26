@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, User, Mail, Lock, Phone, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { ADMIN_EMAIL } from "@/lib/contexts/AuthContext";
+import { ADMIN_EMAIL, useAuth } from "@/lib/contexts/AuthContext";
 
 export default function AuthPortal() {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,6 +17,12 @@ export default function AuthPortal() {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
+  const { loginAsDemo } = useAuth();
+
+  const handleBypassAuth = () => {
+    loginAsDemo();
+    router.push("/profile");
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,6 +185,21 @@ export default function AuthPortal() {
                 <ArrowRight size={20} />
               </>
             )}
+          </button>
+          
+          <div className="relative flex items-center my-6">
+            <div className="flex-grow border-t border-white/10"></div>
+            <span className="flex-shrink mx-4 text-white/20 text-[9px] font-bold tracking-widest uppercase">OR</span>
+            <div className="flex-grow border-t border-white/10"></div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleBypassAuth}
+            className="w-full h-14 bg-[#00F0FF]/5 border border-[#00F0FF]/20 text-[#00F0FF]/80 hover:text-[#00F0FF] hover:bg-[#00F0FF]/15 font-display font-black tracking-widest uppercase rounded-xl transition-all flex items-center justify-center gap-3"
+          >
+            Bypass Authentication (Test Mode)
+            <ShieldCheck size={20} className="text-[#00F0FF]" />
           </button>
         </form>
 
