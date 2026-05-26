@@ -10,6 +10,7 @@ const EntranceAnimation = () => {
     // Hide animation after 3.5 seconds
     const timer = setTimeout(() => {
       setShow(false);
+      window.dispatchEvent(new CustomEvent("open-country-modal"));
     }, 3500);
     return () => clearTimeout(timer);
   }, []);

@@ -56,23 +56,53 @@ const AIChatbot = () => {
     setIsProcessing(true);
 
     try {
-      const chatMessages: ChatMessage[] = messages.concat(userMessage).map((m) => ({
-        role: m.role as any,
+      const chatMessages = messages.concat(userMessage).map((m) => ({
+        role: m.role === "user" ? "user" : "model",
         content: m.content,
       }));
 
-      const response = await aiService.chat(chatMessages);
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          messages: chatMessages,
+          language: "English"
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch response");
+      }
+
+      const data = await response.json();
+      
+      let type = "text";
+      if (
+        data.message.toLowerCase().includes("recommend") ||
+        data.message.toLowerCase().includes("curate") ||
+        data.message.toLowerCase().includes("suggest") ||
+        data.message.toLowerCase().includes("shirt") ||
+        data.message.toLowerCase().includes("linen")
+      ) {
+        type = "recommendation";
+      }
 
       const aiResponse: Message = {
         role: "assistant",
-        content: response.content,
-        type: response.type,
+        content: data.message,
+        type: type,
       };
 
-      if (response.type === "recommendation" || response.type === "product") {
-        if (messageText.toLowerCase().includes("sneaker")) {
-          aiResponse.product = MOCK_PRODUCTS.find((p) => p.id === "zy-002");
+      if (type === "recommendation") {
+        const textLower = messageText.toLowerCase();
+        if (textLower.includes("white")) {
+          aiResponse.product = MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-001");
+        } else if (textLower.includes("blue") || textLower.includes("sky")) {
+          aiResponse.product = MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-002") || MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-006");
+        } else if (textLower.includes("black") || textLower.includes("dark")) {
+          aiResponse.product = MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-007");
         } else {
+          // General recommendation: White and Desert Sand linen shirts
           aiResponse.items = [MOCK_PRODUCTS[0], MOCK_PRODUCTS[2]];
         }
       }

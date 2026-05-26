@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
@@ -13,6 +14,15 @@ export default function CartSidebar() {
   const { isCartOpen, toggleCart, cart: items, removeFromCart, updateQuantity, totalPrice } = useCommerce();
   const { convertPrice } = useCommerce();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [coupons, setCoupons] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isCartOpen) {
+      const savedCoupons = JSON.parse(localStorage.getItem("luxe-coupons") || "[]");
+      setCoupons(savedCoupons);
+    }
+  }, [isCartOpen]);
+
   const formatPrice = (p: number) => { const res = convertPrice(p); return res.symbol + res.amount; };
 
   return (
@@ -60,7 +70,7 @@ export default function CartSidebar() {
                   </div>
                 ) : (
                   items.map((item) => (
-                    <div key={`${item.id}-${item.size}`} className="flex gap-4 bg-white/[0.02] border border-white/5 p-3 rounded-2xl">
+                    <div key={`${item.id}-${item.size}-${item.color || 'default'}`} className="flex gap-4 bg-white/[0.02] border border-white/5 p-3 rounded-2xl">
                       <div className="relative w-20 h-24 rounded-xl overflow-hidden bg-white/5">
                         <Image src={item.image} alt={item.name} fill className="object-cover" />
                       </div>
@@ -68,24 +78,32 @@ export default function CartSidebar() {
                         <div className="space-y-1">
                           <div className="flex justify-between items-start">
                             <h3 className="text-sm font-mono font-bold tracking-widest uppercase line-clamp-1 pr-2">{item.name}</h3>
-                            <button onClick={() => removeFromCart(item.id, item.size)} className="text-white/30 hover:text-red-400 transition-colors cursor-pointer">
+                            <button onClick={() => removeFromCart(item.id, item.size, item.color)} className="text-white/30 hover:text-red-400 transition-colors cursor-pointer">
                               <Trash2 size={14} />
                             </button>
                           </div>
-                          {item.size && <p className="text-[10px] font-mono text-white/40 uppercase">Size: {item.size}</p>}
+                          <div className="flex gap-2 text-[10px] font-mono text-white/40 uppercase">
+                            {item.size && <span>Size: {item.size}</span>}
+                            {item.color && (
+                              <>
+                                <span>•</span>
+                                <span>Color: {item.color}</span>
+                              </>
+                            )}
+                          </div>
                           <p className="text-sm font-mono text-primary">{formatPrice(item.price)}</p>
                         </div>
                         
                         <div className="flex items-center gap-3">
                           <button 
-                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.size)}
+                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.size, item.color)}
                             className="w-6 h-6 rounded bg-white/10 flex items-center justify-center hover:bg-white/20 cursor-pointer"
                           >
                             <Minus size={12} />
                           </button>
                           <span className="text-xs font-mono w-4 text-center">{item.quantity}</span>
                           <button 
-                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.size)}
+                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.size, item.color)}
                             className="w-6 h-6 rounded bg-white/10 flex items-center justify-center hover:bg-white/20 cursor-pointer"
                           >
                             <Plus size={12} />
@@ -94,6 +112,32 @@ export default function CartSidebar() {
                       </div>
                     </div>
                   ))
+                )}
+
+                {/* Saved Coupons Section */}
+                {coupons.length > 0 && (
+                  <div className="mt-8 pt-6 border-t border-white/5 space-y-3">
+                    <h3 className="text-[10px] font-mono text-primary/60 uppercase tracking-[0.2em] font-bold">Your Prepaid Rewards</h3>
+                    <div className="space-y-2">
+                      {coupons.map((coupon, idx) => (
+                        <div key={idx} className="bg-green-500/5 border border-green-500/20 p-3 rounded-xl flex items-center justify-between text-left">
+                          <div>
+                            <p className="text-xs font-mono font-bold text-green-400">{coupon.code}</p>
+                            <p className="text-[8px] font-mono text-white/40 uppercase tracking-widest">{coupon.discount}</p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(coupon.code);
+                              toast.success("Coupon code copied!");
+                            }}
+                            className="text-[8px] font-mono tracking-widest uppercase bg-green-500/10 hover:bg-green-500/20 text-green-400 px-2 py-1 rounded cursor-pointer transition-colors"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
 

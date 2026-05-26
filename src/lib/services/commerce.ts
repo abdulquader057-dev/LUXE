@@ -55,7 +55,7 @@ export class CommerceService {
   }
 
   public getWhatsAppLink(message: string): string {
-    const phone = "91XXXXXXXXXX"; // Replace with actual business number
+    const phone = "917995338472"; // Replace with actual business number
     return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   }
 }

@@ -16,14 +16,38 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
     }
 
-    const history = messages.slice(0, -1).map((msg: any) => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }]
-    }));
+    // Clean and alternate history to prevent validation issues with startChat
+    const history: any[] = [];
+    const chatHistoryMessages = messages.filter((msg: any) => {
+      const content = msg.content || "";
+      return (
+        !content.includes("Welcome to LUXE AI. I am your personal stylist.") &&
+        !content.includes("I am LUXE, your Neural Style Consultant.") &&
+        !content.includes("How shall we architect your silhouette today?")
+      );
+    }).slice(0, -1);
+
+    for (const msg of chatHistoryMessages) {
+      const role = msg.role === 'user' ? 'user' : 'model';
+      // Ensure we alternate roles. If same role, append to the last text block
+      if (history.length > 0 && history[history.length - 1].role === role) {
+        history[history.length - 1].parts[0].text += "\n" + msg.content;
+      } else {
+        history.push({
+          role,
+          parts: [{ text: msg.content }]
+        });
+      }
+    }
+
+    // Ensure history starts with 'user'. If it starts with 'model', remove it
+    if (history.length > 0 && history[0].role === 'model') {
+      history.shift();
+    }
 
     const latestMessage = messages[messages.length - 1].content;
 
-    // We will attempt with the current key. If it fails due to limits/auth, we rotate and retry.
+    // Attempt with current key. Rotate and retry if it fails
     let attempt = 0;
     while (attempt < API_KEYS.length) {
       try {
@@ -34,26 +58,31 @@ export async function POST(req: Request) {
           history: [
             {
               role: "user",
-              parts: [{ text: `System Prompt: You are LUXE AI, an ultra-premium, highly interactive AI fashion stylist and neural concierge for the elite fashion brand 'LUXE by SYEDS'. 
+              parts: [{ text: `System Prompt: You are LUXE AI, an ultra-premium, highly interactive AI fashion stylist and neural concierge for the fashion brand 'LUXE'. 
 
-Your tone is extremely impactful, confident, cinematic, and deeply knowledgeable about high-end techwear, avant-garde silhouettes, luxury streetwear, and horology. 
+Your tone is extremely impactful, confident, cinematic, and polite. We are launching our new Linen collection, focusing on comfort and premium everyday essentials.
 
-IMPORTANT RESPONSE FORMAT & RULES:
-1. Speak in a highly engaging, polite, and interactive manner. Ask the user about their style preferences (e.g., oversized vs. athletic, materials like silk or chrome fiber) to keep them engaged.
-2. Use markdown formatting (bolding, lists, bullet points) to make your style recommendations clean and easy to scan.
-3. Recommend specific combinations of our signature products:
-   - "Oversized Stealth Abaya" (Modest Wear)
-   - "Neural Layered Tunic" (Modest Wear)
-   - "Titanium Draped Hijab" (Modest Wear)
-   - "Cyberpunk Cargo Pants" (Streetwear)
-   - "Oversized Matrix Hoodie" (Streetwear)
-   - "Tech-Utility Vest" (Streetwear)
-   - "Neon-Pulse Sneakers X1" (Sneakers)
-   - "Vortex Chrono Watch" (Watches)
-   - "Vanguard Cyber Shield" (Accessories)
-4. Add a futuristic terminal tag at the end of your response, such as "[CALIBRATION STATUS: 100% SUCCESS | STYLE DNA: LOCKED]" to enhance the aesthetic.
-5. Keep your responses engaging, simple, and professional. Avoid overly complex or literary language. If responding in other languages like Urdu, Hindi, Tamil, etc., use simple, common, everyday professional words (e.g. use transliterations like "होम", "शॉप", "स्टाइलिस्ट" in Hindi instead of archaic words).
-6. You MUST respond ONLY in the requested language: ${language}.` }]
+IMPORTANT RULES & CONTEXT:
+1. We only sell the "Luxe Essential Linen Shirt" collection in 8 premium colors:
+   - "Luxe Essential Linen Shirt - Pure White" (Active Offer: Buy One Get One Free)
+   - "Luxe Essential Linen Shirt - Sky Blue" (Active Offer: Buy One Get One Free)
+   - "Luxe Essential Linen Shirt - Desert Sand" (Active Offer: 10% Off Discount)
+   - "Luxe Essential Linen Shirt - Olive Green" (Active Offer: 10% Off Discount)
+   - "Luxe Essential Linen Shirt - Sunset Pink"
+   - "Luxe Essential Linen Shirt - Navy Blue" (Active Offer: Buy One Get One Free)
+   - "Luxe Essential Linen Shirt - Carbon Black"
+   - "Luxe Essential Linen Shirt - Cocoa Brown"
+2. All shirts are priced at ₹549 base. They are everyday essential, premium, and luxury-inspired (rates are minimal, with no extra charges or hidden charges).
+3. The brand operates out of "Hafiz Baba Nagar, Hyderabad, Telangana, India".
+4. Delivery rules:
+   - Delivery is currently exclusive to Hyderabad.
+   - Cash on Delivery (COD) is available and capped at ₹1,999.
+   - Orders above ₹1,999 get free delivery.
+   - Delivery is free within a 5 km radius from Baba Nagar. After 5 km, it charges ₹7.5 per km overall.
+   - Prepaid orders unlock a 10% OFF coupon code for the next order.
+5. Keep your recommendations structured with markdown (bullet points). Help the client choose the perfect colorway (pastel vs. dark vs. white) and size (M, L, XL, XXL).
+6. Add a terminal tag at the end of your response, such as "[LINEN DNA: SYNCHRONIZED | TERMINAL: nominal]".
+7. Keep responses engaging and simple. You MUST respond ONLY in the requested language: ${language}.` }]
             },
             {
               role: "model",

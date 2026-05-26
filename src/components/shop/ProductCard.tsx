@@ -13,6 +13,7 @@ interface Product {
   images: string[] | string | any;
   category: string;
   isNew?: boolean;
+  stock?: number;
 }
 
 // Safely extract first image from either array, JSON string, or plain URL
@@ -53,6 +54,15 @@ const ProductCard = ({ product }: { product: Product }) => {
           style={{ backgroundImage: `url(${imageUrl})` }}
         />
         
+        {/* Out of Stock Overlay */}
+        {product.stock === 0 && (
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-[1px] flex items-center justify-center z-10">
+            <span className="text-[8px] font-mono font-bold tracking-[0.2em] text-red-500 border border-red-500/20 px-3 py-1.5 rounded-lg bg-black/90 uppercase">
+              Unavailable
+            </span>
+          </div>
+        )}
+
         {/* Gradients */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-transparent opacity-90" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#050508]/60 via-transparent to-transparent opacity-90" />
@@ -107,19 +117,25 @@ const ProductCard = ({ product }: { product: Product }) => {
             </div>
           </div>
 
-          <button 
-            onClick={() => addToCart({
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              image: imageUrl,
-              quantity: 1,
-              size: "L"
-            })}
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/70 flex items-center justify-center hover:bg-white hover:text-black hover:shadow-[0_5px_15px_rgba(255,255,255,0.2)] transition-all duration-300 transform hover:scale-105 active:scale-95"
-          >
-            <ShoppingCart size={16} />
-          </button>
+          {product.stock === 0 ? (
+            <span className="text-[9px] font-mono font-bold text-red-500/60 uppercase tracking-widest px-3 py-1.5 bg-red-500/5 border border-red-500/10 rounded-lg">
+              N/A
+            </span>
+          ) : (
+            <button 
+              onClick={() => addToCart({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: imageUrl,
+                quantity: 1,
+                size: "L"
+              })}
+              className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/70 flex items-center justify-center hover:bg-white hover:text-black hover:shadow-[0_5px_15px_rgba(255,255,255,0.2)] transition-all duration-300 transform hover:scale-105 active:scale-95"
+            >
+              <ShoppingCart size={16} />
+            </button>
+          )}
         </div>
       </div>
     </div>

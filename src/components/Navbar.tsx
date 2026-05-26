@@ -20,14 +20,23 @@ const Navbar = () => {
   const cartControls = useAnimation();
   const { t } = useLanguage();
   const { user } = useAuth();
-  const { currency, setCurrency, cartCount, toggleCart } = useCommerce();
+  const { currency, setCurrency, cartCount, toggleCart, availableCurrencies } = useCommerce();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    const handleOpenCountryModal = () => {
+      setIsCountryModalOpen(true);
+    };
+    window.addEventListener("open-country-modal", handleOpenCountryModal);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("open-country-modal", handleOpenCountryModal);
+    };
   }, []);
 
   const navLinks = [
@@ -87,7 +96,7 @@ const Navbar = () => {
         <div className="flex items-center gap-6 ml-auto">
           {/* Currency Pills */}
           <div className="hidden md:flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10">
-            {(["INR", "USD", "EUR", "GBP"] as Currency[]).map((cur) => (
+            {availableCurrencies.map((cur) => (
               <button 
                 key={cur}
                 onClick={() => setCurrency(cur)}

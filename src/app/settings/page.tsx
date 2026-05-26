@@ -869,6 +869,45 @@ function SubscriptionServices() {
                </div>
             </div>
          </div>
+       </div>
+
+       <CouponsDisplay />
+    </div>
+  );
+}
+
+function CouponsDisplay() {
+  const [coupons, setCoupons] = useState<any[]>([]);
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("luxe-coupons") || "[]");
+    setCoupons(saved);
+  }, []);
+
+  if (coupons.length === 0) return null;
+
+  return (
+    <div className="space-y-6 pt-12 border-t border-white/[0.03] text-left">
+      <h3 className="text-[10px] font-mono text-white/30 uppercase tracking-[0.5em]">Prepaid Reward Coupons</h3>
+      <div className="grid md:grid-cols-2 gap-4">
+        {coupons.map((coupon: any, idx: number) => (
+          <div key={idx} className="p-6 rounded-2xl bg-green-500/5 border border-green-500/20 flex items-center justify-between">
+            <div className="space-y-1">
+              <span className="text-[8px] font-mono text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full uppercase tracking-widest">Prepaid Code</span>
+              <p className="text-xl font-mono font-bold text-white tracking-widest">{coupon.code}</p>
+              <p className="text-[9px] font-mono text-white/40 uppercase tracking-widest">{coupon.discount}</p>
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(coupon.code);
+                toast.success("Coupon code copied!");
+              }}
+              className="px-4 py-2 rounded-xl bg-green-500/10 hover:bg-green-500/20 text-green-400 font-mono text-[9px] uppercase tracking-widest transition-colors cursor-pointer border border-green-500/20"
+            >
+              Copy Code
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

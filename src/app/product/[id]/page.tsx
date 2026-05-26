@@ -39,8 +39,8 @@ const ProductPage = () => {
   const { id } = useParams();
   const product = MOCK_PRODUCTS.find((p) => p.id === id);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("L");
+  const [selectedColor, setSelectedColor] = useState("White");
   const [quantity, setQuantity] = useState(1);
   const [isStyleAnalysisOpen, setIsStyleAnalysisOpen] = useState(false);
   const { trackView, getOutfitPairing } = usePersonalization();
@@ -49,6 +49,20 @@ const ProductPage = () => {
   useEffect(() => {
     if (product) {
       trackView(product.id);
+      
+      // Auto-select color based on product name
+      const nameLower = product.name.toLowerCase();
+      let defaultColor = "White";
+      if (nameLower.includes("white")) defaultColor = "White";
+      else if (nameLower.includes("sky blue")) defaultColor = "Sky Blue";
+      else if (nameLower.includes("desert sand")) defaultColor = "Desert Sand";
+      else if (nameLower.includes("olive green")) defaultColor = "Olive Green";
+      else if (nameLower.includes("sunset pink")) defaultColor = "Sunset Pink";
+      else if (nameLower.includes("navy blue")) defaultColor = "Navy Blue";
+      else if (nameLower.includes("carbon black")) defaultColor = "Carbon Black";
+      else if (nameLower.includes("cocoa brown")) defaultColor = "Cocoa Brown";
+      
+      setSelectedColor(defaultColor);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.id]);
@@ -60,7 +74,7 @@ const ProductPage = () => {
   const handleWhatsAppBuy = () => {
     const formattedPrice = `${convertPrice(product.price).symbol}${convertPrice(product.price).amount}`;
     const message = `Hi Luxe! I want to buy:\n\n*Product:* ${product.name}\n*Price:* ${formattedPrice}\n*Size:* ${selectedSize || 'N/A'}\n*Color:* ${selectedColor || 'N/A'}\n*Quantity:* ${quantity}\n\nCan you help me complete my order?`;
-    window.open(`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(message)}`, "_blank");
+    window.open(`https://wa.me/917995338472?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   const matchRate = 96.8;
@@ -153,7 +167,7 @@ const ProductPage = () => {
                 {product.sizes && (
                   <MotionItem animation="slideUp">
                     <div className="flex justify-between items-center mb-6">
-                      <h4 className="text-[11px] font-black tracking-[0.3em] text-white/30 uppercase">Select Architecture</h4>
+                      <h4 className="text-[11px] font-black tracking-[0.3em] text-white/30 uppercase">Select Size</h4>
                       <button className="text-[10px] font-black text-primary/60 hover:text-primary tracking-widest uppercase underline underline-offset-4">Size Guide</button>
                     </div>
                     <div className="flex flex-wrap gap-4">
@@ -175,8 +189,60 @@ const ProductPage = () => {
                   </MotionItem>
                 )}
 
+                {product.colors && (
+                  <MotionItem animation="slideUp" delay={0.05}>
+                    <div className="flex justify-between items-center mb-6">
+                      <h4 className="text-[11px] font-black tracking-[0.3em] text-white/30 uppercase">Select Color</h4>
+                      {selectedColor && (
+                        <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest">{selectedColor}</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-4">
+                      {product.colors.map((color) => {
+                        const colorMap: Record<string, string> = {
+                          "white": "#ffffff",
+                          "light blue": "#a8d5e5",
+                          "sky blue": "#a8d5e5",
+                          "pink": "#e8b0b0",
+                          "sunset pink": "#e8b0b0",
+                          "olive green": "#657053",
+                          "tan beige": "#d7c6b5",
+                          "desert sand": "#d7c6b5",
+                          "cocoa brown": "#5c4033",
+                          "navy blue": "#1d2a44",
+                          "carbon black": "#151515"
+                        };
+                        const hex = colorMap[color.toLowerCase()] || "#cccccc";
+                        const isWhite = color.toLowerCase() === "white";
+
+                        return (
+                          <button
+                            key={color}
+                            onClick={() => setSelectedColor(color)}
+                            className={cn(
+                              "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 border-2",
+                              selectedColor === color 
+                                ? "border-[#D4AF37] scale-110 shadow-lg shadow-[#D4AF37]/20" 
+                                : "border-white/5 hover:border-white/20"
+                            )}
+                            title={color}
+                          >
+                            <span 
+                              className="w-8 h-8 rounded-full block border"
+                              style={{ 
+                                backgroundColor: hex, 
+                                borderColor: isWhite ? "rgba(255,255,255,0.2)" : "transparent" 
+                              }} 
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </MotionItem>
+                )}
+
                 <MotionItem animation="slideUp" delay={0.1}>
-                  <h4 className="text-[11px] font-black tracking-[0.3em] text-white/30 uppercase mb-6">Quantum Quantity</h4>
+                  <h4 className="text-[11px] font-black tracking-[0.3em] text-white/30 uppercase mb-6">Quantity</h4>
                   <div className="flex items-center gap-6">
                     <div className="flex items-center gap-6 glass border border-white/10 rounded-[20px] px-6 py-3">
                       <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="text-white/40 hover:text-primary transition-colors"><Minus size={20} /></button>
@@ -188,7 +254,7 @@ const ProductPage = () => {
                         initial={{ width: 0 }}
                         animate={{ width: "70%" }}
                         transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                        className="h-full bg-primary" 
+                        className="h-full bg-[#D4AF37]" 
                       />
                     </div>
                     <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{product.stock} Units left</p>
@@ -198,31 +264,43 @@ const ProductPage = () => {
 
               {/* Action Buttons - Transaction Layer */}
               <div className="flex flex-col sm:flex-row gap-6 mb-20">
-                <Magnetic>
+                {product.stock === 0 ? (
                   <button 
-                    onClick={() => addToCart({
-                      id: product.id,
-                      name: product.name,
-                      price: product.price,
-                      image: product.images[0],
-                      quantity: quantity,
-                      size: selectedSize || "One Size"
-                    })}
-                    className="w-full py-6 glass rounded-[24px] border border-white/10 flex items-center justify-center gap-4 hover:bg-white/5 hover:border-white/20 transition-all duration-700 [transition-timing-function:var(--ease-out-expo)] group overflow-hidden"
+                    disabled
+                    className="w-full py-6 bg-red-500/10 border border-red-500/20 text-red-500/60 rounded-[24px] flex items-center justify-center gap-4 cursor-not-allowed opacity-50 text-xs font-black tracking-[0.3em] uppercase font-mono"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 [transition-timing-function:var(--ease-out-expo)]" />
-                    <ShoppingCart size={20} className="text-primary group-hover:scale-110 transition-transform duration-700 [transition-timing-function:var(--ease-out-expo)]" />
-                    <span className="text-xs font-black tracking-[0.3em] uppercase">Add to Cart</span>
-                 </button>
-                </Magnetic>
-                <Magnetic>
-                  <button 
-                    onClick={handleWhatsAppBuy}
-                    className="btn-luxury btn-luxury-primary w-full !py-6"
-                  >
-                    <MessageCircle size={20} /> <span>WhatsApp Concierge</span>
+                    Out of Stock / Unavailable
                   </button>
-                </Magnetic>
+                ) : (
+                  <>
+                    <Magnetic>
+                      <button 
+                        onClick={() => addToCart({
+                          id: product.id,
+                          name: product.name,
+                          price: product.price,
+                          image: product.images[0],
+                          quantity: quantity,
+                          size: selectedSize || "L",
+                          color: selectedColor || "White"
+                        })}
+                        className="w-full py-6 glass rounded-[24px] border border-white/10 flex items-center justify-center gap-4 hover:bg-white/5 hover:border-white/20 transition-all duration-700 [transition-timing-function:var(--ease-out-expo)] group overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 [transition-timing-function:var(--ease-out-expo)]" />
+                        <ShoppingCart size={20} className="text-primary group-hover:scale-110 transition-transform duration-700 [transition-timing-function:var(--ease-out-expo)]" />
+                        <span className="text-xs font-black tracking-[0.3em] uppercase">Add to Cart</span>
+                      </button>
+                    </Magnetic>
+                    <Magnetic>
+                      <button 
+                        onClick={handleWhatsAppBuy}
+                        className="btn-luxury btn-luxury-primary w-full !py-6"
+                      >
+                        <MessageCircle size={20} /> <span>WhatsApp Concierge</span>
+                      </button>
+                    </Magnetic>
+                  </>
+                )}
               </div>
 
               {/* Core Features / Trust Architecture */}

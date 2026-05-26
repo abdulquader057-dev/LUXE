@@ -2,28 +2,25 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Search, SlidersHorizontal, Sparkles, MapPin, Truck, CheckCircle2, ShieldCheck, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Hero from "@/components/home/Hero";
 import ProductCard from "@/components/shop/ProductCard";
 
 const filters = [
-  "ALL COLLECTIONS",
-  "MODEST TECH",
-  "SNEAKERS",
-  "WATCHES",
-  "ACCESSORIES",
-  "STREETWEAR",
-  "LUXURY"
+  "ALL DESIGNS",
+  "WHITE SHIRTS",
+  "PASTEL SHIRTS",
+  "DARK SHIRTS"
 ];
 
 import { supabase } from "@/lib/supabase";
 import { MOCK_PRODUCTS } from "@/data/products";
 
 export default function Home() {
-  const [activeFilter, setActiveFilter] = useState("ALL COLLECTIONS");
+  const [activeFilter, setActiveFilter] = useState("ALL DESIGNS");
   const [searchQuery, setSearchQuery] = useState("");
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>(MOCK_PRODUCTS);
   const router = useRouter();
 
   React.useEffect(() => {
@@ -31,12 +28,14 @@ export default function Home() {
       try {
         const { data } = await supabase.from("products").select("*");
         if (data && data.length > 0) {
-          setProducts(data);
-        } else {
-          setProducts(MOCK_PRODUCTS);
+          // If the DB has items, ensure they match the local Linen Collection
+          const hasLinen = data.some(p => p.name.toLowerCase().includes("linen"));
+          if (hasLinen) {
+            setProducts(data);
+          }
         }
       } catch (err) {
-        setProducts(MOCK_PRODUCTS);
+        console.warn("Using offline catalog fallback:", err);
       }
     }
     fetchProducts();
@@ -51,8 +50,13 @@ export default function Home() {
 
   const handleFilterClick = (filter: string) => {
     setActiveFilter(filter);
-    if (filter !== "ALL COLLECTIONS") {
-      router.push(`/shop?cat=${encodeURIComponent(filter)}`);
+    let catId = "all";
+    if (filter === "WHITE SHIRTS") catId = "white";
+    else if (filter === "PASTEL SHIRTS") catId = "pastel";
+    else if (filter === "DARK SHIRTS") catId = "dark";
+    
+    if (catId !== "all") {
+      router.push(`/shop?cat=${encodeURIComponent(catId)}`);
     } else {
       router.push(`/shop`);
     }
@@ -61,6 +65,93 @@ export default function Home() {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
       <Hero />
+
+      {/* Brand Philosophy & Trust Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16 items-stretch">
+        {/* Left column: Flyer image */}
+        <div className="lg:col-span-5 relative rounded-2xl overflow-hidden border border-white/10 group min-h-[350px] lg:min-h-[420px] flex items-center justify-center bg-black/40">
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay z-10" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src="/brand/linen_flyer.jpg" 
+            alt="Luxe Linen Collection Flyer" 
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[8s] ease-out opacity-85"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
+          <div className="absolute bottom-6 left-6 right-6 z-20">
+            <span className="text-[9px] font-sora tracking-[0.3em] text-[#D4AF37] uppercase block mb-2 font-bold">Exclusive Launch</span>
+            <h3 className="text-3xl font-cormorant font-light text-white italic tracking-wide leading-tight">Summer Soft Linen Collection</h3>
+          </div>
+        </div>
+
+        {/* Right column: Trust details (The 7 Brand Marketing/Trust Lines) */}
+        <div className="lg:col-span-7 flex flex-col justify-between p-8 md:p-10 rounded-2xl border border-white/10 bg-[#0A0A0C]/60 backdrop-blur-md relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[200px] h-[200px] rounded-full bg-white/5 blur-[80px] pointer-events-none" />
+          
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <span className="h-px w-8 bg-[#D4AF37]/50" />
+              <span className="text-[10px] font-sora text-[#D4AF37] uppercase tracking-[0.4em] font-bold">Brand Hub</span>
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-cormorant font-light tracking-wide text-white mb-6 leading-snug">
+              Everyday comfort crafted with <span className="italic text-white/60">premium luxury-inspired</span> soft fabrics.
+            </h2>
+            
+            <p className="text-xs font-sora text-white/50 tracking-wider leading-relaxed mb-8 max-w-xl">
+              We have been providing these premium linen collections directly to our WhatsApp community, and now we are elevating your shopping experience. 100% trusted, minimal pricing, with zero hidden or extra charges.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-white/5">
+            {/* Location & Delivery */}
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-[#D4AF37]">
+                  <MapPin size={16} />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-sora font-semibold tracking-wider text-white uppercase">Dispatch Hub</h4>
+                  <p className="text-[10px] font-sora text-white/40 tracking-wider mt-1">📍 Hafiz Baba Nagar, Hyderabad</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-[#D4AF37]">
+                  <Truck size={16} />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-sora font-semibold tracking-wider text-white uppercase">COD Access</h4>
+                  <p className="text-[10px] font-sora text-white/40 tracking-wider mt-1">🚚 Cash on Delivery available</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Core Values */}
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-[#D4AF37]">
+                  <CheckCircle2 size={16} />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-sora font-semibold tracking-wider text-white uppercase">Trust Factor</h4>
+                  <p className="text-[10px] font-sora text-white/40 tracking-wider mt-1">✨ 100% trusted & reliable app</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-[#D4AF37]">
+                  <Sparkles size={16} />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-sora font-semibold tracking-wider text-white uppercase">Soft Fabric Collection</h4>
+                  <p className="text-[10px] font-sora text-white/40 tracking-wider mt-1">▫️ Premium & Luxury Inspired</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Search and Filters Section */}
       <div className="flex flex-col lg:flex-row items-center gap-6 mb-10 w-full">
@@ -74,7 +165,7 @@ export default function Home() {
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search products..." 
+              placeholder="Search Linen products..." 
               className="w-full bg-[#0A0A0C] border border-white/10 rounded-full py-3.5 pl-12 pr-4 text-white text-[11px] font-sora tracking-wide focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
             />
           </form>
@@ -129,4 +220,5 @@ export default function Home() {
     </div>
   );
 }
+
 

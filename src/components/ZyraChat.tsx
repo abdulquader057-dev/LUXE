@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Send, Sparkles, Loader2, Mic, Volume2, VolumeX } from "lucide-react";
+import { MessageSquare, X, Send, Sparkles, Loader2, Mic, Volume2, VolumeX, PhoneCall } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 
@@ -198,6 +198,42 @@ export default function ZyraChat() {
 
             {/* Input Area */}
             <div className="p-4 border-t border-white/5 bg-black/40">
+              {/* Direct Support Quick Links */}
+              <div className="flex gap-2 mb-3 overflow-x-auto no-scrollbar px-1 pb-1">
+                <a
+                  href="https://wa.me/917995338472?text=Hi! I would like to query about orders/collections."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-green-500/20 bg-green-500/5 text-green-400 hover:bg-green-500/10 hover:border-green-500/40 transition-all text-[8px] font-mono tracking-widest uppercase whitespace-nowrap"
+                >
+                  <MessageSquare size={10} />
+                  WhatsApp Primary
+                </a>
+                <a
+                  href="https://wa.me/917337246297?text=Hi! I have a style support query."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-green-500/10 bg-green-500/0 text-green-400/70 hover:bg-green-500/5 hover:border-green-500/30 transition-all text-[8px] font-mono tracking-widest uppercase whitespace-nowrap"
+                >
+                  <MessageSquare size={10} />
+                  WhatsApp Alt
+                </a>
+                <a
+                  href="tel:+917995338472"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-blue-500/20 bg-blue-500/5 text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/40 transition-all text-[8px] font-mono tracking-widest uppercase whitespace-nowrap"
+                >
+                  <PhoneCall size={10} />
+                  Call Primary
+                </a>
+                <a
+                  href="tel:+917337246297"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-blue-500/10 bg-blue-500/0 text-blue-400/70 hover:bg-blue-500/5 hover:border-blue-500/30 transition-all text-[8px] font-mono tracking-widest uppercase whitespace-nowrap"
+                >
+                  <PhoneCall size={10} />
+                  Call Alt
+                </a>
+              </div>
+
               <div className="relative flex items-center gap-2">
                 <button 
                   onClick={startListening}

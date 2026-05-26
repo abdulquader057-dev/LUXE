@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, MapPin, AlertCircle, Sparkles } from "lucide-react";
+import { X, Send, MapPin, AlertCircle, Sparkles, Compass, Loader2, CreditCard, QrCode, Clipboard, CheckCircle2 } from "lucide-react";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -13,6 +13,21 @@ interface CheckoutModalProps {
   onClose: () => void;
 }
 
+// Baba Nagar, Hyderabad Coordinates
+const BABA_NAGAR = { lat: 17.3272, lon: 78.4908 };
+
+function getDistanceKM(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  return R * c;
+}
+
 export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { cart, totalPrice, convertPrice, clearCart, toggleCart } = useCommerce();
   const { user } = useAuth();
@@ -21,13 +36,35 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [phone, setPhone] = useState(user?.user_metadata?.phone_number || "");
   const [email, setEmail] = useState(user?.email || "");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState("Hyderabad");
   const [state, setState] = useState("Telangana");
   const [pincode, setPincode] = useState("");
   const [landmark, setLandmark] = useState("");
   const [instructions, setInstructions] = useState("");
+  
+  // Location coordinates and distance state
+  const [coords, setCoords] = useState<{lat: number; lon: number} | null>(null);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [detecting, setDetecting] = useState(false);
+
+  // Payment states
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "upi" | "cod">("upi");
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [upiCopied, setUpiCopied] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Automatically adjust payment method if COD becomes blocked
+  const isCodBlocked = totalPrice > 1999;
+  useEffect(() => {
+    if (isCodBlocked && paymentMethod === "cod") {
+      setPaymentMethod("upi");
+    }
+  }, [isCodBlocked, paymentMethod]);
 
   if (!isOpen) return null;
 
@@ -36,14 +73,103 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     return res.symbol + res.amount;
   };
 
+  // Get shipping cost
+  const getDeliveryFee = () => {
+    if (totalPrice > 1999) return 0; // Free delivery for orders > 1999
+    if (distance !== null) {
+      if (distance <= 5) return 0;
+      return Math.round(distance * 7.5); // 7.5 per km overall
+    }
+    return 45; // Default standard delivery fee
+  };
+
+  const deliveryFee = getDeliveryFee();
+  const gstRate = totalPrice <= 1000 ? 0.05 : 0.12;
+  const gstAmount = Math.round(totalPrice * gstRate);
+  const cgstAmount = Math.round(gstAmount / 2);
+  const sgstAmount = gstAmount - cgstAmount;
+  const grandTotal = totalPrice + gstAmount + deliveryFee;
+
+  // Auto-detect address using Geolocation and Nominatim
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setDetecting(true);
+    const toastId = toast.loading("Acquiring GPS coordinates...");
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          setCoords({ lat: latitude, lon: longitude });
+
+          const dist = getDistanceKM(latitude, longitude, BABA_NAGAR.lat, BABA_NAGAR.lon);
+          setDistance(dist);
+
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+          if (!res.ok) throw new Error("Reverse geocode failed");
+          
+          const data = await res.json();
+          toast.dismiss(toastId);
+
+          const addressInfo = data.address || {};
+          const detectedCity = addressInfo.city || addressInfo.town || addressInfo.suburb || addressInfo.village || addressInfo.state_district || "";
+          const detectedState = addressInfo.state || "Telangana";
+          const detectedPincode = addressInfo.postcode || "";
+          
+          // Formulate street address details
+          const road = addressInfo.road || "";
+          const neighbourhood = addressInfo.neighbourhood || addressInfo.suburb || "";
+          const county = addressInfo.county || "";
+          const fullAddr = [neighbourhood, road, county].filter(Boolean).join(", ");
+
+          if (detectedCity.toLowerCase() !== "hyderabad" && !data.display_name.toLowerCase().includes("hyderabad")) {
+            setError(`Detected location is outside Hyderabad (${detectedCity || "Unknown"}). Delivery is currently exclusive to Hyderabad.`);
+            toast.error("Delivery exclusive to Hyderabad!");
+            return;
+          }
+
+          setAddress(fullAddr || "Detected GPS Coordinates");
+          setCity("Hyderabad");
+          setState(detectedState);
+          if (detectedPincode) setPincode(detectedPincode);
+          
+          setError(null);
+          toast.success(`Location synced! Distance from Baba Nagar: ${dist.toFixed(1)} km`);
+        } catch (err) {
+          toast.dismiss(toastId);
+          toast.error("Could not fetch location details. Please enter manually.");
+        } finally {
+          setDetecting(false);
+        }
+      },
+      (err) => {
+        toast.dismiss(toastId);
+        toast.error("GPS access denied. Please fill manually.");
+        setDetecting(false);
+      }
+    );
+  };
+
+  const copyUpiId = () => {
+    navigator.clipboard.writeText("7995338472@ptaxis");
+    setUpiCopied(true);
+    toast.success("UPI ID copied to clipboard!");
+    setTimeout(() => setUpiCopied(false), 2000);
+  };
+
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // Hyderabad only validation
+    // Hyderabad verification check
     const targetCity = city.trim().toLowerCase();
     if (targetCity !== "hyderabad") {
       setError("Delivery is currently exclusive to Hyderabad, TS. We will expand global teleport shipping soon.");
+      toast.error("We only deliver to Hyderabad!");
       return;
     }
 
@@ -55,7 +181,23 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       
       const fullDeliveryAddress = `${address}, Landmark: ${landmark || "None"}, City: ${city}, State: ${state}, ZIP: ${pincode}, Instructions: ${instructions || "None"}`;
 
-      // 1. Create order record in Supabase orders table if logged in
+      // 1. Generate prepaid coupon if prepaid order
+      let couponCode = "";
+      if (paymentMethod === "card" || paymentMethod === "upi") {
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        couponCode = `LUXE-PREPAID-${rand}`;
+        
+        // Save coupon code in localStorage
+        const savedCoupons = JSON.parse(localStorage.getItem("luxe-coupons") || "[]");
+        savedCoupons.push({
+          code: couponCode,
+          discount: "10% OFF on next order",
+          createdAt: new Date().toISOString()
+        });
+        localStorage.setItem("luxe-coupons", JSON.stringify(savedCoupons));
+      }
+
+      // 2. Create order record in Supabase orders table if logged in
       if (user) {
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id);
         const { error: dbError } = await supabase
@@ -63,7 +205,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           .insert([
             {
               customer_id: isUuid ? user.id : null,
-              total_price: totalPrice,
+              total_price: grandTotal,
               status: "processing",
               delivery_address: fullDeliveryAddress,
             }
@@ -74,10 +216,16 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         }
       }
 
-      // 2. Format the dispatch payload for WhatsApp message
+      // 3. Format the dispatch payload for WhatsApp message
       const itemsText = cart
         .map((i) => `- ${i.name} (Size: ${i.size || "Standard"}) x${i.quantity} | ${formatPrice(i.price * i.quantity)}`)
         .join("\n");
+
+      const paymentMethodNames = {
+        card: "Visa / Credit Card",
+        upi: "UPI Transfer (7995338472@ptaxis)",
+        cod: "Cash on Delivery (COD)"
+      };
 
       const messageText = `🌟 LUXE OS DISPATCH UPLINK 🌟
 ------------------------------
@@ -96,29 +244,45 @@ City: ${city}
 State: ${state}
 Pincode/ZIP: ${pincode}
 Instructions: ${instructions || "None"}
+Distance from Base: ${distance ? `${distance.toFixed(2)} km` : "Not calculated"}
+
+💳 PAYMENT METRIC:
+Mode: ${paymentMethodNames[paymentMethod]}
+Status: ${paymentMethod === "cod" ? "Pay on Delivery" : "Prepaid Transfer Pending"}
+${couponCode ? `Prepaid Reward Coupon: ${couponCode} (10% OFF Saved)` : ""}
 
 🛍️ ARTIFACT DETAILS:
 ${itemsText}
 
 ------------------------------
-GRAND TOTAL: ${formatPrice(totalPrice)}
+SUBTOTAL: ${formatPrice(totalPrice)}
+CGST (${(gstRate * 100 / 2).toFixed(1)}%): ${formatPrice(cgstAmount)}
+SGST (${(gstRate * 100 / 2).toFixed(1)}%): ${formatPrice(sgstAmount)}
+TOTAL GST (${Math.round(gstRate * 100)}%): ${formatPrice(gstAmount)}
+DELIVERY: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
+------------------------------
+GRAND TOTAL: ${formatPrice(grandTotal)}
 ------------------------------
 *This dispatch has been synced with LUXE OS. The owner (+91 79953 38472) will coordinate immediate shipping.*`;
 
-      // 3. Clear Cart & Close modals
+      // 4. Clear Cart & Close modals
       clearCart();
       onClose();
       toggleCart();
 
-      // 4. Open WhatsApp redirect
+      // 5. Open WhatsApp redirect
       const encodedMessage = encodeURIComponent(messageText);
       const whatsappUrl = `https://wa.me/917995338472?text=${encodedMessage}`;
       
-      toast.success("Order logged in dispatch terminal!");
+      if (couponCode) {
+        toast.success(`Order logged! Prepaid Coupon unlocked: ${couponCode}`);
+      } else {
+        toast.success("Order logged in dispatch terminal!");
+      }
       
       setTimeout(() => {
         window.open(whatsappUrl, "_blank");
-      }, 800);
+      }, 1000);
 
     } catch (err: any) {
       setError("An unexpected error occurred during dispatch initialization.");
@@ -146,7 +310,7 @@ GRAND TOTAL: ${formatPrice(totalPrice)}
           transition={{ type: "spring", damping: 25, stiffness: 250 }}
           className="relative w-full max-w-xl bg-[#07070a]/95 border border-white/10 backdrop-blur-2xl rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,240,255,0.05)] flex flex-col my-8 relative z-10"
         >
-          {/* Subtle Glowing Header beam */}
+          {/* Glowing Header beam */}
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#00f2ff]/50 to-transparent" />
 
           {/* Header */}
@@ -167,7 +331,7 @@ GRAND TOTAL: ${formatPrice(totalPrice)}
           </div>
 
           {/* Form */}
-          <form onSubmit={handleCheckout} className="p-8 space-y-5 overflow-y-auto max-h-[70vh] custom-scrollbar">
+          <form onSubmit={handleCheckout} className="p-8 space-y-5 overflow-y-auto max-h-[70vh] custom-scrollbar text-left">
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -178,6 +342,40 @@ GRAND TOTAL: ${formatPrice(totalPrice)}
                 <span>{error}</span>
               </motion.div>
             )}
+
+            {/* Autofill location button */}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={detectLocation}
+                disabled={detecting}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 transition-all text-[9px] font-mono tracking-widest uppercase cursor-pointer"
+              >
+                {detecting ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin" />
+                    Locating GPS...
+                  </>
+                ) : (
+                  <>
+                    <Compass size={12} className="animate-pulse" />
+                    Auto-Fill Current Location
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Brand Handoff & Trust tags */}
+            <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-[9px] font-mono uppercase tracking-widest text-white/50 space-y-2 leading-relaxed">
+              <div className="flex items-center gap-2 text-[#D4AF37]">
+                <MapPin size={12} className="animate-pulse" />
+                <span>Hub: Hafiz Baba Nagar, Hyderabad</span>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-white/30">
+                <span>✨ 100% Trusted & Reliable</span>
+                <span>▫️ Premium Luxury Inspired Soft Fabrics</span>
+              </div>
+            </div>
 
             {/* Form Fields Grid */}
             <div className="space-y-4">
@@ -290,11 +488,181 @@ GRAND TOTAL: ${formatPrice(totalPrice)}
               </div>
             </div>
 
+            {/* Payment Section */}
+            <div className="pt-6 border-t border-white/5 space-y-4">
+              <label className="text-[10px] font-mono text-[#00f2ff] uppercase tracking-widest block mb-2 font-bold">Select Payment Protocol</label>
+              
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("upi")}
+                  className={`py-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 font-mono text-[9px] tracking-widest uppercase transition-all cursor-pointer ${
+                    paymentMethod === "upi"
+                      ? "border-primary bg-primary/10 text-white"
+                      : "border-white/5 bg-white/[0.02] text-white/40 hover:border-white/20 hover:text-white"
+                  }`}
+                >
+                  <QrCode size={16} />
+                  UPI / Scan QR
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("card")}
+                  className={`py-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 font-mono text-[9px] tracking-widest uppercase transition-all cursor-pointer ${
+                    paymentMethod === "card"
+                      ? "border-primary bg-primary/10 text-white"
+                      : "border-white/5 bg-white/[0.02] text-white/40 hover:border-white/20 hover:text-white"
+                  }`}
+                >
+                  <CreditCard size={16} />
+                  Visa / Card
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isCodBlocked}
+                  onClick={() => setPaymentMethod("cod")}
+                  className={`py-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 font-mono text-[9px] tracking-widest uppercase transition-all cursor-pointer ${
+                    paymentMethod === "cod"
+                      ? "border-primary bg-primary/10 text-white"
+                      : "border-white/5 bg-white/[0.02] text-white/40 hover:border-white/20 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed"
+                  }`}
+                >
+                  <MapPin size={16} />
+                  COD
+                </button>
+              </div>
+
+              {/* COD Warning */}
+              {isCodBlocked && (
+                <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-400 text-[9px] font-mono uppercase tracking-wider flex items-center gap-2 leading-relaxed">
+                  <AlertCircle size={12} className="flex-shrink-0" />
+                  <span>COD capped at ₹1,999. Online payment required for this order value.</span>
+                </div>
+              )}
+
+              {/* Prepaid Coupon Reward notification */}
+              {(paymentMethod === "upi" || paymentMethod === "card") && (
+                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-[9px] font-mono uppercase tracking-wider flex items-center gap-2 leading-relaxed">
+                  <Sparkles size={12} className="flex-shrink-0 animate-pulse" />
+                  <span>PREPAID PERK: Placing this prepaid order unlocks a 10% OFF coupon for your next drop!</span>
+                </div>
+              )}
+
+              {/* Payment Details Sub-interfaces */}
+              <div className="p-5 bg-white/[0.01] border border-white/5 rounded-2xl min-h-[100px]">
+                {paymentMethod === "upi" && (
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <p className="text-[10px] font-mono text-white/50 uppercase tracking-widest">Scan QR or Pay to UPI ID</p>
+                    
+                    {/* UPI copy area */}
+                    <div className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 w-full justify-between">
+                      <span className="text-[10px] font-mono text-white tracking-widest">7995338472@ptaxis</span>
+                      <button
+                        type="button"
+                        onClick={copyUpiId}
+                        className="p-1 text-primary hover:text-white transition-colors cursor-pointer"
+                      >
+                        {upiCopied ? <CheckCircle2 size={14} className="text-green-400" /> : <Clipboard size={14} />}
+                      </button>
+                    </div>
+
+                    {/* QR Code */}
+                    <div className="w-48 h-48 relative border-2 border-white/10 rounded-xl overflow-hidden bg-white p-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/upi-qr.jpg" alt="UPI Payment QR Code" className="w-full h-full object-contain" />
+                    </div>
+                    <span className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Pay overall total then submit checklist below</span>
+                  </div>
+                )}
+
+                {paymentMethod === "card" && (
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-mono text-white/50 uppercase tracking-widest mb-1">Enter Card Credentials</p>
+                    <input
+                      type="text"
+                      required
+                      value={cardName}
+                      onChange={(e) => setCardName(e.target.value)}
+                      placeholder="CARDHOLDER NAME"
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-2.5 text-[10px] font-mono focus:outline-none focus:border-primary/40 text-white placeholder:text-white/20 transition-all uppercase tracking-wider"
+                    />
+                    <input
+                      type="text"
+                      required
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim())}
+                      maxLength={19}
+                      placeholder="CARD NUMBER"
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-2.5 text-[10px] font-mono focus:outline-none focus:border-primary/40 text-white placeholder:text-white/20 transition-all tracking-widest"
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        required
+                        value={cardExpiry}
+                        onChange={(e) => setCardExpiry(e.target.value)}
+                        placeholder="MM/YY"
+                        maxLength={5}
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-2.5 text-[10px] font-mono focus:outline-none focus:border-primary/40 text-white placeholder:text-white/20 transition-all tracking-wider text-center"
+                      />
+                      <input
+                        type="password"
+                        required
+                        value={cardCvv}
+                        onChange={(e) => setCardCvv(e.target.value)}
+                        placeholder="CVV"
+                        maxLength={3}
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-2.5 text-[10px] font-mono focus:outline-none focus:border-primary/40 text-white placeholder:text-white/20 transition-all tracking-wider text-center"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {paymentMethod === "cod" && (
+                  <div className="flex flex-col items-center justify-center text-center py-4 space-y-2">
+                    <CheckCircle2 className="text-primary animate-bounce" size={24} />
+                    <p className="text-[10px] font-mono text-white/60 uppercase tracking-widest font-bold">Cash on Delivery Verified</p>
+                    <p className="text-[9px] font-mono text-white/30 uppercase tracking-widest max-w-[320px]">Pay by Cash or UPI to the shipping courier upon physical handoff.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Total / Submit */}
             <div className="pt-6 border-t border-white/5 space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Total Dispatch Value</span>
-                <span className="text-xl font-display text-[#00f2ff]">{formatPrice(totalPrice)}</span>
+              <div className="space-y-2 text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span className="text-white">{formatPrice(totalPrice)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>CGST ({(gstRate * 100 / 2).toFixed(1)}%)</span>
+                  <span className="text-white">{formatPrice(cgstAmount)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>SGST ({(gstRate * 100 / 2).toFixed(1)}%)</span>
+                  <span className="text-white">{formatPrice(sgstAmount)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Total GST ({Math.round(gstRate * 100)}%)</span>
+                  <span className="text-white">{formatPrice(gstAmount)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Delivery Charges</span>
+                  <span className="text-white">{deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}</span>
+                </div>
+                {distance !== null && (
+                  <div className="text-[8px] text-white/20 text-right">
+                    Calculated Distance: {distance.toFixed(2)} km from Baba Nagar Base
+                  </div>
+                )}
+                <div className="h-px bg-white/5 my-2" />
+                <div className="flex justify-between items-center text-xs font-bold text-white">
+                  <span className="text-[#00f2ff]">Grand Total</span>
+                  <span className="text-lg text-[#00f2ff]">{formatPrice(grandTotal)}</span>
+                </div>
               </div>
 
               <motion.button

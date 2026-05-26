@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 const WhatsAppWidget = () => {
   const handleWhatsApp = () => {
-    window.open(`https://wa.me/91XXXXXXXXXX?text=Hi Luxe! I'm interested in your futuristic fashion collections.`, "_blank");
+    window.open(`https://wa.me/917995338472?text=Hi Luxe! I'm interested in your futuristic fashion collections.`, "_blank");
   };
 
   return (

@@ -12,6 +12,7 @@ interface CartItem {
   image: string;
   quantity: number;
   size?: string;
+  color?: string;
 }
 
 interface CommerceContextType {
@@ -19,14 +20,17 @@ interface CommerceContextType {
   setCurrency: (currency: Currency) => void;
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (id: string, size?: string) => void;
-  updateQuantity: (id: string, quantity: number, size?: string) => void;
+  removeFromCart: (id: string, size?: string, color?: string) => void;
+  updateQuantity: (id: string, quantity: number, size?: string, color?: string) => void;
   clearCart: () => void;
   cartCount: number;
   totalPrice: number;
   isCartOpen: boolean;
   toggleCart: () => void;
   convertPrice: (priceINR: number) => { amount: number; symbol: string };
+  country: string;
+  setCountry: (country: string) => void;
+  availableCurrencies: Currency[];
 }
 
 const CommerceContext = createContext<CommerceContextType | undefined>(undefined);
@@ -46,13 +50,27 @@ const currencySymbols = {
 };
 
 export function CommerceProvider({ children }: { children: React.ReactNode }) {
-  const [currency, setCurrency] = useState<Currency>("USD");
+  const [country, setCountry] = useState<string>("India");
+  const [currency, setCurrency] = useState<Currency>("INR");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  const availableCurrencies: Currency[] = country === "India" ? ["INR", "USD", "EUR"] : ["USD", "EUR"];
+
   useEffect(() => {
+    const savedCountry = localStorage.getItem("luxe-country") || "India";
+    setCountry(savedCountry);
+
     const savedCurrency = localStorage.getItem("luxe-currency") as Currency;
-    if (savedCurrency) setCurrency(savedCurrency);
+    const allowed = savedCountry === "India" ? ["INR", "USD", "EUR"] : ["USD", "EUR"];
+    
+    if (savedCurrency && allowed.includes(savedCurrency)) {
+      setCurrency(savedCurrency);
+    } else {
+      const defaultCur = savedCountry === "India" ? "INR" : "USD";
+      setCurrency(defaultCur as Currency);
+      localStorage.setItem("luxe-currency", defaultCur);
+    }
 
     const savedCart = localStorage.getItem("luxe-cart");
     if (savedCart) setCart(JSON.parse(savedCart));
@@ -67,13 +85,25 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("luxe-currency", cur);
   };
 
+  const handleSetCountry = (newCountry: string) => {
+    setCountry(newCountry);
+    localStorage.setItem("luxe-country", newCountry);
+
+    const allowed = newCountry === "India" ? ["INR", "USD", "EUR"] : ["USD", "EUR"];
+    if (!allowed.includes(currency)) {
+      const defaultCur = newCountry === "India" ? "INR" : "USD";
+      setCurrency(defaultCur as Currency);
+      localStorage.setItem("luxe-currency", defaultCur);
+    }
+  };
+
   const addToCart = (item: CartItem) => {
     setCart((prev) => {
-      const existing = prev.find((i) => i.id === item.id && i.size === item.size);
+      const existing = prev.find((i) => i.id === item.id && i.size === item.size && i.color === item.color);
       let newCart;
       if (existing) {
         newCart = prev.map((i) =>
-          i.id === item.id && i.size === item.size ? { ...i, quantity: i.quantity + item.quantity } : i
+          i.id === item.id && i.size === item.size && i.color === item.color ? { ...i, quantity: i.quantity + item.quantity } : i
         );
         toast.success(`Increased quantity for ${item.name}`);
       } else {
@@ -86,19 +116,19 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
     setIsCartOpen(true);
   };
 
-  const removeFromCart = (id: string, size?: string) => {
+  const removeFromCart = (id: string, size?: string, color?: string) => {
     setCart((prev) => {
-      const newCart = prev.filter((i) => !(i.id === id && i.size === size));
+      const newCart = prev.filter((i) => !(i.id === id && i.size === size && i.color === color));
       localStorage.setItem("luxe-cart", JSON.stringify(newCart));
       return newCart;
     });
     toast.error("Item removed from Arsenal");
   };
 
-  const updateQuantity = (id: string, quantity: number, size?: string) => {
-    if (quantity < 1) return removeFromCart(id, size);
+  const updateQuantity = (id: string, quantity: number, size?: string, color?: string) => {
+    if (quantity < 1) return removeFromCart(id, size, color);
     setCart((prev) => {
-      const newCart = prev.map(i => (i.id === id && i.size === size) ? { ...i, quantity } : i);
+      const newCart = prev.map(i => (i.id === id && i.size === size && i.color === color) ? { ...i, quantity } : i);
       localStorage.setItem("luxe-cart", JSON.stringify(newCart));
       return newCart;
     });
@@ -114,8 +144,8 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const totalPrice = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
-  const convertPrice = (priceUSD: number) => {
-    const converted = priceUSD * exchangeRates[currency];
+  const convertPrice = (priceINR: number) => {
+    const converted = priceINR * exchangeRates[currency];
     return {
       amount: Math.round(converted),
       symbol: currencySymbols[currency],
@@ -137,6 +167,9 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
         isCartOpen,
         toggleCart,
         convertPrice,
+        country,
+        setCountry: handleSetCountry,
+        availableCurrencies,
       }}
     >
       {children}

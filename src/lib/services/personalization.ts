@@ -79,11 +79,6 @@ export class PersonalizationService {
   }
 
   public getRecommendedProducts(): Product[] {
-    // Basic AI Recommendation Logic:
-    // 1. Preferred Categories first
-    // 2. Similar price points to recently viewed
-    // 3. Exclude already viewed if possible, but keep trending
-    
     const topCategories = Object.entries(this.persona.preferredCategories)
       .sort((a, b) => b[1] - a[1])
       .map(([cat]) => cat);
@@ -99,7 +94,12 @@ export class PersonalizationService {
       const trending = MOCK_PRODUCTS.filter(
         (p) => p.isTrending && !this.persona.recentlyViewed.includes(p.id)
       );
-      return [...new Set([...recommendations, ...trending])].slice(0, 8);
+      const combined = [...new Set([...recommendations, ...trending])];
+      if (combined.length < 4) {
+        // Safe fallback: append any products from MOCK_PRODUCTS to fill up the list
+        return [...new Set([...combined, ...MOCK_PRODUCTS])].slice(0, 8);
+      }
+      return combined.slice(0, 8);
     }
 
     return recommendations.slice(0, 8);
@@ -109,9 +109,9 @@ export class PersonalizationService {
     const product = MOCK_PRODUCTS.find((p) => p.id === productId);
     if (!product) return [];
 
-    // Simple pairing logic: suggest from different categories
+    // Pairings should suggest other products, excluding the current one itself
     return MOCK_PRODUCTS.filter(
-      (p) => p.category !== product.category && p.id !== product.id
+      (p) => p.id !== product.id
     ).slice(0, 3);
   }
 

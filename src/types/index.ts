@@ -23,6 +23,7 @@ export interface Product {
   aesthetic?: string[];
   compatibilityTags?: string[];
   fashionScore?: number;
+  offer?: string;
 }
 
 export interface CartItem extends Product {

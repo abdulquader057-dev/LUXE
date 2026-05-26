@@ -15,19 +15,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import MagneticWrapper from "@/components/MagneticWrapper";
 
 const ShopContent = () => {
-  const [dbProducts, setDbProducts] = React.useState<any[]>([]);
+  const [dbProducts, setDbProducts] = React.useState<any[]>(MOCK_PRODUCTS);
 
   React.useEffect(() => {
     async function fetchProducts() {
       try {
         const { data } = await supabase.from("products").select("*");
         if (data && data.length > 0) {
-          setDbProducts(data);
-        } else {
-          setDbProducts(MOCK_PRODUCTS);
+          const hasLinen = data.some(p => p.name.toLowerCase().includes("linen"));
+          if (hasLinen) {
+            setDbProducts(data);
+          }
         }
       } catch (err) {
-        setDbProducts(MOCK_PRODUCTS);
+        console.warn("Using offline catalog fallback:", err);
       }
     }
     fetchProducts();
@@ -51,15 +52,10 @@ const ShopContent = () => {
   }, [searchParams]);
 
   const categories = [
-    { id: "all", name: "Complete Archive" },
-    { id: "sneakers", name: "Sneakers" },
-    { id: "streetwear", name: "Streetwear" },
-    { id: "luxury", name: "Luxury" },
-    { id: "accessories", name: "Accessories" },
-    { id: "watches", name: "Watches" },
-    { id: "Outerwear", name: "Outerwear" },
-    { id: "Upper", name: "Uppers" },
-    { id: "Lower", name: "Lowers" },
+    { id: "all", name: "All Designs" },
+    { id: "white", name: "White Shirts" },
+    { id: "pastel", name: "Pastel Shirts" },
+    { id: "dark", name: "Dark Shirts" },
   ];
 
   const filteredProducts = dbProducts.filter((p) => {
@@ -68,51 +64,27 @@ const ShopContent = () => {
       matchesCategory = true;
     } else {
       const selCat = selectedCategory.toLowerCase();
-      const pCat = p.category.toLowerCase();
       
-      if (selCat === "modest-wear" || selCat === "modest tech" || selCat === "modest wear") {
-        matchesCategory = pCat === "modest-wear";
-      } else if (selCat === "streetwear") {
-        matchesCategory = pCat === "streetwear";
-      } else if (selCat === "luxury") {
-        matchesCategory = pCat === "mixed-fashion" || p.name.toLowerCase().includes("luxury") || p.description.toLowerCase().includes("luxury");
-      } else if (selCat === "sneakers") {
-        matchesCategory = pCat === "sneakers";
-      } else if (selCat === "watches") {
-        matchesCategory = pCat === "watches";
-      } else if (selCat === "accessories") {
-        matchesCategory = pCat === "accessories";
-      } else if (selCat === "outerwear" || selCat === "hardwear" || selCat === "hard wear" || selCat === "outer wear") {
-        matchesCategory = p.name.toLowerCase().includes("jacket") || 
-                          p.name.toLowerCase().includes("coat") || 
-                          p.name.toLowerCase().includes("trench") || 
-                          p.name.toLowerCase().includes("hoodie") || 
-                          p.name.toLowerCase().includes("abaya") ||
-                          p.description.toLowerCase().includes("outerwear") ||
-                          p.description.toLowerCase().includes("jacket") ||
-                          p.description.toLowerCase().includes("coat") ||
-                          p.description.toLowerCase().includes("trench") ||
-                          p.description.toLowerCase().includes("hoodie");
-      } else if (selCat === "upper" || selCat === "upperwear" || selCat === "upper wear") {
-        matchesCategory = p.name.toLowerCase().includes("tunic") ||
-                          p.name.toLowerCase().includes("shirt") ||
-                          p.name.toLowerCase().includes("hoodie") ||
-                          p.name.toLowerCase().includes("jacket") ||
-                          p.name.toLowerCase().includes("abaya") ||
-                          p.description.toLowerCase().includes("upper") ||
-                          p.description.toLowerCase().includes("shirt") ||
-                          p.description.toLowerCase().includes("tunic") ||
-                          p.description.toLowerCase().includes("top");
-      } else if (selCat === "lower" || selCat === "lowerwear" || selCat === "lower wear") {
-        matchesCategory = p.name.toLowerCase().includes("pants") ||
-                          p.name.toLowerCase().includes("cargo") ||
-                          p.name.toLowerCase().includes("joggers") ||
-                          p.name.toLowerCase().includes("trousers") ||
-                          p.description.toLowerCase().includes("lower") ||
-                          p.description.toLowerCase().includes("pants") ||
-                          p.description.toLowerCase().includes("cargo");
+      if (selCat === "white") {
+        matchesCategory = p.name.toLowerCase().includes("white") || p.description.toLowerCase().includes("white");
+      } else if (selCat === "pastel") {
+        matchesCategory = p.name.toLowerCase().includes("blue") || 
+                          p.name.toLowerCase().includes("sand") || 
+                          p.name.toLowerCase().includes("green") || 
+                          p.name.toLowerCase().includes("pink") ||
+                          p.description.toLowerCase().includes("blue") || 
+                          p.description.toLowerCase().includes("sand") || 
+                          p.description.toLowerCase().includes("green") || 
+                          p.description.toLowerCase().includes("pink");
+      } else if (selCat === "dark") {
+        matchesCategory = p.name.toLowerCase().includes("navy") || 
+                          p.name.toLowerCase().includes("black") || 
+                          p.name.toLowerCase().includes("brown") ||
+                          p.description.toLowerCase().includes("navy") || 
+                          p.description.toLowerCase().includes("black") || 
+                          p.description.toLowerCase().includes("brown");
       } else {
-        matchesCategory = pCat === selCat;
+        matchesCategory = p.category?.toLowerCase() === selCat;
       }
     }
 
