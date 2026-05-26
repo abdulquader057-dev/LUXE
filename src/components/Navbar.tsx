@@ -60,7 +60,7 @@ const Navbar = () => {
     >
       <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex items-center justify-between">
         {/* Brand/Logo */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-8 pl-16 md:pl-20">
           <Link href="/" className="text-2xl font-display font-black tracking-tighter text-white hover:text-white/80 transition-colors">
             LUXE<span className="text-white/40">.</span>
           </Link>

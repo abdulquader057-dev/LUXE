@@ -43,13 +43,15 @@ export default function AuthPortal() {
     setLoading(true);
     setError(null);
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     try {
       if (isLogin) {
         let authSuccess = false;
         
         try {
           const { data, error: signInError } = await supabase.auth.signInWithPassword({
-            email,
+            email: normalizedEmail,
             password,
           });
 
@@ -66,10 +68,10 @@ export default function AuthPortal() {
           // Local/mock authentication fallback if Supabase fails or keys are misconfigured!
           // This ensures the client can always login and test all features!
           const mockUser = {
-            id: email === ADMIN_EMAIL ? "admin-id-123" : "mock-user-12345",
-            email: email,
+            id: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "admin-id-123" : "mock-user-12345",
+            email: normalizedEmail,
             user_metadata: {
-              full_name: email === ADMIN_EMAIL ? "Admin Master" : "Luxe Customer",
+              full_name: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "Admin Master" : "Luxe Customer",
               phone_number: "+919876543210",
               style_dna: {
                 wardrobeCompletion: 92,
@@ -79,10 +81,10 @@ export default function AuthPortal() {
           };
           const mockProfile = {
             id: mockUser.id,
-            email: email,
+            email: normalizedEmail,
             full_name: mockUser.user_metadata.full_name,
             phone_number: mockUser.user_metadata.phone_number,
-            role: email === ADMIN_EMAIL ? "admin" : "customer"
+            role: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "admin" : "customer"
           };
 
           // Save to local storage for AuthContext to pick up
@@ -90,13 +92,13 @@ export default function AuthPortal() {
           localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
           toast.success("Syncing Neural Profile (Local Fallback Mode)...");
           setTimeout(() => {
-            window.location.reload();
+            window.location.href = normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "/admin" : "/profile";
           }, 1000);
           return;
         }
 
         // Redirect based on role
-        if (email === ADMIN_EMAIL) {
+        if (normalizedEmail === ADMIN_EMAIL.toLowerCase()) {
           router.push("/admin");
         } else {
           router.push("/profile");
@@ -104,7 +106,7 @@ export default function AuthPortal() {
       } else {
         try {
           const { data, error: signUpError } = await supabase.auth.signUp({
-            email,
+            email: normalizedEmail,
             password,
             options: {
               data: {
@@ -120,8 +122,8 @@ export default function AuthPortal() {
           console.warn("Supabase signup failed, creating local profile fallback:", supabaseErr.message);
           // Fallback local signup
           const mockUser = {
-            id: email === ADMIN_EMAIL ? "admin-id-123" : "mock-user-12345",
-            email: email,
+            id: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "admin-id-123" : "mock-user-12345",
+            email: normalizedEmail,
             user_metadata: {
               full_name: fullName || "Luxe Customer",
               phone_number: phone || "+919876543210",
@@ -133,21 +135,21 @@ export default function AuthPortal() {
           };
           const mockProfile = {
             id: mockUser.id,
-            email: email,
+            email: normalizedEmail,
             full_name: mockUser.user_metadata.full_name,
             phone_number: mockUser.user_metadata.phone_number,
-            role: email === ADMIN_EMAIL ? "admin" : "customer"
+            role: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "admin" : "customer"
           };
           localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
           localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
           alert("Registration successful (Local Mode)! Logging you in...");
           setTimeout(() => {
-            window.location.reload();
+            window.location.href = normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "/admin" : "/profile";
           }, 1000);
           return;
         }
         
-        if (email === ADMIN_EMAIL) {
+        if (normalizedEmail === ADMIN_EMAIL.toLowerCase()) {
           router.push("/admin");
         } else {
           router.push("/profile");

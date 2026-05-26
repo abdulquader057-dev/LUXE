@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<any | null>(null);
 
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   useEffect(() => {
     // Get initial session
@@ -61,16 +61,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
-        setSession(newSession);
-        setUser(newSession?.user || null);
-        
         if (newSession?.user) {
+          localStorage.removeItem("luxe-mock-user");
+          localStorage.removeItem("luxe-mock-profile");
+          setSession(newSession);
+          setUser(newSession.user);
           fetchProfile(newSession.user.id);
+          setIsLoading(false);
         } else {
-          setProfile(null);
+          const savedMockUser = localStorage.getItem("luxe-mock-user");
+          if (savedMockUser) {
+            setIsLoading(false);
+          } else {
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+            setIsLoading(false);
+          }
         }
-        
-        setIsLoading(false);
       }
     );
 

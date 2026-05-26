@@ -234,10 +234,11 @@ function AccountSettings() {
 
   const handleUpdateProfile = () => {
     // Save locally
+    const normalizedEmail = email.trim().toLowerCase();
     const mockUserStr = localStorage.getItem("luxe-mock-user");
     if (mockUserStr) {
       const mockUser = JSON.parse(mockUserStr);
-      mockUser.email = email;
+      mockUser.email = normalizedEmail;
       mockUser.user_metadata.full_name = name;
       mockUser.user_metadata.phone_number = phone;
       localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
@@ -245,16 +246,16 @@ function AccountSettings() {
       const mockProfileStr = localStorage.getItem("luxe-mock-profile");
       if (mockProfileStr) {
         const mockProfile = JSON.parse(mockProfileStr);
-        mockProfile.email = email;
+        mockProfile.email = normalizedEmail;
         mockProfile.full_name = name;
         mockProfile.phone_number = phone;
-        mockProfile.role = email === "abdulquader057@gmail.com" ? "admin" : "customer";
+        mockProfile.role = normalizedEmail === "abdulquader057@gmail.com" ? "admin" : "customer";
         localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
       }
     } else {
       const mockUser = {
-        id: email === "abdulquader057@gmail.com" ? "admin-id-123" : "mock-user-12345",
-        email: email,
+        id: normalizedEmail === "abdulquader057@gmail.com" ? "admin-id-123" : "mock-user-12345",
+        email: normalizedEmail,
         user_metadata: {
           full_name: name || "Luxe Client",
           phone_number: phone || "",
@@ -263,19 +264,19 @@ function AccountSettings() {
       };
       const mockProfile = {
         id: mockUser.id,
-        email: email,
+        email: normalizedEmail,
         full_name: name || "Luxe Client",
         phone_number: phone || "",
-        role: email === "abdulquader057@gmail.com" ? "admin" : "customer"
+        role: normalizedEmail === "abdulquader057@gmail.com" ? "admin" : "customer"
       };
       localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
       localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
     }
     toast.success("Identity vectors updated successfully!");
 
-    // Reload page to re-evaluate AuthContext states
+    // Redirect and reload page to re-evaluate AuthContext states
     setTimeout(() => {
-      window.location.reload();
+      window.location.href = normalizedEmail === "abdulquader057@gmail.com" ? "/admin" : "/profile";
     }, 1000);
   };
 
@@ -732,7 +733,7 @@ function SubscriptionServices() {
   const [showSuccessCelebration, setShowSuccessCelebration] = useState(false);
   const [celebrationPlanName, setCelebrationPlanName] = useState("");
 
-  const isAdmin = user?.email === "abdulquader057@gmail.com";
+  const isAdmin = user?.email?.toLowerCase() === "abdulquader057@gmail.com";
 
   useEffect(() => {
     const p1 = localStorage.getItem("price-insider");
@@ -1393,7 +1394,7 @@ function SupportCenter() {
       setLoading(true);
       if (user) {
         try {
-          const isAdmin = user.email === "abdulquader057@gmail.com";
+          const isAdmin = user.email?.toLowerCase() === "abdulquader057@gmail.com";
           if (isAdmin) {
             // Admin fetches all orders in the system
             const { data, error } = await supabase
