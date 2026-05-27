@@ -56,7 +56,7 @@ const ProductCard = ({ product }: { product: Product }) => {
 
   return (
     <div 
-      className="group relative rounded-xl overflow-hidden bg-[#0A0A0C] border border-white/5 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.15,1)] hover:border-white/20 hover:shadow-[0_20px_40px_rgba(0,0,0,0.8)] flex flex-col h-[400px]"
+      className="product-card group relative rounded-xl overflow-hidden bg-[#0A0A0C] border border-white/5 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.15,1)] hover:border-white/20 hover:shadow-[0_20px_40px_rgba(0,0,0,0.8)] flex flex-col h-[400px]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

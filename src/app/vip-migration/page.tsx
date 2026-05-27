@@ -9,6 +9,7 @@ import Seo from "@/components/seo/Seo";
 export default function VipMigrationPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,7 +17,7 @@ export default function VipMigrationPage() {
     if (!name || !phone) return;
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("vip_migration").insert({ name, phone });
+      const { error } = await supabase.from("vip_migration").insert({ name, phone, email });
       if (error) throw error;
       toast.success("Welcome to the Inner Circle 🖤");
       setName("");
@@ -53,6 +54,17 @@ export default function VipMigrationPage() {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              required
+              className="w-full px-4 py-2 rounded bg-primary border border-gold text-offwhite"
+            />
+          </div>
+          <div>
+            <label className="block mb-1" htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-4 py-2 rounded bg-primary border border-gold text-offwhite"
             />

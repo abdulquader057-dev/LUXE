@@ -6,7 +6,18 @@ import { motion } from "framer-motion";
 
 const WhatsAppWidget = () => {
   const handleWhatsApp = () => {
-    window.open(`https://wa.me/917995338472?text=Hi%20Luxe!%20I'm%20interested%20in%20your%20futuristic%20fashion%20collections.`, "_blank");
+    // Primary number for product inquiries and general support
+    window.open(
+      `https://wa.me/917995338472?text=Hi%20Luxe!%20I'm%20interested%20in%20your%20fashion%20collections.`,
+      "_blank"
+    );
+    // Secondary number for tech or payment related issues
+    setTimeout(() => {
+      window.open(
+        `https://wa.me/917337246297?text=Hi%20Luxe!%20I'm%20facing%20a%20technical%20or%20payment%20issue.`,
+        "_blank"
+      );
+    }, 500);
   };
 
   return (

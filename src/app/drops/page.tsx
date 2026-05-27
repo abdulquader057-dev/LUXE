@@ -77,12 +77,12 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
               <span className="px-3 py-1 border border-rose-gold/30 text-[9px] font-sora uppercase tracking-widest text-rose-gold">
                 {drop.rarity}
               </span>
-                {drop.exclusive && (
-                  <div className="absolute top-4 left-4 flex items-center space-x-1 bg-gold/10 text-gold px-2 py-1 rounded">
-                    <Lock size={14} />
-                    <span className="text-xs font-sora uppercase">Gold Members Only</span>
-                  </div>
-                )}
+              {drop.exclusive && (
+                <div className="badge-appear flex items-center space-x-1 bg-gold/10 text-gold px-2 py-1 rounded">
+                  <Lock size={14} />
+                  <span className="text-xs font-sora uppercase">Gold Members Only</span>
+                </div>
+              )}
             </div>
           </div>
           <button
@@ -130,7 +130,7 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
               <div className="text-3xl font-sora font-light text-rose-gold mb-2">
                 USD {drop.product.price}
                 {drop.remainingStock === 0 && (
-                  <div className="absolute top-4 right-4 bg-red-600 text-white px-2 py-1 rounded text-xs font-sora">Sold Out</div>
+                  <div className="bg-red-600 text-white px-2 py-1 rounded text-xs font-sora">Sold Out</div>
                 )}
               </div>
               <div className="flex items-center justify-start md:justify-end gap-4">
@@ -158,7 +158,7 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
           whileTap={{ scale: 0.96 }}
           className="metal-pill px-8 py-4 flex items-center gap-3 text-white hover:text-white transition-colors duration-500 shadow-[0_10px_40px_rgba(183,110,121,0.15)] group/btn"
         >
-          <ShoppingBag size={14} strokeWidth={1.5} className="text-rose-gold group-hover/btn:scale-110 transition-transform" /> 
+          <ShoppingBag size={14} strokeWidth={1.5} className="text-gold group-hover/btn:scale-110 transition-transform" /> 
           <span className="font-sora text-[10px] tracking-[0.3em] uppercase text-white/90">
             Secure Allocation
           </span>

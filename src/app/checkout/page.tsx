@@ -113,6 +113,15 @@ export default function CheckoutPage() {
 
     try {
       const isUuid = user?.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id);
+
+      const cartItems = cart.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        size: item.size || "L",
+        color: item.color || "White"
+      }));
       
       // Structure all info inside delivery_address column as JSON
       const orderPayload = JSON.stringify({
@@ -124,18 +133,11 @@ export default function CheckoutPage() {
         paymentMethod: cod ? "COD" : "UPI",
         upi: upi || "",
         promo: promo || "",
-        items: cart.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          size: item.size || "L",
-          color: item.color || "White"
-        }))
+        items: cartItems,
       });
 
       // Save order to Supabase orders table
-      const { error: dbError } = await supabase
+      const { data: orderData, error: dbError } = await supabase
         .from("orders")
         .insert([
           {
@@ -144,25 +146,55 @@ export default function CheckoutPage() {
             status: "Pending",
             delivery_address: orderPayload,
           }
-        ]);
+        ])
+        .select("id")
+        .single();
 
       if (dbError) throw dbError;
 
-      // Prepare WhatsApp verification text
+      // ── Trigger notification API (WhatsApp + Email + Supabase log) ──────────
+      try {
+        await fetch("/api/notify-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: orderData?.id,
+            name,
+            phone,
+            address,
+            city,
+            pincode,
+            paymentMethod: cod ? "COD" : "UPI",
+            upi: upi || "",
+            items: cartItems,
+            subtotal: subtotal.toFixed(2),
+            deliveryFee,
+            total: total.toFixed(2),
+          }),
+        });
+      } catch (notifyErr) {
+        // Non-fatal: order was placed, notification is best-effort
+        console.warn("Notification API error:", notifyErr);
+      }
+
+      // Prepare WhatsApp message text for the store
       const itemsText = cart
         .map((i: any) => `• ${i.name} (Size: ${i.size || "L"}, Color: ${i.color || "White"}) x ${i.quantity} = ₹${i.price * i.quantity}`)
         .join("\n");
 
-      const whatsappMsg = `🌟 LUXE NEW ORDER UPLINK 🌟\n━━━━━━━━━━━━━━━━━━━━━━━\n👤 Name: ${name}\n📞 Phone: ${phone}\n📍 Delivery Address: ${address}\n🏙️ City: ${city}\n📌 Pincode: ${pincode}\n💳 Payment Mode: ${cod ? "Cash on Delivery (COD)" : `UPI (Ref ID: ${upi})`}\n\n🛍️ Ordered Items:\n${itemsText}\n\n💰 Subtotal: ₹${subtotal.toFixed(2)}\n🚚 Delivery Charges: ${deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}\n🧾 Total Payable: ₹${total.toFixed(2)}\n━━━━━━━━━━━━━━━━━━━━━━━\n*Order logged in LUXE OS database.*`;
+      const whatsappMsg = `🌟 LUXE NEW ORDER 🌟\n━━━━━━━━━━━━━━━━━━━━━━━\n👤 Name: ${name}\n📞 Phone: ${phone}\n📍 Address: ${address}\n🏙️ City: ${city} – ${pincode}\n💳 Payment: ${cod ? "COD" : `UPI (${upi})`}\n\n🛍️ Items:\n${itemsText}\n\n💰 Subtotal: ₹${subtotal.toFixed(2)}\n🚚 Delivery: ${deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}\n🧾 *Total: ₹${total.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━━━`;
 
       toast.dismiss(toastId);
-      toast.success("Order placed successfully! Redirecting to WhatsApp Concierge...");
+      toast.success("Order placed! Connecting you to WhatsApp...");
 
       clearCart();
       
-      // Open WhatsApp to notify owner
+      // Open WhatsApp for primary number; secondary opens after short delay
       setTimeout(() => {
         window.open(`https://wa.me/917995338472?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
+        setTimeout(() => {
+          window.open(`https://wa.me/917337246297?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
+        }, 800);
         router.push("/");
       }, 1200);
 

@@ -21,7 +21,7 @@ export const StatCard = ({ label, value, change, isPositive, icon: Icon, color, 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="glass-panel !rounded-[32px] p-8 border-white/5 relative overflow-hidden group hover:border-white/10 transition-all duration-500"
+      className="admin-card glass-panel !rounded-[32px] p-8 relative overflow-hidden group transition-all duration-500"
     >
       <div className="relative z-10 flex flex-col gap-6">
         <div className="flex items-center justify-between">

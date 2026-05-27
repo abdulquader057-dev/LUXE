@@ -1,0 +1,96 @@
+/* Design System – LUXE */
+:root {
+  --color-black: #020203;
+  --color-gold: #D4AF37;
+  --color-offwhite: #F9FAFB;
+  --font-primary: 'Outfit', sans-serif;
+  --font-headline: 'Bebas Neue', sans-serif;
+  --font-cormorant: 'Cormorant Garamond', serif;
+  --transition-default: 0.3s ease;
+}
+
+html, body {
+  background-color: var(--color-black);
+  color: var(--color-offwhite);
+  font-family: var(--font-primary);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Buttons */
+.btn-primary {
+  background: var(--color-gold);
+  color: var(--color-black);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: var(--transition-default);
+  box-shadow: 0 0 8px rgba(212, 163, 55, 0.6);
+}
+.btn-primary:hover {
+  animation: gold-pulse 1.5s infinite;
+  transform: translateY(-2px);
+}
+.btn-primary:disabled {
+  background: #555;
+  color: #aaa;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-gold);
+  border: 2px solid var(--color-gold);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: var(--transition-default);
+}
+.btn-secondary:hover {
+  background: var(--color-gold);
+  color: var(--color-black);
+}
+
+/* Input fields */
+.input-field {
+  background: var(--color-black);
+  color: var(--color-offwhite);
+  border: 2px solid transparent;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: var(--transition-default);
+}
+.input-field:focus {
+  border-color: var(--color-gold);
+  outline: none;
+}
+
+/* Gold shimmer skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #020203 25%, #D4AF37 50%, #020203 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Card hover lift */
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+}
+
+/* Glass background */
+.glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+}

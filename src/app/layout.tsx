@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Rajdhani, Sora, Orbitron, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
+import "./design-system.css";
 import ZyraChat from "@/components/ZyraChat";
 import BackToTop from "@/components/BackToTop";
 import Sidebar from "@/components/Sidebar";
 import { CommerceProvider } from "@/lib/contexts/CommerceContext";
+import { motion, AnimatePresence } from "framer-motion";
 import { LanguageProvider } from "@/lib/contexts/LanguageContext";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
 import CartSidebar from "@/components/ui/CartSidebar";
@@ -101,7 +103,10 @@ export default function RootLayout({
           <main className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative scroll-smooth custom-scrollbar">
             <Navbar />
             <div className="flex-1 w-full relative z-10 pt-24 pb-12">
-              {children}
+              {/* Page transition wrapper */}
+<AnimatePresence mode="wait">
+  {children}
+</AnimatePresence>
             </div>
             <Footer />
           </main>

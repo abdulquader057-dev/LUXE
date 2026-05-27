@@ -1,0 +1,106 @@
+/* src/design-system.css */
+
+:root {
+  --color-black: #020203;
+  --color-gold: #D4AF37;
+  --color-offwhite: #F9FAFB;
+}
+
+/* Primary backgrounds and text */
+.bg-primary { background-color: var(--color-black); }
+.text-primary { color: var(--color-gold); }
+.text-offwhite { color: var(--color-offwhite); }
+.bg-offwhite { background-color: var(--color-offwhite); }
+
+/* Gold utility */
+.bg-gold { background-color: var(--color-gold); }
+.bg-gold:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 12px var(--color-gold);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.text-gold { color: var(--color-gold); }
+.border-gold { border-color: var(--color-gold); }
+
+/* Glassmorphism utility */
+.glass {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+/* Gold pulse hover for buttons */
+.button-gold {
+  background-color: var(--color-gold);
+  color: var(--color-black);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.button-gold:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px var(--color-gold);
+}
+
+/* Smooth page transition (to be used with framer-motion wrappers) */
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Gold shimmer skeleton loader ──────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(212, 175, 55, 0.04) 25%,
+    rgba(212, 175, 55, 0.12) 50%,
+    rgba(212, 175, 55, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* ── Admin dashboard glass card ────────────────────────────── */
+.admin-card {
+  background: rgba(10, 10, 12, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 16px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.admin-card:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.08);
+}
+
+/* ── Loyalty form gold validation messages ─────────────────── */
+.validation-msg {
+  color: var(--color-gold);
+  font-size: 0.7rem;
+  font-family: monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.validation-error {
+  color: #ef4444;
+  font-size: 0.7rem;
+  font-family: monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Drops badge fade-in animation ────────────────────────── */
+.badge-appear {
+  animation: badgeFadeIn 0.4s ease forwards;
+}
+@keyframes badgeFadeIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
