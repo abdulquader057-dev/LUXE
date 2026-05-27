@@ -10,43 +10,28 @@ interface ProductViewer3DProps {
   images: string[];
   productName: string;
   selectedColor?: string;
+  currentIndex?: number;
+  onChangeIndex?: (index: number) => void;
 }
 
 const getColorFilter = (colorName: string) => {
-  const name = (colorName || "").toLowerCase();
-  if (name.includes("white")) return "none";
-  if (name.includes("sky blue") || name.includes("light blue")) {
-    return "hue-rotate(155deg) saturate(1.8) brightness(0.9) contrast(1.05)";
-  }
-  if (name.includes("sunset pink") || name.includes("pink")) {
-    return "hue-rotate(300deg) saturate(1.6) brightness(0.9) contrast(1.05)";
-  }
-  if (name.includes("olive green") || name.includes("green")) {
-    return "hue-rotate(65deg) saturate(0.9) brightness(0.7) contrast(1.1) sepia(0.25)";
-  }
-  if (name.includes("desert sand") || name.includes("tan beige") || name.includes("beige")) {
-    return "hue-rotate(15deg) saturate(1.2) brightness(0.85) sepia(0.4)";
-  }
-  if (name.includes("cocoa brown") || name.includes("brown")) {
-    return "hue-rotate(15deg) saturate(1.0) brightness(0.55) sepia(0.5)";
-  }
-  if (name.includes("navy blue") || name.includes("navy")) {
-    return "hue-rotate(190deg) saturate(2.0) brightness(0.4) contrast(1.2)";
-  }
-  if (name.includes("carbon black") || name.includes("black")) {
-    return "brightness(0.2) contrast(1.3)";
-  }
-  return "none";
+  return "none"; // Filters are removed to ensure natural colors and prevent background/skin tone shifts
 };
 
-export const ProductViewer3D = ({ images, productName, selectedColor = "White" }: ProductViewer3DProps) => {
+export const ProductViewer3D = ({ 
+  images, 
+  productName, 
+  selectedColor = "White",
+  currentIndex = 0,
+  onChangeIndex
+}: ProductViewer3DProps) => {
   const modelImages = images && images.length > 0 ? images : [
     "/brand/linen_model_front.png",
     "/brand/linen_model_back.png",
     "/brand/linen_model_side.png"
   ];
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [internalIndex, setInternalIndex] = useState(currentIndex);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -62,10 +47,22 @@ export const ProductViewer3D = ({ images, productName, selectedColor = "White" }
     setPosition({ x: 0, y: 0 });
   }, [selectedColor]);
 
+  // Sync internalIndex with prop
+  useEffect(() => {
+    setInternalIndex(currentIndex);
+  }, [currentIndex]);
+
+  const updateIndex = (newIndex: number) => {
+    setInternalIndex(newIndex);
+    if (onChangeIndex) {
+      onChangeIndex(newIndex);
+    }
+  };
+
   const handleStart = (clientX: number, clientY: number) => {
     setIsDragging(true);
     dragStart.current = { x: clientX, y: clientY };
-    startIndex.current = currentIndex;
+    startIndex.current = internalIndex;
     startPosition.current = { x: position.x, y: position.y };
   };
 
@@ -78,8 +75,8 @@ export const ProductViewer3D = ({ images, productName, selectedColor = "White" }
       const step = 60; // pixels of drag per step
       const offset = Math.floor(deltaX / step);
       const newIndex = (startIndex.current - offset + modelImages.length * 10) % modelImages.length;
-      if (newIndex !== currentIndex) {
-        setCurrentIndex(newIndex);
+      if (newIndex !== internalIndex) {
+        updateIndex(newIndex);
       }
     } else {
       // Pan image
@@ -134,8 +131,8 @@ export const ProductViewer3D = ({ images, productName, selectedColor = "White" }
   };
 
   const viewModeLabel = () => {
-    if (currentIndex === 0) return "Front Angle";
-    if (currentIndex === 1) return "Rear Profile";
+    if (internalIndex === 0) return "Front Angle";
+    if (internalIndex === 1) return "Rear Profile";
     return "Side Profile";
   };
 
@@ -160,19 +157,19 @@ export const ProductViewer3D = ({ images, productName, selectedColor = "White" }
         }}
       >
         <Image
-          src={modelImages[currentIndex]}
+          src={modelImages[internalIndex]}
           alt={`${productName} - ${viewModeLabel()}`}
           fill
           priority
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover transition-all duration-300"
           style={{ 
-            filter: getColorFilter(selectedColor) 
+            filter: "none" 
           }}
         />
         
         {/* Soft Luxury Vignette shadow */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none" />
       </div>
 
       {/* Floating Zoom & Helper HUD Controls */}
@@ -203,9 +200,9 @@ export const ProductViewer3D = ({ images, productName, selectedColor = "White" }
         {modelImages.map((_, idx) => (
           <button
             key={idx}
-            onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
+            onClick={(e) => { e.stopPropagation(); updateIndex(idx); }}
             className={`px-3 py-1.5 rounded-full text-[8px] font-mono border uppercase tracking-widest transition-all cursor-pointer ${
-              currentIndex === idx 
+              internalIndex === idx 
                 ? "bg-primary text-black border-primary font-bold shadow-[0_0_15px_#00f2ff]" 
                 : "bg-black/40 text-white/50 border-white/10 hover:text-white"
             }`}

@@ -64,8 +64,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         )}
 
         {/* Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-transparent opacity-90" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050508]/60 via-transparent to-transparent opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-transparent opacity-20" />
 
         {/* AI Badge Top Left */}
         <div className="absolute top-3 left-3 px-2.5 py-1 rounded-sm bg-black/60 border border-white/10 backdrop-blur-md flex items-center gap-1.5 shadow-[0_5px_15px_rgba(0,0,0,0.5)]">

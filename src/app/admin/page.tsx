@@ -141,7 +141,7 @@ export default function AdminDashboard() {
       setFormCategory("streetwear");
       setFormStock(100);
       setFormSizes("M, L, XL, XXL");
-      setFormColors("White, Sky Blue, Pink, Olive Green, Tan Beige, Cocoa Brown, Navy Blue, Carbon Black");
+      setFormColors("White, Sky Blue, Desert Sand, Olive Green, Sunset Pink, Navy Blue, Carbon Black, Cocoa Brown");
       setFormDescription("");
       setFormImageUrl("/brand/linen_model_front.png");
       setFormOffer("Buy One Get One Free");

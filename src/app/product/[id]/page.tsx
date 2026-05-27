@@ -46,6 +46,11 @@ const ProductPage = () => {
   const { trackView, getOutfitPairing } = usePersonalization();
   const { convertPrice, addToCart } = useCommerce();
 
+  // Reset selected image index when color changes
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [selectedColor]);
+
   useEffect(() => {
     if (product) {
       trackView(product.id);
@@ -68,6 +73,13 @@ const ProductPage = () => {
   }, [product?.id]);
 
   if (!product) return <div className="min-h-screen flex items-center justify-center">Product not found</div>;
+
+  // Find the variant product matching the selected color, or fallback to current product
+  const activeProduct = MOCK_PRODUCTS.find(
+    p => p.name.toLowerCase().includes(selectedColor.toLowerCase())
+  ) || product;
+  
+  const activeImages = activeProduct.images;
 
   const outfitPairings = getOutfitPairing(product.id);
 
@@ -94,11 +106,17 @@ const ProductPage = () => {
           {/* Left: Image Architecture */}
           <MotionContainer animation="stagger" className="space-y-8">
             <MotionItem animation="scale" className="relative group w-full">
-              <ProductViewer3D images={product.images} productName={product.name} selectedColor={selectedColor} />
+              <ProductViewer3D 
+                images={activeImages} 
+                productName={product.name} 
+                selectedColor={selectedColor} 
+                currentIndex={selectedImage}
+                onChangeIndex={setSelectedImage}
+              />
             </MotionItem>
             
             <div className="flex gap-6 overflow-x-auto pb-4 no-scrollbar">
-              {product.images.map((img, i) => (
+              {activeImages.map((img, i) => (
                 <MotionItem key={i} animation="slideUp" delay={i * 0.1}>
                   <button
                     onClick={() => setSelectedImage(i)}
@@ -276,10 +294,10 @@ const ProductPage = () => {
                     <Magnetic>
                       <button 
                         onClick={() => addToCart({
-                          id: product.id,
-                          name: product.name,
-                          price: product.price,
-                          image: product.images[0],
+                          id: activeProduct.id,
+                          name: activeProduct.name,
+                          price: activeProduct.price,
+                          image: activeImages[0],
                           quantity: quantity,
                           size: selectedSize || "L",
                           color: selectedColor || "White"

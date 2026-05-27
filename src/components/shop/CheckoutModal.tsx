@@ -59,6 +59,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [invoiceNo, setInvoiceNo] = useState("");
   const [gstin] = useState("36ABCDE1234F1Z5");
 
+  // Coupon States
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState("");
+  const [couponDiscountPercent, setCouponDiscountPercent] = useState(0);
+  const [couponError, setCouponError] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,8 +112,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const discountAmount = Math.round(totalPrice * discountRate);
   const discountedSubtotal = totalPrice - discountAmount;
 
+  // Coupon Discount
+  const couponDiscountAmount = Math.round(discountedSubtotal * couponDiscountPercent);
+  const postCouponSubtotal = discountedSubtotal - couponDiscountAmount;
+
   const getDeliveryFee = () => {
-    if (discountedSubtotal > 1999) return 0; // Free delivery for orders > 1999
+    if (postCouponSubtotal > 1999) return 0; // Free delivery for orders > 1999
     if (distance !== null) {
       if (distance <= 5) return 0;
       return Math.round(distance * 7.5); // 7.5 per km overall
@@ -122,8 +132,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   let sgstAmount = 0;
   
   cart.forEach((item) => {
-    // Apply discount rate to item price
-    const discountedItemPrice = item.price * (1 - discountRate);
+    // Apply discount rate and coupon discount rate to item price
+    const discountedItemPrice = item.price * (1 - discountRate) * (1 - couponDiscountPercent);
     const rate = discountedItemPrice <= 1000 ? 0.05 : 0.12;
     const itemCgst = Math.round((discountedItemPrice * (rate / 2)) * item.quantity);
     const itemSgst = Math.round((discountedItemPrice * (rate / 2)) * item.quantity);
@@ -132,7 +142,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   });
 
   const gstAmount = cgstAmount + sgstAmount;
-  const grandTotal = discountedSubtotal + gstAmount + deliveryFee;
+  const grandTotal = postCouponSubtotal + gstAmount + deliveryFee;
 
   // Auto-detect address using Geolocation and Nominatim
   const detectLocation = () => {
@@ -301,13 +311,14 @@ ${itemsText}
 💳 Payment Mode
 ${paymentMethodNames[paymentMethod]} - Status: ${paymentMethod === "cod" ? "Pay on Delivery" : "Prepaid (Pending Verification)"}
 ${couponCode ? `Prepaid Reward Coupon: ${couponCode} (10% OFF Saved)` : ""}
+${appliedCoupon ? `Applied Coupon: ${appliedCoupon} (${Math.round(couponDiscountPercent * 100)}% OFF)` : ""}
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 💰 Bill Breakdown
 Subtotal: ${formatPrice(totalPrice)}
-${discountAmount > 0 ? `Membership Discount (${Math.round(discountRate * 100)}%): -${formatPrice(discountAmount)}\nDiscounted Subtotal: ${formatPrice(discountedSubtotal)}` : ""}
-CGST (${discountedSubtotal <= 1000 ? "2.5%" : "6.0%"}): ${formatPrice(cgstAmount)}
-SGST (${discountedSubtotal <= 1000 ? "2.5%" : "6.0%"}): ${formatPrice(sgstAmount)}
+${discountAmount > 0 ? `Membership Discount (${Math.round(discountRate * 100)}%): -${formatPrice(discountAmount)}\n` : ""}${couponDiscountAmount > 0 ? `Coupon Discount (${Math.round(couponDiscountPercent * 100)}%): -${formatPrice(couponDiscountAmount)}\n` : ""}Post-Discount Subtotal: ${formatPrice(postCouponSubtotal)}
+CGST (${postCouponSubtotal <= 1000 ? "2.5%" : "6.0%"}): ${formatPrice(cgstAmount)}
+SGST (${postCouponSubtotal <= 1000 ? "2.5%" : "6.0%"}): ${formatPrice(sgstAmount)}
 Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
 ━━━━━━━━━━━━━━━━━━━━━━━
 🧾 Total Payable: ${formatPrice(grandTotal)}
@@ -682,6 +693,64 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
               </div>
             </div>
 
+            {/* Promo / Coupon Code Section */}
+            <div className="pt-6 border-t border-white/5 space-y-3">
+              <label className="text-[10px] font-mono text-primary uppercase tracking-widest block font-bold">Apply Coupon Code</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="ENTER COUPON CODE"
+                  value={promoCode}
+                  onChange={(e) => {
+                    setPromoCode(e.target.value.toUpperCase());
+                    setCouponError("");
+                  }}
+                  className="flex-1 bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-primary/40 text-white placeholder:text-white/20 transition-all uppercase"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cleanCode = promoCode.trim().toUpperCase();
+                    if (!cleanCode) return;
+                    if (cleanCode === "COUPON60") {
+                      setAppliedCoupon("COUPON60");
+                      setCouponDiscountPercent(0.60);
+                      setCouponError("");
+                      toast.success("60% OFF Coupon Applied!");
+                    } else if (cleanCode.startsWith("LUXE-PREPAID-") || cleanCode.includes("PREPAID")) {
+                      setAppliedCoupon(cleanCode);
+                      setCouponDiscountPercent(0.10);
+                      setCouponError("");
+                      toast.success("10% Prepaid Coupon Applied!");
+                    } else {
+                      setCouponError("Invalid or expired coupon code");
+                      toast.error("Invalid coupon code");
+                    }
+                  }}
+                  className="px-6 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-mono text-[10px] uppercase tracking-widest transition-colors cursor-pointer"
+                >
+                  Apply
+                </button>
+              </div>
+              {couponError && <p className="text-[9px] font-mono text-red-400 uppercase tracking-widest ml-2">{couponError}</p>}
+              {appliedCoupon && (
+                <div className="flex justify-between items-center bg-green-500/5 border border-green-500/20 px-4 py-2 rounded-xl text-green-400 text-[10px] font-mono uppercase tracking-widest">
+                  <span>Coupon Applied: {appliedCoupon} ({couponDiscountPercent * 100}% OFF)</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAppliedCoupon("");
+                      setPromoCode("");
+                      setCouponDiscountPercent(0);
+                    }}
+                    className="text-white/40 hover:text-white font-bold"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Total / Submit */}
             <div className="pt-6 border-t border-white/5 space-y-4">
               <div className="space-y-2 text-[10px] font-mono text-white/40 uppercase tracking-widest">
@@ -690,27 +759,31 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                   <span className="text-white">{formatPrice(totalPrice)}</span>
                 </div>
                 {discountAmount > 0 && (
-                  <>
-                    <div className="flex justify-between text-green-400">
-                      <span>Membership Discount ({Math.round(discountRate * 100)}%)</span>
-                      <span>-{formatPrice(discountAmount)}</span>
-                    </div>
-                    <div className="flex justify-between text-white/60">
-                      <span>Discounted Subtotal</span>
-                      <span>{formatPrice(discountedSubtotal)}</span>
-                    </div>
-                  </>
+                  <div className="flex justify-between text-green-400">
+                    <span>Membership Discount ({Math.round(discountRate * 100)}%)</span>
+                    <span>-{formatPrice(discountAmount)}</span>
+                  </div>
                 )}
+                {couponDiscountAmount > 0 && (
+                  <div className="flex justify-between text-green-400">
+                    <span>Coupon Discount ({Math.round(couponDiscountPercent * 100)}%)</span>
+                    <span>-{formatPrice(couponDiscountAmount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-white/60">
+                  <span>Post-Discount Subtotal</span>
+                  <span>{formatPrice(postCouponSubtotal)}</span>
+                </div>
                 <div className="flex justify-between">
-                  <span>CGST ({discountedSubtotal <= 1000 ? "2.5%" : "6.0%"})</span>
+                  <span>CGST ({postCouponSubtotal <= 1000 ? "2.5%" : "6.0%"})</span>
                   <span className="text-white">{formatPrice(cgstAmount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>SGST ({discountedSubtotal <= 1000 ? "2.5%" : "6.0%"})</span>
+                  <span>SGST ({postCouponSubtotal <= 1000 ? "2.5%" : "6.0%"})</span>
                   <span className="text-white">{formatPrice(sgstAmount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Total GST ({discountedSubtotal <= 1000 ? "5%" : "12%"})</span>
+                  <span>Total GST ({postCouponSubtotal <= 1000 ? "5%" : "12%"})</span>
                   <span className="text-white">{formatPrice(gstAmount)}</span>
                 </div>
                 <div className="flex justify-between">

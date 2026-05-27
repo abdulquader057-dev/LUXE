@@ -9,6 +9,7 @@ export const MOCK_PRODUCTS: Product[] = [
     "currency": "INR",
     "category": "streetwear",
     "images": [
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg",
       "/brand/linen_model_front.png",
       "/brand/linen_model_back.png",
       "/brand/linen_model_side.png"
@@ -16,7 +17,7 @@ export const MOCK_PRODUCTS: Product[] = [
     "stock": 150,
     "isTrending": true,
     "sizes": ["M", "L", "XL", "XXL"],
-    "colors": ["White", "Light Blue", "Pink", "Olive Green", "Tan Beige", "Cocoa Brown", "Navy Blue", "Carbon Black"],
+    "colors": ["White", "Sky Blue", "Desert Sand", "Olive Green", "Sunset Pink", "Navy Blue", "Carbon Black", "Cocoa Brown"],
     "ratings": 4.9,
     "reviewsCount": 142,
     "discount": 0,
@@ -30,14 +31,13 @@ export const MOCK_PRODUCTS: Product[] = [
     "currency": "INR",
     "category": "streetwear",
     "images": [
-      "/brand/linen_model_front.png",
-      "/brand/linen_model_back.png",
-      "/brand/linen_model_side.png"
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM.jpeg"
     ],
     "stock": 120,
     "isTrending": true,
     "sizes": ["M", "L", "XL", "XXL"],
-    "colors": ["White", "Light Blue", "Pink", "Olive Green", "Tan Beige", "Cocoa Brown", "Navy Blue", "Carbon Black"],
+    "colors": ["White", "Sky Blue", "Desert Sand", "Olive Green", "Sunset Pink", "Navy Blue", "Carbon Black", "Cocoa Brown"],
     "ratings": 4.8,
     "reviewsCount": 98,
     "discount": 0,
@@ -51,13 +51,13 @@ export const MOCK_PRODUCTS: Product[] = [
     "currency": "INR",
     "category": "streetwear",
     "images": [
-      "/brand/linen_model_front.png",
-      "/brand/linen_model_back.png",
-      "/brand/linen_model_side.png"
+      "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM.jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM.jpeg"
     ],
     "stock": 85,
     "sizes": ["M", "L", "XL", "XXL"],
-    "colors": ["White", "Light Blue", "Pink", "Olive Green", "Tan Beige", "Cocoa Brown", "Navy Blue", "Carbon Black"],
+    "colors": ["White", "Sky Blue", "Desert Sand", "Olive Green", "Sunset Pink", "Navy Blue", "Carbon Black", "Cocoa Brown"],
     "ratings": 4.7,
     "reviewsCount": 63,
     "discount": 10,
@@ -71,13 +71,13 @@ export const MOCK_PRODUCTS: Product[] = [
     "currency": "INR",
     "category": "streetwear",
     "images": [
-      "/brand/linen_model_front.png",
-      "/brand/linen_model_back.png",
-      "/brand/linen_model_side.png"
+      "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (2).jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM.jpeg"
     ],
     "stock": 70,
     "sizes": ["M", "L", "XL", "XXL"],
-    "colors": ["White", "Light Blue", "Pink", "Olive Green", "Tan Beige", "Cocoa Brown", "Navy Blue", "Carbon Black"],
+    "colors": ["White", "Sky Blue", "Desert Sand", "Olive Green", "Sunset Pink", "Navy Blue", "Carbon Black", "Cocoa Brown"],
     "ratings": 4.6,
     "reviewsCount": 54,
     "discount": 10,
@@ -91,13 +91,12 @@ export const MOCK_PRODUCTS: Product[] = [
     "currency": "INR",
     "category": "streetwear",
     "images": [
-      "/brand/linen_model_front.png",
-      "/brand/linen_model_back.png",
-      "/brand/linen_model_side.png"
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM.jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg"
     ],
     "stock": 95,
     "sizes": ["M", "L", "XL", "XXL"],
-    "colors": ["White", "Light Blue", "Pink", "Olive Green", "Tan Beige", "Cocoa Brown", "Navy Blue", "Carbon Black"],
+    "colors": ["White", "Sky Blue", "Desert Sand", "Olive Green", "Sunset Pink", "Navy Blue", "Carbon Black", "Cocoa Brown"],
     "ratings": 4.7,
     "reviewsCount": 41,
     "discount": 0,
@@ -111,14 +110,14 @@ export const MOCK_PRODUCTS: Product[] = [
     "currency": "INR",
     "category": "streetwear",
     "images": [
-      "/brand/linen_model_front.png",
-      "/brand/linen_model_back.png",
-      "/brand/linen_model_side.png"
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.23 PM.jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (1).jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg"
     ],
     "stock": 110,
     "isTrending": true,
     "sizes": ["M", "L", "XL", "XXL"],
-    "colors": ["White", "Light Blue", "Pink", "Olive Green", "Tan Beige", "Cocoa Brown", "Navy Blue", "Carbon Black"],
+    "colors": ["White", "Sky Blue", "Desert Sand", "Olive Green", "Sunset Pink", "Navy Blue", "Carbon Black", "Cocoa Brown"],
     "ratings": 4.9,
     "reviewsCount": 118,
     "discount": 0,
@@ -132,13 +131,14 @@ export const MOCK_PRODUCTS: Product[] = [
     "currency": "INR",
     "category": "streetwear",
     "images": [
-      "/brand/linen_model_front.png",
-      "/brand/linen_model_back.png",
-      "/brand/linen_model_side.png"
+      "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.22 PM (1).jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.22 PM (2).jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (2).jpeg"
     ],
     "stock": 130,
     "sizes": ["M", "L", "XL", "XXL"],
-    "colors": ["White", "Light Blue", "Pink", "Olive Green", "Tan Beige", "Cocoa Brown", "Navy Blue", "Carbon Black"],
+    "colors": ["White", "Sky Blue", "Desert Sand", "Olive Green", "Sunset Pink", "Navy Blue", "Carbon Black", "Cocoa Brown"],
     "ratings": 4.8,
     "reviewsCount": 82,
     "discount": 0,
@@ -152,13 +152,13 @@ export const MOCK_PRODUCTS: Product[] = [
     "currency": "INR",
     "category": "streetwear",
     "images": [
-      "/brand/linen_model_front.png",
-      "/brand/linen_model_back.png",
-      "/brand/linen_model_side.png"
+      "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM.jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.14 PM.jpeg",
+      "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM.jpeg"
     ],
     "stock": 65,
     "sizes": ["M", "L", "XL", "XXL"],
-    "colors": ["White", "Light Blue", "Pink", "Olive Green", "Tan Beige", "Cocoa Brown", "Navy Blue", "Carbon Black"],
+    "colors": ["White", "Sky Blue", "Desert Sand", "Olive Green", "Sunset Pink", "Navy Blue", "Carbon Black", "Cocoa Brown"],
     "ratings": 4.5,
     "reviewsCount": 29,
     "discount": 0,
