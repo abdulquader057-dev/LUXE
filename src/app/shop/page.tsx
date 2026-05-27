@@ -36,18 +36,18 @@ const ShopContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const initialCategory = searchParams.get("category") || searchParams.get("cat") || "all";
-  const initialSearch = searchParams.get("q") || "";
+  const initialCategory = searchParams?.get("category") || searchParams?.get("cat") || "all";
+  const initialSearch = searchParams?.get("q") || "";
   
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
 
   // Sync state when URL changes
   useEffect(() => {
-    const cat = searchParams.get("category") || searchParams.get("cat");
+    const cat = searchParams?.get("category") || searchParams?.get("cat");
     if (cat) setSelectedCategory(cat);
     
-    const q = searchParams.get("q");
+    const q = searchParams?.get("q");
     if (q) setSearchQuery(q);
   }, [searchParams]);
 

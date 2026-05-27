@@ -36,7 +36,8 @@ import { useEffect } from "react";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 const ProductPage = () => {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id as string;
   const product = MOCK_PRODUCTS.find((p) => p.id === id);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("L");

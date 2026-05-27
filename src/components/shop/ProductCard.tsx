@@ -49,9 +49,10 @@ const ProductCard = ({ product }: { product: Product }) => {
     >
       {/* Top Image Section */}
       <Link href={`/product/${product.id}`} className="relative h-[240px] w-full overflow-hidden bg-[#0A0A0F] block">
-        <div 
-          className={`absolute inset-0 bg-cover bg-center transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.15,1)] ${isHovered ? 'scale-110 rotate-2' : 'scale-100 rotate-0'}`}
-          style={{ backgroundImage: `url(${imageUrl})` }}
+        <img 
+          src={imageUrl} 
+          alt={product.name}
+          className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.15,1)] ${isHovered ? 'scale-110 rotate-2' : 'scale-100 rotate-0'}`}
         />
         
         {/* Out of Stock Overlay */}
