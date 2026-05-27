@@ -23,6 +23,7 @@ import {
   Eye,
   ArrowRight
 } from "lucide-react";
+import TrustBadges from "@/components/shop/TrustBadges";
 import { ProductViewer3D } from "@/components/shop/ProductViewer3D";
 import { MOCK_PRODUCTS } from "@/data/products";
 import { cn } from "@/lib/utils";
@@ -166,6 +167,7 @@ const ProductPage = () => {
                 </div>
 
                 <p className="text-white/40 text-xl leading-relaxed mb-16 font-medium max-w-xl">{product.description}</p>
+                <TrustBadges />
               </MotionItem>
 
               {/* AI Styling Intelligence Panel */}

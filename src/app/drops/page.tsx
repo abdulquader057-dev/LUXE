@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bell, ShoppingBag } from "lucide-react";
+import { Bell, ShoppingBag, Lock } from "lucide-react";
 import Image from "next/image";
 import { LIVE_DROPS } from "@/data/ecosystem";
 import { LiveDrop } from "@/types";
@@ -77,6 +77,12 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
               <span className="px-3 py-1 border border-rose-gold/30 text-[9px] font-sora uppercase tracking-widest text-rose-gold">
                 {drop.rarity}
               </span>
+                {drop.exclusive && (
+                  <div className="absolute top-4 left-4 flex items-center space-x-1 bg-gold/10 text-gold px-2 py-1 rounded">
+                    <Lock size={14} />
+                    <span className="text-xs font-sora uppercase">Gold Members Only</span>
+                  </div>
+                )}
             </div>
           </div>
           <button
@@ -123,6 +129,9 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
             <div className="text-left md:text-right mb-16 md:mb-0">
               <div className="text-3xl font-sora font-light text-rose-gold mb-2">
                 USD {drop.product.price}
+                {drop.remainingStock === 0 && (
+                  <div className="absolute top-4 right-4 bg-red-600 text-white px-2 py-1 rounded text-xs font-sora">Sold Out</div>
+                )}
               </div>
               <div className="flex items-center justify-start md:justify-end gap-4">
                 <span className="text-[9px] font-sora tracking-widest text-white/40 uppercase">

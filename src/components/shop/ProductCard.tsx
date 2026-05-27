@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import Link from "next/link";
+import SwatchSelector from "@/components/shop/SwatchSelector";
 
 interface Product {
   id: string;
@@ -40,12 +41,18 @@ const ProductCard = ({ product }: { product: Product }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
+  const [isImageFading, setIsImageFading] = useState(false);
   // Determine image based on modelImages and selected color
   const modelImg = product.modelImages?.variants?.[selectedColor] || product.modelImages || {};
   const frontImage = modelImg.front && modelImg.front !== "/model_placeholder.png" ? modelImg.front : getFirstImage(product.images);
   const sideImage = modelImg.side && modelImg.side !== "/model_placeholder.png" ? modelImg.side : frontImage;
   const imageUrl = isHovered ? sideImage : frontImage;
   const matchScore = Math.floor(Math.random() * 15) + 85;
+  useEffect(() => {
+    setIsImageFading(true);
+    const timer = setTimeout(() => setIsImageFading(false), 300);
+    return () => clearTimeout(timer);
+  }, [selectedColor]);
 
   return (
     <div 
@@ -58,7 +65,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         <img 
           src={imageUrl} 
           alt={product.name}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ease-in-out ${isHovered ? 'opacity-100' : 'opacity-90'} ${isHovered ? 'scale-110 rotate-2' : 'scale-100 rotate-0'}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ease-in-out ${isImageFading ? 'opacity-0' : ''} ${isHovered ? 'opacity-100' : 'opacity-90'} ${isHovered ? 'scale-110 rotate-2' : 'scale-100 rotate-0'}`}
         />
         
         {/* Out of Stock Overlay */}
@@ -107,17 +114,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             {product.description}
           </p>
           {/* Colour Swatch Selector */}
-          <div className="mt-2 flex space-x-2">
-            {product.colors?.map((color) => (
-              <button
-                key={color}
-                onClick={() => setSelectedColor(color)}
-                className={`w-5 h-5 rounded-full border border-white/30 transition-all duration-200 ${selectedColor === color ? 'ring-2 ring-[#D4AF37]' : ''}`}
-                style={{ backgroundColor: color.toLowerCase() }}
-                aria-label={color}
-              />
-            ))}
-          </div>
+          <SwatchSelector colors={product.colors || []} selectedColor={selectedColor} onSelect={setSelectedColor} />
         </div>
 
         <div className="mt-4 pt-4 border-t border-white/10 flex items-end justify-between">

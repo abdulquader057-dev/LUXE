@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "../styles/designTokens.css";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&display=swap');
 
 @theme {
   --color-primary: var(--primary-color, #00f2ff);

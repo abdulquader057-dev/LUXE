@@ -16,6 +16,7 @@ import EntranceAnimation from "@/components/EntranceAnimation";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { Toaster } from "react-hot-toast";
 import ThemeColorLoader from "@/components/ThemeColorLoader";
+import Seo from "@/components/seo/Seo";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -56,8 +57,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "LUXE | Cognitive Fashion Operating System",
-  description: "Experience the future of fashion. AI-native, luxury-grade, neural-powered style curation for the next generation of digital identities.",
+  title: "LUXE — Luxury Redefined",
+  description: "Affordable luxury fashion for the bold generation",
+  openGraph: {
+    images: [{ url: "/hero/mobile.jpg" }],
+  },
   keywords: ["AI Fashion", "Future of Retail", "Luxury Techwear", "Neural Styling", "Luxe"],
 };
 
@@ -72,6 +76,15 @@ export default function RootLayout({
       className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth`}
     >
       <body className="min-h-full flex bg-transparent text-white selection:bg-[#00F0FF]/30 selection:text-white relative overflow-hidden h-screen w-screen">
+        <script dangerouslySetInnerHTML={{ __html: "(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-XXXXXXX');" }} />
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          ></iframe>
+        </noscript>
         <ThemeColorLoader />
         <AnimatedBackground />
         <EntranceAnimation />

@@ -1,3 +1,4 @@
+// src/components/home/Hero.tsx
 "use client";
 
 import React from "react";
@@ -13,107 +14,41 @@ const Hero = () => {
   const { user } = useAuth();
   const router = useRouter();
 
-  // Extract actual style match if logged in, otherwise default to 98
-  const styleMatch = user?.user_metadata?.style_dna?.wardrobeCompletion || 98;
+  // Placeholder for any future interaction logic (e.g., navigation on click)
+  const handleClick = () => {
+    toast.success("Welcome to LUXE!");
+    router.push("/shop");
+  };
 
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden bg-[#050508] border border-white/5 mb-8 min-h-[300px] md:min-h-[400px] flex items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-      
-      {/* Background Cyberpunk Image layer */}
-      <motion.div 
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 0.4 }}
-        transition={{ duration: 2, ease: "easeOut" }}
-        className="absolute inset-0 bg-cover bg-center mix-blend-screen transition-transform duration-[10s] hover:scale-105"
-        style={{ backgroundImage: "url('/hero-1.jpg')" }}
-      />
-      
-      {/* Gradients to blend image */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#050508] via-[#050508]/80 to-transparent z-0" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050508] to-transparent z-0" />
-      
-      {/* Cinematic Ambient Glow behind model */}
-      <div className="absolute right-[20%] top-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-white/5 blur-[100px] z-0" />
-      <div className="absolute right-[20%] top-1/2 -translate-y-1/2 w-[450px] h-[450px] rounded-full border-[1px] border-white/5 shadow-[0_0_60px_rgba(255,255,255,0.05)] z-0" />
+    <section className="relative min-h-screen bg-primary flex items-center justify-center overflow-hidden">
+      {/* Dark cinematic background - could be an image or video */}
+      <div className="absolute inset-0 bg-black/70" />
 
-      <div className="relative z-10 w-full px-8 md:px-12 py-12 flex flex-col md:flex-row items-center justify-between gap-12">
-        
-        {/* Left Content: The Archive */}
-        <div className="w-full max-w-xl">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
-          >
-            <h1 className="text-[clamp(3rem,6vw,6rem)] font-bebas leading-[0.85] tracking-tight text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] mb-4">
-              {t("hero.titleThe")} <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-white">{t("hero.titleArchive")}</span>
-            </h1>
-            
-            <p className="text-[11px] font-sora text-white/50 tracking-widest leading-relaxed mb-8 max-w-sm">
-              {t("hero.subtitle")}
-            </p>
+      {/* Gold gradient headline overlay */}
+      <h1 className="relative text-5xl md:text-7xl font-orbitron font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold to-offwhite animate-pulse">
+        LUXURY REDEFINED
+      </h1>
 
-            <div className="flex flex-wrap items-center gap-4">
-              <button onClick={() => router.push('/shop')} className="px-8 py-3 rounded-md bg-white text-black text-[10px] font-sora font-bold tracking-widest uppercase transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95">
-                {t("hero.exploreNow")}
-              </button>
-              
-              <button onClick={() => window.dispatchEvent(new CustomEvent("open-zyra"))} className="px-8 py-3 rounded-md bg-white/5 border border-white/10 text-white text-[10px] font-sora font-bold tracking-widest uppercase transition-all hover:bg-white/10 flex items-center gap-2 group">
-                AI Stylist
-                <Sparkles size={14} className="text-white group-hover:animate-pulse" />
-              </button>
-            </div>
-          </motion.div>
+      {/* Optional widgets – keep existing styling but make them appear on top */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7, duration: 1, ease: [0.25, 1, 0.5, 1] }}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-6"
+      >
+        {/* Widget 1 */}
+        <div className="flex flex-col items-center text-center text-gold">
+          <Sparkles size={24} />
+          <span className="text-sm">{t("hero.styleMatch")}</span>
         </div>
-
-        <div className="hidden lg:flex flex-col gap-4 min-w-[200px]">
-          
-          {/* Widget 1 */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 1, ease: [0.25, 1, 0.5, 1] }}
-            className="flex-1 min-w-[200px] border border-white/5 bg-white/[0.02] backdrop-blur-md p-6 rounded-md relative overflow-hidden group hover:bg-white/[0.04] transition-colors"
-          >
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-50" />
-            <div className="text-[9px] font-sora text-white/70 tracking-widest font-bold mb-2">{t("hero.styleMatch")}</div>
-            <div className="text-3xl font-orbitron font-bold text-white">{styleMatch}<span className="text-sm text-white/50">%</span></div>
-          </motion.div>
-
-          {/* Widget 2 */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6, duration: 1.2, ease: "easeOut" }}
-            className="bg-[#050508]/80 backdrop-blur-md border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center relative overflow-hidden"
-          >
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-50" />
-            <div className="text-[9px] font-sora text-white/70 tracking-widest font-bold mb-2">{t("hero.trending")}</div>
-            <div className="text-3xl font-orbitron font-bold text-white flex items-center gap-2">
-              #1
-              <TrendingUp size={20} className="text-white/70" />
-            </div>
-          </motion.div>
-
-          {/* Widget 3 */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.8, duration: 1.2, ease: "easeOut" }}
-            className="bg-[#050508]/80 backdrop-blur-md border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center relative overflow-hidden"
-          >
-            <div className="text-[9px] font-sora text-white/50 tracking-widest font-bold mb-3">{t("hero.aiRecommended")}</div>
-            <div className="flex items-end justify-center gap-1.5 h-6 w-full">
-              {[40, 70, 45, 90, 60, 30, 80, 50].map((h, i) => (
-                <div key={i} className="w-1.5 bg-white rounded-t-sm opacity-50" style={{ height: `${h}%` }} />
-              ))}
-            </div>
-          </motion.div>
-
+        {/* Widget 2 */}
+        <div className="flex flex-col items-center text-center text-gold">
+          <TrendingUp size={24} />
+          <span className="text-sm">{t("hero.trending")}</span>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </section>
   );
 };
 

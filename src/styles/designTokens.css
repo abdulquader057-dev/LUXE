@@ -1,0 +1,64 @@
+/* src/styles/designTokens.css */
+
+:root {
+  /* Brand Palette */
+  --primary: #020203;   /* deep black */
+  --gold: #D4AF37;     /* luxury gold */
+  --offwhite: #F9FAFB;/* off‑white */
+
+  /* Typography */
+  --font-family: 'Outfit', sans-serif;
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+
+  /* Spacing Scale */
+  --space-0: 0rem;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.5rem;    /* 24px */
+  --space-6: 2rem;      /* 32px */
+  --space-7: 3rem;      /* 48px */
+  --space-8: 4rem;      /* 64px */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
+  --shadow-lg: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
+/* Utility Classes */
+.text-primary { color: var(--primary); }
+.text-gold { color: var(--gold); }
+.text-offwhite { color: var(--offwhite); }
+.bg-primary { background-color: var(--primary); }
+.bg-gold { background-color: var(--gold); }
+.bg-offwhite { background-color: var(--offwhite); }
+
+/* Glass‑morphism */
+.glass {
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--space-2);
+}
+
+/* Font utilities */
+.font-base { font-family: var(--font-family); font-size: var(--font-size-base); line-height: var(--line-height-base); }
+
+/* Margin & Padding shortcuts */
+.m-1 { margin: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.p-4 { padding: var(--space-4); }
+
+/* Rounded corners */
+.rounded-sm { border-radius: var(--space-1); }
+.rounded { border-radius: var(--space-2); }
+.rounded-lg { border-radius: var(--space-3); }
+
+/* Shadow utilities */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }

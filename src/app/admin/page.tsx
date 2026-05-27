@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { MOCK_PRODUCTS } from "@/data/products";
 import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -63,7 +64,13 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       if (!isAdmin) return;
 
-      // 1. Initial load from local storage
+      // 1. Initial load from local storage with cache-buster
+      const cacheVersion = localStorage.getItem("luxe-catalog-version");
+      if (cacheVersion !== "v2.2") {
+        localStorage.removeItem("luxe-catalog");
+        localStorage.setItem("luxe-catalog-version", "v2.2");
+      }
+
       const localCat = localStorage.getItem("luxe-catalog");
       if (localCat) {
         try {
@@ -84,10 +91,27 @@ export default function AdminDashboard() {
         
         // Format orders for UI
         if (ordersRes.data) {
-          const formattedOrders = ordersRes.data.map(o => ({
-            ...o,
-            customer_name: o.profiles?.full_name || 'Unknown'
-          }));
+          const formattedOrders = ordersRes.data.map(o => {
+            let parsedDetails = null;
+            try {
+              parsedDetails = JSON.parse(o.delivery_address || "");
+            } catch (e) {
+              // Not a JSON string
+            }
+
+            return {
+              ...o,
+              customer_name: parsedDetails?.name || o.profiles?.full_name || 'Unknown User',
+              phone: parsedDetails?.phone || o.profiles?.phone_number || 'N/A',
+              address: parsedDetails?.address || o.delivery_address || 'N/A',
+              city: parsedDetails?.city || 'Hyderabad',
+              pincode: parsedDetails?.pincode || '',
+              items: parsedDetails?.items || o.items || [],
+              payment_method: parsedDetails?.paymentMethod || o.payment_method || 'UPI',
+              upi_id: parsedDetails?.upi || '',
+              promo_code: parsedDetails?.promo || '',
+            };
+          });
           setOrders(formattedOrders);
         }
         
@@ -107,6 +131,88 @@ export default function AdminDashboard() {
     
     if (isAdmin) fetchData();
   }, [isAdmin]);
+
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    try {
+      // 1. Update status in Supabase orders table
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+      
+      if (error) throw error;
+
+      // 2. Update local state
+      setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+      toast.success(`Order status updated to ${newStatus}`);
+
+      // 3. WhatsApp notification when status changes to "Shipped"
+      if (newStatus === "Shipped") {
+        const phoneNum = order.phone || "";
+        const trackingLink = `https://luxe.ai/track/${orderId}`;
+        const messageText = `Your LUXE order is on the way! 🖤 Track: ${trackingLink}`;
+        
+        // Clean phone number (digits only, prefix 91 if not present)
+        let cleanPhone = phoneNum.replace(/[^0-9]/g, "");
+        if (cleanPhone.length === 10) {
+          cleanPhone = `91${cleanPhone}`;
+        }
+        
+        const whatsappUrl = `https://wa.me/${cleanPhone || '917995338472'}?text=${encodeURIComponent(messageText)}`;
+        window.open(whatsappUrl, "_blank");
+        toast.success("WhatsApp tracking message prepared!");
+      }
+
+      // 4. Loyalty points addition when status changes to "Delivered"
+      if (newStatus === "Delivered") {
+        if (order.customer_id) {
+          // If customer is a mock user, update mock user profile locally
+          const savedMockUser = localStorage.getItem("luxe-mock-user");
+          if (savedMockUser) {
+            const parsed = JSON.parse(savedMockUser);
+            if (parsed.id === order.customer_id) {
+              const currentDna = parsed.user_metadata?.style_dna || { totalXP: 2450, level: 7 };
+              currentDna.totalXP = (currentDna.totalXP || 0) + 100;
+              currentDna.level = Math.floor(currentDna.totalXP / 400);
+              parsed.user_metadata.style_dna = currentDna;
+              localStorage.setItem("luxe-mock-user", JSON.stringify(parsed));
+              
+              const savedMockProfile = localStorage.getItem("luxe-mock-profile");
+              if (savedMockProfile) {
+                const parsedProf = JSON.parse(savedMockProfile);
+                parsedProf.loyalty_points = (parsedProf.loyalty_points || 0) + 100;
+                localStorage.setItem("luxe-mock-profile", JSON.stringify(parsedProf));
+              }
+            }
+          }
+          
+          // Also try to update profiles table if loyalty_points column exists (non-blocking)
+          try {
+            const { data: profileData } = await supabase
+              .from("profiles")
+              .select("loyalty_points")
+              .eq("id", order.customer_id)
+              .single();
+            
+            const currentPoints = profileData?.loyalty_points || 0;
+            await supabase
+              .from("profiles")
+              .update({ loyalty_points: currentPoints + 100 })
+              .eq("id", order.customer_id);
+          } catch (e) {
+            // Ignore if column doesn't exist
+          }
+          
+          toast.success("Loyalty points (+100 XP) added to customer profile! 🖤");
+        }
+      }
+    } catch (err: any) {
+      toast.error(`Status update failed: ${err.message}`);
+    }
+  };
 
   const handleDelete = async (id: string, type: 'orders' | 'products') => {
     if (confirm(`Are you sure you want to delete this ${type === 'orders' ? 'order' : 'product'}?`)) {
@@ -176,13 +282,14 @@ export default function AdminDashboard() {
     const colorsArr = formColors.split(",").map(c => c.trim()).filter(Boolean);
 
     const productData = {
+      ...editingProduct,
       id: editingProduct ? editingProduct.id : `luxe-${formCategory.toLowerCase()}-${Date.now()}`,
       name: formName,
       description: formDescription,
       price: Number(formPrice),
       currency: "INR",
       category: formCategory,
-      images: [formImageUrl],
+      images: editingProduct?.images || [formImageUrl],
       image_url: formImageUrl,
       stock: Number(formStock),
       stock_quantity: Number(formStock),
@@ -192,7 +299,13 @@ export default function AdminDashboard() {
       offer: formOffer,
       ratings: editingProduct?.ratings || 4.8,
       reviewsCount: editingProduct?.reviewsCount || 1,
-      discount: editingProduct?.discount || 0
+      discount: editingProduct?.discount || 0,
+      modelImages: editingProduct?.modelImages || {
+        front: formImageUrl,
+        side: formImageUrl,
+        back: formImageUrl,
+        variants: {}
+      }
     };
 
     let updatedProducts = [...products];
@@ -389,15 +502,147 @@ export default function AdminDashboard() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.05 }}
-                  className="h-full"
+                  className="space-y-8 h-full"
                 >
-                  <ManagementHub 
-                    type="orders" 
-                    data={orders} 
-                    onAdd={() => handleAdd('orders')}
-                    onEdit={handleEdit}
-                    onDelete={(id) => handleDelete(id, 'orders')}
-                  />
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                      <h3 className="text-3xl font-display font-black tracking-tighter text-gradient uppercase">Order Hub Controller</h3>
+                      <p className="text-xs text-white/40 tracking-widest uppercase mt-1">Real-time order management & logistics coordination</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 pb-20 overflow-y-auto max-h-[70vh] pr-2 custom-scrollbar">
+                    {orders.length === 0 ? (
+                      <div className="p-12 text-center bg-white/[0.01] border border-white/5 rounded-3xl">
+                        <ShoppingBag className="mx-auto mb-4 text-white/20 animate-pulse" size={32} />
+                        <p className="text-xs font-mono text-white/40 uppercase tracking-widest">No order streams initialized in the network.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-6">
+                        {orders.map((order, i) => {
+                          const statusColors: Record<string, string> = {
+                            "Pending": "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20",
+                            "Confirmed": "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+                            "Packed": "bg-purple-500/10 text-purple-400 border border-purple-500/20",
+                            "Shipped": "bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse",
+                            "Delivered": "bg-green-500/10 text-green-500 border border-green-500/20",
+                            "Cancelled": "bg-red-500/10 text-red-500 border border-red-500/20"
+                          };
+
+                          return (
+                            <motion.div
+                              key={order.id}
+                              initial={{ opacity: 0, y: 15 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: i * 0.05 }}
+                              className="bg-[#0A0A0C] border border-white/5 rounded-[24px] p-6 relative overflow-hidden group hover:border-white/10 transition-all duration-500"
+                            >
+                              {/* Order Header */}
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/5">
+                                <div className="space-y-1">
+                                  <span className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Order Identifier</span>
+                                  <h4 className="text-sm font-mono font-bold text-white tracking-widest flex items-center gap-2">
+                                    LX-ORD-{order.id.slice(0, 8).toUpperCase()}
+                                  </h4>
+                                  <p className="text-[9px] font-mono text-white/20 uppercase tracking-wider">{new Date(order.created_at).toLocaleString()}</p>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                  <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest">Set Status:</label>
+                                  <select
+                                    value={order.status || "Pending"}
+                                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                    className={cn(
+                                      "px-4 py-2 rounded-xl text-[10px] font-mono font-bold uppercase tracking-wider bg-black border-none focus:outline-none focus:ring-1 focus:ring-[#D4AF37] cursor-pointer",
+                                      statusColors[order.status || "Pending"] || "bg-white/5 text-white"
+                                    )}
+                                  >
+                                    <option value="Pending">Pending</option>
+                                    <option value="Confirmed">Confirmed</option>
+                                    <option value="Packed">Packed</option>
+                                    <option value="Shipped">Shipped</option>
+                                    <option value="Delivered">Delivered</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              {/* Order Details Body */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6">
+                                {/* Customer Info */}
+                                <div className="space-y-3 text-xs leading-relaxed">
+                                  <h5 className="text-[9px] font-mono text-white/30 uppercase tracking-widest font-bold">Recipient Node</h5>
+                                  <div className="space-y-1 text-white/80">
+                                    <p className="font-bold text-white uppercase">{order.customer_name}</p>
+                                    <p className="font-mono text-white/60">{order.phone}</p>
+                                    <p className="text-white/50">{order.address}</p>
+                                    <p className="text-white/40 font-mono text-[10px]">{order.city} {order.pincode ? `- ${order.pincode}` : ""}</p>
+                                  </div>
+                                </div>
+
+                                {/* Items Ordered */}
+                                <div className="space-y-3">
+                                  <h5 className="text-[9px] font-mono text-white/30 uppercase tracking-widest font-bold">Garment Cargo</h5>
+                                  <div className="space-y-2 max-h-[140px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {Array.isArray(order.items) && order.items.length > 0 ? (
+                                      order.items.map((item: any, idx: number) => (
+                                        <div key={idx} className="flex justify-between items-center text-xs">
+                                          <div className="space-y-0.5">
+                                            <p className="font-bold text-white/80 uppercase line-clamp-1">{item.name}</p>
+                                            <span className="text-[8px] font-mono text-white/30 uppercase">QTY: {item.quantity} · Size: {item.size || "L"} · Color: {item.color || "White"}</span>
+                                          </div>
+                                          <span className="font-mono text-white/60">₹{item.price * item.quantity}</span>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <p className="text-[9px] font-mono text-white/30 uppercase">Generic Product Bundle</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Bill & Payment Info */}
+                                <div className="space-y-3 text-xs flex flex-col justify-between">
+                                  <div className="space-y-2">
+                                    <h5 className="text-[9px] font-mono text-white/30 uppercase tracking-widest font-bold">Financial Stream</h5>
+                                    <div className="flex justify-between items-baseline text-white">
+                                      <span className="text-white/40 uppercase tracking-wider text-[9px]">Total Value:</span>
+                                      <span className="text-lg font-orbitron font-bold text-[#D4AF37] tracking-wider">₹{order.total_price}</span>
+                                    </div>
+                                    <div className="flex justify-between text-[10px] font-mono">
+                                      <span className="text-white/40">Transfer Method:</span>
+                                      <span className="text-white font-bold uppercase tracking-wider">{order.payment_method || "COD"}</span>
+                                    </div>
+                                    {order.upi_id && (
+                                      <div className="flex justify-between text-[9px] font-mono">
+                                        <span className="text-white/30">UPI Ref ID:</span>
+                                        <span className="text-white/60">{order.upi_id}</span>
+                                      </div>
+                                    )}
+                                    {order.promo_code && (
+                                      <div className="flex justify-between text-[9px] font-mono">
+                                        <span className="text-white/30">Used Promo:</span>
+                                        <span className="text-green-400 font-bold">{order.promo_code}</span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Delete Order Button */}
+                                  <div className="flex justify-end pt-4">
+                                    <button
+                                      onClick={() => handleDelete(order.id, 'orders')}
+                                      className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 text-[9px] font-mono uppercase tracking-widest transition-all cursor-pointer"
+                                    >
+                                      Decommission Node
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </motion.div>
               )}
 

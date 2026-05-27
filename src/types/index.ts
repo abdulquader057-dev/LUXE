@@ -110,6 +110,7 @@ export interface LiveDrop {
   rarity: 'limited' | 'exclusive' | 'ultra-rare';
   hypeScore: number;
   waitlistCount: number;
+  exclusive?: boolean;
 }
 
 // Community & Social
