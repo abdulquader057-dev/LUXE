@@ -24,6 +24,70 @@ interface Message {
 }
 
 const AIChatbot = () => {
+  const { convertPrice } = useCommerce();
+  
+  const renderMessageContent = (content: string) => {
+    const recommendRegex = /\[RECOMMEND:\s*([a-zA-Z0-9-]+)\]/g;
+    
+    if (!content.match(recommendRegex)) {
+      return <span>{content}</span>;
+    }
+    
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+    
+    recommendRegex.lastIndex = 0;
+    while ((match = recommendRegex.exec(content)) !== null) {
+      const matchIndex = match.index;
+      const productId = match[1];
+      
+      if (matchIndex > lastIndex) {
+        parts.push(<span key={`text-${lastIndex}`}>{content.substring(lastIndex, matchIndex)}</span>);
+      }
+      
+      const p = MOCK_PRODUCTS.find((prod) => prod.id === productId);
+      if (p) {
+        parts.push(
+          <div
+            key={`recommend-${productId}-${matchIndex}`}
+            onClick={() => window.location.href = `/product/${p.id}`}
+            className="my-3 w-full rounded-2xl p-4 border border-primary/20 bg-white/[0.03] group cursor-pointer hover:bg-white/[0.05] transition-all hover:border-primary/40 pointer-events-auto block"
+          >
+            <div className="flex gap-4 items-center">
+              <div className="w-14 h-14 rounded-xl overflow-hidden relative border border-white/[0.06] flex-shrink-0">
+                <Image 
+                  src={p.modelImages?.variants?.["White"]?.front || p.images[0] || "/brand/linen_model_front.png"} 
+                  alt={p.name} 
+                  fill 
+                  className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-display font-black text-[11px] tracking-tight truncate text-white">{p.name}</h4>
+                <p className="text-[9px] text-white/40 mt-0.5 line-clamp-1">{p.description}</p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-primary font-black text-xs">{convertPrice(p.price).symbol}{convertPrice(p.price).amount}</span>
+                  <span className="text-[8px] font-black tracking-widest bg-white/5 border border-white/10 text-white/50 px-2 py-1 rounded uppercase hover:bg-primary/20 hover:text-primary transition-all">
+                    View
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      
+      lastIndex = recommendRegex.lastIndex;
+    }
+    
+    if (lastIndex < content.length) {
+      parts.push(<span key={`text-${lastIndex}`}>{content.substring(lastIndex)}</span>);
+    }
+    
+    return <div className="space-y-1">{parts}</div>;
+  };
+
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -76,33 +140,30 @@ const AIChatbot = () => {
 
       const data = await response.json();
       
-      let type = "text";
-      if (
+      const aiResponse: Message = {
+        role: "assistant",
+        content: data.message,
+        type: data.recommendations && data.recommendations.length > 0 ? "recommendation" : "text",
+        items: data.recommendations || []
+      };
+
+      // Fallback matching if recommendations not present in response
+      if ((!aiResponse.items || aiResponse.items.length === 0) && (
         data.message.toLowerCase().includes("recommend") ||
         data.message.toLowerCase().includes("curate") ||
         data.message.toLowerCase().includes("suggest") ||
         data.message.toLowerCase().includes("shirt") ||
         data.message.toLowerCase().includes("linen")
-      ) {
-        type = "recommendation";
-      }
-
-      const aiResponse: Message = {
-        role: "assistant",
-        content: data.message,
-        type: type,
-      };
-
-      if (type === "recommendation") {
+      )) {
+        aiResponse.type = "recommendation";
         const textLower = messageText.toLowerCase();
         if (textLower.includes("white")) {
-          aiResponse.product = MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-001");
+          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-001")].filter(Boolean) as Product[];
         } else if (textLower.includes("blue") || textLower.includes("sky")) {
-          aiResponse.product = MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-002") || MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-006");
+          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-002") || MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-006")].filter(Boolean) as Product[];
         } else if (textLower.includes("black") || textLower.includes("dark")) {
-          aiResponse.product = MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-007");
+          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-007")].filter(Boolean) as Product[];
         } else {
-          // General recommendation: White and Desert Sand linen shirts
           aiResponse.items = [MOCK_PRODUCTS[0], MOCK_PRODUCTS[2]];
         }
       }
@@ -119,7 +180,6 @@ const AIChatbot = () => {
     }
   };
 
-  const { convertPrice } = useCommerce();
 
   const toggleVoice = () => {
     if (isListening) stopListening();
@@ -222,19 +282,20 @@ const AIChatbot = () => {
                         : "bg-white/[0.03] text-white/60 rounded-2xl rounded-tl-md border border-white/[0.04]"
                     )}
                   >
-                    {m.content}
+                    {renderMessageContent(m.content)}
                   </div>
 
-                  {/* Product Recommendation Card */}
+                  {/* Single Product Recommendation Card */}
                   {m.product && (
                     <motion.div
                       initial={{ scale: 0.95, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="w-full rounded-2xl p-4 border border-primary/10 bg-white/[0.02] group cursor-pointer hover:bg-white/[0.04] transition-all"
+                      className="w-full rounded-2xl p-4 border border-primary/15 bg-white/[0.02] group cursor-pointer hover:bg-white/[0.04] transition-all"
+                      onClick={() => window.location.href = `/product/${m.product?.id}`}
                     >
                       <div className="flex gap-4 items-center">
-                        <div className="w-16 h-16 rounded-xl overflow-hidden relative border border-white/[0.06]">
-                          <Image src={m.product.images[0]} alt={m.product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div className="w-16 h-16 rounded-xl overflow-hidden relative border border-white/[0.06] flex-shrink-0">
+                          <Image src={m.product.modelImages?.variants?.["White"]?.front || m.product.images[0] || "/brand/linen_model_front.png"} alt={m.product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-display font-black text-xs tracking-tight truncate">{m.product.name}</h4>
@@ -248,6 +309,38 @@ const AIChatbot = () => {
                         </div>
                       </div>
                     </motion.div>
+                  )}
+
+                  {/* Multiple Product Recommendations List */}
+                  {m.items && m.items.length > 0 && (
+                    <div className="flex flex-col gap-2.5 w-full">
+                      {m.items.map((item, idx) => (
+                        <motion.div
+                          key={`${item.id}-${idx}`}
+                          initial={{ scale: 0.95, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: idx * 0.05 }}
+                          className="w-full rounded-2xl p-4 border border-primary/15 bg-white/[0.02] group cursor-pointer hover:bg-white/[0.04] transition-all"
+                          onClick={() => window.location.href = `/product/${item.id}`}
+                        >
+                          <div className="flex gap-4 items-center">
+                            <div className="w-16 h-16 rounded-xl overflow-hidden relative border border-white/[0.06] flex-shrink-0">
+                              <Image src={item.modelImages?.variants?.["White"]?.front || item.images[0] || "/brand/linen_model_front.png"} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-display font-black text-xs tracking-tight truncate">{item.name}</h4>
+                              <p className="text-[10px] text-white/30 mt-0.5 line-clamp-1">{item.description}</p>
+                              <div className="flex items-center justify-between mt-2">
+                                <span className="text-primary font-black text-xs">{convertPrice(item.price).symbol}{convertPrice(item.price).amount}</span>
+                                <button className="text-[8px] font-black tracking-widest bg-white/5 border border-white/10 text-white/50 px-3 py-1.5 rounded-lg uppercase hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all">
+                                  View
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   )}
                 </motion.div>
               ))}

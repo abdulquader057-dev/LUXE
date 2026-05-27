@@ -14,6 +14,8 @@ interface Product {
   category: string;
   isNew?: boolean;
   stock?: number;
+  colors?: string[];
+  modelImages?: any;
 }
 
 // Safely extract first image from either array, JSON string, or plain URL
@@ -37,8 +39,12 @@ const ProductCard = ({ product }: { product: Product }) => {
   const { convertPrice, addToCart } = useCommerce();
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-
-  const imageUrl = getFirstImage(product.images);
+  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
+  // Determine image based on modelImages and selected color
+  const modelImg = product.modelImages?.variants?.[selectedColor] || product.modelImages || {};
+  const frontImage = modelImg.front && modelImg.front !== "/model_placeholder.png" ? modelImg.front : getFirstImage(product.images);
+  const sideImage = modelImg.side && modelImg.side !== "/model_placeholder.png" ? modelImg.side : frontImage;
+  const imageUrl = isHovered ? sideImage : frontImage;
   const matchScore = Math.floor(Math.random() * 15) + 85;
 
   return (
@@ -48,11 +54,11 @@ const ProductCard = ({ product }: { product: Product }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Top Image Section */}
-      <Link href={`/product/${product.id}`} className="relative h-[240px] w-full overflow-hidden bg-[#0A0A0F] block">
+      <Link href={`/product/${product.id}?color=${encodeURIComponent(selectedColor)}`} className="relative h-[240px] w-full overflow-hidden bg-[#0A0A0F] block">
         <img 
           src={imageUrl} 
           alt={product.name}
-          className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] ease-[cubic-bezier(0.25,1,0.15,1)] ${isHovered ? 'scale-110 rotate-2' : 'scale-100 rotate-0'}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ease-in-out ${isHovered ? 'opacity-100' : 'opacity-90'} ${isHovered ? 'scale-110 rotate-2' : 'scale-100 rotate-0'}`}
         />
         
         {/* Out of Stock Overlay */}
@@ -100,6 +106,18 @@ const ProductCard = ({ product }: { product: Product }) => {
           <p className="text-[10px] font-sora text-white/40 tracking-wider line-clamp-2">
             {product.description}
           </p>
+          {/* Colour Swatch Selector */}
+          <div className="mt-2 flex space-x-2">
+            {product.colors?.map((color) => (
+              <button
+                key={color}
+                onClick={() => setSelectedColor(color)}
+                className={`w-5 h-5 rounded-full border border-white/30 transition-all duration-200 ${selectedColor === color ? 'ring-2 ring-[#D4AF37]' : ''}`}
+                style={{ backgroundColor: color.toLowerCase() }}
+                aria-label={color}
+              />
+            ))}
+          </div>
         </div>
 
         <div className="mt-4 pt-4 border-t border-white/10 flex items-end justify-between">

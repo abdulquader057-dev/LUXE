@@ -22,19 +22,15 @@ export default function AuthPortal() {
 
   React.useEffect(() => {
     if (!authLoading && user) {
-      if (isAdmin) {
-        router.push("/admin");
-      } else {
-        router.push("/profile");
-      }
+      router.push("/");
     }
-  }, [user, isAdmin, authLoading, router]);
+  }, [user, authLoading, router]);
 
   const handleBypassAuth = () => {
     loginAsDemo();
     // Wait a brief moment for state to sync before router push
     setTimeout(() => {
-      router.push("/profile");
+      router.push("/");
     }, 100);
   };
 
@@ -92,17 +88,12 @@ export default function AuthPortal() {
           localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
           toast.success("Syncing Neural Profile (Local Fallback Mode)...");
           setTimeout(() => {
-            window.location.href = normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "/admin" : "/profile";
+            window.location.href = "/";
           }, 1000);
           return;
         }
 
-        // Redirect based on role
-        if (normalizedEmail === ADMIN_EMAIL.toLowerCase()) {
-          router.push("/admin");
-        } else {
-          router.push("/profile");
-        }
+        router.push("/");
       } else {
         try {
           const { data, error: signUpError } = await supabase.auth.signUp({
@@ -144,16 +135,12 @@ export default function AuthPortal() {
           localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
           alert("Registration successful (Local Mode)! Logging you in...");
           setTimeout(() => {
-            window.location.href = normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "/admin" : "/profile";
+            window.location.href = "/";
           }, 1000);
           return;
         }
         
-        if (normalizedEmail === ADMIN_EMAIL.toLowerCase()) {
-          router.push("/admin");
-        } else {
-          router.push("/profile");
-        }
+        router.push("/");
       }
     } catch (err: any) {
       setError(err.message || "An error occurred during authentication.");

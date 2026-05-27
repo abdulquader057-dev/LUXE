@@ -24,6 +24,17 @@ export interface Product {
   compatibilityTags?: string[];
   fashionScore?: number;
   offer?: string;
+  modelImages?: {
+    front?: string;
+    side?: string;
+    back?: string;
+    variants?: Record<string, {
+      front: string;
+      side: string;
+      back: string;
+      original?: string;
+    }>;
+  };
 }
 
 export interface CartItem extends Product {

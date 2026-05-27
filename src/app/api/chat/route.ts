@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { MOCK_PRODUCTS } from '@/data/products';
 
 const API_KEYS = [
   process.env.NEXT_PUBLIC_GEMINI_API_KEY || '',
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
     while (attempt < API_KEYS.length) {
       try {
         const genAI = new GoogleGenerativeAI(API_KEYS[currentKeyIndex]);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         const chat = model.startChat({
           history: [
@@ -64,14 +65,14 @@ Your tone is extremely impactful, confident, cinematic, and polite. We are launc
 
 IMPORTANT RULES & CONTEXT:
 1. We only sell the "Luxe Essential Linen Shirt" collection in 8 premium colors:
-   - "Luxe Essential Linen Shirt - Pure White" (Active Offer: Buy One Get One Free)
-   - "Luxe Essential Linen Shirt - Sky Blue" (Active Offer: Buy One Get One Free)
-   - "Luxe Essential Linen Shirt - Desert Sand" (Active Offer: 10% Off Discount)
-   - "Luxe Essential Linen Shirt - Olive Green" (Active Offer: 10% Off Discount)
-   - "Luxe Essential Linen Shirt - Sunset Pink"
-   - "Luxe Essential Linen Shirt - Navy Blue" (Active Offer: Buy One Get One Free)
-   - "Luxe Essential Linen Shirt - Carbon Black"
-   - "Luxe Essential Linen Shirt - Cocoa Brown"
+   - "Luxe Essential Linen Shirt - Pure White" (Active Offer: Buy One Get One Free) [ID: luxe-linen-001]
+   - "Luxe Essential Linen Shirt - Sunset Pink" [ID: luxe-linen-002]
+   - "Premium Short-Sleeve Polo - Carbon Black" [ID: luxe-linen-003]
+   - "Signature Long-Sleeve Shirt - Bright White" [ID: luxe-linen-004]
+   - "Polo Ralph Lauren Long-Sleeve - Desert Sand" [ID: luxe-linen-005]
+   - "USPA Embossed Graphic Tee - Red" [ID: luxe-linen-006]
+   - "Zara Crew-Neck T-Shirt - Pure White" [ID: luxe-linen-007]
+   - "Premium Cotton Button-Up - Navy Blue" [ID: luxe-linen-008]
 2. All shirts are priced at ₹549 base. They are everyday essential, premium, and luxury-inspired (rates are minimal, with no extra charges or hidden charges).
 3. The brand operates out of "Hafiz Baba Nagar, Hyderabad, Telangana, India".
 4. Delivery rules:
@@ -82,7 +83,8 @@ IMPORTANT RULES & CONTEXT:
    - Prepaid orders unlock a 10% OFF coupon code for the next order.
 5. Keep your recommendations structured with markdown (bullet points). Help the client choose the perfect colorway (pastel vs. dark vs. white) and size (M, L, XL, XXL).
 6. Add a terminal tag at the end of your response, such as "[LINEN DNA: SYNCHRONIZED | TERMINAL: nominal]".
-7. Keep responses engaging and simple. You MUST respond ONLY in the requested language: ${language}.` }]
+7. Keep responses engaging and simple. You MUST respond ONLY in the requested language: ${language}.
+8. When recommending a product, you MUST append a recommendation tag at the end of your response in the format: "[RECOMMEND: <product-id>]". For example, if you recommend Pure White Linen, add "[RECOMMEND: luxe-linen-001]". Only use IDs from the list of 8 products above.` }]
             },
             {
               role: "model",
@@ -96,7 +98,13 @@ IMPORTANT RULES & CONTEXT:
         const response = await result.response;
         const text = response.text();
 
-        return NextResponse.json({ message: text });
+        // Parse recommendation tags
+        const recommendRegex = /\[RECOMMEND:\s*([a-zA-Z0-9-]+)\]/g;
+        const matches = [...text.matchAll(recommendRegex)];
+        const recommendedIds = matches.map(m => m[1]);
+        const recommendations = MOCK_PRODUCTS.filter(p => recommendedIds.includes(p.id));
+
+        return NextResponse.json({ message: text, recommendations });
       } catch (error: any) {
         console.error('Error with API key index ' + currentKeyIndex, error.message);
         currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
@@ -108,16 +116,23 @@ IMPORTANT RULES & CONTEXT:
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     
-    // Fallback Mock Response for demo purposes if all keys fail
+    // Fallback Mock Response with actual catalog products if all keys fail
     const mockResponses = [
-      "**LUXE AI // Neural Stylist Online**\n\nI recommend calibrating your wardrobe with the ultimate tactical ensemble:\n• **Oversized Stealth Abaya** (Matte Obsidian Black)\n• **Cyberpunk Cargo Pants** (Tactical Olive)\n• **Vortex Chrono Watch** (Titanium Chrome)\n\n*Would you prefer to calibrate this for an oversized look, or an athletic silhouette?*\n\n`[SYSTEM SYNC: 100% | CALIBRATION: NOMINAL]`",
-      
-      "**LUXE AI // Style DNA Recommendation**\n\nYour profile indicates a strong affinity for avant-garde Streetwear. Consider this curated combination:\n• **Oversized Matrix Hoodie** (Heavyweight French Terry)\n• **Neon-Pulse Sneakers X1** (Procedural Neon Glow)\n• **Vanguard Cyber Shield** (Reflective Glass)\n\n*Would you like me to add these items directly to your cart?*\n\n`[PROFILE INTEGRITY: SECURED | STYLE INDEX: 98.4%]`",
-      
-      "**LUXE AI // Modest Tech Curation**\n\nAchieve maximum coverage with maximum futuristic impact:\n• **Neural Layered Tunic** (Desert Sand)\n• **Titanium Draped Hijab** (Metallic Sheen)\n\n*Shall I customize this setup with custom laser-etched monogramming?*\n\n`[NEXUS CONNECT: ACTIVE | MONOGRAM: PENDING]`"
+      {
+        message: "**LUXE AI // Neural Stylist Online**\n\nI recommend calibrating your wardrobe with the ultimate linen silhouette:\n* **Luxe Essential Linen Shirt - Pure White** [RECOMMEND: luxe-linen-001] (Active Offer: Buy One Get One Free)\n\nIt features classic styling, lightweight and breathable fabric.",
+        recommendations: [MOCK_PRODUCTS[0]]
+      },
+      {
+        message: "**LUXE AI // Style DNA Recommendation**\n\nFor a softer luxury aesthetic, I recommend:\n* **Luxe Essential Linen Shirt - Sunset Pink** [RECOMMEND: luxe-linen-002]\n\nPair it with clean neutral trousers for a high-end look.",
+        recommendations: [MOCK_PRODUCTS[1]]
+      },
+      {
+        message: "**LUXE AI // Premium Curation**\n\nI recommend our sharpest dark silhouette:\n* **Premium Short-Sleeve Polo - Carbon Black** [RECOMMEND: luxe-linen-003]\n\nPerfect for versatile everyday wear.",
+        recommendations: [MOCK_PRODUCTS[2]]
+      }
     ];
-    const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
+    const random = mockResponses[Math.floor(Math.random() * mockResponses.length)];
     
-    return NextResponse.json({ message: randomResponse });
+    return NextResponse.json(random);
   }
 }

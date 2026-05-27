@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, Sparkles, MapPin, Truck, CheckCircle2, ShieldCheck, Heart } from "lucide-react";
+import { Search, SlidersHorizontal, Sparkles, MapPin, Truck, CheckCircle2, ShieldCheck, Heart, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Hero from "@/components/home/Hero";
 import ProductCard from "@/components/shop/ProductCard";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 const filters = [
   "ALL DESIGNS",
@@ -18,6 +19,7 @@ import { supabase } from "@/lib/supabase";
 import { MOCK_PRODUCTS } from "@/data/products";
 
 export default function Home() {
+  const { cart, convertPrice, toggleCart, removeFromCart } = useCommerce();
   const [activeFilter, setActiveFilter] = useState("ALL DESIGNS");
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<any[]>(MOCK_PRODUCTS);
@@ -194,6 +196,71 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* ACTIVE ARSENAL / CURRENT CURATION SECTION */}
+      {cart.length > 0 && (
+        <div className="mb-16 p-8 rounded-3xl border border-primary/20 bg-white/[0.02] backdrop-blur-md relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-[150px] h-[150px] rounded-full bg-primary/5 blur-[50px] pointer-events-none" />
+          
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div className="flex items-center gap-3">
+              <ShoppingBag size={20} className="text-primary animate-pulse" />
+              <div>
+                <h2 className="text-2xl font-orbitron font-bold text-white tracking-wide uppercase">Your Active Curation</h2>
+                <p className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em] mt-1">Ready for initialization // {cart.length} unique shapes</p>
+              </div>
+            </div>
+            
+            <button 
+              onClick={toggleCart}
+              className="text-[9px] font-mono tracking-widest text-primary border border-primary/30 hover:border-primary px-4 py-2 rounded-full uppercase transition-all bg-primary/5 hover:bg-primary/10 cursor-pointer"
+            >
+              Open Arsenal Sidebar
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cart.map((item) => (
+              <div 
+                key={`${item.id}-${item.size}-${item.color}`} 
+                className="flex gap-4 p-4 rounded-2xl border border-white/5 bg-[#0A0A0C]/50 hover:border-white/10 transition-all group"
+              >
+                <div className="relative w-16 h-20 rounded-xl overflow-hidden bg-white/5 flex-shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                </div>
+                
+                <div className="flex-1 flex flex-col justify-between min-w-0">
+                  <div>
+                    <h3 className="text-xs font-mono font-bold tracking-widest uppercase truncate text-white">{item.name}</h3>
+                    <div className="flex gap-2 text-[9px] font-mono text-white/40 uppercase mt-1">
+                      {item.size && <span>Size: {item.size}</span>}
+                      {item.color && (
+                        <>
+                          <span>•</span>
+                          <span>Color: {item.color}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-xs font-mono text-primary font-bold">
+                      {convertPrice(item.price).symbol}{convertPrice(item.price).amount} x {item.quantity}
+                    </span>
+                    <button 
+                      onClick={() => removeFromCart(item.id, item.size, item.color)}
+                      className="text-[9px] font-mono tracking-wider text-red-500/60 hover:text-red-400 uppercase transition-all cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* RECOMMENDED PICKS Grid */}
       <div className="mb-16">

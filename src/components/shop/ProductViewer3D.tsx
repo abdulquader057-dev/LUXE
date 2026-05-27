@@ -52,6 +52,50 @@ export const ProductViewer3D = ({
     setInternalIndex(currentIndex);
   }, [currentIndex]);
 
+  // Global mouse event handlers for smooth dragging
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientX, e.clientY);
+    };
+
+    const handleWindowMouseUp = () => {
+      handleEnd();
+    };
+
+    window.addEventListener("mousemove", handleWindowMouseMove);
+    window.addEventListener("mouseup", handleWindowMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleWindowMouseMove);
+      window.removeEventListener("mouseup", handleWindowMouseUp);
+    };
+  }, [isDragging, internalIndex, scale, position, modelImages.length]);
+
+  // Global touch event handlers for smooth mobile rotation
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleWindowTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
+    const handleWindowTouchEnd = () => {
+      handleEnd();
+    };
+
+    window.addEventListener("touchmove", handleWindowTouchMove, { passive: true });
+    window.addEventListener("touchend", handleWindowTouchEnd);
+
+    return () => {
+      window.removeEventListener("touchmove", handleWindowTouchMove);
+      window.removeEventListener("touchend", handleWindowTouchEnd);
+    };
+  }, [isDragging, internalIndex, scale, position, modelImages.length]);
+
   const updateIndex = (newIndex: number) => {
     setInternalIndex(newIndex);
     if (onChangeIndex) {
@@ -99,20 +143,10 @@ export const ProductViewer3D = ({
     handleStart(e.clientX, e.clientY);
   };
 
-  const onMouseMove = (e: React.MouseEvent) => {
-    handleMove(e.clientX, e.clientY);
-  };
-
   // Touch Events
   const onTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length > 0) {
       handleStart(e.touches[0].clientX, e.touches[0].clientY);
-    }
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length > 0) {
-      handleMove(e.touches[0].clientX, e.touches[0].clientY);
     }
   };
 
@@ -133,20 +167,16 @@ export const ProductViewer3D = ({
   const viewModeLabel = () => {
     if (internalIndex === 0) return "Front Angle";
     if (internalIndex === 1) return "Rear Profile";
-    return "Side Profile";
+    if (internalIndex === 2) return "Side Profile";
+    return "Catalog Detail";
   };
 
   return (
     <div 
       ref={containerRef}
-      className="relative w-full aspect-[3/4] rounded-[48px] overflow-hidden bg-[#050508] border border-white/10 group cursor-grab active:cursor-grabbing select-none"
+      className="relative w-full aspect-[3/4] rounded-[48px] overflow-hidden bg-[#050508] border border-white/10 group cursor-grab active:cursor-grabbing select-none touch-none"
       onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={handleEnd}
-      onMouseLeave={handleEnd}
       onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={handleEnd}
     >
       {/* Dynamic Colored Image Turntable */}
       <div 
@@ -207,7 +237,7 @@ export const ProductViewer3D = ({
                 : "bg-black/40 text-white/50 border-white/10 hover:text-white"
             }`}
           >
-            {idx === 0 ? "Front" : idx === 1 ? "Back" : "Side"}
+            {idx === 0 ? "Front" : idx === 1 ? "Back" : idx === 2 ? "Side" : "Detail"}
           </button>
         ))}
       </div>

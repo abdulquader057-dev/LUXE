@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useParams } from "next/navigation";
+import React, { useState, useEffect, Suspense } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,12 +31,12 @@ import { Magnetic } from "@/components/ui/Magnetic";
 import ProductCard from "@/components/shop/ProductCard";
 
 import { usePersonalization } from "@/lib/hooks/usePersonalization";
-import { useEffect } from "react";
 
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 const ProductPage = () => {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params?.id as string;
   const product = MOCK_PRODUCTS.find((p) => p.id === id);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -56,31 +56,40 @@ const ProductPage = () => {
     if (product) {
       trackView(product.id);
       
-      // Auto-select color based on product name
-      const nameLower = product.name.toLowerCase();
-      let defaultColor = "White";
-      if (nameLower.includes("white")) defaultColor = "White";
-      else if (nameLower.includes("sky blue")) defaultColor = "Sky Blue";
-      else if (nameLower.includes("desert sand")) defaultColor = "Desert Sand";
-      else if (nameLower.includes("olive green")) defaultColor = "Olive Green";
-      else if (nameLower.includes("sunset pink")) defaultColor = "Sunset Pink";
-      else if (nameLower.includes("navy blue")) defaultColor = "Navy Blue";
-      else if (nameLower.includes("carbon black")) defaultColor = "Carbon Black";
-      else if (nameLower.includes("cocoa brown")) defaultColor = "Cocoa Brown";
-      
-      setSelectedColor(defaultColor);
+      // Auto-select color based on query param or product name
+      const queryColor = searchParams?.get("color");
+      if (queryColor && product.colors?.includes(queryColor)) {
+        setSelectedColor(queryColor);
+      } else {
+        const nameLower = product.name.toLowerCase();
+        let defaultColor = product.colors?.[0] || "White";
+        if (nameLower.includes("white")) defaultColor = "White";
+        else if (nameLower.includes("sky blue")) defaultColor = "Sky Blue";
+        else if (nameLower.includes("desert sand")) defaultColor = "Desert Sand";
+        else if (nameLower.includes("olive green")) defaultColor = "Olive Green";
+        else if (nameLower.includes("sunset pink")) defaultColor = "Sunset Pink";
+        else if (nameLower.includes("navy blue")) defaultColor = "Navy Blue";
+        else if (nameLower.includes("carbon black")) defaultColor = "Carbon Black";
+        else if (nameLower.includes("cocoa brown")) defaultColor = "Cocoa Brown";
+        
+        setSelectedColor(defaultColor);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product?.id]);
+  }, [product?.id, searchParams]);
 
   if (!product) return <div className="min-h-screen flex items-center justify-center">Product not found</div>;
 
-  // Find the variant product matching the selected color, or fallback to current product
-  const activeProduct = MOCK_PRODUCTS.find(
-    p => p.name.toLowerCase().includes(selectedColor.toLowerCase())
-  ) || product;
-  
-  const activeImages = activeProduct.images;
+  // Find variant images based on selectedColor from modelImages
+  const variantData = product.modelImages?.variants?.[selectedColor];
+  let activeImages = variantData
+    ? [variantData.front, variantData.back, variantData.side, variantData.original]
+        .filter((img): img is string => !!img && img !== "/model_placeholder.png")
+    : [];
+
+  if (activeImages.length === 0) {
+    activeImages = product.images;
+  }
 
   const outfitPairings = getOutfitPairing(product.id);
 
@@ -295,9 +304,9 @@ const ProductPage = () => {
                     <Magnetic>
                       <button 
                         onClick={() => addToCart({
-                          id: activeProduct.id,
-                          name: activeProduct.name,
-                          price: activeProduct.price,
+                          id: product.id,
+                          name: product.name,
+                          price: product.price,
                           image: activeImages[0],
                           quantity: quantity,
                           size: selectedSize || "L",
@@ -434,4 +443,12 @@ const ProductPage = () => {
   );
 };
 
-export default ProductPage;
+const ProductPageWrapper = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-white/50 font-sora">Loading Product...</div>}>
+      <ProductPage />
+    </Suspense>
+  );
+};
+
+export default ProductPageWrapper;

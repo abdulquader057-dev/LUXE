@@ -21,7 +21,32 @@ export const MOCK_PRODUCTS: Product[] = [
     "ratings": 4.9,
     "reviewsCount": 142,
     "discount": 0,
-    "offer": "Buy One Get One Free"
+    "offer": "Buy One Get One Free",
+    "modelImages": {
+      "front": "/model_images/luxe_linen_white_front.png",
+      "side": "/model_images/luxe_linen_white_side.png",
+      "back": "/model_images/luxe_linen_white_back.png",
+      "variants": {
+        "White": {
+          "front": "/model_images/luxe_linen_white_front.png",
+          "side": "/model_images/luxe_linen_white_side.png",
+          "back": "/model_images/luxe_linen_white_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg"
+        },
+        "Sunset Pink": {
+          "front": "/model_images/luxe_linen_pink_front.png",
+          "side": "/model_images/luxe_linen_pink_side.png",
+          "back": "/model_images/luxe_linen_pink_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM.jpeg"
+        },
+        "Carbon Black": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.24 PM.jpeg"
+        }
+      }
+    }
   },
   {
     "id": "luxe-linen-002",
@@ -40,7 +65,32 @@ export const MOCK_PRODUCTS: Product[] = [
     "ratings": 4.7,
     "reviewsCount": 41,
     "discount": 0,
-    "offer": "Limited First Drop Offer"
+    "offer": "Limited First Drop Offer",
+    "modelImages": {
+      "front": "/model_images/luxe_linen_pink_front.png",
+      "side": "/model_images/luxe_linen_pink_side.png",
+      "back": "/model_images/luxe_linen_pink_back.png",
+      "variants": {
+        "White": {
+          "front": "/model_images/luxe_linen_white_front.png",
+          "side": "/model_images/luxe_linen_white_side.png",
+          "back": "/model_images/luxe_linen_white_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg"
+        },
+        "Sunset Pink": {
+          "front": "/model_images/luxe_linen_pink_front.png",
+          "side": "/model_images/luxe_linen_pink_side.png",
+          "back": "/model_images/luxe_linen_pink_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM.jpeg"
+        },
+        "Carbon Black": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.24 PM.jpeg"
+        }
+      }
+    }
   },
   {
     "id": "luxe-linen-003",
@@ -59,7 +109,26 @@ export const MOCK_PRODUCTS: Product[] = [
     "ratings": 4.8,
     "reviewsCount": 82,
     "discount": 0,
-    "offer": "Special Summer Price"
+    "offer": "Special Summer Price",
+    "modelImages": {
+      "front": "/model_images/luxe_linen_black_front.png",
+      "side": "/model_images/luxe_linen_black_side.png",
+      "back": "/model_images/luxe_linen_black_back.png",
+      "variants": {
+        "Carbon Black": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg"
+        },
+        "White": {
+          "front": "/model_images/white_polo_front.png",
+          "side": "/model_images/white_polo_side.png",
+          "back": "/model_images/white_polo_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (2).jpeg"
+        }
+      }
+    }
   },
   {
     "id": "luxe-linen-004",
@@ -79,7 +148,26 @@ export const MOCK_PRODUCTS: Product[] = [
     "ratings": 4.9,
     "reviewsCount": 118,
     "discount": 0,
-    "offer": "Buy One Get One Free"
+    "offer": "Buy One Get One Free",
+    "modelImages": {
+      "front": "/model_images/luxe_linen_white_front.png",
+      "side": "/model_images/luxe_linen_white_side.png",
+      "back": "/model_images/luxe_linen_white_back.png",
+      "variants": {
+        "White": {
+          "front": "/model_images/luxe_linen_white_front.png",
+          "side": "/model_images/luxe_linen_white_side.png",
+          "back": "/model_images/luxe_linen_white_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM.jpeg"
+        },
+        "Carbon Black": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.23 PM.jpeg"
+        }
+      }
+    }
   },
   {
     "id": "luxe-linen-005",
@@ -98,7 +186,44 @@ export const MOCK_PRODUCTS: Product[] = [
     "ratings": 4.7,
     "reviewsCount": 63,
     "discount": 10,
-    "offer": "Introductory 10% Off"
+    "offer": "Introductory 10% Off",
+    "modelImages": {
+      "front": "/model_images/luxe_linen_white_front.png",
+      "side": "/model_images/luxe_linen_white_side.png",
+      "back": "/model_images/luxe_linen_white_back.png",
+      "variants": {
+        "Desert Sand": {
+          "front": "/model_images/luxe_linen_white_front.png",
+          "side": "/model_images/luxe_linen_white_side.png",
+          "back": "/model_images/luxe_linen_white_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.14 PM.jpeg"
+        },
+        "Red": {
+          "front": "/model_images/luxe_linen_pink_front.png",
+          "side": "/model_images/luxe_linen_pink_side.png",
+          "back": "/model_images/luxe_linen_pink_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.24 PM.jpeg"
+        },
+        "Carbon Black": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.24 PM.jpeg"
+        },
+        "Cocoa Brown": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.24 PM.jpeg"
+        },
+        "White": {
+          "front": "/model_images/luxe_linen_white_front.png",
+          "side": "/model_images/luxe_linen_white_side.png",
+          "back": "/model_images/luxe_linen_white_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.14 PM.jpeg"
+        }
+      }
+    }
   },
   {
     "id": "luxe-linen-006",
@@ -117,7 +242,44 @@ export const MOCK_PRODUCTS: Product[] = [
     "ratings": 4.8,
     "reviewsCount": 98,
     "discount": 0,
-    "offer": "Buy One Get One Free"
+    "offer": "Buy One Get One Free",
+    "modelImages": {
+      "front": "/model_images/luxe_linen_pink_front.png",
+      "side": "/model_images/luxe_linen_pink_side.png",
+      "back": "/model_images/luxe_linen_pink_back.png",
+      "variants": {
+        "Red": {
+          "front": "/model_images/luxe_linen_pink_front.png",
+          "side": "/model_images/luxe_linen_pink_side.png",
+          "back": "/model_images/luxe_linen_pink_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM.jpeg"
+        },
+        "Carbon Black": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM.jpeg"
+        },
+        "Desert Sand": {
+          "front": "/model_images/luxe_linen_white_front.png",
+          "side": "/model_images/luxe_linen_white_side.png",
+          "back": "/model_images/luxe_linen_white_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM.jpeg"
+        },
+        "Cocoa Brown": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM.jpeg"
+        },
+        "White": {
+          "front": "/model_images/white_polo_front.png",
+          "side": "/model_images/white_polo_side.png",
+          "back": "/model_images/white_polo_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM.jpeg"
+        }
+      }
+    }
   },
   {
     "id": "luxe-linen-007",
@@ -136,7 +298,26 @@ export const MOCK_PRODUCTS: Product[] = [
     "ratings": 4.6,
     "reviewsCount": 54,
     "discount": 10,
-    "offer": "Introductory 10% Off"
+    "offer": "Introductory 10% Off",
+    "modelImages": {
+      "front": "/model_images/white_polo_front.png",
+      "side": "/model_images/white_polo_side.png",
+      "back": "/model_images/white_polo_back.png",
+      "variants": {
+        "White": {
+          "front": "/model_images/white_polo_front.png",
+          "side": "/model_images/white_polo_side.png",
+          "back": "/model_images/white_polo_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.41.59 PM (1).jpeg"
+        },
+        "Carbon Black": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.41.59 PM.jpeg"
+        }
+      }
+    }
   },
   {
     "id": "luxe-linen-008",
@@ -155,6 +336,31 @@ export const MOCK_PRODUCTS: Product[] = [
     "ratings": 4.5,
     "reviewsCount": 29,
     "discount": 0,
-    "offer": "Special Summer Price"
+    "offer": "Special Summer Price",
+    "modelImages": {
+      "front": "/model_images/luxe_linen_black_front.png",
+      "side": "/model_images/luxe_linen_black_side.png",
+      "back": "/model_images/luxe_linen_black_back.png",
+      "variants": {
+        "Navy Blue": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM (1).jpeg"
+        },
+        "White": {
+          "front": "/model_images/luxe_linen_white_front.png",
+          "side": "/model_images/luxe_linen_white_side.png",
+          "back": "/model_images/luxe_linen_white_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.22 PM (2).jpeg"
+        },
+        "Carbon Black": {
+          "front": "/model_images/luxe_linen_black_front.png",
+          "side": "/model_images/luxe_linen_black_side.png",
+          "back": "/model_images/luxe_linen_black_back.png",
+          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.22 PM (2).jpeg"
+        }
+      }
+    }
   }
 ];
