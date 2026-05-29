@@ -28,6 +28,7 @@ const WhatsAppWidget = () => {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={handleWhatsApp}
+      title="WhatsApp Support: Primary for Products & Support, Secondary for Tech & Payment Issues"
       className="fixed bottom-6 right-6 max-md:bottom-28 z-max w-[56px] h-[56px] rounded-full bg-[rgba(15,15,28,0.6)] backdrop-blur-xl border border-[rgba(0,229,204,0.3)] text-accent-cyan flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all group"
     >
       <MessageCircle size={26} className="relative z-10 transition-transform group-hover:scale-110" />

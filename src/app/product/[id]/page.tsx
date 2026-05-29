@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { MotionContainer, MotionItem } from "@/components/MotionContainer";
 import { Magnetic } from "@/components/ui/Magnetic";
 import ProductCard from "@/components/shop/ProductCard";
+import LuxeButton from "@/components/ui/LuxeButton";
 
 import { usePersonalization } from "@/lib/hooks/usePersonalization";
 
@@ -304,7 +305,8 @@ const ProductPage = () => {
                 ) : (
                   <>
                     <Magnetic>
-                      <button 
+                      <LuxeButton 
+                        variant="hud"
                         onClick={() => addToCart({
                           id: product.id,
                           name: product.name,
@@ -314,20 +316,20 @@ const ProductPage = () => {
                           size: selectedSize || "L",
                           color: selectedColor || "White"
                         })}
-                        className="w-full py-6 glass rounded-[24px] border border-white/10 flex items-center justify-center gap-4 hover:bg-white/5 hover:border-white/20 transition-all duration-700 [transition-timing-function:var(--ease-out-expo)] group overflow-hidden"
+                        className="w-full !py-6 flex items-center justify-center gap-4 hover:border-primary/50 group overflow-hidden"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 [transition-timing-function:var(--ease-out-expo)]" />
-                        <ShoppingCart size={20} className="text-primary group-hover:scale-110 transition-transform duration-700 [transition-timing-function:var(--ease-out-expo)]" />
+                        <ShoppingCart size={20} className="text-primary group-hover:scale-110 transition-transform duration-700" />
                         <span className="text-xs font-black tracking-[0.3em] uppercase">Add to Cart</span>
-                      </button>
+                      </LuxeButton>
                     </Magnetic>
                     <Magnetic>
-                      <button 
+                      <LuxeButton 
+                        variant="gold"
                         onClick={handleWhatsAppBuy}
-                        className="btn-luxury btn-luxury-primary w-full !py-6"
+                        className="w-full !py-6 flex items-center justify-center gap-4"
                       >
                         <MessageCircle size={20} /> <span>WhatsApp Concierge</span>
-                      </button>
+                      </LuxeButton>
                     </Magnetic>
                   </>
                 )}

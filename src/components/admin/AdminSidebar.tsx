@@ -24,7 +24,7 @@ const menuItems = [
 
 export const AdminSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   return (
-    <div className="w-80 h-full flex flex-col p-6 gap-8 border-r border-white/5 bg-black/40 backdrop-blur-3xl relative overflow-hidden group">
+    <div className="w-[280px] sm:w-80 h-full flex flex-col p-6 gap-8 border-r border-white/5 bg-black/40 backdrop-blur-3xl relative overflow-y-auto no-scrollbar group">
       {/* Background Pulse */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
          <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(0,242,255,0.05),transparent_70%)] animate-pulse-slow" />

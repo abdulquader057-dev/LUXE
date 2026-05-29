@@ -21,7 +21,7 @@ export const ManagementHub = ({ type, data, onAdd, onEdit, onDelete }: Managemen
   return (
     <div className="space-y-8 h-full flex flex-col">
       {/* Header Actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
          <div>
             <h3 className="text-3xl font-display font-black tracking-tighter text-gradient uppercase">
                {type === "orders" ? "Commerce Nodes" : "Asset Manifest"}
@@ -30,24 +30,26 @@ export const ManagementHub = ({ type, data, onAdd, onEdit, onDelete }: Managemen
                {type === "orders" ? "Realtime transactional data streams" : "High-fidelity product asset management"}
             </p>
          </div>
-         <div className="flex items-center gap-4">
-            <div className="relative group">
+         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full xl:w-auto">
+            <div className="relative group w-full sm:w-80">
                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-primary transition-colors" size={18} />
                <input 
                   type="text" 
                   placeholder={`Search ${type}...`}
-                  className="bg-white/[0.02] border border-white/5 rounded-2xl pl-12 pr-6 py-4 text-sm focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all w-80 font-medium"
+                  className="bg-white/[0.02] border border-white/5 rounded-2xl pl-12 pr-6 py-4 text-sm focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all w-full font-medium"
                />
             </div>
-            <button className="glass border-white/10 p-4 rounded-2xl hover:bg-white/5 transition-all text-white/40 hover:text-white">
-               <Filter size={20} />
-            </button>
-            <button 
-               onClick={onAdd}
-               className="bg-white text-black px-8 py-4 rounded-2xl text-xs font-black tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-2xl"
-            >
-               Add {type === "orders" ? "Node" : "Asset"}
-            </button>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+               <button className="glass border-white/10 p-4 rounded-2xl hover:bg-white/5 transition-all text-white/40 hover:text-white flex-1 sm:flex-none flex items-center justify-center">
+                  <Filter size={20} />
+               </button>
+               <button 
+                  onClick={onAdd}
+                  className="bg-white text-black px-8 py-4 rounded-2xl text-xs font-black tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-2xl flex-1 sm:flex-none flex items-center justify-center"
+               >
+                  Add {type === "orders" ? "Node" : "Asset"}
+               </button>
+            </div>
          </div>
       </div>
 
@@ -62,18 +64,33 @@ export const ManagementHub = ({ type, data, onAdd, onEdit, onDelete }: Managemen
                   transition={{ delay: i * 0.05 }}
                   className="glass-panel !rounded-[24px] p-6 border-white/5 bg-white/[0.01] hover:bg-white/[0.03] hover:border-white/10 transition-all duration-500 group relative overflow-hidden"
                >
-                  <div className="flex items-center gap-8 relative z-10">
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-8 relative z-10">
                      {/* Identity Section */}
-                     <div className="w-16 h-16 rounded-2xl glass border border-white/10 flex flex-col items-center justify-center flex-shrink-0 group-hover:border-primary/40 transition-all">
-                        <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">ID</span>
-                        <span className="text-xs font-black text-white uppercase italic">#{item.id.toString().padStart(4, '0')}</span>
+                     <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-2xl glass border border-white/10 flex flex-col items-center justify-center flex-shrink-0 group-hover:border-primary/40 transition-all">
+                           <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">ID</span>
+                           <span className="text-xs font-black text-white uppercase italic">#{item.id.toString().padStart(4, '0')}</span>
+                        </div>
+                        {type === "products" && (
+                           <div className="w-12 h-12 rounded-xl overflow-hidden glass border border-white/10 lg:hidden">
+                              <img src={item.image_url} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                           </div>
+                        )}
+                        <div className="lg:hidden flex-1 min-w-0">
+                           <span className="text-[9px] font-black text-white/20 uppercase tracking-widest block">
+                              {type === "orders" ? "Customer" : "Asset Title"}
+                           </span>
+                           <span className="text-sm font-bold text-white uppercase tracking-tight truncate block">
+                              {type === "orders" ? (item.customer_name || 'Anonymous User') : item.name}
+                           </span>
+                        </div>
                      </div>
 
                      {/* Details Section */}
-                     <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-8">
+                     <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
                         {type === "orders" ? (
                            <>
-                              <div className="flex flex-col gap-1">
+                              <div className="hidden lg:flex flex-col gap-1">
                                  <div className="flex items-center gap-2 mb-1">
                                     <User size={12} className="text-primary/60" />
                                     <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Customer Node</span>
@@ -102,14 +119,14 @@ export const ManagementHub = ({ type, data, onAdd, onEdit, onDelete }: Managemen
                                     item.status === 'delivered' ? 'bg-green-500/10 text-green-500' : 
                                     item.status === 'processing' ? 'bg-primary/10 text-primary animate-pulse' :
                                     'bg-white/5 text-white/40'
-                                 )}>
+                                  )}>
                                     {item.status}
                                  </div>
                               </div>
                            </>
                         ) : (
                            <>
-                              <div className="col-span-2 flex items-center gap-6">
+                              <div className="col-span-1 sm:col-span-2 hidden lg:flex items-center gap-6">
                                  <div className="w-12 h-12 rounded-xl overflow-hidden glass border border-white/10">
                                     <img src={item.image_url} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
                                  </div>
@@ -138,7 +155,7 @@ export const ManagementHub = ({ type, data, onAdd, onEdit, onDelete }: Managemen
                      </div>
 
                      {/* Actions Section */}
-                     <div className="flex items-center gap-3">
+                     <div className="flex items-center gap-3 w-full lg:w-auto justify-end pt-4 lg:pt-0 border-t border-white/5 lg:border-t-0">
                         <button className="w-10 h-10 rounded-xl glass border border-white/5 flex items-center justify-center text-white/20 hover:text-white hover:border-white/20 transition-all">
                            <Eye size={16} />
                         </button>
