@@ -6,7 +6,6 @@ import ZyraChat from "@/components/ZyraChat";
 import BackToTop from "@/components/BackToTop";
 import Sidebar from "@/components/Sidebar";
 import { CommerceProvider } from "@/lib/contexts/CommerceContext";
-import { motion, AnimatePresence } from "framer-motion";
 import { LanguageProvider } from "@/lib/contexts/LanguageContext";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
 import CartSidebar from "@/components/ui/CartSidebar";
@@ -83,7 +82,7 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} ${outfit.variable} h-full antialiased dark scroll-smooth`}
     >
-      <body className="min-h-full flex bg-transparent text-white selection:bg-[#00F0FF]/30 selection:text-white relative overflow-hidden h-screen w-screen">
+      <body className="min-h-screen flex flex-col bg-[#050508] text-white selection:bg-[#00F0FF]/30 selection:text-white relative">
         <script dangerouslySetInnerHTML={{ __html: "(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-XXXXXXX');" }} />
         <noscript>
           <iframe
@@ -106,13 +105,10 @@ export default function RootLayout({
                   <Sidebar />
           <CartSidebar />
           
-          <main className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative scroll-smooth custom-scrollbar">
+          <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden relative scroll-smooth">
             <Navbar />
-            <div className="flex-1 w-full relative z-10 pt-24 pb-12">
-              {/* Page transition wrapper */}
-<AnimatePresence mode="wait">
-  {children}
-</AnimatePresence>
+            <div className="flex-1 w-full relative z-10">
+              {children}
             </div>
             <Footer />
           </main>

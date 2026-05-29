@@ -31,6 +31,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isBooting, setIsBooting] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Real Data States
   const [orders, setOrders] = useState<any[]>([]);
@@ -408,18 +409,40 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-black text-white flex overflow-hidden font-sans selection:bg-primary selection:text-black">
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/70 z-[40] lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className={`fixed lg:relative inset-y-0 left-0 z-[50] transform transition-transform duration-300 ease-in-out lg:transform-none ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        <AdminSidebar activeTab={activeTab} setActiveTab={(tab) => { setActiveTab(tab); setSidebarOpen(false); }} />
+      </div>
 
       {/* Main Operating Area */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
+      <main className="flex-1 flex flex-col min-h-screen overflow-y-auto overflow-x-hidden relative">
         
         {/* Top OS Bar */}
-        <header className="h-20 border-b border-white/5 px-10 flex items-center justify-between bg-black/40 backdrop-blur-xl relative z-20">
-           <div className="flex items-center gap-8">
+        <header className="h-16 lg:h-20 border-b border-white/5 px-4 lg:px-10 flex items-center justify-between bg-black/40 backdrop-blur-xl relative z-20 sticky top-0">
+           <div className="flex items-center gap-4">
+              {/* Mobile hamburger */}
+              <button
+                className="lg:hidden flex flex-col gap-1.5 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                aria-label="Toggle sidebar"
+              >
+                <span className="block w-5 h-[1.5px] bg-white/60" />
+                <span className="block w-5 h-[1.5px] bg-white/60" />
+                <span className="block w-5 h-[1.5px] bg-white/60" />
+              </button>
               <div className="flex items-center gap-3">
                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]" />
-                 <span className="text-[10px] font-black tracking-widest uppercase text-white/40">Neural Link: Stable</span>
+                 <span className="text-[10px] font-black tracking-widest uppercase text-white/40 hidden sm:block">Neural Link: Stable</span>
               </div>
               <div className="h-4 w-[1px] bg-white/10" />
               <div className="flex items-center gap-3">
@@ -444,7 +467,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Dynamic Content Viewport */}
-        <div className="flex-1 overflow-y-auto no-scrollbar p-10 relative">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-4 lg:p-10 relative">
            
            <AnimatePresence mode="wait">
               {activeTab === "overview" && (
