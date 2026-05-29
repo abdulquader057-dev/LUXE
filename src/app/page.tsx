@@ -105,49 +105,39 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-white/5">
-            {/* Location & Delivery */}
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-[#D4AF37]">
-                  <MapPin size={16} />
+          <div className="space-y-4 pt-6 border-t border-white/5">
+            <span className="text-[9px] font-mono text-[#D4AF37] uppercase tracking-[0.2em] block mb-2 font-bold">// Collection DNA & Trust Indicators</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-xs tracking-wider text-white/80">
+                  <span className="text-[#D4AF37] select-none text-sm">✨</span>
+                  <span className="font-sora">Premium luxury soft fabric collection</span>
                 </div>
-                <div>
-                  <h4 className="text-[11px] font-sora font-semibold tracking-wider text-white uppercase">Dispatch Hub</h4>
-                  <p className="text-[10px] font-sora text-white/40 tracking-wider mt-1">📍 Hafiz Baba Nagar, Hyderabad</p>
+                <div className="flex items-center gap-3 text-xs tracking-wider text-white/80">
+                  <span className="text-[#D4AF37] select-none text-sm">📍</span>
+                  <span className="font-sora">Hafiz Baba Nagar, Hyderabad</span>
                 </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-[#D4AF37]">
-                  <Truck size={16} />
+                <div className="flex items-center gap-3 text-xs tracking-wider text-white/80">
+                  <span className="text-[#D4AF37] select-none text-sm">🚚</span>
+                  <span className="font-sora">Cash on Delivery available</span>
                 </div>
-                <div>
-                  <h4 className="text-[11px] font-sora font-semibold tracking-wider text-white uppercase">COD Access</h4>
-                  <p className="text-[10px] font-sora text-white/40 tracking-wider mt-1">🚚 Cash on Delivery available</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Core Values */}
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-[#D4AF37]">
-                  <CheckCircle2 size={16} />
-                </div>
-                <div>
-                  <h4 className="text-[11px] font-sora font-semibold tracking-wider text-white uppercase">Trust Factor</h4>
-                  <p className="text-[10px] font-sora text-white/40 tracking-wider mt-1">✨ 100% trusted & reliable app</p>
+                <div className="flex items-center gap-3 text-xs tracking-wider text-white/80">
+                  <span className="text-[#D4AF37] select-none text-sm">✨</span>
+                  <span className="font-sora">100% trusted & reliable</span>
                 </div>
               </div>
-
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-[#D4AF37]">
-                  <Sparkles size={16} />
+              <div className="space-y-3 sm:border-l sm:border-white/5 sm:pl-6">
+                <div className="flex items-center gap-3 text-xs tracking-wider text-white/80">
+                  <span className="text-[#D4AF37] select-none text-sm">▫️</span>
+                  <span className="font-sora">Everyday Essential</span>
                 </div>
-                <div>
-                  <h4 className="text-[11px] font-sora font-semibold tracking-wider text-white uppercase">Soft Fabric Collection</h4>
-                  <p className="text-[10px] font-sora text-white/40 tracking-wider mt-1">▫️ Premium & Luxury Inspired</p>
+                <div className="flex items-center gap-3 text-xs tracking-wider text-white/80">
+                  <span className="text-[#D4AF37] select-none text-sm">▫️</span>
+                  <span className="font-sora">Premium</span>
+                </div>
+                <div className="flex items-center gap-3 text-xs tracking-wider text-white/80">
+                  <span className="text-[#D4AF37] select-none text-sm">▫️</span>
+                  <span className="font-sora">Luxury Inspired</span>
                 </div>
               </div>
             </div>

@@ -141,8 +141,8 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
 
   const toggleCart = () => setIsCartOpen(!isCartOpen);
 
-  const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const totalPrice = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const cartCount = cart.reduce((total, item) => total + (Number(item.quantity) || 0), 0);
+  const totalPrice = cart.reduce((total, item) => total + ((Number(item.price) || 0) * (Number(item.quantity) || 0)), 0);
 
   const convertPrice = (priceINR: number) => {
     const converted = priceINR * exchangeRates[currency];

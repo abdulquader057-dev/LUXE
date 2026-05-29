@@ -6,14 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import LuxeButton from "./LuxeButton";
-import CheckoutModal from "../shop/CheckoutModal";
 
 
 export default function CartSidebar() {
   const { isCartOpen, toggleCart, cart: items, removeFromCart, updateQuantity, totalPrice } = useCommerce();
   const { convertPrice } = useCommerce();
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const router = useRouter();
   const [coupons, setCoupons] = useState<any[]>([]);
 
   useEffect(() => {
@@ -148,7 +148,13 @@ export default function CartSidebar() {
                     <span className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Subtotal</span>
                     <span className="text-2xl font-display text-primary">{formatPrice(totalPrice)}</span>
                   </div>
-                  <LuxeButton onClick={() => setIsCheckoutOpen(true)} className="w-full flex items-center justify-center gap-2">
+                  <LuxeButton 
+                    onClick={() => {
+                      toggleCart();
+                      router.push("/checkout");
+                    }} 
+                    className="w-full flex items-center justify-center gap-2"
+                  >
                     INITIALIZE CHECKOUT <ArrowRight size={16} />
                   </LuxeButton>
                 </div>
@@ -157,8 +163,6 @@ export default function CartSidebar() {
           </>
         )}
       </AnimatePresence>
-
-      <CheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />
     </>
   );
 }

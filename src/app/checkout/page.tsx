@@ -31,61 +31,79 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.warn("Google Maps API key is missing. Autocomplete disabled.");
+      return;
+    }
+
     const initAutocomplete = () => {
       const input = document.getElementById("address-input") as HTMLInputElement;
       const win = window as any;
-      if (!input || !win.google) return;
+      if (!input || !win.google || !win.google.maps || !win.google.maps.places || !win.google.maps.places.Autocomplete) return;
 
-      autocompleteRef.current = new win.google.maps.places.Autocomplete(input, {
-        types: ["address"],
-        componentRestrictions: { country: "IN" } // Prioritize India addresses
-      });
+      try {
+        autocompleteRef.current = new win.google.maps.places.Autocomplete(input, {
+          types: ["address"],
+          componentRestrictions: { country: "IN" } // Prioritize India addresses
+        });
 
-      autocompleteRef.current.addListener("place_changed", () => {
-        const place = autocompleteRef.current.getPlace();
-        if (!place.address_components) return;
+        autocompleteRef.current.addListener("place_changed", () => {
+          const place = autocompleteRef.current.getPlace();
+          if (!place.address_components) return;
 
-        let pin = "";
-        let cty = "";
+          let pin = "";
+          let cty = "";
 
-        for (const component of place.address_components) {
-          const types = component.types;
-          if (types.includes("postal_code")) {
-            pin = component.long_name;
+          for (const component of place.address_components) {
+            const types = component.types;
+            if (types.includes("postal_code")) {
+              pin = component.long_name;
+            }
+            if (types.includes("locality")) {
+              cty = component.long_name;
+            } else if (types.includes("administrative_area_level_2") && !cty) {
+              cty = component.long_name;
+            }
           }
-          if (types.includes("locality")) {
-            cty = component.long_name;
-          } else if (types.includes("administrative_area_level_2") && !cty) {
-            cty = component.long_name;
-          }
-        }
 
-        // Set address to formatted address or name
-        setAddress(place.formatted_address || input.value);
-        if (pin) setPincode(pin);
-        if (cty) setCity(cty);
+          // Set address to formatted address or name
+          setAddress(place.formatted_address || input.value);
+          if (pin) setPincode(pin);
+          if (cty) setCity(cty);
 
-        toast.success(`Synced location: ${cty} (${pin})`);
-      });
+          toast.success(`Synced location: ${cty} (${pin})`);
+        });
+      } catch (err) {
+        console.warn("Google Maps Autocomplete failed to initialize:", err);
+      }
     };
 
     const win = window as any;
     if (win.google && win.google.maps && win.google.maps.places) {
       initAutocomplete();
     } else {
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        setTimeout(initAutocomplete, 500);
-      };
-      document.head.appendChild(script);
+      let script = document.getElementById("google-maps-sdk") as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement("script");
+        script.id = "google-maps-sdk";
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          setTimeout(initAutocomplete, 500);
+        };
+        document.head.appendChild(script);
+      } else {
+        script.addEventListener("load", () => {
+          setTimeout(initAutocomplete, 500);
+        });
+      }
     }
   }, []);
 
-  const isUpiValid = cod ? true : /^[a-zA-Z0-9]+@[^@\s]+$/.test(upi);
-  const isPhoneValid = /^[6-9]\d{9}$/.test(phone.replace(/[^0-9]/g, "").slice(-10)); // Accept Indian numbers
+  const isUpiValid = cod ? true : /^[a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+$/.test(upi || "");
+  const isPhoneValid = /^[6-9]\d{9}$/.test((phone || "").replace(/[^0-9]/g, "").slice(-10)); // Accept Indian numbers
   const canSubmit = name && address && city && pincode && isPhoneValid && (cod ? true : isUpiValid) && cart.length > 0;
 
   const subtotal = totalPrice;
@@ -93,7 +111,7 @@ export default function CheckoutPage() {
   
   // Delivery Fee Calculation based on Pincode and City
   // Free delivery for orders above 1999, else Hyderabad is 45, others 90
-  const isHyderabad = city.toLowerCase().includes("hyderabad");
+  const isHyderabad = (city || "").toLowerCase().includes("hyderabad");
   const deliveryFee = subtotal > 1999 ? 0 : (isHyderabad ? 45 : 90);
   const total = subtotal + tax + deliveryFee;
 
@@ -179,7 +197,7 @@ export default function CheckoutPage() {
 
       // Prepare WhatsApp message text for the store
       const itemsText = cart
-        .map((i: any) => `• ${i.name} (Size: ${i.size || "L"}, Color: ${i.color || "White"}) x ${i.quantity} = ₹${i.price * i.quantity}`)
+        .map((i: any) => `• ${i.name} (Size: ${i.size || "L"}, Color: ${i.color || "White"}) x ${Number(i.quantity) || 0} = ₹${((Number(i.price) || 0) * (Number(i.quantity) || 0)).toFixed(2)}`)
         .join("\n");
 
       const whatsappMsg = `🌟 LUXE NEW ORDER 🌟\n━━━━━━━━━━━━━━━━━━━━━━━\n👤 Name: ${name}\n📞 Phone: ${phone}\n📍 Address: ${address}\n🏙️ City: ${city} – ${pincode}\n💳 Payment: ${cod ? "COD" : `UPI (${upi})`}\n\n🛍️ Items:\n${itemsText}\n\n💰 Subtotal: ₹${subtotal.toFixed(2)}\n🚚 Delivery: ${deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}\n🧾 *Total: ₹${total.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━━━`;
@@ -417,7 +435,7 @@ export default function CheckoutPage() {
                           <span className="text-[9px] font-mono text-white/30 uppercase">{item.quantity} × Size {item.size || "L"} · {item.color || "White"}</span>
                         </div>
                       </div>
-                      <span className="font-mono font-medium text-white/80">₹{(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="font-mono font-medium text-white/80">₹{((Number(item.price) || 0) * (Number(item.quantity) || 0)).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>

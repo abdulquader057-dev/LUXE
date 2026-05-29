@@ -108,19 +108,20 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     return 0;
   };
 
-  const discountRate = getDiscountRate();
-  const discountAmount = Math.round(totalPrice * discountRate);
-  const discountedSubtotal = totalPrice - discountAmount;
+  const discountRate = Number(getDiscountRate()) || 0;
+  const discountAmount = Math.round(Number(totalPrice) * discountRate);
+  const discountedSubtotal = Number(totalPrice) - discountAmount;
 
   // Coupon Discount
-  const couponDiscountAmount = Math.round(discountedSubtotal * couponDiscountPercent);
+  const couponDiscountAmount = Math.round(discountedSubtotal * (Number(couponDiscountPercent) || 0));
   const postCouponSubtotal = discountedSubtotal - couponDiscountAmount;
 
   const getDeliveryFee = () => {
     if (postCouponSubtotal > 1999) return 0; // Free delivery for orders > 1999
     if (distance !== null) {
-      if (distance <= 5) return 0;
-      return Math.round(distance * 7.5); // 7.5 per km overall
+      const distNum = Number(distance) || 0;
+      if (distNum <= 5) return 0;
+      return Math.round(distNum * 7.5); // 7.5 per km overall
     }
     return 45; // Default standard delivery fee
   };
@@ -133,10 +134,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   
   cart.forEach((item) => {
     // Apply discount rate and coupon discount rate to item price
-    const discountedItemPrice = item.price * (1 - discountRate) * (1 - couponDiscountPercent);
+    const itemPrice = Number(item.price) || 0;
+    const itemQty = Number(item.quantity) || 0;
+    const discountedItemPrice = itemPrice * (1 - discountRate) * (1 - (Number(couponDiscountPercent) || 0));
     const rate = discountedItemPrice <= 1000 ? 0.05 : 0.12;
-    const itemCgst = Math.round((discountedItemPrice * (rate / 2)) * item.quantity);
-    const itemSgst = Math.round((discountedItemPrice * (rate / 2)) * item.quantity);
+    const itemCgst = Math.round((discountedItemPrice * (rate / 2)) * itemQty);
+    const itemSgst = Math.round((discountedItemPrice * (rate / 2)) * itemQty);
     cgstAmount += itemCgst;
     sgstAmount += itemSgst;
   });
