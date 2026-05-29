@@ -39,7 +39,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-cormorant font-light text-white leading-none tracking-tight mb-4"
+          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-cormorant font-light text-white leading-none tracking-tight mb-4 floatHeadline"
         >
           Luxury
           <span className="block italic text-[#D4AF37]">Redefined</span>

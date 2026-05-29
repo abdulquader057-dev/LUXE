@@ -115,8 +115,12 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
                 { label: "Seconds", value: countdown.seconds },
               ].map((unit) => (
                 <div key={unit.label} className="text-center">
-                  <div className="text-4xl md:text-6xl font-sora font-light tracking-tighter text-white mb-2">
-                    {String(unit.value).padStart(2, "0")}
+                  <div className="text-4xl md:text-6xl font-sora font-light tracking-tighter text-white mb-2 flex justify-center gap-0.5">
+                    {String(unit.value).padStart(2, "0").split("").map((digit, idx) => (
+                      <span key={idx + "-" + digit} className="inline-block flipDigit">
+                        {digit}
+                      </span>
+                    ))}
                   </div>
                   <div className="text-[9px] font-sora tracking-[0.3em] text-white/30 uppercase">
                     {unit.label}

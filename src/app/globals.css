@@ -588,3 +588,45 @@ button, a, .clickable {
   gap: 12px;
   margin-top: 16px;
 }
+
+/* 3D TILT & UI ANIMATIONS */
+
+/* floatHeadline: translateY -8px to 8px, 6s infinite */
+@keyframes floatHeadline {
+  0%, 100% {
+    transform: translateY(-8px);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+.floatHeadline {
+  animation: floatHeadline 6s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* flipDigit: rotateX 0 to -90deg flip animation */
+@keyframes flipDigit {
+  0% {
+    transform: perspective(400px) rotateX(0deg);
+  }
+  100% {
+    transform: perspective(400px) rotateX(-90deg);
+  }
+}
+
+.flipDigit {
+  display: inline-block;
+  transform-style: preserve-3d;
+  animation: flipDigit 0.3s ease-out forwards;
+  backface-visibility: hidden;
+}
+
+/* Disable all tilt on touch and prefers-reduced-motion */
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  [style*="perspective"] {
+    transform: none !important;
+    transition: none !important;
+  }
+}

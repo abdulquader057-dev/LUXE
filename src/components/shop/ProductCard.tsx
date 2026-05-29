@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTilt } from "@/hooks/useTilt";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import Link from "next/link";
@@ -42,6 +43,9 @@ const ProductCard = ({ product }: { product: Product }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
   const [isImageFading, setIsImageFading] = useState(false);
+  
+  const tilt = useTilt(10);
+
   // Determine image based on modelImages and selected color
   const modelImg = product.modelImages?.variants?.[selectedColor] || product.modelImages || {};
   const frontImage = modelImg.front && modelImg.front !== "/model_placeholder.png" ? modelImg.front : getFirstImage(product.images);
@@ -58,7 +62,12 @@ const ProductCard = ({ product }: { product: Product }) => {
     <div 
       className="product-card group relative rounded-xl overflow-hidden bg-[#0A0A0C] border border-white/5 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.15,1)] hover:border-white/20 hover:shadow-[0_20px_40px_rgba(0,0,0,0.8)] flex flex-col h-[400px]"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseMove={tilt.onMouseMove}
+      onMouseLeave={(e) => {
+        setIsHovered(false);
+        tilt.onMouseLeave();
+      }}
+      style={tilt.style}
     >
       {/* Top Image Section */}
       <Link href={`/product/${product.id}?color=${encodeURIComponent(selectedColor)}`} className="relative h-[240px] w-full overflow-hidden bg-[#0A0A0F] block">

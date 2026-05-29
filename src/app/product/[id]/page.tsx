@@ -31,6 +31,7 @@ import { MotionContainer, MotionItem } from "@/components/MotionContainer";
 import { Magnetic } from "@/components/ui/Magnetic";
 import ProductCard from "@/components/shop/ProductCard";
 import LuxeButton from "@/components/ui/LuxeButton";
+import { useTilt } from "@/hooks/useTilt";
 
 import { usePersonalization } from "@/lib/hooks/usePersonalization";
 
@@ -42,6 +43,7 @@ const ProductPage = () => {
   const id = params?.id as string;
   const product = MOCK_PRODUCTS.find((p) => p.id === id);
   const [selectedImage, setSelectedImage] = useState(0);
+  const tilt = useTilt(8);
   const [selectedSize, setSelectedSize] = useState("L");
   const [selectedColor, setSelectedColor] = useState("White");
   const [quantity, setQuantity] = useState(1);
@@ -118,13 +120,20 @@ const ProductPage = () => {
           {/* Left: Image Architecture */}
           <MotionContainer animation="stagger" className="space-y-8">
             <MotionItem animation="scale" className="relative group w-full">
-              <ProductViewer3D 
-                images={activeImages} 
-                productName={product.name} 
-                selectedColor={selectedColor} 
-                currentIndex={selectedImage}
-                onChangeIndex={setSelectedImage}
-              />
+              <div
+                onMouseMove={tilt.onMouseMove}
+                onMouseLeave={tilt.onMouseLeave}
+                style={tilt.style}
+                className="w-full h-full"
+              >
+                <ProductViewer3D 
+                  images={activeImages} 
+                  productName={product.name} 
+                  selectedColor={selectedColor} 
+                  currentIndex={selectedImage}
+                  onChangeIndex={setSelectedImage}
+                />
+              </div>
             </MotionItem>
             
             <div className="flex gap-6 overflow-x-auto pb-4 no-scrollbar">
