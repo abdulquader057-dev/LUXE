@@ -3,19 +3,40 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { MOCK_PRODUCTS } from '@/data/products';
 
 const API_KEYS = [
-  process.env.NEXT_PUBLIC_GEMINI_API_KEY || '',
-  process.env.NEXT_PUBLIC_GEMINI_API_KEY_2 || 'AIzaSyBaY7RnDcRRxE3ytOZfirGDC1OXR4C1urk',
+  process.env.GEMINI_API_KEY || '',
+  process.env.GEMINI_API_KEY_2 || '',
 ].filter(Boolean);
 
 let currentKeyIndex = 0;
 
 export async function POST(req: Request) {
   try {
-    const { messages, language = "English" } = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: "Request body is required" }, { status: 400 });
+    }
+    const { messages, language = "English" } = body;
+
+    // Validate messages
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ error: "Messages parameter must be a non-empty array" }, { status: 400 });
+    }
+
+    for (const msg of messages) {
+      if (typeof msg !== "object" || msg === null || typeof msg.role !== "string" || typeof msg.content !== "string") {
+        return NextResponse.json({ error: "Invalid message payload structure" }, { status: 400 });
+      }
+    }
+
+    // Validate language
+    if (typeof language !== "string" || language.length > 255) {
+      return NextResponse.json({ error: "Invalid language parameter (max 255 characters)" }, { status: 400 });
+    }
     
     if (API_KEYS.length === 0) {
       return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
     }
+
 
     // Clean and alternate history to prevent validation issues with startChat
     const history: any[] = [];

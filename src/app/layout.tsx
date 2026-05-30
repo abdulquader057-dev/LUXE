@@ -18,6 +18,7 @@ import AnimatedBackground from "@/components/AnimatedBackground";
 import { Toaster } from "react-hot-toast";
 import ThemeColorLoader from "@/components/ThemeColorLoader";
 import Seo from "@/components/seo/Seo";
+import GtmPageViewTracker from "@/components/GtmPageViewTracker";
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -70,6 +71,9 @@ export const metadata: Metadata = {
     images: [{ url: "/hero/mobile.jpg" }],
   },
   keywords: ["AI Fashion", "Future of Retail", "Luxury Techwear", "Neural Styling", "Luxe"],
+  verification: {
+    google: "TO_BE_FILLED",
+  },
 };
 
 export default function RootLayout({
@@ -127,6 +131,7 @@ export default function RootLayout({
           ></iframe>
         </noscript>
         <ThemeColorLoader />
+        <GtmPageViewTracker />
         <AnimatedBackground />
         <EntranceAnimation />
         <ScrollProgress />

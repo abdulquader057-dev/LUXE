@@ -89,7 +89,7 @@
   text-transform: uppercase;
 }
 .validation-error {
-  color: #ef4444;
+  color: var(--color-gold);
   font-size: 0.7rem;
   font-family: monospace;
   letter-spacing: 0.08em;

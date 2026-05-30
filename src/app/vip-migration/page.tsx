@@ -11,20 +11,64 @@ export default function VipMigrationPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone) return;
+    setErrorMsg(null);
+
+    const trimmedName = name.trim();
+    const trimmedPhone = phone.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedName || !trimmedPhone) {
+      setErrorMsg("Name and Phone parameters are required.");
+      return;
+    }
+
+    if (trimmedName.length > 255 || trimmedPhone.length > 255 || trimmedEmail.length > 255) {
+      setErrorMsg("Oversized inputs are rejected (max 255 characters).");
+      return;
+    }
+
+    const phoneDigits = trimmedPhone.replace(/[^0-9]/g, "");
+    if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+      setErrorMsg("Please enter a valid phone number (10 to 15 digits).");
+      return;
+    }
+
+    if (trimmedEmail) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedEmail)) {
+        setErrorMsg("Invalid email directive format.");
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("vip_migration").insert({ name, phone, email });
-      if (error) throw error;
+      const response = await fetch("/api/vip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: trimmedName,
+          phone: trimmedPhone,
+          email: trimmedEmail || undefined,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit request.");
+      }
+
       toast.success("Welcome to the Inner Circle 🖤");
       setName("");
       setPhone("");
-    } catch (err) {
+      setEmail("");
+    } catch (err: any) {
       console.error(err);
-      toast.error("Failed to submit. Please try again.");
+      setErrorMsg(err.message || "Failed to submit. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -69,6 +113,11 @@ export default function VipMigrationPage() {
               className="w-full px-4 py-2 rounded bg-primary border border-gold text-offwhite"
             />
           </div>
+          {errorMsg && (
+            <div className="p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded text-xs font-mono text-center">
+              {errorMsg}
+            </div>
+          )}
           <button
             type="submit"
             disabled={submitting}
@@ -76,6 +125,7 @@ export default function VipMigrationPage() {
           >
             Submit
           </button>
+
         </form>
       </section>
     </main>

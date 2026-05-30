@@ -8,6 +8,8 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { MapPin, Phone, User, ShoppingBag, QrCode, Clipboard, CheckCircle2, Loader2 } from "lucide-react";
+import { escapeString } from "@/lib/security";
+
 
 export default function CheckoutPage() {
   const { cart, clearCart, totalPrice } = useCommerce();
@@ -24,8 +26,10 @@ export default function CheckoutPage() {
   const [cod, setCod] = useState(false);
   const [upiCopied, setUpiCopied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const autocompleteRef = useRef<any>(null);
+
 
   // Load Google Maps API Script
   useEffect(() => {
@@ -124,7 +128,45 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit || isSubmitting) return;
+    setErrorMsg(null);
+
+    const trimmedName = (name || "").trim();
+    const trimmedPhone = (phone || "").trim();
+    const trimmedAddress = (address || "").trim();
+    const trimmedCity = (city || "").trim();
+    const trimmedPincode = (pincode || "").trim();
+    const trimmedUpi = (upi || "").trim();
+    const trimmedPromo = (promo || "").trim();
+
+    if (!trimmedName || !trimmedPhone || !trimmedAddress || !trimmedCity || !trimmedPincode) {
+      setErrorMsg("Please fill out all required fields.");
+      return;
+    }
+
+    if (
+      trimmedName.length > 255 ||
+      trimmedPhone.length > 255 ||
+      trimmedAddress.length > 255 ||
+      trimmedCity.length > 255 ||
+      trimmedPincode.length > 255 ||
+      trimmedUpi.length > 255 ||
+      trimmedPromo.length > 255
+    ) {
+      setErrorMsg("Oversized inputs are rejected (max 255 characters).");
+      return;
+    }
+
+    if (!isPhoneValid) {
+      setErrorMsg("Please enter a valid phone number (10 to 15 digits).");
+      return;
+    }
+
+    if (!cod && !isUpiValid) {
+      setErrorMsg("Invalid UPI ID format (must be username@bank).");
+      return;
+    }
+
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
     const toastId = toast.loading("Syncing order node to LUXE OS...");
@@ -134,23 +176,31 @@ export default function CheckoutPage() {
 
       const cartItems = cart.map((item: any) => ({
         id: item.id,
-        name: item.name,
+        name: escapeString(item.name || ""),
         price: item.price,
         quantity: item.quantity,
-        size: item.size || "L",
-        color: item.color || "White"
+        size: escapeString(item.size || "L"),
+        color: escapeString(item.color || "White")
       }));
       
+      const escapedName = escapeString(trimmedName);
+      const escapedPhone = escapeString(trimmedPhone);
+      const escapedAddress = escapeString(trimmedAddress);
+      const escapedCity = escapeString(trimmedCity);
+      const escapedPincode = escapeString(trimmedPincode);
+      const escapedUpi = trimmedUpi ? escapeString(trimmedUpi) : "";
+      const escapedPromo = trimmedPromo ? escapeString(trimmedPromo) : "";
+
       // Structure all info inside delivery_address column as JSON
       const orderPayload = JSON.stringify({
-        name,
-        phone,
-        address,
-        city,
-        pincode,
+        name: escapedName,
+        phone: escapedPhone,
+        address: escapedAddress,
+        city: escapedCity,
+        pincode: escapedPincode,
         paymentMethod: cod ? "COD" : "UPI",
-        upi: upi || "",
-        promo: promo || "",
+        upi: escapedUpi,
+        promo: escapedPromo,
         items: cartItems,
       });
 
@@ -177,13 +227,13 @@ export default function CheckoutPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             orderId: orderData?.id,
-            name,
-            phone,
-            address,
-            city,
-            pincode,
+            name: escapedName,
+            phone: escapedPhone,
+            address: escapedAddress,
+            city: escapedCity,
+            pincode: escapedPincode,
             paymentMethod: cod ? "COD" : "UPI",
-            upi: upi || "",
+            upi: escapedUpi,
             items: cartItems,
             subtotal: subtotal.toFixed(2),
             deliveryFee,
@@ -195,12 +245,35 @@ export default function CheckoutPage() {
         console.warn("Notification API error:", notifyErr);
       }
 
-      // Prepare WhatsApp message text for the store
+      // Prepare WhatsApp message text for the store using clean trimmed values
       const itemsText = cart
         .map((i: any) => `• ${i.name} (Size: ${i.size || "L"}, Color: ${i.color || "White"}) x ${Number(i.quantity) || 0} = ₹${((Number(i.price) || 0) * (Number(i.quantity) || 0)).toFixed(2)}`)
         .join("\n");
 
-      const whatsappMsg = `🌟 LUXE NEW ORDER 🌟\n━━━━━━━━━━━━━━━━━━━━━━━\n👤 Name: ${name}\n📞 Phone: ${phone}\n📍 Address: ${address}\n🏙️ City: ${city} – ${pincode}\n💳 Payment: ${cod ? "COD" : `UPI (${upi})`}\n\n🛍️ Items:\n${itemsText}\n\n💰 Subtotal: ₹${subtotal.toFixed(2)}\n🚚 Delivery: ${deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}\n🧾 *Total: ₹${total.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━━━`;
+      const whatsappMsg = `🌟 LUXE NEW ORDER 🌟\n━━━━━━━━━━━━━━━━━━━━━━━\n👤 Name: ${trimmedName}\n📞 Phone: ${trimmedPhone}\n📍 Address: ${trimmedAddress}\n🏙️ City: ${trimmedCity} – ${trimmedPincode}\n💳 Payment: ${cod ? "COD" : `UPI (${trimmedUpi})`}\n\n🛍️ Items:\n${itemsText}\n\n💰 Subtotal: ₹${subtotal.toFixed(2)}\n🚚 Delivery: ${deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}\n🧾 *Total: ₹${total.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━━━`;
+
+      // GTM Event Tracking for Purchase
+      if (typeof window !== "undefined") {
+        (window as any).dataLayer = (window as any).dataLayer || [];
+        (window as any).dataLayer.push({
+          event: "purchase",
+          ecommerce: {
+            transaction_id: orderData?.id || `mock-${Date.now()}`,
+            value: total,
+            tax: tax,
+            shipping: deliveryFee,
+            currency: "INR",
+            items: cart.map((item: any) => ({
+              item_id: item.id,
+              item_name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              item_size: item.size,
+              item_color: item.color
+            }))
+          }
+        });
+      }
 
       toast.dismiss(toastId);
       toast.success("Order placed! Connecting you to WhatsApp...");
@@ -218,12 +291,14 @@ export default function CheckoutPage() {
 
     } catch (err: any) {
       toast.dismiss(toastId);
+      setErrorMsg(`Order creation failed: ${err.message || "Please try again"}`);
       toast.error(`Order creation failed: ${err.message || "Please try again"}`);
       console.error(err);
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <main className="min-h-screen bg-[#020203] text-[#F9FAFB] p-6 md:p-12 relative overflow-hidden flex items-center justify-center pt-28">
@@ -265,9 +340,9 @@ export default function CheckoutPage() {
                   value={phone} 
                   onChange={(e) => setPhone(e.target.value)} 
                   placeholder="E.g., 9999999999" 
-                  className={`w-full p-3.5 rounded-2xl bg-black/60 border text-[#F9FAFB] text-xs font-mono focus:outline-none focus:ring-1 transition-all placeholder:text-white/20 ${phone && !isPhoneValid ? 'border-red-500/50 focus:border-red-500/80 focus:ring-red-500/30' : 'border-white/10 focus:border-[#D4AF37]/50 focus:ring-[#D4AF37]/30'}`} 
+                  className={`w-full p-3.5 rounded-2xl bg-black/60 border text-[#F9FAFB] text-xs font-mono focus:outline-none focus:ring-1 transition-all placeholder:text-white/20 ${phone && !isPhoneValid ? 'border-[#D4AF37]/50 focus:border-[#D4AF37] focus:ring-[#D4AF37]/30' : 'border-white/10 focus:border-[#D4AF37]/50 focus:ring-[#D4AF37]/30'}`} 
                 />
-                {phone && !isPhoneValid && <p className="text-[9px] font-mono text-red-500 uppercase tracking-wider ml-2">Invalid Indian phone format</p>}
+                {phone && !isPhoneValid && <p className="validation-error ml-2 mt-1">Invalid Indian phone format</p>}
               </div>
             </div>
 
@@ -367,9 +442,9 @@ export default function CheckoutPage() {
                       value={upi} 
                       onChange={(e) => setUpi(e.target.value)} 
                       placeholder="example@bank" 
-                      className={`w-full p-3 rounded-xl bg-black/60 border text-[#F9FAFB] text-xs font-mono focus:outline-none focus:ring-1 transition-all placeholder:text-white/10 ${upi && !isUpiValid ? 'border-red-500/50 focus:border-red-500/80 focus:ring-red-500/30' : 'border-white/10 focus:border-[#D4AF37]/50'}`} 
+                      className={`w-full p-3 rounded-xl bg-black/60 border text-[#F9FAFB] text-xs font-mono focus:outline-none focus:ring-1 transition-all placeholder:text-white/10 ${upi && !isUpiValid ? 'border-[#D4AF37]/50 focus:border-[#D4AF37] focus:ring-[#D4AF37]/30' : 'border-white/10 focus:border-[#D4AF37]/50'}`} 
                     />
-                    {upi && !isUpiValid && <p className="text-[9px] font-mono text-red-500 uppercase tracking-wider ml-2">Invalid UPI handle format</p>}
+                    {upi && !isUpiValid && <p className="validation-error ml-2 mt-1">Invalid UPI handle format</p>}
                   </div>
                 </div>
               )}
@@ -395,11 +470,17 @@ export default function CheckoutPage() {
               />
             </div>
 
+            {errorMsg && (
+              <div className="p-3.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-xs font-mono text-center">
+                {errorMsg}
+              </div>
+            )}
             <button 
               type="submit" 
               disabled={!canSubmit || isSubmitting} 
               className="w-full py-4.5 bg-[#D4AF37] text-[#020203] font-mono font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-[#D4AF37]/90 hover:scale-[1.01] transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 mt-4 cursor-pointer"
             >
+
               {isSubmitting ? (
                 <>
                   <Loader2 size={14} className="animate-spin" /> Uplinking Order...

@@ -5,8 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, User, Mail, Lock, Phone, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { ADMIN_EMAIL, useAuth } from "@/lib/contexts/AuthContext";
+import { ADMIN_EMAIL, STORE_ADMIN_EMAIL, useAuth } from "@/lib/contexts/AuthContext";
 import toast from "react-hot-toast";
+import { escapeString } from "@/lib/security";
+
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
@@ -81,6 +83,14 @@ export default function AuthPortal() {
     }
 
     try {
+      if (typeof window !== "undefined") {
+        (window as any).dataLayer = (window as any).dataLayer || [];
+        (window as any).dataLayer.push({
+          event: "login_start",
+          method: "google"
+        });
+      }
+
       const { error: oAuthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -129,7 +139,23 @@ export default function AuthPortal() {
       return;
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password;
+    const trimmedFullName = fullName.trim();
+    const trimmedPhone = phone.trim();
+
+    if (
+      trimmedEmail.length > 255 ||
+      trimmedPassword.length > 255 ||
+      trimmedFullName.length > 255 ||
+      trimmedPhone.length > 255
+    ) {
+      setError("Oversized inputs are rejected (max 255 characters).");
+      setLoading(false);
+      return;
+    }
+
+    const normalizedEmail = trimmedEmail.toLowerCase();
 
     try {
       if (isLogin) {
@@ -138,7 +164,7 @@ export default function AuthPortal() {
         try {
           const { data, error: signInError } = await supabase.auth.signInWithPassword({
             email: normalizedEmail,
-            password,
+            password: trimmedPassword,
           });
 
           if (!signInError && data?.user) {
@@ -165,12 +191,15 @@ export default function AuthPortal() {
 
         if (!authSuccess) {
           // Local/mock authentication fallback if Supabase fails or keys are misconfigured!
+          const isSuper = normalizedEmail === ADMIN_EMAIL.toLowerCase();
+          const isStore = normalizedEmail === STORE_ADMIN_EMAIL.toLowerCase();
+
           const mockUser = {
-            id: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "admin-id-123" : "mock-user-12345",
+            id: isSuper ? "admin-id-123" : (isStore ? "official-store-admin" : "mock-user-12345"),
             email: normalizedEmail,
             user_metadata: {
-              full_name: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "Admin Master" : "Luxe Customer",
-              phone_number: "+919876543210",
+              full_name: isSuper ? "Admin Master" : (isStore ? "LUXE Store Admin" : "Luxe Customer"),
+              phone_number: isStore ? "+917337246297" : "+919876543210",
               style_dna: {
                 wardrobeCompletion: 92,
                 level: 5,
@@ -182,11 +211,22 @@ export default function AuthPortal() {
             email: normalizedEmail,
             full_name: mockUser.user_metadata.full_name,
             phone_number: mockUser.user_metadata.phone_number,
-            role: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "admin" : "customer"
+            role: isSuper ? "super-admin" : (isStore ? "store-admin" : "customer")
           };
 
           localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
           localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
+
+          // GTM Event Tracking for Mock Login Fallback
+          if (typeof window !== "undefined") {
+            (window as any).dataLayer = (window as any).dataLayer || [];
+            (window as any).dataLayer.push({
+              event: "login",
+              email: normalizedEmail,
+              method: "mock-email"
+            });
+          }
+
           toast.success("Syncing Neural Profile (Local Fallback Mode)...");
           setTimeout(() => {
             window.location.href = "/";
@@ -194,22 +234,46 @@ export default function AuthPortal() {
           return;
         }
 
+        // GTM Event Tracking for Email Login Success
+        if (typeof window !== "undefined") {
+          (window as any).dataLayer = (window as any).dataLayer || [];
+          (window as any).dataLayer.push({
+            event: "login",
+            email: normalizedEmail,
+            method: "email"
+          });
+        }
+
         router.push("/");
       } else {
         try {
+          const escapedFullName = escapeString(trimmedFullName);
+          const escapedPhone = escapeString(trimmedPhone);
+
           const { data, error: signUpError } = await supabase.auth.signUp({
             email: normalizedEmail,
-            password,
+            password: trimmedPassword,
             options: {
               data: {
-                full_name: fullName,
-                phone_number: phone,
+                full_name: escapedFullName,
+                phone_number: escapedPhone,
               },
               emailRedirectTo: `${window.location.origin}/auth`,
             },
           });
 
           if (signUpError) throw signUpError;
+
+          // GTM Event Tracking for Signup Success
+          if (typeof window !== "undefined") {
+            (window as any).dataLayer = (window as any).dataLayer || [];
+            (window as any).dataLayer.push({
+              event: "sign_up",
+              email: normalizedEmail,
+              method: "email"
+            });
+          }
+
           setSuccess("Check your email to verify your account 🖤");
           setEmail("");
           setPassword("");
@@ -217,6 +281,7 @@ export default function AuthPortal() {
           setPhone("");
         } catch (supabaseErr: any) {
           console.warn("Supabase signup failed, creating local profile fallback:", supabaseErr.message);
+
           // Fallback local signup
           const mockUser = {
             id: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "admin-id-123" : "mock-user-12345",
@@ -237,6 +302,17 @@ export default function AuthPortal() {
             phone_number: mockUser.user_metadata.phone_number,
             role: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "admin" : "customer"
           };
+
+          // GTM Event Tracking for Mock Signup Fallback
+          if (typeof window !== "undefined") {
+            (window as any).dataLayer = (window as any).dataLayer || [];
+            (window as any).dataLayer.push({
+              event: "sign_up",
+              email: normalizedEmail,
+              method: "mock-email"
+            });
+          }
+
           localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
           localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
           alert("Registration successful (Local Mode)! Logging you in...");

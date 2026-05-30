@@ -11,12 +11,12 @@ const Footer = () => {
         <div className="text-3xl font-display font-black tracking-tighter text-white/80">
           LUXE<span className="text-primary">.</span>
         </div>
-        <div className="flex flex-wrap justify-center gap-10 text-[9px] font-black tracking-[0.4em] text-white/15 uppercase">
-          <Link href="/cognition" className="hover:text-white/30 transition-colors">Neural Policy</Link>
-          <Link href="/cognition" className="hover:text-white/30 transition-colors">Global Logistics</Link>
-          <Link href="/cognition" className="hover:text-white/30 transition-colors">Cognition Hub</Link>
+        <div className="flex flex-wrap justify-center gap-10 text-[9px] font-black tracking-[0.3em] text-white/15 uppercase">
           <Link href="/privacy" className="hover:text-white/30 transition-colors">Privacy Policy</Link>
           <Link href="/terms" className="hover:text-white/30 transition-colors">Terms & Conditions</Link>
+          <a href="mailto:abdulquader057@gmail.com" className="hover:text-white/30 transition-colors">Support</a>
+          <a href="https://wa.me/917337246297" target="_blank" rel="noopener noreferrer" className="hover:text-white/30 transition-colors">WhatsApp</a>
+          <a href="mailto:abdulquader057@gmail.com?subject=LUXE%20Bug%20Report" className="hover:text-white/30 transition-colors">Report Bug</a>
         </div>
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-1.5 bg-green-500/60 rounded-full animate-pulse" />

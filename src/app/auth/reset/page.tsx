@@ -34,6 +34,13 @@ export default function PasswordResetPortal() {
       return;
     }
 
+    if (password.length > 255 || confirmPassword.length > 255) {
+      setError("Oversized inputs are rejected (max 255 characters).");
+      setLoading(false);
+      return;
+    }
+
+
     try {
       const { error: resetError } = await supabase.auth.updateUser({
         password: password,

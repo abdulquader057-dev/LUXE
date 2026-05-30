@@ -1,28 +1,35 @@
 "use client";
 
 import React from "react";
+
 import { motion } from "framer-motion";
 import { 
   LayoutDashboard, ShoppingBag, Package, 
   Zap, BarChart3, Settings, Cpu, Activity,
-  Database, Terminal, BrainCircuit, LogOut
+  Database, Terminal, BrainCircuit, LogOut, Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
 
-const menuItems = [
-  { id: "overview", icon: LayoutDashboard, label: "Control Center", color: "#00f2ff" },
-  { id: "orders", icon: ShoppingBag, label: "Commerce Nodes", color: "#ff00ff" },
-  { id: "products", icon: Package, label: "Asset Manifest", color: "#7000ff" },
-  { id: "automation", icon: BrainCircuit, label: "Neural Flows", color: "#00ff9d" },
-  { id: "analytics", icon: BarChart3, label: "Intelligence", color: "#ffcc00" },
-];
-
 export const AdminSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
+  const { isSuperAdmin } = useAuth();
+
+  const menuItems = [
+    { id: "overview", icon: LayoutDashboard, label: "Control Center", color: "#00f2ff" },
+    { id: "orders", icon: ShoppingBag, label: "Commerce Nodes", color: "#ff00ff" },
+    { id: "products", icon: Package, label: "Asset Manifest", color: "#7000ff" },
+    ...(isSuperAdmin ? [
+      { id: "automation", icon: BrainCircuit, label: "Neural Flows", color: "#00ff9d" },
+      { id: "admins", icon: Shield, label: "Admin Access", color: "#e81b67" }
+    ] : []),
+    { id: "analytics", icon: BarChart3, label: "Intelligence", color: "#ffcc00" },
+  ];
+
   return (
     <div className="w-[280px] sm:w-80 h-full flex flex-col p-6 gap-8 border-r border-white/5 bg-black/40 backdrop-blur-3xl relative overflow-y-auto no-scrollbar group">
       {/* Background Pulse */}

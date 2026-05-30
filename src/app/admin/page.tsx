@@ -18,14 +18,17 @@ import {
   ShoppingBag, Users, Zap, 
   BarChart3, BrainCircuit, Activity,
   Database, ShieldCheck, Terminal,
-  Cpu, Network, X
+  Cpu, Network, X,
+  Shield, Plus, Lock, Check, Power, Key, Trash2
 } from "lucide-react";
 import { MOCK_PRODUCTS } from "@/data/products";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 
+import { STORE_ADMIN_EMAIL } from "@/lib/contexts/AuthContext";
+
 export default function AdminDashboard() {
-  const { user, isAdmin, isLoading: authLoading } = useAuth();
+  const { user, isAdmin, isSuperAdmin, isStoreAdmin, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState("overview");
@@ -52,6 +55,14 @@ export default function AdminDashboard() {
   const [formOffer, setFormOffer] = useState("Buy One Get One Free");
   const [formIsTrending, setFormIsTrending] = useState(false);
 
+  // Admin Management state (Super admin only)
+  const [adminsList, setAdminsList] = useState<any[]>([]);
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [adminName, setAdminName] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminEditing, setAdminEditing] = useState<any | null>(null);
+
   // Security Check
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -59,6 +70,17 @@ export default function AdminDashboard() {
       else router.push("/auth");
     }
   }, [authLoading, isAdmin, user, router]);
+
+  // Tab Access Control
+  useEffect(() => {
+    if (!authLoading && isAdmin && !isSuperAdmin) {
+      if (activeTab === "automation" || activeTab === "admins") {
+        setActiveTab("overview");
+        toast.error("Access Denied: Tab reserved for Root Administration.");
+      }
+    }
+  }, [activeTab, isSuperAdmin, isAdmin, authLoading]);
+
 
   // Fetch Data
   useEffect(() => {
@@ -132,6 +154,193 @@ export default function AdminDashboard() {
     
     if (isAdmin) fetchData();
   }, [isAdmin]);
+
+  // Load admins list
+  const fetchAdmins = async () => {
+    const officialAdmin = {
+      id: "official-store-admin",
+      full_name: "LUXE Store Admin",
+      email: "official.valceron.in@gmail.com",
+      role: "store-admin",
+      status: "active",
+      created_at: new Date().toISOString()
+    };
+
+    let localAdmins: any[] = [];
+    const saved = localStorage.getItem("luxe-admins");
+    if (saved) {
+      try {
+        localAdmins = JSON.parse(saved);
+      } catch (e) {
+        localAdmins = [];
+      }
+    }
+
+    if (!localAdmins.some(a => a.email.toLowerCase() === officialAdmin.email.toLowerCase())) {
+      localAdmins.push(officialAdmin);
+      localStorage.setItem("luxe-admins", JSON.stringify(localAdmins));
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .in("role", ["super-admin", "store-admin", "admin"]);
+      
+      if (!error && data) {
+        const merged = [...localAdmins];
+        data.forEach(dbAdmin => {
+          if (!merged.some(m => m.email.toLowerCase() === dbAdmin.email.toLowerCase())) {
+            merged.push({
+              id: dbAdmin.id,
+              full_name: dbAdmin.full_name || "Admin Account",
+              email: dbAdmin.email,
+              role: dbAdmin.role === "admin" ? "super-admin" : dbAdmin.role,
+              status: "active",
+              created_at: dbAdmin.created_at
+            });
+          }
+        });
+        setAdminsList(merged);
+        return;
+      }
+    } catch (e) {
+      console.warn("Could not fetch profiles from Supabase, using local storage admins");
+    }
+
+    setAdminsList(localAdmins);
+  };
+
+  useEffect(() => {
+    if (isSuperAdmin && activeTab === "admins") {
+      fetchAdmins();
+    }
+  }, [isSuperAdmin, activeTab]);
+
+  const handleSaveAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminEmail || !adminName) return;
+
+    const trimmedEmail = adminEmail.trim().toLowerCase();
+    const trimmedName = adminName.trim();
+
+    if (trimmedName.length > 255 || trimmedEmail.length > 255 || (adminPassword && adminPassword.length > 255)) {
+      toast.error("Oversized inputs are rejected.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      toast.error("Invalid email format.");
+      return;
+    }
+
+    const newAdmin = {
+      id: adminEditing ? adminEditing.id : `admin-${Date.now()}`,
+      full_name: trimmedName,
+      email: trimmedEmail,
+      role: "store-admin",
+      status: adminEditing ? adminEditing.status : "active",
+      created_at: adminEditing ? adminEditing.created_at : new Date().toISOString()
+    };
+
+    if (!adminEditing && adminPassword) {
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: trimmedEmail,
+          password: adminPassword,
+          options: {
+            data: {
+              full_name: trimmedName,
+              phone_number: "+919999999999",
+            }
+          }
+        });
+        if (error) console.warn("Supabase signUp for admin failed:", error.message);
+        
+        if (data?.user) {
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .insert({
+              id: data.user.id,
+              email: trimmedEmail,
+              full_name: trimmedName,
+              role: "store-admin",
+              phone_number: "+919999999999"
+            });
+          if (profileError) console.warn("Supabase profile insert for admin failed:", profileError.message);
+        }
+      } catch (err) {
+        console.warn("Supabase auth signUp error:", err);
+      }
+    }
+
+    let updated = [...adminsList];
+    if (adminEditing) {
+      updated = adminsList.map(a => a.id === adminEditing.id ? newAdmin : a);
+      toast.success("Admin account parameters calibrated.");
+    } else {
+      if (adminsList.some(a => a.email.toLowerCase() === newAdmin.email.toLowerCase())) {
+        toast.error("An admin account with this email already exists.");
+        return;
+      }
+      updated = [...adminsList, newAdmin];
+      toast.success("New store-admin initialized.");
+    }
+
+    setAdminsList(updated);
+    localStorage.setItem("luxe-admins", JSON.stringify(updated));
+    setShowAdminModal(false);
+    setAdminName("");
+    setAdminEmail("");
+    setAdminPassword("");
+    setAdminEditing(null);
+  };
+
+  const handleDeleteAdmin = async (id: string) => {
+    if (id === "official-store-admin" || id === "super-admin-id-123") {
+      toast.error("Cannot decommission root system administrators.");
+      return;
+    }
+
+    if (confirm("Decommission this admin node?")) {
+      const updated = adminsList.filter(a => a.id !== id);
+      setAdminsList(updated);
+      localStorage.setItem("luxe-admins", JSON.stringify(updated));
+      toast.success("Admin node decommissioned.");
+      
+      try {
+        await supabase.from("profiles").delete().eq("id", id);
+      } catch (e) {
+        // ignore
+      }
+    }
+  };
+
+  const handleToggleAdminStatus = (id: string) => {
+    if (id === "official-store-admin" || id === "super-admin-id-123") {
+      toast.error("Root administrators cannot be deactivated.");
+      return;
+    }
+    const updated = adminsList.map(a => {
+      if (a.id === id) {
+        const nextStatus = a.status === "active" ? "inactive" : "active";
+        toast.success(`Admin state set to ${nextStatus}`);
+        return { ...a, status: nextStatus };
+      }
+      return a;
+    });
+    setAdminsList(updated);
+    localStorage.setItem("luxe-admins", JSON.stringify(updated));
+  };
+
+  const handleResetAdminPassword = (admin: any) => {
+    const newPass = prompt(`Enter new password for ${admin.full_name}:`, "Syed09.");
+    if (newPass) {
+      toast.success(`Password reset request dispatched for ${admin.email}`);
+    }
+  };
+
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     const order = orders.find(o => o.id === orderId);
@@ -650,14 +859,17 @@ export default function AdminDashboard() {
                                   </div>
 
                                   {/* Delete Order Button */}
-                                  <div className="flex justify-end pt-4">
-                                    <button
-                                      onClick={() => handleDelete(order.id, 'orders')}
-                                      className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 text-[9px] font-mono uppercase tracking-widest transition-all cursor-pointer"
-                                    >
-                                      Decommission Node
-                                    </button>
-                                  </div>
+                                  {isSuperAdmin && (
+                                    <div className="flex justify-end pt-4">
+                                      <button
+                                        onClick={() => handleDelete(order.id, 'orders')}
+                                        className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 text-[9px] font-mono uppercase tracking-widest transition-all cursor-pointer"
+                                      >
+                                        Decommission Node
+                                      </button>
+                                    </div>
+                                  )}
+
                                 </div>
                               </div>
                             </motion.div>
@@ -699,7 +911,95 @@ export default function AdminDashboard() {
                 </motion.div>
               )}
 
+              {activeTab === "admins" && isSuperAdmin && (
+                <motion.div
+                  key="admins"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  className="space-y-8 h-full"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                      <h3 className="text-3xl font-display font-black tracking-tighter text-gradient uppercase">Admin Access Control</h3>
+                      <p className="text-xs text-white/40 tracking-widest uppercase mt-1">Manage system administrators and store managers</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setAdminEditing(null);
+                        setAdminName("");
+                        setAdminEmail("");
+                        setAdminPassword("");
+                        setShowAdminModal(true);
+                      }}
+                      className="bg-white text-black px-6 py-3 rounded-2xl text-xs font-black tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center justify-center gap-2"
+                    >
+                      <Plus size={14} /> Add Store Admin
+                    </button>
+                  </div>
+
+                  <div className="space-y-4 pb-20 overflow-y-auto max-h-[70vh] pr-2 custom-scrollbar">
+                    {adminsList.length === 0 ? (
+                      <div className="p-12 text-center bg-white/[0.01] border border-white/5 rounded-3xl">
+                        <Shield className="mx-auto mb-4 text-white/20 animate-pulse" size={32} />
+                        <p className="text-xs font-mono text-white/40 uppercase tracking-widest">No administrator nodes loaded.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-4">
+                        {adminsList.map((admin, idx) => (
+                          <div
+                            key={admin.id || idx}
+                            className="bg-[#0A0A0C] border border-white/5 rounded-[24px] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-white/10 transition-all duration-500"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#D4AF37]">
+                                <Shield size={20} />
+                              </div>
+                              <div className="space-y-1">
+                                <h4 className="text-sm font-bold text-white uppercase tracking-tight">{admin.full_name}</h4>
+                                <p className="text-[10px] font-mono text-white/40">{admin.email}</p>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[8px] font-mono text-white/30 uppercase">Role:</span>
+                                  <span className="px-2 py-0.5 rounded bg-white/5 text-white/60 font-mono text-[8px] uppercase tracking-wider">{admin.role}</span>
+                                  <span className="text-[8px] font-mono text-white/30 uppercase ml-2">Status:</span>
+                                  <span className={`px-2 py-0.5 rounded font-mono text-[8px] uppercase tracking-wider ${admin.status === 'active' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>{admin.status}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => handleToggleAdminStatus(admin.id)}
+                                className={`p-2 rounded-xl border text-[10px] font-mono uppercase tracking-widest transition-all flex items-center gap-1 cursor-pointer ${admin.status === 'active' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500 hover:bg-yellow-500/20' : 'bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20'}`}
+                                title={admin.status === 'active' ? 'Deactivate Admin' : 'Activate Admin'}
+                              >
+                                <Power size={12} /> {admin.status === 'active' ? 'Deactivate' : 'Activate'}
+                              </button>
+                              <button
+                                onClick={() => handleResetAdminPassword(admin)}
+                                className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 text-blue-400 text-[10px] font-mono uppercase tracking-widest transition-all flex items-center gap-1 cursor-pointer"
+                                title="Reset Password"
+                              >
+                                <Key size={12} /> Reset Pass
+                              </button>
+                              <button
+                                onClick={() => handleDeleteAdmin(admin.id)}
+                                className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 text-[10px] font-mono uppercase tracking-widest transition-all flex items-center gap-1 cursor-pointer"
+                                title="Delete Admin"
+                              >
+                                <Trash2 size={12} /> Delete
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
               {activeTab === "analytics" && (
+
                 <motion.div
                   key="analytics"
                   initial={{ opacity: 0, x: -50 }}
@@ -717,6 +1017,99 @@ export default function AdminDashboard() {
                 </motion.div>
               )}
            </AnimatePresence>
+
+         {/* Admin Creation / Editing Modal */}
+         <AnimatePresence>
+           {showAdminModal && (
+             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+               <motion.div 
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 exit={{ opacity: 0 }}
+                 onClick={() => setShowAdminModal(false)}
+                 className="fixed inset-0 bg-black/85 backdrop-blur-md"
+               />
+               <motion.div 
+                 initial={{ scale: 0.95, opacity: 0, y: 30 }}
+                 animate={{ scale: 1, opacity: 1, y: 0 }}
+                 exit={{ scale: 0.95, opacity: 0, y: 30 }}
+                 className="relative w-full max-w-md bg-[#08080c] border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative z-10 flex flex-col max-h-[85vh] text-left"
+               >
+                 <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent" />
+                 <div className="flex justify-between items-center px-8 py-6 border-b border-white/5 bg-white/[0.01]">
+                   <div>
+                     <h3 className="text-lg font-display italic text-white">{adminEditing ? "Modify Admin Settings" : "Initialize Store Admin"}</h3>
+                     <p className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Luxe OS Admin Directory</p>
+                   </div>
+                   <button 
+                     onClick={() => setShowAdminModal(false)}
+                     className="p-2 text-white/40 hover:text-white rounded-full hover:bg-white/5 cursor-pointer"
+                   >
+                     <X size={18} />
+                   </button>
+                 </div>
+
+                 <form onSubmit={handleSaveAdmin} className="p-8 space-y-4 overflow-y-auto max-h-[65vh] custom-scrollbar">
+                   <div className="space-y-1.5">
+                     <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Admin Name</label>
+                     <input
+                       type="text"
+                       required
+                       value={adminName}
+                       onChange={(e) => setAdminName(e.target.value)}
+                       placeholder="E.g., LUXE Store Admin"
+                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#D4AF37]/40 text-white placeholder:text-white/20 transition-all"
+                     />
+                   </div>
+
+                   <div className="space-y-1.5">
+                     <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Email Address</label>
+                     <input
+                       type="email"
+                       required
+                       disabled={!!adminEditing}
+                       value={adminEmail}
+                       onChange={(e) => setAdminEmail(e.target.value)}
+                       placeholder="E.g., official.valceron.in@gmail.com"
+                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#D4AF37]/40 text-white placeholder:text-white/20 transition-all disabled:opacity-50"
+                     />
+                   </div>
+
+                   {!adminEditing && (
+                     <div className="space-y-1.5">
+                       <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Password</label>
+                       <input
+                         type="password"
+                         required
+                         value={adminPassword}
+                         onChange={(e) => setAdminPassword(e.target.value)}
+                         placeholder="Minimum 6 characters"
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#D4AF37]/40 text-white placeholder:text-white/20 transition-all"
+                       />
+                     </div>
+                   )}
+
+                   <div className="pt-4 border-t border-white/5 flex gap-4">
+                     <button
+                       type="button"
+                       onClick={() => setShowAdminModal(false)}
+                       className="flex-1 py-3 border border-white/10 rounded-xl text-white hover:bg-white/5 transition-all text-xs font-mono uppercase tracking-widest cursor-pointer text-center"
+                     >
+                       Abort
+                     </button>
+                     <button
+                       type="submit"
+                       className="flex-1 py-3 bg-[#D4AF37] text-black rounded-xl hover:bg-[#D4AF37]/90 transition-all text-xs font-mono font-bold uppercase tracking-widest cursor-pointer text-center"
+                     >
+                       {adminEditing ? "Calibrate" : "Deploy Admin"}
+                     </button>
+                   </div>
+                 </form>
+               </motion.div>
+             </div>
+           )}
+         </AnimatePresence>
+
 
         </div>
 

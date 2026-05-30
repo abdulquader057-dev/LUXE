@@ -9,6 +9,8 @@ interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
+  isStoreAdmin: boolean;
   profile: any | null;
   signOut: () => Promise<void>;
   loginAsDemo: () => void;
@@ -17,6 +19,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const ADMIN_EMAIL = "abdulquader057@gmail.com";
+export const STORE_ADMIN_EMAIL = "official.valceron.in@gmail.com";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -24,7 +27,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<any | null>(null);
 
-  const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const isSuperAdmin = !!user && (user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() || profile?.role === "super-admin" || profile?.role === "admin");
+  const isStoreAdmin = !!user && (user.email?.toLowerCase() === STORE_ADMIN_EMAIL.toLowerCase() || profile?.role === "store-admin");
+  const isAdmin = isSuperAdmin || isStoreAdmin;
+
 
   useEffect(() => {
     // Get initial session
@@ -144,10 +150,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, isAdmin, profile, signOut, loginAsDemo }}>
+    <AuthContext.Provider value={{ user, session, isLoading, isAdmin, isSuperAdmin, isStoreAdmin, profile, signOut, loginAsDemo }}>
       {children}
     </AuthContext.Provider>
   );
+
 }
 
 export function useAuth() {

@@ -139,6 +139,26 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addToCart = (item: CartItem) => {
+    // GTM Event Tracking
+    if (typeof window !== "undefined") {
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({
+        event: "add_to_cart",
+        ecommerce: {
+          currency: currency,
+          value: item.price * item.quantity,
+          items: [{
+            item_id: item.id,
+            item_name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            item_size: item.size,
+            item_color: item.color
+          }]
+        }
+      });
+    }
+
     setCart((prev) => {
       const existing = prev.find((i) => i.id === item.id && i.size === item.size && i.color === item.color);
       let newCart;

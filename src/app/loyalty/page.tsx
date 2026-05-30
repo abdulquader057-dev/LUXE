@@ -90,11 +90,13 @@ export default function LoyaltyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [memberCount, setMemberCount] = useState<number | null>(null);
   const [joined, setJoined] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Validation helpers
   const isPhoneValid = /^[6-9]\d{9}$/.test(phone.replace(/[^0-9]/g, "").slice(-10));
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const canSubmit = name.trim() && isPhoneValid && isEmailValid && address.trim() && !submitting;
+  const isLengthValid = name.length <= 255 && phone.length <= 255 && email.length <= 255 && address.length <= 255;
+  const canSubmit = name.trim() && isPhoneValid && isEmailValid && address.trim() && isLengthValid && !submitting;
 
   const fetchCount = async () => {
     const { count } = await supabase
@@ -105,12 +107,20 @@ export default function LoyaltyPage() {
 
   useEffect(() => {
     fetchCount();
-    // Redirect to login if not logged in
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit) return;
+    setErrorMsg(null);
+
+    if (!canSubmit) {
+      if (!isLengthValid) {
+        setErrorMsg("Oversized inputs are rejected (max 255 characters).");
+      } else {
+        setErrorMsg("Please verify that all fields are filled out correctly.");
+      }
+      return;
+    }
 
     if (!user) {
       toast.error("Please log in to join the Inner Circle.");
@@ -126,24 +136,33 @@ export default function LoyaltyPage() {
     const toastId = toast.loading("Securing your spot...");
 
     try {
-      // Insert into vip_migration table
-      const { error } = await supabase.from("vip_migration").insert({
-        name: name.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        address: address.trim(),
-        user_id: user.id,
-        tier: "Elite",
-        joined_at: new Date().toISOString(),
+      // POST to secure /api/vip route
+      const response = await fetch("/api/vip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          email: email.trim(),
+          address: address.trim(),
+          user_id: user.id,
+          tier: "Elite",
+        }),
       });
 
-      if (error) {
-        if (error.code === "23505") {
-          toast.dismiss(toastId);
-          toast.error("You have already joined the Inner Circle!");
-          return;
-        }
-        throw error;
+      const resData = await response.json();
+      if (!response.ok) {
+        throw new Error(resData.error || "Failed to join VIP Inner Circle");
+      }
+
+      // GTM Event Tracking for joining Inner Circle
+      if (typeof window !== "undefined") {
+        (window as any).dataLayer = (window as any).dataLayer || [];
+        (window as any).dataLayer.push({
+          event: "join_inner_circle",
+          user_email: email.trim(),
+          tier: "Elite"
+        });
       }
 
       // Send congratulations WhatsApp to customer
@@ -171,11 +190,13 @@ export default function LoyaltyPage() {
     } catch (err: any) {
       console.error(err);
       toast.dismiss(toastId);
-      toast.error("Something went wrong. Please try again.");
+      setErrorMsg(err.message || "Something went wrong. Please try again.");
+      toast.error(err.message || "Something went wrong.");
     } finally {
       setSubmitting(false);
     }
   };
+
 
   const spotsLeft = memberCount !== null ? MAX_MEMBERS - memberCount : null;
   const isFull = (memberCount ?? 0) >= MAX_MEMBERS;
@@ -370,6 +391,11 @@ export default function LoyaltyPage() {
                 />
               </div>
 
+              {errorMsg && (
+                <div className="p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded text-xs font-mono text-center">
+                  {errorMsg}
+                </div>
+              )}
               <button
                 type="submit"
                 disabled={!canSubmit}
@@ -381,6 +407,7 @@ export default function LoyaltyPage() {
                   <><Crown size={14} /> Claim Free Elite Membership</>
                 )}
               </button>
+
 
               <p className="text-[9px] font-mono text-white/20 text-center uppercase tracking-widest">
                 Offer valid for first {MAX_MEMBERS} members only • Limited time

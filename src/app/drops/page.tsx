@@ -86,7 +86,18 @@ function DropCard({ drop, index }: { drop: LiveDrop; index: number }) {
             </div>
           </div>
           <button
-            onClick={() => setIsNotified(!isNotified)}
+            onClick={() => {
+              const nextState = !isNotified;
+              setIsNotified(nextState);
+              if (nextState && typeof window !== "undefined") {
+                (window as any).dataLayer = (window as any).dataLayer || [];
+                (window as any).dataLayer.push({
+                  event: "notify_drop",
+                  product_id: drop.product.id,
+                  product_name: drop.product.name
+                });
+              }
+            }}
             className={cn(
               "glass-pill w-12 h-12 flex items-center justify-center transition-all duration-500",
               isNotified ? "text-rose-gold bg-rose-gold/10" : "text-white/50 hover:text-white"
