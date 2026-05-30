@@ -152,13 +152,14 @@ export const LIVE_DROPS: LiveDrop[] = [
     rarity: "ultra-rare",
     hypeScore: 97,
     waitlistCount: 1240,
+    exclusive: true,
   },
   {
     id: "drop-002",
     product: MOCK_PRODUCTS[2], // Vortex Chrono Watch
     dropDate: new Date(Date.now() + 3600000 * 24).toISOString(), // 24 hours
     totalStock: 100,
-    remainingStock: 42,
+    remainingStock: 0,
     rarity: "exclusive",
     hypeScore: 85,
     waitlistCount: 680,
