@@ -67,8 +67,15 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "LUXE — Luxury Redefined",
   description: "Affordable luxury fashion for the bold generation",
+  alternates: {
+    canonical: "https://valceron.in/",
+  },
   openGraph: {
+    title: "LUXE — Luxury Redefined",
+    description: "Affordable luxury fashion for the bold generation",
+    url: "https://valceron.in/",
     images: [{ url: "/hero/mobile.jpg" }],
+    type: "website",
   },
   keywords: ["AI Fashion", "Future of Retail", "Luxury Techwear", "Neural Styling", "Luxe"],
   verification: {
@@ -86,6 +93,9 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} ${outfit.variable} h-full antialiased dark scroll-smooth`}
     >
+      <head>
+        <meta name="google-site-verification" content="TO_BE_FILLED" />
+      </head>
       <body className="min-h-screen flex flex-col bg-bg-base text-text-primary selection:bg-primary/30 selection:text-white relative transition-colors duration-1000">
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
