@@ -151,6 +151,55 @@ const ProductPage = () => {
                 </MotionItem>
               ))}
             </div>
+
+            {/* Color Swatch Selector below thumbnails */}
+            {product.colors && (
+              <MotionItem animation="slideUp" className="pt-6 border-t border-white/10 mt-6">
+                <div className="flex items-center gap-4 justify-start">
+                  <span className="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em]">Swatch Selection:</span>
+                  <div className="flex flex-wrap gap-3">
+                    {product.colors.map((color) => {
+                      const colorMap: Record<string, string> = {
+                        "white": "#ffffff",
+                        "light blue": "#a8d5e5",
+                        "sky blue": "#a8d5e5",
+                        "pink": "#e8b0b0",
+                        "sunset pink": "#e8b0b0",
+                        "olive green": "#657053",
+                        "tan beige": "#d7c6b5",
+                        "desert sand": "#d7c6b5",
+                        "cocoa brown": "#5c4033",
+                        "navy blue": "#1d2a44",
+                        "carbon black": "#151515"
+                      };
+                      const hex = colorMap[color.toLowerCase()] || "#cccccc";
+                      const isWhite = color.toLowerCase() === "white";
+                      return (
+                        <button
+                          key={color}
+                          onClick={() => setSelectedColor(color)}
+                          className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 border-2",
+                            selectedColor === color 
+                              ? "border-[#D4AF37] scale-110 shadow-lg" 
+                              : "border-white/5 hover:border-white/20"
+                          )}
+                          title={color}
+                        >
+                          <span 
+                            className="w-5.5 h-5.5 rounded-full block border"
+                            style={{ 
+                              backgroundColor: hex, 
+                              borderColor: isWhite ? "rgba(255,255,255,0.2)" : "transparent" 
+                            }} 
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </MotionItem>
+            )}
           </MotionContainer>
 
           {/* Right: Cognition & Selection */}
@@ -303,7 +352,7 @@ const ProductPage = () => {
               </div>
 
               {/* Action Buttons - Transaction Layer */}
-              <div className="flex flex-col sm:flex-row gap-6 mb-20">
+              <div className="flex flex-col sm:flex-row gap-6 mb-20 mobile-sticky-actions">
                 {product.stock === 0 ? (
                   <button 
                     disabled

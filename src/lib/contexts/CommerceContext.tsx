@@ -27,7 +27,7 @@ interface CommerceContextType {
   totalPrice: number;
   isCartOpen: boolean;
   toggleCart: () => void;
-  convertPrice: (priceINR: number) => { amount: number; symbol: string };
+  convertPrice: (priceINR: number, skipDiscount?: boolean) => { amount: number; symbol: string };
   country: string;
   setCountry: (country: string) => void;
   availableCurrencies: Currency[];
@@ -78,6 +78,47 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
     // Load saved UI Theme color
     const savedTheme = localStorage.getItem("luxe-theme-color") || "#00f2ff";
     document.documentElement.style.setProperty("--primary-color", savedTheme);
+  }, []);
+
+  const [isGold, setIsGold] = useState(false);
+
+  useEffect(() => {
+    const checkGoldStatus = () => {
+      try {
+        const savedMockProfile = localStorage.getItem("luxe-mock-profile");
+        const savedMockUser = localStorage.getItem("luxe-mock-user");
+        const activeTheme = localStorage.getItem("luxe-theme") || "Noir Gold";
+        const isGoldTheme = ["Royal Obsidian", "Cognac", "Midnight Rose"].includes(activeTheme);
+        const isGoldLocal = localStorage.getItem("luxe-is-gold") === "true";
+        
+        let hasGoldLevel = false;
+        if (savedMockUser) {
+          const userObj = JSON.parse(savedMockUser);
+          if (userObj?.user_metadata?.style_dna?.level >= 3) {
+            hasGoldLevel = true;
+          }
+        }
+
+        let isGoldProfile = false;
+        if (savedMockProfile) {
+          const profileObj = JSON.parse(savedMockProfile);
+          if (profileObj?.tier === "Gold" || profileObj?.role === "admin") {
+            isGoldProfile = true;
+          }
+        }
+
+        setIsGold(isGoldTheme || isGoldLocal || hasGoldLevel || isGoldProfile);
+      } catch (e) {}
+    };
+
+    checkGoldStatus();
+    
+    window.addEventListener("storage", checkGoldStatus);
+    const interval = setInterval(checkGoldStatus, 1500);
+    return () => {
+      window.removeEventListener("storage", checkGoldStatus);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleSetCurrency = (cur: Currency) => {
@@ -142,10 +183,15 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
   const toggleCart = () => setIsCartOpen(!isCartOpen);
 
   const cartCount = cart.reduce((total, item) => total + (Number(item.quantity) || 0), 0);
-  const totalPrice = cart.reduce((total, item) => total + ((Number(item.price) || 0) * (Number(item.quantity) || 0)), 0);
+  const rawTotalPrice = cart.reduce((total, item) => total + ((Number(item.price) || 0) * (Number(item.quantity) || 0)), 0);
+  const totalPrice = isGold ? rawTotalPrice * 0.85 : rawTotalPrice;
 
-  const convertPrice = (priceINR: number) => {
-    const converted = priceINR * exchangeRates[currency];
+  const convertPrice = (priceINR: number, skipDiscount = false) => {
+    let finalPrice = priceINR;
+    if (isGold && !skipDiscount) {
+      finalPrice = priceINR * 0.85;
+    }
+    const converted = finalPrice * exchangeRates[currency];
     return {
       amount: Math.round(converted),
       symbol: currencySymbols[currency],

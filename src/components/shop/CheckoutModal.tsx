@@ -87,7 +87,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   if (!isOpen) return null;
 
   const formatPrice = (p: number) => {
-    const res = convertPrice(p);
+    const res = convertPrice(p, true);
     return res.symbol + res.amount;
   };
 

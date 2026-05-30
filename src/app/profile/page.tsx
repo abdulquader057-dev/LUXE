@@ -47,6 +47,38 @@ function CircularProgress({ value, size = 120, strokeWidth = 8, color = "#00f2ff
 export default function ProfilePage() {
   const { user, profile, isLoading } = useAuth();
   const router = useRouter();
+  const [isGold, setIsGold] = useState(false);
+
+  useEffect(() => {
+    const checkGold = () => {
+      try {
+        const savedMockProfile = localStorage.getItem("luxe-mock-profile");
+        const savedMockUser = localStorage.getItem("luxe-mock-user");
+        const activeTheme = localStorage.getItem("luxe-theme") || "Noir Gold";
+        const isGoldTheme = ["Royal Obsidian", "Cognac", "Midnight Rose"].includes(activeTheme);
+        const isGoldLocal = localStorage.getItem("luxe-is-gold") === "true";
+
+        let hasGoldLevel = false;
+        if (savedMockUser) {
+          const userObj = JSON.parse(savedMockUser);
+          if (userObj?.user_metadata?.style_dna?.level >= 3) {
+            hasGoldLevel = true;
+          }
+        }
+
+        let isGoldProfile = false;
+        if (savedMockProfile) {
+          const profileObj = JSON.parse(savedMockProfile);
+          if (profileObj?.tier === "Gold" || profileObj?.role === "admin") {
+            isGoldProfile = true;
+          }
+        }
+
+        setIsGold(isGoldTheme || isGoldLocal || hasGoldLevel || isGoldProfile || profile?.tier === "Gold" || profile?.role === "admin");
+      } catch (e) {}
+    };
+    checkGold();
+  }, [profile, user]);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -98,6 +130,13 @@ export default function ProfilePage() {
               </div>
             </CircularProgress>
           </div>
+
+          {isGold && (
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/40 text-[#D4AF37] text-[10px] font-black tracking-[0.2em] uppercase mb-4 shadow-[0_0_15px_rgba(212,175,55,0.15)] animate-pulse-glow">
+              <Crown size={12} className="fill-[#D4AF37]/20 text-[#D4AF37]" />
+              Gold Loyalty Member
+            </div>
+          )}
 
           <h1 className="text-5xl font-display font-black tracking-tighter mb-2 uppercase">
             {profile?.full_name || user?.email?.split('@')[0] || 'Your Style DNA'}

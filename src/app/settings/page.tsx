@@ -7,7 +7,7 @@ import {
   Settings2, Shirt, Watch, Crown, 
   Bell, HelpCircle, Camera, Cpu, 
   History, Share2, MessageSquare, 
-  CheckCircle2, ChevronRight, X,
+  CheckCircle2, ChevronRight, X, Lock,
   LogOut, Globe, Moon, Eye, Sparkles, Diamond, ShoppingBag, Palette, Calendar, Send, Clipboard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ import confetti from "canvas-confetti";
 
 const SETTINGS_MENU = [
   { id: "account", label: "Account", icon: User, color: "#00f2ff" },
+  { id: "themes", label: "Theme Hub", icon: Palette, color: "#D4AF37" },
   { id: "preferences", label: "Preferences", icon: Shirt, color: "#c084fc" },
   { id: "accessories", label: "Accessory Hub", icon: Watch, color: "#ffcc00" },
   { id: "subscription", label: "Luxe Elite", icon: Crown, color: "#ff4466" },
@@ -45,6 +46,8 @@ export default function SettingsPage() {
     switch (activeTab) {
       case "account":
         return <AccountSettings />;
+      case "themes":
+        return <ThemeSettings />;
       case "preferences":
         return <ClothingPreferences />;
       case "accessories":
@@ -1774,5 +1777,151 @@ function OrderRow({ id, status, date }: { id: string; status: string; date: stri
           <ChevronRight size={14} className="text-white/10 group-hover:text-white/40 group-hover:translate-x-1 transition-all" />
        </div>
     </motion.div>
+  );
+}
+
+function ThemeSettings() {
+  const { user, profile } = useAuth();
+  const [activeTheme, setActiveTheme] = useState("Noir Gold");
+  const [isGold, setIsGold] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("luxe-theme") || "Noir Gold";
+    setActiveTheme(savedTheme);
+
+    const checkGold = () => {
+      try {
+        const savedMockProfile = localStorage.getItem("luxe-mock-profile");
+        const savedMockUser = localStorage.getItem("luxe-mock-user");
+        const isGoldLocal = localStorage.getItem("luxe-is-gold") === "true";
+
+        let hasGoldLevel = false;
+        if (savedMockUser) {
+          const userObj = JSON.parse(savedMockUser);
+          if (userObj?.user_metadata?.style_dna?.level >= 3) {
+            hasGoldLevel = true;
+          }
+        }
+
+        let isGoldProfile = false;
+        if (savedMockProfile) {
+          const profileObj = JSON.parse(savedMockProfile);
+          if (profileObj?.tier === "Gold" || profileObj?.role === "admin") {
+            isGoldProfile = true;
+          }
+        }
+
+        setIsGold(isGoldLocal || hasGoldLevel || isGoldProfile);
+      } catch (e) {}
+    };
+    checkGold();
+  }, []);
+
+  const handleSelectTheme = async (themeName: string, isExclusive: boolean) => {
+    if (isExclusive && !isGold) {
+      toast.error("🔒 Theme Locked. Unlock exclusive themes by reaching Gold loyalty tier!");
+      return;
+    }
+
+    setActiveTheme(themeName);
+    localStorage.setItem("luxe-theme", themeName);
+    
+    // Trigger global theme apply
+    const event = new CustomEvent("luxe-theme-change", { detail: themeName });
+    window.dispatchEvent(event);
+
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ theme_preference: themeName })
+          .eq("id", user.id);
+        
+        if (error) {
+          // If theme_preference doesn't exist, save inside user metadata
+          const { error: metaError } = await supabase.auth.updateUser({
+            data: { theme_preference: themeName }
+          });
+          if (metaError) throw metaError;
+        }
+      } catch (err) {
+        console.warn("Could not save theme to Supabase:", err);
+      }
+    }
+    toast.success(`Theme updated to ${themeName}!`);
+  };
+
+  const themeList = [
+    { name: "Noir Gold", bg: "#0D0A06", card: "#1A1408", text: "#F5E6C8", accent: "#D4AF37", desc: "Classic dark theme with warm gold accents.", exclusive: false },
+    { name: "Champagne", bg: "#1C1410", card: "#2A1F0E", text: "#F5E6C8", accent: "#D4AF37", desc: "Crisp and luxurious champagne style.", exclusive: false },
+    { name: "Deep Slate", bg: "#0A0F1A", card: "#111827", text: "#E8E0D0", accent: "#D4AF37", desc: "Professional deep slate look.", exclusive: false },
+    { name: "Burgundy Luxe", bg: "#0F0608", card: "#1A0A0E", text: "#F5E0E8", accent: "#D4AF37", desc: "Rich and moody burgundy essence.", exclusive: false },
+    { name: "Royal Obsidian", bg: "#050308", card: "#0D0A14", text: "#EDE8FF", accent: "#D4AF37", desc: "Exclusive obsidian with animated borders.", exclusive: true },
+    { name: "Cognac", bg: "#0F0800", card: "#1F1000", text: "#FFE8CC", accent: "#D4AF37", desc: "Warm rich cognac with ember glows.", exclusive: true },
+    { name: "Midnight Rose", bg: "#080510", card: "#100818", text: "#FFE8F0", accent: "#D4AF37", desc: "Subtle rose shimmer on midnight sky.", exclusive: true }
+  ];
+
+  return (
+    <div className="space-y-12 text-left">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-display font-light italic">Theme Configuration Hub</h2>
+        <div className="text-[8px] font-mono text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest">Calibrated</div>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {themeList.map((theme) => {
+          const isSelected = activeTheme === theme.name;
+          const isLocked = theme.exclusive && !isGold;
+
+          return (
+            <motion.div
+              key={theme.name}
+              whileHover={{ scale: isLocked ? 1.0 : 1.03, y: isLocked ? 0 : -4 }}
+              whileTap={{ scale: isLocked ? 1.0 : 0.98 }}
+              onClick={() => handleSelectTheme(theme.name, theme.exclusive)}
+              className={cn(
+                "p-6 rounded-3xl border transition-all duration-300 cursor-pointer flex flex-col justify-between h-[180px] relative overflow-hidden",
+                isSelected 
+                  ? "border-[#D4AF37] bg-white/[0.03] shadow-[0_0_20px_rgba(212,175,55,0.15)]" 
+                  : isLocked 
+                    ? "border-white/5 bg-white/[0.01] opacity-50 cursor-not-allowed" 
+                    : "border-white/10 bg-white/[0.02] hover:border-[#D4AF37]/50"
+              )}
+              style={{
+                boxShadow: isSelected ? `0 0 25px -5px ${theme.accent}` : "none"
+              }}
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-mono font-bold uppercase tracking-wider text-white">
+                    {theme.name}
+                  </h4>
+                  {isSelected ? (
+                    <CheckCircle2 size={16} className="text-[#D4AF37]" />
+                  ) : isLocked ? (
+                    <Lock size={16} className="text-[#D4AF37]" />
+                  ) : null}
+                </div>
+                <p className="text-[10px] font-sora text-white/40 leading-relaxed">
+                  {theme.desc}
+                </p>
+              </div>
+
+              <div className="flex gap-2 items-center mt-4">
+                <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: theme.bg }} title="Background" />
+                <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: theme.card }} title="Card/Surface" />
+                <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: theme.text }} title="Text Color" />
+                <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: theme.accent }} title="Accent" />
+                {theme.exclusive && (
+                  <span className="text-[7px] font-mono text-[#D4AF37] border border-[#D4AF37]/30 px-2 py-0.5 rounded-full uppercase ml-auto tracking-widest">
+                    Gold Member
+                  </span>
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

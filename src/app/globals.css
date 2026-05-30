@@ -604,6 +604,14 @@ button, a, .clickable {
 .floatHeadline {
   animation: floatHeadline 6s ease-in-out infinite;
   display: inline-block;
+  text-shadow: 
+    0 1px 0 rgba(212, 175, 55, 0.4),
+    0 2px 0 rgba(212, 175, 55, 0.35),
+    0 3px 0 rgba(212, 175, 55, 0.3),
+    0 4px 0 rgba(0, 0, 0, 0.7),
+    0 5px 10px rgba(0, 0, 0, 0.9),
+    0 10px 20px rgba(0, 0, 0, 0.95),
+    0 20px 30px rgba(212, 175, 55, 0.15);
 }
 
 /* flipDigit: rotateX 0 to -90deg flip animation */
@@ -630,3 +638,173 @@ button, a, .clickable {
     transition: none !important;
   }
 }
+
+/* ==============================================================
+   LAYOUT & GRID OVERRIDES (PART 2)
+   ============================================================== */
+
+/* Consistent page container paddings */
+.container {
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 48px !important;
+    padding-right: 48px !important;
+  }
+}
+
+/* Product list grid layout */
+.product-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 24px !important;
+}
+@media (min-width: 640px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 32px !important;
+  }
+}
+@media (min-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 40px !important;
+  }
+}
+
+/* Enforce minimum touch target heights for all buttons */
+button, .btn, .btn-primary, .btn-secondary, [role="button"] {
+  min-height: 44px;
+}
+
+/* Mobile sticky action buttons layout */
+@media (max-width: 640px) {
+  .mobile-sticky-actions {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: rgba(13, 10, 6, 0.85); /* fallback */
+    background: var(--theme-bg, #0D0A06) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 16px 20px !important;
+    margin-bottom: 0 !important;
+    z-index: 150 !important;
+    flex-direction: row !important;
+    gap: 12px !important;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7);
+  }
+  .mobile-sticky-actions button,
+  .mobile-sticky-actions .btn {
+    flex: 1 !important;
+    min-height: 44px !important;
+    padding: 12px 16px !important;
+    border-radius: 16px !important;
+    font-size: 10px !important;
+    letter-spacing: 0.1em !important;
+    white-space: nowrap !important;
+  }
+  /* Avoid content overlapping with the sticky mobile panel */
+  body {
+    padding-bottom: 80px !important;
+  }
+}
+
+/* ==============================================================
+   3D PREMIUM ANIMATIONS (PART 3)
+   ============================================================== */
+
+/* Page transition mount animation */
+@keyframes pageTransition {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-page-transition {
+  animation: pageTransition 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Background slow gradient motion */
+@keyframes slowGradientMove {
+  0% { background-position: 50% 0%; }
+  50% { background-position: 50% 100%; }
+  100% { background-position: 50% 0%; }
+}
+.bg-mesh, .fixed.inset-0.z-0 {
+  background-size: 200% 200% !important;
+  animation: slowGradientMove 30s ease-in-out infinite !important;
+}
+
+/* Card gold shimmer sweep */
+@keyframes gold-shimmer {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+.group:hover .animate-gold-shimmer {
+  animation: gold-shimmer 1.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+/* ==============================================================
+   EXCLUSIVE THEME EFFECTS (PART 1 & PART 5)
+   ============================================================== */
+
+/* Royal Obsidian animated gradient border */
+@keyframes borderGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.theme-royal-obsidian .product-card::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: 13px;
+  padding: 1.5px;
+  background: linear-gradient(90deg, #D4AF37, #EDE8FF, #D4AF37, #EDE8FF);
+  background-size: 300% 100%;
+  animation: borderGradient 5s linear infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* Cognac theme warm ember glow */
+.theme-cognac .product-card:hover,
+.theme-cognac button:hover,
+.theme-cognac .btn-primary:hover,
+.theme-cognac .btn-secondary:hover {
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.4), 0 0 50px rgba(255, 120, 0, 0.2) !important;
+}
+
+/* Midnight Rose slow rose background shimmer */
+@keyframes roseShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.theme-midnight-rose::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 232, 240, 0.02) 0%, transparent 60%),
+              radial-gradient(circle at 80% 70%, rgba(212, 175, 55, 0.02) 0%, transparent 60%);
+  background-size: 200% 200%;
+  animation: roseShimmer 16s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+

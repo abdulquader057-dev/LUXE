@@ -19,8 +19,48 @@ const Navbar = () => {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const cartControls = useAnimation();
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { currency, setCurrency, cartCount, toggleCart, availableCurrencies } = useCommerce();
+  const [isGold, setIsGold] = useState(false);
+
+  useEffect(() => {
+    const checkGoldStatus = () => {
+      try {
+        const savedMockProfile = localStorage.getItem("luxe-mock-profile");
+        const savedMockUser = localStorage.getItem("luxe-mock-user");
+        const activeTheme = localStorage.getItem("luxe-theme") || "Noir Gold";
+        const isGoldTheme = ["Royal Obsidian", "Cognac", "Midnight Rose"].includes(activeTheme);
+        const isGoldLocal = localStorage.getItem("luxe-is-gold") === "true";
+        
+        let hasGoldLevel = false;
+        if (savedMockUser) {
+          const userObj = JSON.parse(savedMockUser);
+          if (userObj?.user_metadata?.style_dna?.level >= 3) {
+            hasGoldLevel = true;
+          }
+        }
+
+        let isGoldProfile = false;
+        if (savedMockProfile) {
+          const profileObj = JSON.parse(savedMockProfile);
+          if (profileObj?.tier === "Gold" || profileObj?.role === "admin") {
+            isGoldProfile = true;
+          }
+        }
+
+        setIsGold(isGoldTheme || isGoldLocal || hasGoldLevel || isGoldProfile || profile?.tier === "Gold" || profile?.role === "admin");
+      } catch (e) {}
+    };
+
+    checkGoldStatus();
+    
+    window.addEventListener("storage", checkGoldStatus);
+    const interval = setInterval(checkGoldStatus, 1500);
+    return () => {
+      window.removeEventListener("storage", checkGoldStatus);
+      clearInterval(interval);
+    };
+  }, [user, profile]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -141,8 +181,16 @@ const Navbar = () => {
             </button>
 
             {/* User / Login */}
-            <Link href={user ? "/profile" : "/auth"}>
-              <button className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+            <Link href={user ? "/profile" : "/auth"} className="flex items-center gap-2">
+              {isGold && (
+                <span className="text-[#D4AF37] font-sora font-bold text-[10px] tracking-wider uppercase animate-pulse-glow mr-1">
+                  {profile?.full_name || user?.user_metadata?.full_name || "Vanguard"}
+                </span>
+              )}
+              <button className={cn(
+                "w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border text-white/70 hover:text-white hover:bg-white/10 transition-colors",
+                isGold ? "border-[#D4AF37]/50 text-[#D4AF37] hover:text-[#D4AF37]/80" : "border-white/10"
+              )}>
                 {user ? <User size={16} /> : <LogIn size={16} />}
               </button>
             </Link>

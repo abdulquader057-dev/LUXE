@@ -260,7 +260,7 @@ export default function Home() {
           <div className="h-[1px] flex-1 bg-gradient-to-r from-white/20 to-transparent ml-4" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="product-grid">
           {products.map((product, i) => (
             <motion.div
               key={product.id}

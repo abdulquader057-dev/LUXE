@@ -23,7 +23,7 @@ export default function CartSidebar() {
     }
   }, [isCartOpen]);
 
-  const formatPrice = (p: number) => { const res = convertPrice(p); return res.symbol + res.amount; };
+  const formatPrice = (p: number, skipDiscount = false) => { const res = convertPrice(p, skipDiscount); return res.symbol + res.amount; };
 
   return (
     <>
@@ -146,7 +146,7 @@ export default function CartSidebar() {
                 <div className="p-6 border-t border-white/5 bg-black/40 backdrop-blur-xl">
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Subtotal</span>
-                    <span className="text-2xl font-display text-primary">{formatPrice(totalPrice)}</span>
+                    <span className="text-2xl font-display text-primary">{formatPrice(totalPrice, true)}</span>
                   </div>
                   <LuxeButton 
                     onClick={() => {

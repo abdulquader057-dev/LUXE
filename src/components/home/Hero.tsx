@@ -47,9 +47,9 @@ const Hero = () => {
 
         {/* Sub-headline */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25 }}
+          transition={{ duration: 1.0, delay: 0.3, ease: [0.25, 1, 0.15, 1] }}
           className="text-sm sm:text-base text-white/50 font-sora max-w-xl mx-auto leading-relaxed mb-10"
         >
           Affordable luxury fashion crafted from premium breathable linen.

@@ -174,7 +174,7 @@ export const ProductViewer3D = ({
   return (
     <div 
       ref={containerRef}
-      className="relative w-full aspect-[3/4] rounded-[48px] overflow-hidden bg-[#050508] border border-white/10 group cursor-grab active:cursor-grabbing select-none touch-none"
+      className="relative w-full h-[500px] md:h-[600px] rounded-[48px] overflow-hidden bg-bg-surface border border-white/10 group cursor-grab active:cursor-grabbing select-none touch-none"
       onMouseDown={onMouseDown}
       onTouchStart={onTouchStart}
     >
@@ -192,7 +192,7 @@ export const ProductViewer3D = ({
           fill
           priority
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover transition-all duration-300"
+          className="object-contain transition-all duration-300"
           style={{ 
             filter: "none" 
           }}

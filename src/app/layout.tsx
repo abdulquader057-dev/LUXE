@@ -82,7 +82,41 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} ${outfit.variable} h-full antialiased dark scroll-smooth`}
     >
-      <body className="min-h-screen flex flex-col bg-[#050508] text-white selection:bg-[#00F0FF]/30 selection:text-white relative">
+      <body className="min-h-screen flex flex-col bg-bg-base text-text-primary selection:bg-primary/30 selection:text-white relative transition-colors duration-1000">
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var theme = localStorage.getItem('luxe-theme') || 'Noir Gold';
+              var themes = {
+                'Noir Gold': { bg: '#0D0A06', card: '#1A1408', text: '#F5E6C8', accent: '#D4AF37' },
+                'Champagne': { bg: '#1C1410', card: '#2A1F0E', text: '#F5E6C8', accent: '#D4AF37' },
+                'Deep Slate': { bg: '#0A0F1A', card: '#111827', text: '#E8E0D0', accent: '#D4AF37' },
+                'Burgundy Luxe': { bg: '#0F0608', card: '#1A0A0E', text: '#F5E0E8', accent: '#D4AF37' },
+                'Royal Obsidian': { bg: '#050308', card: '#0D0A14', text: '#EDE8FF', accent: '#D4AF37' },
+                'Cognac': { bg: '#0F0800', card: '#1F1000', text: '#FFE8CC', accent: '#D4AF37' },
+                'Midnight Rose': { bg: '#080510', card: '#100818', text: '#FFE8F0', accent: '#D4AF37' }
+              };
+              var selected = themes[theme] || themes['Noir Gold'];
+              var root = document.documentElement;
+              
+              root.style.setProperty('--theme-bg', selected.bg);
+              root.style.setProperty('--theme-card', selected.card);
+              root.style.setProperty('--theme-text', selected.text);
+              root.style.setProperty('--theme-accent', selected.accent);
+              
+              root.style.setProperty('--bg-void', selected.bg);
+              root.style.setProperty('--bg-base', selected.bg);
+              root.style.setProperty('--bg-surface', selected.card);
+              root.style.setProperty('--bg-elevated', selected.card);
+              root.style.setProperty('--text-primary', selected.text);
+              
+              root.style.setProperty('--primary-color', selected.accent);
+              root.style.setProperty('--gold-accent', selected.accent);
+              
+              root.classList.add('theme-' + theme.toLowerCase().replace(/\\s+/g, '-'));
+            } catch (e) {}
+          })();
+        ` }} />
         <script dangerouslySetInnerHTML={{ __html: "(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-XXXXXXX');" }} />
         <noscript>
           <iframe
@@ -107,7 +141,7 @@ export default function RootLayout({
           
           <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden relative scroll-smooth">
             <Navbar />
-            <div className="flex-1 w-full relative z-10">
+            <div className="flex-1 w-full relative z-10 animate-page-transition">
               {children}
             </div>
             <Footer />
