@@ -15,6 +15,8 @@ const Footer = () => {
           <Link href="/cognition" className="hover:text-white/30 transition-colors">Neural Policy</Link>
           <Link href="/cognition" className="hover:text-white/30 transition-colors">Global Logistics</Link>
           <Link href="/cognition" className="hover:text-white/30 transition-colors">Cognition Hub</Link>
+          <Link href="/privacy" className="hover:text-white/30 transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-white/30 transition-colors">Terms & Conditions</Link>
         </div>
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-1.5 bg-green-500/60 rounded-full animate-pulse" />
