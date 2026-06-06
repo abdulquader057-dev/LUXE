@@ -22,8 +22,8 @@ const ShopContent = () => {
       try {
         const { data } = await supabase.from("products").select("*");
         if (data && data.length > 0) {
-          const hasLinen = data.some(p => p.name.toLowerCase().includes("linen"));
-          if (hasLinen) {
+          const hasLuxe = data.some(p => p.id.toLowerCase().includes("luxe"));
+          if (hasLuxe) {
             setDbProducts(data);
           }
         }

@@ -139,8 +139,8 @@ export default function AdminDashboard() {
         }
         
         if (productsRes.data && productsRes.data.length > 0) {
-          const hasLinen = productsRes.data.some(p => p.name.toLowerCase().includes("linen"));
-          if (hasLinen) {
+          const hasLuxe = productsRes.data.some(p => p.id.toLowerCase().includes("luxe"));
+          if (hasLuxe) {
             setProducts(productsRes.data);
             localStorage.setItem("luxe-catalog", JSON.stringify(productsRes.data));
           }

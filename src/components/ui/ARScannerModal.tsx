@@ -112,7 +112,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
     const recommendedProducts = [
       {
         id: "luxe-linen-003",
-        name: "Luxe Essential Linen Shirt - Desert Sand",
+        name: "Luxe Essential Shirt - Desert Sand",
         price: 549,
         image: "/brand/linen_model_front.png",
         match: "98.4%",
@@ -121,7 +121,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
       },
       {
         id: "luxe-linen-002",
-        name: "Luxe Essential Linen Shirt - Sky Blue",
+        name: "Luxe Essential Shirt - Sky Blue",
         price: 549,
         image: "/brand/linen_model_front.png",
         match: "95.2%",
@@ -132,7 +132,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
 
     setAnalysisResult({
       tone: "Warm Autumn Undertone",
-      description: "Your skin undertone matches warm natural earth pigments. Desert Sand and Sky Blue linen weaves reflect ambient light onto your features, highlighting bone structure and matching your style matrix calibration.",
+      description: "Your skin undertone matches warm natural earth pigments. Desert Sand and Sky Blue weaves reflect ambient light onto your features, highlighting bone structure and matching your style matrix calibration.",
       recommendations: recommendedProducts
     });
     setScanningStatus("complete");
@@ -280,7 +280,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
                     className="space-y-6"
                   >
                     <p className="text-[11px] font-mono text-white/40 uppercase tracking-wider leading-relaxed">
-                      Upload your selfie or activate camera scan. Our AI neural network will analyze your facial skin tone, undertones, and structural angles to lock the exact linen colorway that compliments your style DNA.
+                      Upload your selfie or activate camera scan. Our AI neural network will analyze your facial skin tone, undertones, and structural angles to lock the exact style colorway that compliments your style DNA.
                     </p>
 
                     <div className="grid grid-cols-1 gap-4 pt-4">

@@ -3,8 +3,8 @@ import { Product } from "@/types";
 export const MOCK_PRODUCTS: Product[] = [
   {
     "id": "luxe-linen-001",
-    "name": "Luxe Essential Linen Shirt - Pure White",
-    "description": "Crafted for comfort, made to stand out. Premium luxury soft fabric linen shirt, lightweight and breathable. Features classic fit styling, everyday essential wear, and single piece packing.",
+    "name": "Luxe Essential Shirt - Pure White",
+    "description": "Crafted for comfort, made to stand out. Premium luxury soft fabric shirt, lightweight and breathable. Features classic fit styling, everyday essential wear, and single piece packing.",
     "price": 549,
     "currency": "INR",
     "category": "streetwear",
@@ -50,8 +50,8 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     "id": "luxe-linen-002",
-    "name": "Luxe Essential Linen Shirt - Sunset Pink",
-    "description": "Elegant, luxury-inspired soft pink linen shirt. Tailored for comfort, premium weave fibers, daily essential wardrobe piece.",
+    "name": "Luxe Essential Shirt - Sunset Pink",
+    "description": "Elegant, luxury-inspired soft pink shirt. Tailored for comfort, premium weave fibers, daily essential wardrobe piece.",
     "price": 549,
     "currency": "INR",
     "category": "streetwear",

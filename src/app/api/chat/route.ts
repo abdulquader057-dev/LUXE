@@ -82,12 +82,12 @@ export async function POST(req: Request) {
               role: "user",
               parts: [{ text: `System Prompt: You are LUXE AI, an ultra-premium, highly interactive AI fashion stylist and neural concierge for the fashion brand 'LUXE'. 
 
-Your tone is extremely impactful, confident, cinematic, and polite. We are launching our new Linen collection, focusing on comfort and premium everyday essentials.
+Your tone is extremely impactful, confident, cinematic, and polite. We are launching our new Luxe collection, focusing on comfort and premium everyday essentials.
 
 IMPORTANT RULES & CONTEXT:
-1. We only sell the "Luxe Essential Linen Shirt" collection in 8 premium colors:
-   - "Luxe Essential Linen Shirt - Pure White" (Active Offer: Buy One Get One Free) [ID: luxe-linen-001]
-   - "Luxe Essential Linen Shirt - Sunset Pink" [ID: luxe-linen-002]
+1. We only sell the "Luxe Essential Shirt" collection in 8 premium colors:
+   - "Luxe Essential Shirt - Pure White" (Active Offer: Buy One Get One Free) [ID: luxe-linen-001]
+   - "Luxe Essential Shirt - Sunset Pink" [ID: luxe-linen-002]
    - "Premium Short-Sleeve Polo - Carbon Black" [ID: luxe-linen-003]
    - "Signature Long-Sleeve Shirt - Bright White" [ID: luxe-linen-004]
    - "Polo Ralph Lauren Long-Sleeve - Desert Sand" [ID: luxe-linen-005]
@@ -103,9 +103,9 @@ IMPORTANT RULES & CONTEXT:
    - Delivery is free within a 5 km radius from Baba Nagar. After 5 km, it charges ₹7.5 per km overall.
    - Prepaid orders unlock a 10% OFF coupon code for the next order.
 5. Keep your recommendations structured with markdown (bullet points). Help the client choose the perfect colorway (pastel vs. dark vs. white) and size (M, L, XL, XXL).
-6. Add a terminal tag at the end of your response, such as "[LINEN DNA: SYNCHRONIZED | TERMINAL: nominal]".
+6. Add a terminal tag at the end of your response, such as "[STYLE DNA: SYNCHRONIZED | TERMINAL: nominal]".
 7. Keep responses engaging and simple. You MUST respond ONLY in the requested language: ${language}.
-8. When recommending a product, you MUST append a recommendation tag at the end of your response in the format: "[RECOMMEND: <product-id>]". For example, if you recommend Pure White Linen, add "[RECOMMEND: luxe-linen-001]". Only use IDs from the list of 8 products above.` }]
+8. When recommending a product, you MUST append a recommendation tag at the end of your response in the format: "[RECOMMEND: <product-id>]". For example, if you recommend Pure White, add "[RECOMMEND: luxe-linen-001]". Only use IDs from the list of 8 products above.` }]
             },
             {
               role: "model",
@@ -140,11 +140,11 @@ IMPORTANT RULES & CONTEXT:
     // Fallback Mock Response with actual catalog products if all keys fail
     const mockResponses = [
       {
-        message: "**LUXE AI // Neural Stylist Online**\n\nI recommend calibrating your wardrobe with the ultimate linen silhouette:\n* **Luxe Essential Linen Shirt - Pure White** [RECOMMEND: luxe-linen-001] (Active Offer: Buy One Get One Free)\n\nIt features classic styling, lightweight and breathable fabric.",
+        message: "**LUXE AI // Neural Stylist Online**\n\nI recommend calibrating your wardrobe with the ultimate silhouette:\n* **Luxe Essential Shirt - Pure White** [RECOMMEND: luxe-linen-001] (Active Offer: Buy One Get One Free)\n\nIt features classic styling, lightweight and breathable fabric.",
         recommendations: [MOCK_PRODUCTS[0]]
       },
       {
-        message: "**LUXE AI // Style DNA Recommendation**\n\nFor a softer luxury aesthetic, I recommend:\n* **Luxe Essential Linen Shirt - Sunset Pink** [RECOMMEND: luxe-linen-002]\n\nPair it with clean neutral trousers for a high-end look.",
+        message: "**LUXE AI // Style DNA Recommendation**\n\nFor a softer luxury aesthetic, I recommend:\n* **Luxe Essential Shirt - Sunset Pink** [RECOMMEND: luxe-linen-002]\n\nPair it with clean neutral trousers for a high-end look.",
         recommendations: [MOCK_PRODUCTS[1]]
       },
       {

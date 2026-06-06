@@ -26,11 +26,11 @@ const Hero = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/20 rounded-full px-5 py-2 mb-8"
+          className="inline-flex items-center gap-2 bg-[#93C572]/10 border border-[#93C572]/20 rounded-full px-5 py-2 mb-8"
         >
-          <Sparkles size={12} className="text-[#D4AF37]" />
-          <span className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-[0.3em]">
-            Premium Linen Collection 2026
+          <Sparkles size={12} className="text-[#93C572]" />
+          <span className="text-[10px] font-sora text-[#93C572] uppercase tracking-[0.25em] font-semibold">
+            PREMIUM LUXE COLLECTION - LATEST COLLECTION
           </span>
         </motion.div>
 
@@ -52,7 +52,7 @@ const Hero = () => {
           transition={{ duration: 1.0, delay: 0.3, ease: [0.25, 1, 0.15, 1] }}
           className="text-sm sm:text-base text-white/50 font-sora max-w-xl mx-auto leading-relaxed mb-10"
         >
-          Affordable luxury fashion crafted from premium breathable linen.
+          Affordable luxury fashion crafted from premium breathable fabrics.
           Designed for the bold generation of Hyderabad.
         </motion.p>
 
@@ -65,14 +65,14 @@ const Hero = () => {
         >
           <Link
             href="/shop"
-            className="group flex items-center gap-2 px-8 py-4 bg-[#D4AF37] text-[#020203] font-mono font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#D4AF37]/90 hover:scale-[1.02] transition-all duration-300"
+            className="group flex items-center gap-2 px-8 py-4 bg-[#93C572] text-[#020203] font-sora font-semibold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-[#82B461] hover:scale-[1.02] transition-all duration-300 shadow-[0_4px_20px_rgba(147,197,114,0.25)]"
           >
             Shop Collection
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
             href="/drops"
-            className="flex items-center gap-2 px-8 py-4 bg-transparent border border-white/15 text-white/70 font-mono text-xs uppercase tracking-widest rounded-xl hover:border-[#D4AF37]/40 hover:text-white transition-all duration-300"
+            className="flex items-center gap-2 px-8 py-4 bg-transparent border border-[#93C572]/30 text-[#93C572] font-sora font-semibold text-xs uppercase tracking-[0.2em] rounded-xl hover:border-[#93C572] hover:bg-[#93C572]/5 hover:text-white transition-all duration-300"
           >
             Upcoming Drops
           </Link>
@@ -86,9 +86,9 @@ const Hero = () => {
           className="flex flex-wrap gap-8 justify-center mt-16"
         >
           {[
-            { icon: <Sparkles size={14} />, label: "Premium Linen Fabric", sub: "Breathable & Soft" },
+            { icon: <Sparkles size={14} />, label: "Premium Luxury Fabric", sub: "Breathable & Soft" },
             { icon: <TrendingUp size={14} />, label: "Trending Styles", sub: "New drops weekly" },
-            { icon: <span className="text-xs font-mono">📍</span>, label: "Hyderabad Local", sub: "Fast delivery" },
+            { icon: <span className="text-xs font-mono">📍</span>, label: "Hyderabad", sub: "Fast delivery" },
           ].map((stat, i) => (
             <div key={i} className="flex flex-col items-center gap-1.5 text-center">
               <div className="text-[#D4AF37]">{stat.icon}</div>

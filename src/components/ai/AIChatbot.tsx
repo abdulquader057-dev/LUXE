@@ -153,7 +153,7 @@ const AIChatbot = () => {
         data.message.toLowerCase().includes("curate") ||
         data.message.toLowerCase().includes("suggest") ||
         data.message.toLowerCase().includes("shirt") ||
-        data.message.toLowerCase().includes("linen")
+        data.message.toLowerCase().includes("luxe")
       )) {
         aiResponse.type = "recommendation";
         const textLower = messageText.toLowerCase();

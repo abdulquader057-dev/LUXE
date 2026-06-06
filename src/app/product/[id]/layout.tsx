@@ -9,8 +9,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   
   // Map IDs to friendly names
   const productNames: Record<string, string> = {
-    "luxe-linen-001": "Luxe Essential Linen Shirt - Pure White",
-    "luxe-linen-002": "Luxe Essential Linen Shirt - Sunset Pink",
+    "luxe-linen-001": "Luxe Essential Shirt - Pure White",
+    "luxe-linen-002": "Luxe Essential Shirt - Sunset Pink",
     "luxe-linen-003": "Premium Short-Sleeve Polo - Carbon Black",
     "luxe-linen-004": "Signature Long-Sleeve Shirt - Bright White",
     "luxe-linen-005": "Polo Ralph Lauren Long-Sleeve - Desert Sand",
