@@ -40,6 +40,25 @@ export const ProductViewer3D = ({
   const startPosition = useRef({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Touch zoom and swipe states
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchStartY, setTouchStartY] = useState(0);
+  const [initialDistance, setInitialDistance] = useState<number | null>(null);
+  const [startScale, setStartScale] = useState(1);
+  const [showSwipeHint, setShowSwipeHint] = useState(false);
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem("luxe-swipe-hint-dismissed");
+    if (!dismissed) {
+      setShowSwipeHint(true);
+    }
+  }, []);
+
+  const dismissSwipeHint = () => {
+    setShowSwipeHint(false);
+    localStorage.setItem("luxe-swipe-hint-dismissed", "true");
+  };
+
   // Sync selectedColor index if available
   useEffect(() => {
     // Reset zoom and pan on color change
@@ -73,28 +92,41 @@ export const ProductViewer3D = ({
     };
   }, [isDragging, internalIndex, scale, position, modelImages.length]);
 
-  // Global touch event handlers for smooth mobile rotation
+  // Global touch event handlers for smooth mobile rotation & pinch zoom
   useEffect(() => {
-    if (!isDragging) return;
+    if (!isDragging && initialDistance === null) return;
 
     const handleWindowTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
+      if (e.touches.length === 1 && isDragging) {
         handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2 && initialDistance !== null) {
+        // Pinch zoom logic
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const factor = dist / initialDistance;
+        const newScale = Math.min(2.5, Math.max(1, startScale * factor));
+        setScale(newScale);
+        if (newScale === 1) {
+          setPosition({ x: 0, y: 0 });
+        }
       }
     };
 
     const handleWindowTouchEnd = () => {
       handleEnd();
+      setInitialDistance(null);
     };
 
-    window.addEventListener("touchmove", handleWindowTouchMove, { passive: true });
+    window.addEventListener("touchmove", handleWindowTouchMove, { passive: false });
     window.addEventListener("touchend", handleWindowTouchEnd);
 
     return () => {
       window.removeEventListener("touchmove", handleWindowTouchMove);
       window.removeEventListener("touchend", handleWindowTouchEnd);
     };
-  }, [isDragging, internalIndex, scale, position, modelImages.length]);
+  }, [isDragging, initialDistance, startScale, scale, internalIndex, position, modelImages.length]);
 
   const updateIndex = (newIndex: number) => {
     setInternalIndex(newIndex);
@@ -135,6 +167,9 @@ export const ProductViewer3D = ({
 
   const handleEnd = () => {
     setIsDragging(false);
+    if (showSwipeHint) {
+      dismissSwipeHint();
+    }
   };
 
   // Mouse Events
@@ -145,8 +180,18 @@ export const ProductViewer3D = ({
 
   // Touch Events
   const onTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length > 0) {
+    if (e.touches.length === 1) {
+      setTouchStartX(e.touches[0].clientX);
+      setTouchStartY(e.touches[0].clientY);
       handleStart(e.touches[0].clientX, e.touches[0].clientY);
+    } else if (e.touches.length === 2) {
+      setIsDragging(false);
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      setInitialDistance(dist);
+      setStartScale(scale);
     }
   };
 
@@ -225,6 +270,26 @@ export const ProductViewer3D = ({
         )}
       </div>
 
+      {/* Swipe Hint Overlay */}
+      <AnimatePresence>
+        {showSwipeHint && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: -10, x: "-50%" }}
+            className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 text-[8px] font-mono tracking-widest text-[#D4AF37] uppercase z-30 flex items-center gap-2"
+          >
+            <span>🔄</span> Swipe/Drag to rotate
+            <button 
+              onClick={(e) => { e.stopPropagation(); dismissSwipeHint(); }}
+              className="text-white/40 hover:text-white ml-2 text-[10px] cursor-pointer"
+            >
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Angle Selector Indicators */}
       <div className="absolute top-6 left-6 flex gap-2 z-20">
         {modelImages.map((_, idx) => (
@@ -239,6 +304,21 @@ export const ProductViewer3D = ({
           >
             {idx === 0 ? "Front" : idx === 1 ? "Back" : idx === 2 ? "Side" : "Detail"}
           </button>
+        ))}
+      </div>
+
+      {/* Dot Indicators */}
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+        {modelImages.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={(e) => { e.stopPropagation(); updateIndex(idx); }}
+            className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
+              internalIndex === idx 
+                ? "bg-[#D4AF37] w-6 shadow-[0_0_8px_#D4AF37]" 
+                : "bg-white/20 hover:bg-white/40"
+            }`}
+          />
         ))}
       </div>
 

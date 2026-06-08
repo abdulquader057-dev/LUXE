@@ -13,6 +13,8 @@ const Footer = () => {
             LUXE<span className="text-primary">.</span>
           </div>
           <div className="flex flex-wrap justify-center gap-10 text-[9px] font-black tracking-[0.3em] text-white/15 uppercase">
+            <Link href="/ar-scanner" className="hover:text-white/30 transition-colors">Beta Scanner</Link>
+            <Link href="/cognition" className="hover:text-white/30 transition-colors">Cognition Hub</Link>
             <Link href="/privacy" className="hover:text-white/30 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white/30 transition-colors">Terms & Conditions</Link>
           </div>

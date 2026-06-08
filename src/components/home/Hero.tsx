@@ -1,48 +1,152 @@
 // src/components/home/Hero.tsx
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useRef } from "react";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { Sparkles, TrendingUp, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const Hero = () => {
-  const router = useRouter();
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // 3 depth layers with different parallax speeds
+  const bgX  = useTransform(mouseX, [-1, 1], [-20, 20]);
+  const bgY  = useTransform(mouseY, [-1, 1], [-12, 12]);
+  const midX = useTransform(mouseX, [-1, 1], [-40, 40]);
+  const midY = useTransform(mouseY, [-1, 1], [-24, 24]);
+  const fgX  = useTransform(mouseX, [-1, 1], [-64, 64]);
+  const fgY  = useTransform(mouseY, [-1, 1], [-40, 40]);
+
+  const bgXSpring  = useSpring(bgX,  { stiffness: 50, damping: 20 });
+  const bgYSpring  = useSpring(bgY,  { stiffness: 50, damping: 20 });
+  const midXSpring = useSpring(midX, { stiffness: 60, damping: 22 });
+  const midYSpring = useSpring(midY, { stiffness: 60, damping: 22 });
+  const fgXSpring  = useSpring(fgX,  { stiffness: 80, damping: 25 });
+  const fgYSpring  = useSpring(fgY,  { stiffness: 80, damping: 25 });
+
+  const containerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const x = ((e.clientX - rect.left) / rect.width)  * 2 - 1; // -1..1
+      const y = ((e.clientY - rect.top)  / rect.height) * 2 - 1; // -1..1
+      mouseX.set(x);
+      mouseY.set(y);
+    };
+    const handleReset = () => { mouseX.set(0); mouseY.set(0); };
+
+    // Device orientation for mobile
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      const gamma = Math.max(-30, Math.min(30, e.gamma || 0)) / 30;
+      const beta  = Math.max(-20, Math.min(20, (e.beta  || 0) - 40)) / 20;
+      mouseX.set(gamma);
+      mouseY.set(beta);
+    };
+
+    const el = containerRef.current;
+    el?.addEventListener("mousemove", handleMouseMove);
+    el?.addEventListener("mouseleave", handleReset);
+    if (typeof DeviceOrientationEvent !== "undefined") {
+      window.addEventListener("deviceorientation", handleOrientation);
+    }
+    return () => {
+      el?.removeEventListener("mousemove", handleMouseMove);
+      el?.removeEventListener("mouseleave", handleReset);
+      window.removeEventListener("deviceorientation", handleOrientation);
+    };
+  }, [mouseX, mouseY]);
 
   return (
-    <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-28 pb-16">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(212,175,55,0.08)_0%,transparent_70%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_80%,rgba(0,242,255,0.04)_0%,transparent_60%)] pointer-events-none" />
+    <section
+      ref={containerRef}
+      className="relative w-full min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-28 pb-16"
+      style={{ perspective: "1200px" }}
+    >
+      {/* Layer 1 — background gradient (slowest, 0.02x) */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ x: bgXSpring, y: bgYSpring }}
+      >
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 65%)" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 80% 80%, rgba(107,30,60,0.05) 0%, transparent 55%)" }} />
+        {/* Animated dot grid */}
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage: "radial-gradient(circle, rgba(201,168,76,1) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
+      </motion.div>
 
-      {/* Gold top line */}
-      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/40 to-transparent" />
+      {/* Gold horizontal accent line */}
+      <div className="absolute top-0 inset-x-0 h-[1px]" style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.35), transparent)" }} />
 
-      {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-        {/* Pre-title badge */}
+      {/* Layer 2 — product visual placeholder (medium speed) */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none flex items-center justify-center"
+        style={{ x: midXSpring, y: midYSpring, opacity: 0.04 }}
+      >
+        <div
+          className="w-[500px] h-[500px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(201,168,76,0.5) 0%, transparent 70%)" }}
+        />
+      </motion.div>
+
+      {/* Layer 3 — text / logo (fastest, foreground) */}
+      <motion.div
+        className="relative z-10 text-center px-4 max-w-5xl mx-auto"
+        style={{ x: fgXSpring, y: fgYSpring }}
+      >
+        {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 bg-[#93C572]/10 border border-[#93C572]/20 rounded-full px-5 py-2 mb-8"
+          className="inline-flex items-center gap-2 rounded-full px-5 py-2 mb-8"
+          style={{
+            background: "rgba(201,168,76,0.08)",
+            border: "1px solid rgba(201,168,76,0.2)",
+          }}
         >
-          <Sparkles size={12} className="text-[#93C572]" />
-          <span className="text-[10px] font-sora text-[#93C572] uppercase tracking-[0.25em] font-semibold">
-            PREMIUM LUXE COLLECTION - LATEST COLLECTION
+          <Sparkles size={12} style={{ color: "#C9A84C" }} />
+          <span
+            className="text-[10px] uppercase tracking-[0.25em] font-semibold"
+            style={{ fontFamily: "var(--font-sora)", color: "#C9A84C" }}
+          >
+            Premium LUXE Collection — Latest Drop
           </span>
         </motion.div>
 
-        {/* Main headline */}
+        {/* Main headline — gold gradient */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-cormorant font-light text-white leading-none tracking-tight mb-4 floatHeadline"
+          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-cormorant font-light leading-none tracking-tight mb-4 floatHeadline"
+          style={{
+            background: "linear-gradient(135deg, #C9A84C 0%, #E8C97A 50%, #9A7B30 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            filter: "drop-shadow(0 0 30px rgba(201,168,76,0.2))",
+          }}
         >
           Luxury
-          <span className="block italic text-[#D4AF37]">Redefined</span>
+          <span
+            className="block italic"
+            style={{
+              background: "linear-gradient(135deg, #E8C97A 0%, #C9A84C 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Redefined
+          </span>
         </motion.h1>
 
         {/* Sub-headline */}
@@ -50,7 +154,8 @@ const Hero = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.0, delay: 0.3, ease: [0.25, 1, 0.15, 1] }}
-          className="text-sm sm:text-base text-white/50 font-sora max-w-xl mx-auto leading-relaxed mb-10"
+          className="text-sm sm:text-base max-w-xl mx-auto leading-relaxed mb-10"
+          style={{ fontFamily: "var(--font-sora)", color: "rgba(240,237,232,0.55)", lineHeight: 1.75 }}
         >
           Affordable luxury fashion crafted from premium breathable fabrics.
           Designed for the bold generation of Hyderabad.
@@ -65,14 +170,26 @@ const Hero = () => {
         >
           <Link
             href="/shop"
-            className="group flex items-center gap-2 px-8 py-4 bg-[#93C572] text-[#020203] font-sora font-semibold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-[#82B461] hover:scale-[1.02] transition-all duration-300 shadow-[0_4px_20px_rgba(147,197,114,0.25)]"
+            className="group flex items-center gap-2 px-8 py-4 font-semibold text-xs uppercase tracking-[0.2em] rounded-xl transition-all duration-300"
+            style={{
+              background: "var(--accent-gold, #C9A84C)",
+              color: "#0A0A0F",
+              fontFamily: "var(--font-sora)",
+              boxShadow: "0 4px 24px rgba(201,168,76,0.3)",
+            }}
           >
             Shop Collection
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
             href="/drops"
-            className="flex items-center gap-2 px-8 py-4 bg-transparent border border-[#93C572]/30 text-[#93C572] font-sora font-semibold text-xs uppercase tracking-[0.2em] rounded-xl hover:border-[#93C572] hover:bg-[#93C572]/5 hover:text-white transition-all duration-300"
+            className="flex items-center gap-2 px-8 py-4 font-semibold text-xs uppercase tracking-[0.2em] rounded-xl transition-all duration-300"
+            style={{
+              background: "transparent",
+              border: "1px solid rgba(201,168,76,0.3)",
+              color: "#C9A84C",
+              fontFamily: "var(--font-sora)",
+            }}
           >
             Upcoming Drops
           </Link>
@@ -87,26 +204,27 @@ const Hero = () => {
         >
           {[
             { icon: <Sparkles size={14} />, label: "Premium Luxury Fabric", sub: "Breathable & Soft" },
-            { icon: <TrendingUp size={14} />, label: "Trending Styles", sub: "New drops weekly" },
+            { icon: <TrendingUp size={14} />, label: "Trending Styles",      sub: "New drops weekly" },
             { icon: <span className="text-xs font-mono">📍</span>, label: "Hyderabad", sub: "Fast delivery" },
           ].map((stat, i) => (
             <div key={i} className="flex flex-col items-center gap-1.5 text-center">
-              <div className="text-[#D4AF37]">{stat.icon}</div>
-              <p className="text-[10px] font-mono text-white uppercase tracking-[0.2em]">{stat.label}</p>
-              <p className="text-[9px] font-mono text-white/30 uppercase tracking-widest">{stat.sub}</p>
+              <div style={{ color: "#C9A84C" }}>{stat.icon}</div>
+              <p className="text-[10px] font-mono uppercase tracking-[0.2em]" style={{ color: "var(--text-primary)" }}>{stat.label}</p>
+              <p className="text-[9px] font-mono uppercase tracking-widest" style={{ color: "rgba(240,237,232,0.3)" }}>{stat.sub}</p>
             </div>
           ))}
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.6 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/20"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        style={{ color: "rgba(240,237,232,0.2)" }}
       >
-        <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-[#D4AF37]/30 to-transparent" />
+        <div className="w-[1px] h-12" style={{ background: "linear-gradient(to bottom, transparent, rgba(201,168,76,0.4), transparent)" }} />
         <span className="text-[8px] font-mono uppercase tracking-[0.4em]">Scroll</span>
       </motion.div>
     </section>

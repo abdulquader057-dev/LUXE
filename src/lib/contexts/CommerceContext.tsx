@@ -5,6 +5,8 @@ import toast from "react-hot-toast";
 
 export type Currency = "INR" | "USD" | "EUR" | "GBP";
 
+import { track } from "@vercel/analytics";
+
 interface CartItem {
   id: string;
   name: string;
@@ -139,6 +141,19 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addToCart = (item: CartItem) => {
+    try {
+      track("cart_item_added", {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        size: item.size || "L",
+        color: item.color || "White"
+      });
+    } catch (e) {
+      console.warn("Vercel track error:", e);
+    }
+
     // GTM Event Tracking
     if (typeof window !== "undefined") {
       (window as any).dataLayer = (window as any).dataLayer || [];
@@ -166,15 +181,45 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
         newCart = prev.map((i) =>
           i.id === item.id && i.size === item.size && i.color === item.color ? { ...i, quantity: i.quantity + item.quantity } : i
         );
-        toast.success(`Increased quantity for ${item.name}`);
       } else {
         newCart = [...prev, item];
-        toast.success(`Added ${item.name} to Arsenal`);
       }
+
+      const pInfo = convertPrice(item.price);
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-slide-in" : "animate-slide-out"
+          } max-w-md w-full bg-[#050508] border border-white/10 shadow-[0_10px_50px_rgba(0,240,255,0.1)] rounded-2xl pointer-events-auto flex p-4 items-center gap-4`}
+          style={{ transition: "all 0.3s ease" }}
+        >
+          <div className="relative w-12 h-16 rounded-lg overflow-hidden bg-white/5 shrink-0 border border-white/5">
+            <img src={item.image} alt={item.name} className="object-cover w-full h-full" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-mono font-bold text-white tracking-widest uppercase truncate">{item.name}</p>
+            <p className="text-[9px] font-mono text-white/40 uppercase mt-0.5 truncate">
+              {item.size ? `Size: ${item.size}` : ""} {item.color ? `• Color: ${item.color}` : ""}
+            </p>
+            <p className="text-xs font-mono text-primary mt-1 font-bold">
+              {pInfo.symbol}{pInfo.amount}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              setIsCartOpen(true);
+            }}
+            className="text-[9px] font-mono tracking-widest uppercase bg-primary/10 hover:bg-primary/20 text-primary px-3 py-2 rounded-lg transition-colors border border-primary/20 cursor-pointer whitespace-nowrap"
+          >
+            View Cart
+          </button>
+        </div>
+      ), { duration: 3000, position: "bottom-center" });
+
       localStorage.setItem("luxe-cart", JSON.stringify(newCart));
       return newCart;
     });
-    setIsCartOpen(true);
   };
 
   const removeFromCart = (id: string, size?: string, color?: string) => {

@@ -6,6 +6,7 @@ import { Search, SlidersHorizontal, Sparkles, MapPin, Truck, CheckCircle2, Shiel
 import { useRouter } from "next/navigation";
 import Hero from "@/components/home/Hero";
 import ProductCard from "@/components/shop/ProductCard";
+import Image from "next/image";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 const filters = [
@@ -16,13 +17,13 @@ const filters = [
 ];
 
 import { supabase } from "@/lib/supabase";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { MOCK_PRODUCTS, parseDbProduct } from "@/data/products";
 
 export default function Home() {
   const { cart, convertPrice, toggleCart, removeFromCart } = useCommerce();
   const [activeFilter, setActiveFilter] = useState("ALL DESIGNS");
   const [searchQuery, setSearchQuery] = useState("");
-  const [products, setProducts] = useState<any[]>(MOCK_PRODUCTS);
+  const [products, setProducts] = useState<any[]>([]);
   const router = useRouter();
 
   React.useEffect(() => {
@@ -30,10 +31,9 @@ export default function Home() {
       try {
         const { data } = await supabase.from("products").select("*");
         if (data && data.length > 0) {
-          const hasLuxe = data.some(p => p.id.toLowerCase().includes("luxe"));
-          if (hasLuxe) {
-            setProducts(data);
-          }
+          const parsed = data.map(parseDbProduct);
+          const unique = parsed.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+          setProducts(unique);
         }
       } catch (err) {
         console.warn("Using offline catalog fallback:", err);
@@ -138,8 +138,7 @@ export default function Home() {
                 className="flex gap-4 p-4 rounded-2xl border border-white/5 bg-[#0A0A0C]/50 hover:border-white/10 transition-all group"
               >
                 <div className="relative w-16 h-20 rounded-xl overflow-hidden bg-white/5 flex-shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  <Image src={item.image} alt={item.name} fill sizes="80px" className="w-full h-full object-cover" />
                 </div>
                 
                 <div className="flex-1 flex flex-col justify-between min-w-0">
@@ -201,10 +200,11 @@ export default function Home() {
         {/* Left column: Flyer image */}
         <div className="lg:col-span-5 relative rounded-2xl overflow-hidden border border-white/10 group min-h-[350px] lg:min-h-[420px] flex items-center justify-center bg-black/40">
           <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay z-10" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
+          <Image 
             src="/brand/linen_flyer.jpg" 
             alt="Luxe Collection Flyer" 
+            fill
+            sizes="(max-width: 768px) 100vw, 40vw"
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[8s] ease-out opacity-85"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
@@ -234,7 +234,7 @@ export default function Home() {
           </div>
 
           <div className="space-y-4 pt-6 border-t border-white/5">
-            <span className="text-[9px] font-mono text-[#D4AF37] uppercase tracking-[0.2em] block mb-2 font-bold">// Collection DNA & Trust Indicators</span>
+            <span className="text-[9px] font-mono text-[#D4AF37] uppercase tracking-[0.2em] block mb-2 font-bold">{"// Collection DNA & Trust Indicators"}</span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-xs tracking-wider text-white/80">
@@ -273,6 +273,38 @@ export default function Home() {
         </div>
       </div>
       
+      {/* Organization Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "LUXE",
+            "url": "https://valceron.in",
+            "logo": "https://valceron.in/logo.png",
+            "sameAs": [
+              "https://www.instagram.com/valceron.in",
+              "https://wa.me/917995338472"
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+91-7995338472",
+              "contactType": "customer service",
+              "areaServed": "IN",
+              "availableLanguage": ["en", "hi"]
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Hafiz Baba Nagar",
+              "addressLocality": "Hyderabad",
+              "addressRegion": "Telangana",
+              "postalCode": "500058",
+              "addressCountry": "IN"
+            }
+          })
+        }}
+      />
     </div>
   );
 }

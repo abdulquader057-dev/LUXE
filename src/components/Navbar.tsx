@@ -62,9 +62,20 @@ const Navbar = () => {
     };
   }, [user, profile]);
 
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const currentScrollY = window.scrollY;
+      setIsScrolled(currentScrollY > 50);
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
     };
     window.addEventListener("scroll", handleScroll);
 
@@ -77,7 +88,7 @@ const Navbar = () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("open-country-modal", handleOpenCountryModal);
     };
-  }, []);
+  }, [lastScrollY]);
 
   const navLinks = [
     { name: t("nav.home"), href: "/" },
@@ -89,8 +100,8 @@ const Navbar = () => {
   return (
     <motion.nav
       initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.8 }}
+      animate={{ y: isVisible ? 0 : -100 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6",
         isScrolled 
@@ -213,6 +224,27 @@ const Navbar = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Scrolling Trust Marquee */}
+      <div className="w-full bg-black/90 border-t border-white/5 py-2 overflow-hidden relative z-10 flex select-none">
+        <motion.div
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ ease: "linear", duration: 25, repeat: Infinity }}
+          className="flex whitespace-nowrap gap-16 text-[8px] font-mono tracking-[0.25em] text-[#D4AF37] uppercase"
+        >
+          <span>✦ FREE SHIPPING ACROSS INDIA</span>
+          <span>✦ CASH ON DELIVERY (COD) AVAILABLE</span>
+          <span>✦ 100% SECURE TRANSACTIONS</span>
+          <span>✦ 7-DAY NO-QUESTIONS RETURN POLICY</span>
+          <span>✦ LUXURY SOFT COTTON COLLECTION</span>
+
+          <span>✦ FREE SHIPPING ACROSS INDIA</span>
+          <span>✦ CASH ON DELIVERY (COD) AVAILABLE</span>
+          <span>✦ 100% SECURE TRANSACTIONS</span>
+          <span>✦ 7-DAY NO-QUESTIONS RETURN POLICY</span>
+          <span>✦ LUXURY SOFT COTTON COLLECTION</span>
+        </motion.div>
       </div>
       
       <CountrySelectorModal 

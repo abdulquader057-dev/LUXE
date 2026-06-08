@@ -6,6 +6,7 @@ import { Camera, X, Scan, CheckCircle2, ChevronRight, Maximize, Upload, Sparkles
 import { cn } from "@/lib/utils";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 interface ARScannerModalProps {
   isOpen: boolean;
@@ -111,21 +112,21 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
     // Stage 4: Calibration Complete
     const recommendedProducts = [
       {
-        id: "luxe-linen-003",
-        name: "Luxe Essential Shirt - Desert Sand",
-        price: 549,
-        image: "/brand/linen_model_front.png",
+        id: "00000000-0000-4000-a000-000000000002",
+        name: "Luxe Premium Long-Sleeve Knit Polo",
+        price: 799,
+        image: "/brand/WhatsApp Image 2026-05-26 at 8.37.14 PM.jpeg",
         match: "98.4%",
         color: "Desert Sand",
         badge: "Perfect Match"
       },
       {
-        id: "luxe-linen-002",
-        name: "Luxe Essential Shirt - Sky Blue",
-        price: 549,
-        image: "/brand/linen_model_front.png",
+        id: "00000000-0000-4000-a000-000000000001",
+        name: "Luxe Signature Short-Sleeve Linen Shirt",
+        price: 799,
+        image: "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg",
         match: "95.2%",
-        color: "Sky Blue",
+        color: "White",
         badge: "Highly Compatible"
       }
     ];
@@ -181,10 +182,10 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
             {selectedPhoto ? (
               // Uploaded Selfie Display
               <div className="absolute inset-0 flex items-center justify-center bg-[#07070a]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
+                <Image 
                   src={selectedPhoto} 
                   alt="User Selfie" 
+                  fill
                   className={cn(
                     "w-full h-full object-cover opacity-60 transition-all",
                     scanningStatus === "analyzing" && "blur-[2px]"
@@ -363,8 +364,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-xl bg-white/5 overflow-hidden relative border border-white/10">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={prod.image} alt={prod.name} className="w-full h-full object-cover" />
+                              <Image src={prod.image} alt={prod.name} fill sizes="48px" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex flex-col">
                               <span className="text-[8px] font-mono text-[#D4AF37] uppercase tracking-widest font-bold mb-0.5">{prod.badge}</span>

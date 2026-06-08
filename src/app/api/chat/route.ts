@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { MOCK_PRODUCTS } from '@/data/products';
@@ -9,8 +11,48 @@ const API_KEYS = [
 
 let currentKeyIndex = 0;
 
+// In-memory rate limiting map
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const limit = rateLimitMap.get(ip);
+  if (!limit) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
+    return false;
+  }
+  
+  if (now > limit.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
+    return false;
+  }
+  
+  if (limit.count >= 20) {
+    return true;
+  }
+  
+  limit.count += 1;
+  return false;
+}
+
+// Input sanitization: strips HTML tags and clamps input to 500 characters
+function sanitizeInput(text: string): string {
+  if (typeof text !== "string") return "";
+  const clean = text.replace(/<\/?[^>]+(>|$)/g, "");
+  return clean.slice(0, 500);
+}
+
 export async function POST(req: Request) {
   try {
+    // 1. Rate Limiting Check
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    if (isRateLimited(ip)) {
+      return NextResponse.json(
+        { message: "Too many requests, please wait" },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json().catch(() => null);
     if (!body) {
       return NextResponse.json({ error: "Request body is required" }, { status: 400 });
@@ -37,10 +79,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
     }
 
-
-    // Clean and alternate history to prevent validation issues with startChat
-    const history: any[] = [];
-    const chatHistoryMessages = messages.filter((msg: any) => {
+    const history: { role: string; parts: { text: string }[] }[] = [];
+    const chatHistoryMessages = messages.filter((msg: { role: string; content: string }) => {
       const content = msg.content || "";
       return (
         !content.includes("Welcome to LUXE AI. I am your personal stylist.") &&
@@ -51,13 +91,14 @@ export async function POST(req: Request) {
 
     for (const msg of chatHistoryMessages) {
       const role = msg.role === 'user' ? 'user' : 'model';
-      // Ensure we alternate roles. If same role, append to the last text block
+      // Sanitize history messages content
+      const cleanContent = sanitizeInput(msg.content);
       if (history.length > 0 && history[history.length - 1].role === role) {
-        history[history.length - 1].parts[0].text += "\n" + msg.content;
+        history[history.length - 1].parts[0].text += "\n" + cleanContent;
       } else {
         history.push({
           role,
-          parts: [{ text: msg.content }]
+          parts: [{ text: cleanContent }]
         });
       }
     }
@@ -68,6 +109,8 @@ export async function POST(req: Request) {
     }
 
     const latestMessage = messages[messages.length - 1].content;
+    // 2. Sanitize user input
+    const sanitizedLatestMessage = sanitizeInput(latestMessage);
 
     // Attempt with current key. Rotate and retry if it fails
     let attempt = 0;
@@ -80,32 +123,18 @@ export async function POST(req: Request) {
           history: [
             {
               role: "user",
-              parts: [{ text: `System Prompt: You are LUXE AI, an ultra-premium, highly interactive AI fashion stylist and neural concierge for the fashion brand 'LUXE'. 
+              parts: [{ text: `You are Zyra, the exclusive AI style consultant for LUXE — a premium Indian fashion brand. You are warm and speak like a luxury personal stylist. Help customers with outfit recommendations, sizing (Indian charts: XS=34, S=36, M=38, L=40, XL=42, XXL=44), styling for Indian occasions (weddings, festive, casual, office), fabric care, and shipping info (standard 3-5 days across India, express 1-2 days to Mumbai, Delhi, Bangalore, Hyderabad, Chennai, Kolkata). Never discuss competitor brands. Always end with a helpful follow-up question. Keep responses under 120 words unless asked for detail. Reply in the same language the customer uses — Hindi or English.
 
-Your tone is extremely impactful, confident, cinematic, and polite. We are launching our new Luxe collection, focusing on comfort and premium everyday essentials.
-
-IMPORTANT RULES & CONTEXT:
-1. We only sell the "Luxe Essential Shirt" collection in 8 premium colors:
-   - "Luxe Essential Shirt - Pure White" (Active Offer: Buy One Get One Free) [ID: luxe-linen-001]
-   - "Luxe Essential Shirt - Sunset Pink" [ID: luxe-linen-002]
-   - "Premium Short-Sleeve Polo - Carbon Black" [ID: luxe-linen-003]
-   - "Signature Long-Sleeve Shirt - Bright White" [ID: luxe-linen-004]
-   - "Polo Ralph Lauren Long-Sleeve - Desert Sand" [ID: luxe-linen-005]
-   - "USPA Embossed Graphic Tee - Red" [ID: luxe-linen-006]
-   - "Zara Crew-Neck T-Shirt - Pure White" [ID: luxe-linen-007]
-   - "Premium Cotton Button-Up - Navy Blue" [ID: luxe-linen-008]
-2. All shirts are priced at ₹549 base. They are everyday essential, premium, and luxury-inspired (rates are minimal, with no extra charges or hidden charges).
-3. The brand operates out of "Hafiz Baba Nagar, Hyderabad, Telangana, India".
-4. Delivery rules:
-   - Delivery is currently exclusive to Hyderabad.
-   - Cash on Delivery (COD) is available and capped at ₹1,999.
-   - Orders above ₹1,999 get free delivery.
-   - Delivery is free within a 5 km radius from Baba Nagar. After 5 km, it charges ₹7.5 per km overall.
-   - Prepaid orders unlock a 10% OFF coupon code for the next order.
-5. Keep your recommendations structured with markdown (bullet points). Help the client choose the perfect colorway (pastel vs. dark vs. white) and size (M, L, XL, XXL).
-6. Add a terminal tag at the end of your response, such as "[STYLE DNA: SYNCHRONIZED | TERMINAL: nominal]".
-7. Keep responses engaging and simple. You MUST respond ONLY in the requested language: ${language}.
-8. When recommending a product, you MUST append a recommendation tag at the end of your response in the format: "[RECOMMEND: <product-id>]". For example, if you recommend Pure White, add "[RECOMMEND: luxe-linen-001]". Only use IDs from the list of 8 products above.` }]
+When recommending a product from our catalog, you must append a recommendation tag at the end of your response in the format: "[RECOMMEND: <product-uuid>]". For example, if you recommend our Luxe Signature Linen Shirt, append "[RECOMMEND: 00000000-0000-4000-a000-000000000001]". Available products in our catalog are:
+1. Luxe Signature Short-Sleeve Linen Shirt [ID: 00000000-0000-4000-a000-000000000001]
+2. Luxe Premium Long-Sleeve Knit Polo [ID: 00000000-0000-4000-a000-000000000002]
+3. Luxe Signature Cotton Button-Up [ID: 00000000-0000-4000-a000-000000000003]
+4. Luxe Premium Crew-Neck Tee [ID: 00000000-0000-4000-a000-000000000004]
+5. Luxe Tipped Collar Polo [ID: 00000000-0000-4000-a000-000000000005]
+6. Luxe Crew-Neck Embossed Tee [ID: 00000000-0000-4000-a000-000000000006]
+7. Luxe Signature Luxury Polo [ID: 00000000-0000-4000-a000-000000000007]
+8. Luxe Classic Long-Sleeve Shirt [ID: 00000000-0000-4000-a000-000000000008]
+Do not discuss or recommend competitor brands.` }]
             },
             {
               role: "model",
@@ -115,7 +144,7 @@ IMPORTANT RULES & CONTEXT:
           ]
         });
 
-        const result = await chat.sendMessage(latestMessage);
+        const result = await chat.sendMessage(sanitizedLatestMessage);
         const response = await result.response;
         const text = response.text();
 
@@ -126,8 +155,8 @@ IMPORTANT RULES & CONTEXT:
         const recommendations = MOCK_PRODUCTS.filter(p => recommendedIds.includes(p.id));
 
         return NextResponse.json({ message: text, recommendations });
-      } catch (error: any) {
-        console.error('Error with API key index ' + currentKeyIndex, error.message);
+      } catch (error) {
+        console.error('Error with API key index ' + currentKeyIndex, error instanceof Error ? error.message : String(error));
         currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
         attempt++;
       }

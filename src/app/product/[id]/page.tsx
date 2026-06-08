@@ -21,27 +21,30 @@ import {
   Zap,
   BrainCircuit,
   Eye,
-  ArrowRight
+  ArrowRight,
+  Bell
 } from "lucide-react";
 import TrustBadges from "@/components/shop/TrustBadges";
 import { ProductViewer3D } from "@/components/shop/ProductViewer3D";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { MOCK_PRODUCTS, parseDbProduct } from "@/data/products";
 import { cn } from "@/lib/utils";
 import { MotionContainer, MotionItem } from "@/components/MotionContainer";
 import { Magnetic } from "@/components/ui/Magnetic";
 import ProductCard from "@/components/shop/ProductCard";
 import LuxeButton from "@/components/ui/LuxeButton";
 import { useTilt } from "@/hooks/useTilt";
-
 import { usePersonalization } from "@/lib/hooks/usePersonalization";
-
 import { useCommerce } from "@/lib/contexts/CommerceContext";
+import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
+import { track } from "@vercel/analytics";
 
 const ProductPage = () => {
   const params = useParams();
   const searchParams = useSearchParams();
   const id = params?.id as string;
-  const product = MOCK_PRODUCTS.find((p) => p.id === id);
+  const initialProduct = MOCK_PRODUCTS.find((p) => p.id === id);
+  const [product, setProduct] = useState<any>(initialProduct);
   const [selectedImage, setSelectedImage] = useState(0);
   const tilt = useTilt(8);
   const [selectedSize, setSelectedSize] = useState("L");
@@ -50,6 +53,104 @@ const ProductPage = () => {
   const [isStyleAnalysisOpen, setIsStyleAnalysisOpen] = useState(false);
   const { trackView, getOutfitPairing } = usePersonalization();
   const { convertPrice, addToCart } = useCommerce();
+
+  // Price Drop Modal and shipping pincode states
+  const [showChatToOrderLabel, setShowChatToOrderLabel] = useState(false);
+  const [pincodeVal, setPincodeVal] = useState("");
+  const [pincodeResult, setPincodeResult] = useState("");
+  const [showPriceDropModal, setShowPriceDropModal] = useState(false);
+  const [emailAlert, setEmailAlert] = useState("");
+  const [phoneAlert, setPhoneAlert] = useState("");
+  const [isAlertSubmitting, setIsAlertSubmitting] = useState(false);
+
+  useEffect(() => {
+    async function fetchProduct() {
+      if (!id) return;
+      try {
+        const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
+        if (data && !error) {
+          setProduct(parseDbProduct(data));
+        }
+      } catch (err) {
+        console.warn("DB Fetch failed, keeping mock:", err);
+      }
+    }
+    fetchProduct();
+  }, [id]);
+
+  useEffect(() => {
+    // Show 'Chat to order' label on first mobile visit for 4 seconds
+    const hasVisited = localStorage.getItem("luxe-whatsapp-visited");
+    if (!hasVisited) {
+      setShowChatToOrderLabel(true);
+      const timer = setTimeout(() => setShowChatToOrderLabel(false), 4000);
+      localStorage.setItem("luxe-whatsapp-visited", "true");
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (product) {
+      try {
+        track("product_viewed", { name: product.name, price: product.price });
+      } catch (e) {
+        console.warn("Analytics track error:", e);
+      }
+    }
+  }, [product]);
+
+  const handleSizeSelect = (size: string) => {
+    setSelectedSize(size);
+    try {
+      track("size_selected", { size, productName: product?.name });
+    } catch (e) {}
+  };
+
+  const handlePincodeCheck = (val: string) => {
+    const cleanVal = val.replace(/\D/g, "").slice(0, 6);
+    if (cleanVal.length === 6) {
+      const prefixes = ["400", "110", "560", "500", "600", "700"];
+      const isMetro = prefixes.some(pref => cleanVal.startsWith(pref));
+      if (isMetro) {
+        setPincodeResult("Delivery in 1-2 business days");
+      } else {
+        setPincodeResult("Delivery in 3-5 business days");
+      }
+    } else if (cleanVal.length > 0) {
+      setPincodeResult("Please enter a valid pincode");
+    } else {
+      setPincodeResult("");
+    }
+  };
+
+  const handlePriceDropSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailAlert || !phoneAlert) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    setIsAlertSubmitting(true);
+    try {
+      const { error } = await supabase.from("price_drop_alerts").insert([
+        {
+          product_id: product?.id,
+          email: emailAlert,
+          phone: phoneAlert,
+          target_price: product?.price
+        }
+      ]);
+      if (error) throw error;
+      toast.success("Price drop alert set successfully!");
+      setShowPriceDropModal(false);
+      setEmailAlert("");
+      setPhoneAlert("");
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not set alert. Please try again.");
+    } finally {
+      setIsAlertSubmitting(false);
+    }
+  };
 
   // Reset selected image index when color changes
   useEffect(() => {
@@ -98,8 +199,10 @@ const ProductPage = () => {
   const outfitPairings = getOutfitPairing(product.id);
 
   const handleWhatsAppBuy = () => {
-    const formattedPrice = `${convertPrice(product.price).symbol}${convertPrice(product.price).amount}`;
-    const message = `Hi Luxe! I want to buy:\n\n*Product:* ${product.name}\n*Price:* ${formattedPrice}\n*Size:* ${selectedSize || 'N/A'}\n*Color:* ${selectedColor || 'N/A'}\n*Quantity:* ${quantity}\n\nCan you help me complete my order?`;
+    try {
+      track("whatsapp_initiated", { productName: product?.name, size: selectedSize, color: selectedColor, qty: quantity });
+    } catch (e) {}
+    const message = `Hi, I'd like to order ${product.name} | Size: ${selectedSize || 'N/A'} | Color: ${selectedColor || 'N/A'} | Qty: ${quantity}`;
     window.open(`https://wa.me/917995338472?text=${encodeURIComponent(message)}`, "_blank");
   };
 
@@ -126,13 +229,19 @@ const ProductPage = () => {
                 style={tilt.style}
                 className="w-full h-full"
               >
-                <ProductViewer3D 
-                  images={activeImages} 
-                  productName={product.name} 
-                  selectedColor={selectedColor} 
-                  currentIndex={selectedImage}
-                  onChangeIndex={setSelectedImage}
-                />
+                <Suspense fallback={
+                  <div className="w-full aspect-square rounded-[40px] bg-white/[0.02] border border-white/5 animate-pulse flex items-center justify-center">
+                    <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest animate-pulse">Constructing 3D Workspace...</span>
+                  </div>
+                }>
+                  <ProductViewer3D 
+                    images={activeImages} 
+                    productName={product.name} 
+                    selectedColor={selectedColor} 
+                    currentIndex={selectedImage}
+                    onChangeIndex={setSelectedImage}
+                  />
+                </Suspense>
               </div>
             </MotionItem>
             
@@ -218,11 +327,21 @@ const ProductPage = () => {
 
                 <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.8] uppercase">{product.name}</h1>
                 
-                <div className="flex items-baseline gap-6 mb-12">
-                  <p className="text-5xl font-black tracking-tighter text-gradient">{convertPrice(product.price).symbol}{convertPrice(product.price).amount}</p>
-                  {product.discount && (
-                    <p className="text-2xl font-black tracking-tighter text-white/10 line-through">{convertPrice(Math.round(product.price * (1 + product.discount/100))).symbol}{convertPrice(Math.round(product.price * (1 + product.discount/100))).amount}</p>
-                  )}
+                <div className="flex flex-col gap-2 mb-12">
+                  <div className="flex items-baseline gap-6">
+                    <p className="text-5xl font-black tracking-tighter text-gradient">{convertPrice(product.price).symbol}{convertPrice(product.price).amount}</p>
+                    {product.discount && (
+                      <p className="text-2xl font-black tracking-tighter text-white/10 line-through">{convertPrice(Math.round(product.price * (1 + product.discount/100))).symbol}{convertPrice(Math.round(product.price * (1 + product.discount/100))).amount}</p>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">Inclusive of all taxes</span>
+                  
+                  <button
+                    onClick={() => setShowPriceDropModal(true)}
+                    className="w-max mt-2 text-[8px] font-mono tracking-[0.2em] text-[#D4AF37] border border-[#D4AF37]/20 hover:border-[#D4AF37] px-4 py-2 rounded-xl uppercase transition-all bg-[#D4AF37]/5 hover:bg-[#D4AF37]/10 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Bell size={10} /> Set Price Drop Alert
+                  </button>
                 </div>
 
                 <p className="text-white/40 text-xl leading-relaxed mb-16 font-medium max-w-xl">{product.description}</p>
@@ -263,7 +382,7 @@ const ProductPage = () => {
                       {product.sizes.map((size) => (
                         <button
                           key={size}
-                          onClick={() => setSelectedSize(size)}
+                          onClick={() => handleSizeSelect(size)}
                           className={cn(
                             "w-16 h-16 rounded-[20px] flex items-center justify-center font-black text-sm transition-all duration-700 [transition-timing-function:var(--ease-out-expo)] border-2",
                             selectedSize === size 
@@ -274,6 +393,31 @@ const ProductPage = () => {
                           {size}
                         </button>
                       ))}
+                    </div>
+
+                    {/* Shipping UX Pincode delivery date estimator */}
+                    <div className="mt-8 p-5 rounded-2xl border border-white/5 bg-white/[0.01] max-w-sm">
+                      <h5 className="text-[9px] font-mono font-bold tracking-[0.25em] text-white/40 uppercase mb-3">{"// Check Delivery Estimate"}</h5>
+                      <div className="flex gap-3">
+                        <input 
+                          type="text" 
+                          pattern="\d*"
+                          maxLength={6}
+                          value={pincodeVal}
+                          placeholder="Enter 6-digit Pincode"
+                          className="bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-mono w-44 text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                            setPincodeVal(val);
+                            handlePincodeCheck(val);
+                          }}
+                        />
+                      </div>
+                      {pincodeResult && (
+                        <div className="mt-3 text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest flex items-center gap-2 animate-pulse">
+                          <span>🚚</span> {pincodeResult}
+                        </div>
+                      )}
                     </div>
                   </MotionItem>
                 )}
@@ -498,6 +642,154 @@ const ProductPage = () => {
                   Close Analysis
                 </button>
              </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Dynamic JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": product.name,
+            "image": activeImages[0],
+            "description": product.description,
+            "sku": product.id,
+            "offers": {
+              "@type": "Offer",
+              "url": `https://valceron.in/product/${product.id}`,
+              "priceCurrency": "INR",
+              "price": product.price,
+              "priceValidUntil": "2027-12-31",
+              "itemCondition": "https://schema.org/NewCondition",
+              "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+            },
+            "brand": {
+              "@type": "Brand",
+              "name": "LUXE"
+            }
+          })
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://valceron.in"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Shop",
+                "item": "https://valceron.in/shop"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": product.name,
+                "item": `https://valceron.in/product/${product.id}`
+              }
+            ]
+          })
+        }}
+      />
+
+      {/* Mobile Sticky WhatsApp Button with pulse and label */}
+      <div className="fixed bottom-20 right-6 z-50 flex items-center gap-3 md:hidden">
+        <AnimatePresence>
+          {showChatToOrderLabel && (
+            <motion.div
+              initial={{ opacity: 0, x: 10, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 10, scale: 0.8 }}
+              className="bg-green-500 text-black font-mono font-bold text-[9px] tracking-widest uppercase py-2.5 px-4 rounded-xl shadow-2xl animate-bounce"
+            >
+              Chat to order
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        <motion.button
+          onClick={handleWhatsAppBuy}
+          animate={{ scale: [1, 1.08, 1] }}
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="w-14 h-14 rounded-full bg-green-500 text-black flex items-center justify-center shadow-[0_4px_20px_rgba(34,197,94,0.4)] hover:bg-green-400 transition-colors cursor-pointer"
+        >
+          <MessageCircle size={24} fill="currentColor" className="text-black" />
+        </motion.button>
+      </div>
+
+      {/* Price Drop Alert Modal */}
+      <AnimatePresence>
+        {showPriceDropModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="max-w-md w-full bg-[#050508] border border-white/10 rounded-3xl p-8 shadow-2xl text-left"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-mono font-bold text-white uppercase tracking-widest">Price Drop Alert</h3>
+                <button 
+                  onClick={() => setShowPriceDropModal(false)}
+                  className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:text-white cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handlePriceDropSubmit} className="space-y-4">
+                <p className="text-[10px] text-white/50 leading-relaxed font-mono uppercase tracking-wider">
+                  We will notify you immediately via email/SMS when the price of **{product.name}** drops below **{convertPrice(product.price).symbol}{convertPrice(product.price).amount}**.
+                </p>
+
+                <div className="space-y-1">
+                  <label className="text-[8px] font-mono text-white/30 uppercase tracking-widest block">Email Address</label>
+                  <input 
+                    type="email" 
+                    required
+                    value={emailAlert}
+                    onChange={(e) => setEmailAlert(e.target.value)}
+                    placeholder="name@domain.com"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[8px] font-mono text-white/30 uppercase tracking-widest block">Phone Number</label>
+                  <input 
+                    type="tel" 
+                    required
+                    value={phoneAlert}
+                    onChange={(e) => setPhoneAlert(e.target.value)}
+                    placeholder="+91 XXXXX XXXXX"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-[#D4AF37] transition-colors"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isAlertSubmitting}
+                  className="w-full py-4 mt-2 bg-[#D4AF37] text-black font-mono font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-yellow-400 transition-all shadow-lg shadow-[#D4AF37]/10 cursor-pointer"
+                >
+                  {isAlertSubmitting ? "Setting alert..." : "Set Price Alert"}
+                </button>
+              </form>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

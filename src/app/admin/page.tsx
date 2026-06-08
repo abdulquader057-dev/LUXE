@@ -21,7 +21,7 @@ import {
   Cpu, Network, X,
   Shield, Plus, Lock, Check, Power, Key, Trash2
 } from "lucide-react";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { MOCK_PRODUCTS, parseDbProduct } from "@/data/products";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 
@@ -139,11 +139,10 @@ export default function AdminDashboard() {
         }
         
         if (productsRes.data && productsRes.data.length > 0) {
-          const hasLuxe = productsRes.data.some(p => p.id.toLowerCase().includes("luxe"));
-          if (hasLuxe) {
-            setProducts(productsRes.data);
-            localStorage.setItem("luxe-catalog", JSON.stringify(productsRes.data));
-          }
+          const parsed = productsRes.data.map(parseDbProduct);
+          const unique = parsed.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+          setProducts(unique);
+          localStorage.setItem("luxe-catalog", JSON.stringify(unique));
         }
       } catch (error) {
         console.error("Error fetching admin data:", error);

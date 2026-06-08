@@ -128,7 +128,7 @@ export default function CognitionHub() {
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1, delay: 0.2 }}
-          className="text-4xl md:text-7xl font-bebas tracking-widest text-white mb-6 uppercase"
+          className="text-4xl md:text-7xl font-orbitron tracking-widest text-white mb-6 uppercase"
         >
           Neural <span className="text-primary">Cognition</span> Hub
         </motion.h1>

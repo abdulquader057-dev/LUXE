@@ -158,11 +158,11 @@ const AIChatbot = () => {
         aiResponse.type = "recommendation";
         const textLower = messageText.toLowerCase();
         if (textLower.includes("white")) {
-          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-001")].filter(Boolean) as Product[];
+          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "00000000-0000-4000-a000-000000000001")].filter(Boolean) as Product[];
         } else if (textLower.includes("blue") || textLower.includes("sky")) {
-          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-002") || MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-006")].filter(Boolean) as Product[];
+          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "00000000-0000-4000-a000-000000000002") || MOCK_PRODUCTS.find((p) => p.id === "00000000-0000-4000-a000-000000000006")].filter(Boolean) as Product[];
         } else if (textLower.includes("black") || textLower.includes("dark")) {
-          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "luxe-linen-007")].filter(Boolean) as Product[];
+          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "00000000-0000-4000-a000-000000000007")].filter(Boolean) as Product[];
         } else {
           aiResponse.items = [MOCK_PRODUCTS[0], MOCK_PRODUCTS[2]];
         }

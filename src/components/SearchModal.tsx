@@ -8,7 +8,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import { supabase } from "@/lib/supabase";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { MOCK_PRODUCTS, parseDbProduct } from "@/data/products";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -28,9 +28,15 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
     async function fetchProducts() {
       try {
         const { data } = await supabase.from("products").select("*");
-        const prodList = data && data.length > 0 ? data : MOCK_PRODUCTS;
-        setAllProducts(prodList);
-        setResults(prodList.slice(0, 4));
+        if (data && data.length > 0) {
+          const parsed = data.map(parseDbProduct);
+          const unique = parsed.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+          setAllProducts(unique);
+          setResults(unique.slice(0, 4));
+        } else {
+          setAllProducts(MOCK_PRODUCTS);
+          setResults(MOCK_PRODUCTS.slice(0, 4));
+        }
       } catch (err) {
         setAllProducts(MOCK_PRODUCTS);
         setResults(MOCK_PRODUCTS.slice(0, 4));

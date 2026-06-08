@@ -9,26 +9,34 @@ import Footer from "@/components/Footer";
 import AIChatbot from "@/components/ai/AIChatbot";
 import ProductCard from "@/components/shop/ProductCard";
 import { supabase } from "@/lib/supabase";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { MOCK_PRODUCTS, parseDbProduct } from "@/data/products";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import MagneticWrapper from "@/components/MagneticWrapper";
 
 const ShopContent = () => {
-  const [dbProducts, setDbProducts] = React.useState<any[]>(MOCK_PRODUCTS);
+  const [dbProducts, setDbProducts] = React.useState<any[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     async function fetchProducts() {
+      setIsLoading(true);
       try {
         const { data } = await supabase.from("products").select("*");
         if (data && data.length > 0) {
-          const hasLuxe = data.some(p => p.id.toLowerCase().includes("luxe"));
-          if (hasLuxe) {
-            setDbProducts(data);
-          }
+          const parsed = data.map(parseDbProduct);
+          const unique = parsed.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+          setDbProducts(unique);
+        } else {
+          const unique = MOCK_PRODUCTS.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+          setDbProducts(unique);
         }
       } catch (err) {
         console.warn("Using offline catalog fallback:", err);
+        const unique = MOCK_PRODUCTS.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+        setDbProducts(unique);
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchProducts();
@@ -106,8 +114,16 @@ const ShopContent = () => {
           <span className="text-[10px] font-sora text-rose-gold uppercase tracking-[0.4em] block mb-6">
             Season 2027
           </span>
-          <h1 className="text-6xl md:text-[7rem] lg:text-[9rem] font-cormorant font-light tracking-tighter leading-[0.8] mb-8">
-            The <span className="italic text-white/50">Archive</span>
+          <h1
+            className="text-6xl md:text-[7rem] lg:text-[9rem] font-cormorant font-light tracking-tighter leading-[0.8] mb-8"
+            style={{
+              background: "linear-gradient(135deg, #C9A84C 0%, #E8C97A 50%, #9A7B30 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            The <span className="italic">Archive</span>
           </h1>
         </motion.div>
 
@@ -162,7 +178,18 @@ const ShopContent = () => {
         className="relative min-h-[60vh]"
       >
         <AnimatePresence mode="wait">
-          {filteredProducts.length > 0 ? (
+          {isLoading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="product-grid"
+            >
+              {[1,2,3,4,5,6].map(i => (
+                <div key={i} className="h-[480px] rounded-xl animate-shimmer-skeleton bg-[#1A1A26] border border-[#2A2A3E]" />
+              ))}
+            </motion.div>
+          ) : filteredProducts.length > 0 ? (
               <motion.div 
               key={selectedCategory + searchQuery}
               initial={{ opacity: 0, filter: "blur(10px)" }}

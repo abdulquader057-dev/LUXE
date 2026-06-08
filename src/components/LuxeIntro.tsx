@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import LuxeLogo from "./LuxeLogo";
 import { CinematicAtmosphere } from "./CinematicAtmosphere";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const LuxeIntro = () => {
   const [phase, setPhase] = useState(0); // 0: Void, 1: First Light, 2: Atmosphere, 3: Logo, 4: Scan, 5: UI Reveal, 6: Complete
@@ -79,9 +80,11 @@ const LuxeIntro = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="absolute right-0 top-0 h-full w-1/3 z-editorial pointer-events-none hidden md:block"
         >
-          <img 
+          <Image 
             src="/fashion-silhouette.jpg" 
             alt="Fashion Silhouette" 
+            fill
+            sizes="33vw"
             className="h-full w-full object-cover grayscale"
           />
         </motion.div>

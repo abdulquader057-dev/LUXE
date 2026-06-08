@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useTilt } from "@/hooks/useTilt";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import Link from "next/link";
+import Image from "next/image";
 import SwatchSelector from "@/components/shop/SwatchSelector";
 
 interface Product {
@@ -17,12 +18,13 @@ interface Product {
   isNew?: boolean;
   stock?: number;
   colors?: string[];
+  discount?: number;
+  offer?: string;
   modelImages?: any;
 }
 
-// Safely extract first image from either array, JSON string, or plain URL
 function getFirstImage(images: any): string {
-  const fallback = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop";
+  const fallback = "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg";
   if (!images) return fallback;
   if (Array.isArray(images)) return images[0] || fallback;
   if (typeof images === "string") {
@@ -41,10 +43,47 @@ const ProductCard = ({ product }: { product: Product }) => {
   const { convertPrice, addToCart } = useCommerce();
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
+  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "");
   const [isImageFading, setIsImageFading] = useState(false);
-  
-  const tilt = useTilt(15);
+  const [showCartBtn, setShowCartBtn] = useState(false);
+
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Framer Motion 3D tilt
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const rotateX = useSpring(useTransform(mouseY, [-1, 1], [12, -12]), { stiffness: 300, damping: 20 });
+  const rotateY = useSpring(useTransform(mouseX, [-1, 1], [-12, 12]), { stiffness: 300, damping: 20 });
+
+  // Specular highlight position
+  const [specX, setSpecX] = useState(50);
+  const [specY, setSpecY] = useState(50);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = (e.clientX - rect.left) / rect.width;  // 0..1
+    const y = (e.clientY - rect.top) / rect.height;   // 0..1
+    mouseX.set(x * 2 - 1);  // -1..1
+    mouseY.set(y * 2 - 1);  // -1..1
+    setSpecX(x * 100);
+    setSpecY(y * 100);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+    setSpecX(50);
+    setSpecY(50);
+    setIsHovered(false);
+    setShowCartBtn(false);
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    setShowCartBtn(true);
+  };
 
   // Determine image based on modelImages and selected color
   const modelImg = product.modelImages?.variants?.[selectedColor] || product.modelImages || {};
@@ -52,38 +91,110 @@ const ProductCard = ({ product }: { product: Product }) => {
   const sideImage = modelImg.side && modelImg.side !== "/model_placeholder.png" ? modelImg.side : frontImage;
   const imageUrl = isHovered ? sideImage : frontImage;
   const matchScore = Math.floor(Math.random() * 15) + 85;
+
   useEffect(() => {
     setIsImageFading(true);
     const timer = setTimeout(() => setIsImageFading(false), 300);
     return () => clearTimeout(timer);
   }, [selectedColor]);
 
+  const priceInfo = convertPrice(product.price);
+  const discountPct = product.discount && product.discount > 0 ? product.discount : null;
+
   return (
-    <div 
-      className="product-card group relative rounded-xl transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_30px_60px_rgba(0,0,0,0.9)] h-[480px] bg-transparent"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+    <motion.div
+      ref={cardRef}
+      className="product-card group relative rounded-xl h-[500px] bg-transparent"
+      style={{
+        perspective: 800,
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onMouseEnter={handleMouseEnter}
+      whileHover={{ translateZ: 20, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <div
-        className="w-full h-full rounded-xl overflow-hidden bg-bg-surface border border-white/5 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.15,1)] group-hover:border-white/20 flex flex-col relative"
-        onMouseMove={tilt.onMouseMove}
-        onMouseLeave={tilt.onMouseLeave}
-        style={tilt.style}
+        className="w-full h-full rounded-xl overflow-hidden flex flex-col relative"
+        style={{
+          background: "var(--surface-card, #1A1A26)",
+          border: "0.5px solid var(--border-subtle, #2A2A3E)",
+          boxShadow: isHovered
+            ? "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.2)"
+            : "0 8px 24px rgba(0,0,0,0.4)",
+          transition: "border-color 0.4s ease, box-shadow 0.4s ease",
+          borderColor: isHovered ? "var(--accent-gold, #C9A84C)" : "var(--border-subtle, #2A2A3E)",
+        }}
       >
-        {/* Golden Shimmer Overlay on Hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-700 z-20">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#D4AF37]/15 to-transparent -translate-x-full group-hover:animate-gold-shimmer" />
+        {/* Specular highlight overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none z-30 rounded-xl transition-opacity duration-300"
+          style={{
+            opacity: isHovered ? 1 : 0,
+            background: `radial-gradient(circle at ${specX}% ${specY}%, rgba(201,168,76,0.08) 0%, transparent 55%)`,
+          }}
+        />
+
+        {/* Gold border shimmer overlay */}
+        <div className="absolute inset-0 z-20 pointer-events-none rounded-xl overflow-hidden">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.15) 50%, transparent 100%)",
+              backgroundSize: "200% 100%",
+              backgroundPosition: isHovered ? "200% 0" : "-100% 0",
+              transition: "background-position 1.2s ease",
+            }}
+          />
         </div>
 
-        {/* Top Image Section */}
-        <Link href={`/product/${product.id}?color=${encodeURIComponent(selectedColor)}`} className="relative h-[310px] w-full overflow-hidden bg-[#0A0A0F] block">
-          <img 
-            src={imageUrl} 
+        {/* Image section */}
+        <Link
+          href={`/product/${product.id}?color=${encodeURIComponent(selectedColor)}`}
+          className="relative flex-shrink-0 overflow-hidden block"
+          style={{ height: "310px" }}
+        >
+          <Image
+            src={imageUrl}
             alt={product.name}
-            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-[cubic-bezier(0.25,1,0.15,1)] ${isImageFading ? 'opacity-0' : ''} ${isHovered ? 'opacity-100' : 'opacity-90'} ${isHovered ? 'scale-[1.05]' : 'scale-100'}`}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className={`object-cover transition-all duration-500 ease-[cubic-bezier(0.25,1,0.15,1)] ${
+              isImageFading ? "opacity-0" : ""
+            } ${isHovered ? "opacity-100 scale-[1.06]" : "opacity-90 scale-100"}`}
+            style={{ background: "#FAF9F6" }}
           />
-          
-          {/* Out of Stock Overlay */}
+
+          {/* LUXE watermark — right edge, vertical, very subtle */}
+          <div
+            className="absolute right-2 top-0 bottom-0 flex items-center justify-center pointer-events-none z-10"
+            style={{
+              writingMode: "vertical-rl",
+              textOrientation: "mixed",
+              opacity: 0.18,
+              fontFamily: "var(--font-cormorant)",
+              fontSize: "9px",
+              letterSpacing: "0.35em",
+              textTransform: "uppercase",
+              color: "var(--accent-gold, #C9A84C)",
+              userSelect: "none",
+            }}
+          >
+            LUXE
+          </div>
+
+          {/* Soft inner shadow */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              boxShadow: "inset 0 0 40px rgba(0,0,0,0.3), inset 0 -20px 40px rgba(10,10,15,0.6)",
+            }}
+          />
+
+          {/* Out of Stock */}
           {product.stock === 0 && (
             <div className="absolute inset-0 bg-black/70 backdrop-blur-[1px] flex items-center justify-center z-10">
               <span className="text-[8px] font-mono font-bold tracking-[0.2em] text-red-500 border border-red-500/20 px-3 py-1.5 rounded-lg bg-black/90 uppercase">
@@ -92,58 +203,62 @@ const ProductCard = ({ product }: { product: Product }) => {
             </div>
           )}
 
-          {/* Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-transparent opacity-20" />
-
-          {/* AI Badge Top Left */}
-          <div className="absolute top-3 left-3 px-2.5 py-1 rounded-sm bg-black/60 border border-white/10 backdrop-blur-md flex items-center gap-1.5 shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
-            <div className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
-            <span className="text-[9px] font-sora font-bold text-white/90 tracking-widest">
-              AI MATCH {matchScore}%
-            </span>
+          {/* AI Badge */}
+          <div className="absolute top-3 left-3 px-2.5 py-1 rounded-sm bg-black/60 border border-white/10 backdrop-blur-md flex items-center gap-1.5 shadow-[0_5px_15px_rgba(0,0,0,0.5)] z-10">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#C9A84C] animate-pulse" />
+            <span className="text-[9px] font-sora font-bold text-white/90 tracking-widest">AI MATCH {matchScore}%</span>
           </div>
 
-          {/* Heart Icon Top Right */}
-          <button 
-            onClick={(e) => {
-              e.preventDefault();
-              setIsLiked(!isLiked);
-            }}
-            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
-              isLiked 
-                ? 'bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.2)]' 
-                : 'bg-black/40 border border-white/10 text-white/50 hover:bg-black/60 hover:text-white'
+          {/* Heart */}
+          <button
+            onClick={(e) => { e.preventDefault(); setIsLiked(!isLiked); }}
+            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 z-10 ${
+              isLiked
+                ? "bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] shadow-[0_0_15px_rgba(201,168,76,0.25)]"
+                : "bg-black/40 border border-white/10 text-white/50 hover:bg-black/60 hover:text-white"
             }`}
           >
-            <Heart size={14} className={isLiked ? 'fill-[#D4AF37]' : ''} />
+            <Heart size={14} className={isLiked ? "fill-[#C9A84C]" : ""} />
           </button>
         </Link>
 
-        {/* Info Section Bottom */}
-        <div className="flex-1 p-5 flex flex-col justify-between relative z-10 bg-gradient-to-b from-transparent to-[#0A0A0C]">
+        {/* Info section */}
+        <div className="flex-1 p-5 flex flex-col justify-between relative z-10" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(10,10,15,0.95) 100%)" }}>
           <div>
-            <h3 className="text-[13px] font-sora font-bold text-white tracking-widest uppercase mb-1.5 line-clamp-1 group-hover:text-white/80 transition-colors">
+            <h3 className="text-[13px] font-orbitron font-bold text-white/90 tracking-wider uppercase mb-1.5 line-clamp-1 group-hover:text-[#E8C97A] transition-colors">
               {product.name}
             </h3>
-            <p className="text-[10px] font-sora text-white/40 tracking-wider line-clamp-2">
+            <p className="text-[10px] font-sora text-white/40 tracking-wider line-clamp-2 leading-relaxed">
               {product.description}
             </p>
-            {/* Colour Swatch Selector */}
-            <SwatchSelector colors={product.colors || []} selectedColor={selectedColor} onSelect={setSelectedColor} />
+            <SwatchSelector
+              colors={product.colors || []}
+              selectedColor={selectedColor}
+              onSelect={setSelectedColor}
+            />
           </div>
 
-          <div className="mt-4 pt-4 border-t border-white/10 flex items-end justify-between">
+          <div className="mt-4 pt-4 flex items-end justify-between" style={{ borderTop: "1px solid rgba(201,168,76,0.1)" }}>
             <div>
-              <div className="text-[9px] font-sora text-white/30 line-through tracking-wider mb-0.5">
-                {convertPrice(product.price * 1.35).symbol}{convertPrice(product.price * 1.35).amount}
-              </div>
+              {discountPct && discountPct > 0 && (
+                <div className="text-[9px] font-sora text-white/30 line-through tracking-wider mb-0.5">
+                  {convertPrice(Math.round(product.price / (1 - discountPct / 100))).symbol}{convertPrice(Math.round(product.price / (1 - discountPct / 100))).amount}
+                </div>
+              )}
               <div className="flex items-center gap-2">
-                <span className="text-[14px] font-orbitron font-bold text-white tracking-wider">
-                  {convertPrice(product.price).symbol}{convertPrice(product.price).amount}
+                <span
+                  className="text-[14px] font-orbitron font-bold tracking-wider"
+                  style={{ color: "var(--accent-gold, #C9A84C)" }}
+                >
+                  {priceInfo.symbol}{priceInfo.amount}
                 </span>
-                <span className="px-1.5 py-0.5 rounded-sm bg-red-500/20 text-red-400 text-[8px] font-sora font-bold tracking-widest border border-red-500/30">
-                  -35%
-                </span>
+                {discountPct && discountPct > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-sm text-[8px] font-sora font-bold tracking-widest"
+                    style={{ background: "rgba(201,168,76,0.15)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.25)" }}
+                  >
+                    -{discountPct}%
+                  </span>
+                )}
               </div>
             </div>
 
@@ -152,24 +267,27 @@ const ProductCard = ({ product }: { product: Product }) => {
                 N/A
               </span>
             ) : (
-              <button 
-                onClick={() => addToCart({
-                  id: product.id,
-                  name: product.name,
-                  price: product.price,
-                  image: imageUrl,
-                  quantity: 1,
-                  size: "L"
-                })}
-                className="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/70 flex items-center justify-center hover:bg-white hover:text-black hover:shadow-[0_5px_15px_rgba(255,255,255,0.2)] transition-all duration-300 transform hover:scale-105 active:scale-95"
+              <motion.button
+                onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, image: imageUrl, quantity: 1, size: "L", color: selectedColor })}
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
+                style={{
+                  background: showCartBtn ? "var(--accent-gold, #C9A84C)" : "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(201,168,76,0.3)",
+                  color: showCartBtn ? "#0A0A0F" : "rgba(255,255,255,0.7)",
+                }}
+                initial={{ y: 8, opacity: 0 }}
+                animate={{ y: showCartBtn ? 0 : 8, opacity: showCartBtn ? 1 : 0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
               >
                 <ShoppingCart size={16} />
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

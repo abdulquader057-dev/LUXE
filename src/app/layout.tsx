@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Bebas_Neue, Rajdhani, Sora, Orbitron, Cormorant_Garamond, Outfit } from "next/font/google";
+import { Sora, Orbitron, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import "./design-system.css";
-import ZyraChat from "@/components/ZyraChat";
-import BackToTop from "@/components/BackToTop";
 import Sidebar from "@/components/Sidebar";
 import { CommerceProvider } from "@/lib/contexts/CommerceContext";
 import { LanguageProvider } from "@/lib/contexts/LanguageContext";
@@ -11,26 +9,17 @@ import { AuthProvider } from "@/lib/contexts/AuthContext";
 import CartSidebar from "@/components/ui/CartSidebar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import CustomCursor from "@/components/CustomCursor";
 import ScrollProgress from "@/components/ScrollProgress";
 import EntranceAnimation from "@/components/EntranceAnimation";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { Toaster } from "react-hot-toast";
 import ThemeColorLoader from "@/components/ThemeColorLoader";
-import Seo from "@/components/seo/Seo";
 import GtmPageViewTracker from "@/components/GtmPageViewTracker";
-
-const bebasNeue = Bebas_Neue({
-  weight: "400",
-  variable: "--font-bebas",
-  subsets: ["latin"],
-});
-
-const rajdhani = Rajdhani({
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-rajdhani",
-  subsets: ["latin"],
-});
+import FloatingWidgets from "@/components/FloatingWidgets";
+import MobileNav from "@/components/MobileNav";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import LuxeLoadingBar from "@/components/ui/LuxeLoadingBar";
 
 const sora = Sora({
   weight: ["300", "400", "500"],
@@ -48,12 +37,6 @@ const cormorant = Cormorant_Garamond({
   weight: ["300", "400", "500", "600"],
   style: ["normal", "italic"],
   variable: "--font-cormorant",
-  subsets: ["latin"],
-});
-
-const outfit = Outfit({
-  weight: ["400", "600"],
-  variable: "--font-outfit",
   subsets: ["latin"],
 });
 
@@ -78,6 +61,10 @@ export const metadata: Metadata = {
     type: "website",
   },
   keywords: ["AI Fashion", "Future of Retail", "Luxury Techwear", "Neural Styling", "Luxe"],
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
   verification: {
     google: "TO_BE_FILLED",
   },
@@ -91,12 +78,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sora.variable} ${bebasNeue.variable} ${rajdhani.variable} ${orbitron.variable} ${cormorant.variable} ${outfit.variable} h-full antialiased dark scroll-smooth`}
+      className={`${sora.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth`}
     >
       <head>
         <meta name="google-site-verification" content="TO_BE_FILLED" />
       </head>
       <body className="min-h-screen flex flex-col bg-bg-base text-text-primary selection:bg-primary/30 selection:text-white relative transition-colors duration-1000">
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.onerror = function(message, source, lineno, colno, error) {
+            console.error("Global Luxe Exception caught:", message, error);
+            return false;
+          };
+        ` }} />
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
             try {
@@ -145,16 +138,15 @@ export default function RootLayout({
         <AnimatedBackground />
         <EntranceAnimation />
         <ScrollProgress />
+        <LuxeLoadingBar />
         <div className="film-grain opacity-20 mix-blend-overlay pointer-events-none" />
-        <CustomCursor />
-        
         <LanguageProvider>
         <AuthProvider>
         <CommerceProvider>
                   <Sidebar />
           <CartSidebar />
           
-          <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden relative scroll-smooth">
+          <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden relative scroll-smooth pb-20 md:pb-0">
             <Navbar />
             <div className="flex-1 w-full relative z-10 animate-page-transition">
               {children}
@@ -162,11 +154,10 @@ export default function RootLayout({
             <Footer />
           </main>
           
-          {/* FLOATING COMPONENTS GEOMETRY LOCK */}
-          <div style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 9999, display: "flex", flexDirection: "column", gap: "16px", alignItems: "flex-end" }}>
-            <ZyraChat />
-            <BackToTop />
-          </div>
+          <FloatingWidgets />
+          <MobileNav />
+          <Analytics />
+          <SpeedInsights />
                 </CommerceProvider>
         </AuthProvider>
         </LanguageProvider>

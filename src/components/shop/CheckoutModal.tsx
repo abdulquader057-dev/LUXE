@@ -7,6 +7,7 @@ import { useCommerce } from "@/lib/contexts/CommerceContext";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -636,8 +637,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
 
                     {/* QR Code */}
                     <div className="w-48 h-48 relative border-2 border-white/10 rounded-xl overflow-hidden bg-white p-2">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/upi-qr.jpg" alt="UPI Payment QR Code" className="w-full h-full object-contain" />
+                      <Image src="/upi-qr.jpg" alt="UPI Payment QR Code" fill className="w-full h-full object-contain" />
                     </div>
                     <span className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Pay overall total then submit checklist below</span>
                   </div>

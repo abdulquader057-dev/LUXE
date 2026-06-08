@@ -19,6 +19,8 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import confetti from "canvas-confetti";
+import Image from "next/image";
+import { track } from "@vercel/analytics";
 
 const SETTINGS_MENU = [
   { id: "account", label: "Account", icon: User, color: "#00f2ff" },
@@ -819,6 +821,7 @@ function SubscriptionServices() {
     }
     localStorage.setItem("luxe-theme-color", color);
     document.documentElement.style.setProperty("--primary-color", color);
+    try { track("theme_changed", { color }); } catch (e) {}
     toast.success(`Interface colorway updated to ${color}`);
   };
 
@@ -1101,7 +1104,7 @@ function SubscriptionServices() {
                            </button>
                          </div>
                          <div className="w-36 h-36 mx-auto relative border border-white/10 rounded-xl bg-white p-1">
-                           <img src="/upi-qr.jpg" alt="UPI QR" className="w-full h-full object-contain" />
+                           <Image src="/upi-qr.jpg" alt="UPI QR" fill className="w-full h-full object-contain" />
                          </div>
                        </div>
                      ) : (

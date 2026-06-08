@@ -75,3 +75,21 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- 7. Create Price Drop Alerts Table
+CREATE TABLE public.price_drop_alerts (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id text NOT NULL,
+  email text NOT NULL,
+  phone text NOT NULL,
+  target_price numeric,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS
+ALTER TABLE public.price_drop_alerts ENABLE ROW LEVEL SECURITY;
+
+-- Allow public inserts for alerts
+CREATE POLICY "Anyone can create price drop alerts" ON public.price_drop_alerts FOR INSERT WITH CHECK (true);
+-- Only Admin can view alerts
+CREATE POLICY "Admin can view price drop alerts" ON public.price_drop_alerts FOR SELECT USING (auth.jwt()->>'email' = 'abdulquader057@gmail.com');

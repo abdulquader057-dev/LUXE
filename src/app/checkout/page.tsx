@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -431,8 +432,8 @@ export default function CheckoutPage() {
                     </button>
                   </div>
 
-                  <div className="w-36 h-36 border border-white/15 rounded-xl overflow-hidden bg-white p-1">
-                    <img src="/upi-qr.jpg" alt="UPI QR" className="w-full h-full object-contain" />
+                  <div className="w-36 h-36 border border-white/15 rounded-xl overflow-hidden bg-white p-1 relative">
+                    <Image src="/upi-qr.jpg" alt="UPI QR" fill className="w-full h-full object-contain" />
                   </div>
 
                   <div className="w-full space-y-1.5 text-left">
@@ -508,8 +509,8 @@ export default function CheckoutPage() {
                   {cart.map((item: any) => (
                     <div key={item.id + (item.size || "") + (item.color || "")} className="flex justify-between items-center gap-4 text-xs">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0">
-                          <img src={item.image} alt="" className="w-full h-full object-cover grayscale" />
+                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0 relative">
+                          <Image src={item.image} alt="" fill sizes="40px" className="w-full h-full object-cover grayscale" />
                         </div>
                         <div className="space-y-0.5">
                           <p className="font-bold text-white uppercase tracking-tight line-clamp-1">{item.name}</p>
