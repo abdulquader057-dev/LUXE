@@ -637,7 +637,7 @@ const ProductPage = () => {
 
                 <button 
                   onClick={() => setIsStyleAnalysisOpen(false)}
-                  className="w-full mt-16 py-6 bg-primary text-black rounded-[24px] font-black tracking-widest text-xs uppercase hover:bg-white transition-all"
+                  className="w-full mt-16 py-6 bg-[var(--primary-color)] text-black rounded-[24px] font-black tracking-widest text-xs uppercase hover:bg-white transition-all cursor-pointer"
                 >
                   Close Analysis
                 </button>

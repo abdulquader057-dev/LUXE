@@ -696,7 +696,7 @@ export default function AdminDashboard() {
                         <button className="glass border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black tracking-widest uppercase hover:bg-white/5 transition-all">
                            <Terminal size={14} /> CLI Access
                         </button>
-                        <button className="bg-primary text-black px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black tracking-widest uppercase hover:scale-105 transition-all">
+                        <button className="bg-[var(--primary-color)] text-black px-6 py-3 rounded-2xl flex items-center gap-3 text-[10px] font-black tracking-widest uppercase hover:scale-105 transition-all">
                            <Zap size={14} fill="black" /> Turbo Sync
                         </button>
                      </div>

@@ -427,7 +427,7 @@ function ClothingPreferences() {
                    whileTap={{ scale: 0.95 }}
                    className={cn(
                      "px-4 py-2 rounded-full border text-[9px] font-mono uppercase tracking-widest transition-all cursor-pointer",
-                     activeMaterial === m ? "bg-primary text-black border-primary" : "border-white/10 text-white hover:border-primary/40 hover:text-primary"
+                     activeMaterial === m ? "bg-primary text-[var(--primary-color)] border-primary" : "border-white/10 text-white hover:border-primary/40 hover:text-primary"
                    )}
                  >
                    {m}
@@ -449,7 +449,7 @@ function ClothingPreferences() {
                      whileTap={{ scale: 0.97 }}
                      className={cn(
                        "p-4 rounded-2xl border text-[9px] font-mono uppercase tracking-widest transition-all cursor-pointer",
-                       activeFit === f ? "bg-primary text-black border-primary" : "border-white/5 text-white/40 hover:border-primary/40"
+                       activeFit === f ? "bg-primary text-[var(--primary-color)] border-primary" : "border-white/5 text-white/40 hover:border-primary/40"
                      )}
                    >
                      {f}
@@ -1604,7 +1604,7 @@ function SupportCenter() {
                   placeholder="Type a message to Concierge..."
                   className="flex-1 bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-primary/40 text-white"
                 />
-                <button type="submit" className="p-3 bg-primary text-black rounded-xl hover:opacity-90 transition-opacity"><Send size={14} /></button>
+                <button type="submit" className="p-3 bg-primary text-[var(--primary-color)] border border-primary/20 rounded-xl hover:opacity-90 transition-opacity"><Send size={14} /></button>
               </form>
             </motion.div>
           </div>
@@ -1689,8 +1689,8 @@ function SupportCenter() {
                         type="button" 
                         key={num}
                         onClick={() => setFeedbackRating(num)}
-                        className={cn("w-10 h-10 rounded-xl border text-xs font-mono", 
-                          feedbackRating === num ? "bg-primary border-primary text-black" : "border-white/10 text-white")}
+                        className={cn("w-10 h-10 rounded-xl border text-xs font-mono cursor-pointer transition-all", 
+                          feedbackRating === num ? "bg-primary border-primary text-[var(--primary-color)]" : "border-white/10 text-white")}
                       >
                         {num}
                       </button>
@@ -1707,7 +1707,7 @@ function SupportCenter() {
                     className="w-full bg-black/60 border border-white/10 rounded-xl p-4 text-xs font-mono text-white focus:outline-none focus:border-primary/40"
                   />
                 </div>
-                <button type="submit" className="w-full py-4 bg-primary text-black rounded-xl text-xs font-mono uppercase tracking-widest font-bold mt-4">Submit Feedback</button>
+                <button type="submit" className="w-full py-4 bg-[var(--primary-color)] text-black rounded-xl text-xs font-mono uppercase tracking-widest font-bold mt-4 hover:scale-[1.01] transition-transform cursor-pointer">Submit Feedback</button>
               </form>
             </motion.div>
           </div>

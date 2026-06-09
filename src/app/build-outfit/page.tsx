@@ -169,7 +169,7 @@ export default function BuildOutfitPage() {
                 className={cn(
                   "px-6 py-3 rounded-full text-sm font-black tracking-wider transition-all duration-300",
                   selectedMood === mood
-                    ? "bg-primary text-black scale-105"
+                    ? "bg-[var(--primary-color)] text-black scale-105"
                     : "glass-panel border border-white/10 hover:border-white/30 text-white/60"
                 )}
               >
@@ -228,7 +228,7 @@ export default function BuildOutfitPage() {
             <button
               onClick={() => customPrompt && handleGenerate(customPrompt)}
               disabled={isGenerating || !customPrompt}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary text-black px-8 py-4 rounded-[20px] font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-all disabled:opacity-30"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-[var(--primary-color)] text-black px-8 py-4 rounded-[20px] font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-all disabled:opacity-30"
             >
               {isGenerating ? "Generating..." : "Build Fit"}
             </button>
@@ -413,7 +413,7 @@ export default function BuildOutfitPage() {
                   >
                     <RotateCcw size={16} /> Regenerate
                   </button>
-                  <button className="px-10 py-5 rounded-[24px] bg-primary text-black font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-all flex items-center gap-3">
+                  <button className="px-10 py-5 rounded-[24px] bg-[var(--primary-color)] text-black font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-all flex items-center gap-3">
                     <ShoppingBag size={16} /> Add Complete Fit
                   </button>
                 </div>

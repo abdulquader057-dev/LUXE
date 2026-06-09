@@ -298,7 +298,7 @@ export const ProductViewer3D = ({
             onClick={(e) => { e.stopPropagation(); updateIndex(idx); }}
             className={`px-3 py-1.5 rounded-full text-[8px] font-mono border uppercase tracking-widest transition-all cursor-pointer ${
               internalIndex === idx 
-                ? "bg-primary text-black border-primary font-bold shadow-[0_0_15px_#00f2ff]" 
+                ? "bg-[var(--primary-color)] text-black border-primary font-bold shadow-[0_0_15px_var(--primary-color)]" 
                 : "bg-black/40 text-white/50 border-white/10 hover:text-white"
             }`}
           >

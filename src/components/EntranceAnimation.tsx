@@ -68,13 +68,15 @@ const EntranceAnimation = () => {
           />
 
           {/* ── LOGO LAYER — centered, above panels, never clipped */}
-          <div
+          <motion.div
             className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
             style={{ zIndex: 20 }}
+            animate={phase === "split" ? { opacity: 0, scale: 0.92 } : { opacity: 1, scale: 1 }}
+            transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Gold orb glow behind text */}
             <div
-              className="absolute w-[500px] h-[500px] rounded-full"
+              className="absolute w-[400px] h-[400px] rounded-full"
               style={{
                 background:
                   "radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)",
@@ -86,8 +88,8 @@ const EntranceAnimation = () => {
               {LETTERS.map((letter, i) => (
                 <motion.span
                   key={letter + i}
-                  initial={{ rotateX: 90, opacity: 0 }}
-                  animate={{ rotateX: 0, opacity: 1 }}
+                  initial={{ rotateX: 90, y: 15, opacity: 0 }}
+                  animate={{ rotateX: 0, y: 0, opacity: 1 }}
                   transition={{
                     duration: 0.55,
                     delay: 0.3 + i * 0.1,
@@ -96,7 +98,7 @@ const EntranceAnimation = () => {
                   style={{
                     display: "inline-block",
                     fontFamily: "var(--font-cormorant), serif",
-                    fontSize: "clamp(72px, 14vw, 130px)",
+                    fontSize: "clamp(48px, 9vw, 80px)",
                     fontWeight: 300,
                     letterSpacing: "0.12em",
                     lineHeight: 1,
@@ -117,7 +119,7 @@ const EntranceAnimation = () => {
             {/* Gold shimmer line */}
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: "180px", opacity: 1 }}
+              animate={{ width: "140px", opacity: 1 }}
               transition={{ delay: 1.0, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
               className="relative mt-5"
               style={{
@@ -128,7 +130,7 @@ const EntranceAnimation = () => {
             >
               <motion.div
                 initial={{ x: "-100%" }}
-                animate={{ x: "180px" }}
+                animate={{ x: "140px" }}
                 transition={{
                   repeat: Infinity,
                   duration: 1.1,
@@ -174,7 +176,7 @@ const EntranceAnimation = () => {
                 Hyderabad · Est. 2026
               </div>
             </motion.div>
-          </div>
+          </motion.div>
 
           {/* ── GOLD FLASH just before split */}
           <motion.div

@@ -175,7 +175,7 @@ export default function ProfilePage() {
               className={cn(
                 "flex items-center gap-3 px-6 py-3 rounded-full text-[10px] font-black tracking-widest uppercase transition-all whitespace-nowrap",
                 activeSection === tab.id
-                  ? "bg-primary text-black"
+                  ? "bg-[var(--primary-color)] text-black"
                   : "glass-panel border border-white/5 text-white/40 hover:text-white hover:border-white/20"
               )}
             >
@@ -376,7 +376,7 @@ export default function ProfilePage() {
                     <div className={cn(
                       "w-12 h-12 rounded-full flex items-center justify-center text-sm font-black",
                       i < dna.evolutionStage ? "bg-primary/20 text-primary border border-primary/40" :
-                        i === dna.evolutionStage ? "bg-primary text-black" :
+                        i === dna.evolutionStage ? "bg-[var(--primary-color)] text-black" :
                           "bg-white/5 text-white/20 border border-white/5"
                     )}>
                       {i + 1}

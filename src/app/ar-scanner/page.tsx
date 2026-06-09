@@ -108,7 +108,7 @@ export default function ARScannerPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 bg-primary text-black font-mono font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-white hover:scale-[1.01] transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[var(--primary-color)] text-black font-mono font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-white hover:scale-[1.01] transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 {isSubmitting ? "Syncing..." : "Access Beta Hub"} <ChevronRight size={14} />
               </button>
