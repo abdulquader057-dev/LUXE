@@ -130,14 +130,14 @@ export default async function RootLayout({
         </noscript>
         <ThemeColorLoader />
         <GtmPageViewTracker />
-        <DynamicLayoutWidgets />
         <ScrollProgress />
         <LuxeLoadingBar />
         <div className="film-grain opacity-20 mix-blend-overlay pointer-events-none" />
         <LanguageProvider>
         <AuthProvider>
         <CommerceProvider>
-                  <Sidebar />
+          <DynamicLayoutWidgets />
+          <Sidebar />
           <CartSidebar />
           
           <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden relative scroll-smooth pb-20 md:pb-0">
