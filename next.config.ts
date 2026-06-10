@@ -36,7 +36,8 @@ const nextConfig: NextConfig = {
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' blob: data: https://images.unsplash.com https://images.pexels.com https://*.supabase.co https://*.supabase.in https://lh3.googleusercontent.com",
       "connect-src 'self' https://*.supabase.co https://*.supabase.in https://generativelanguage.googleapis.com https://va.vercel-scripts.com wss://*.supabase.co",
-      "frame-src 'none'",
+      "frame-src 'self' https://vercel.live",
+      "frame-ancestors 'self' https://vercel.com https://*.vercel.com https://*.vercel.app",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self' https://wa.me",
@@ -54,10 +55,6 @@ const nextConfig: NextConfig = {
           {
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains; preload',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
           },
           {
             key: 'X-Content-Type-Options',
