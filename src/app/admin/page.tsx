@@ -808,7 +808,7 @@ export default function AdminDashboard() {
                                   </div>
 
                                   {/* Delete Order Button */}
-                                  {isSuperAdmin && (
+                                  {isAdmin && (
                                     <div className="flex justify-end pt-4">
                                       <button
                                         onClick={() => handleDelete(order.id, 'orders')}
