@@ -10,7 +10,21 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { MapPin, Phone, User, ShoppingBag, QrCode, Clipboard, CheckCircle2, Loader2 } from "lucide-react";
 import { escapeString } from "@/lib/security";
+import { telemetry } from "@/lib/telemetry";
 
+
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    if ((window as any).Razorpay) return resolve(true);
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 export default function CheckoutPage() {
   const { cart, clearCart, totalPrice } = useCommerce();
@@ -107,6 +121,15 @@ export default function CheckoutPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (cart.length > 0) {
+      telemetry.track("checkout_started", {
+        cart_total: totalPrice,
+        items_count: cart.reduce((acc: number, curr: any) => acc + (curr.quantity || 1), 0)
+      });
+    }
+  }, [cart, totalPrice]);
+
   const isUpiValid = cod ? true : /^[a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+$/.test(upi || "");
   const isPhoneValid = /^[6-9]\d{9}$/.test((phone || "").replace(/[^0-9]/g, "").slice(-10)); // Accept Indian numbers
   const canSubmit = name && address && city && pincode && isPhoneValid && (cod ? true : isUpiValid) && cart.length > 0;
@@ -199,7 +222,7 @@ export default function CheckoutPage() {
         address: escapedAddress,
         city: escapedCity,
         pincode: escapedPincode,
-        paymentMethod: cod ? "COD" : "UPI",
+        paymentMethod: cod ? "COD" : "Razorpay Online",
         upi: escapedUpi,
         promo: escapedPromo,
         items: cartItems,
@@ -221,6 +244,154 @@ export default function CheckoutPage() {
 
       if (dbError) throw dbError;
 
+      if (!cod) {
+        // Prepaid order via Razorpay
+        const isScriptLoaded = await loadRazorpayScript();
+        if (!isScriptLoaded) {
+          throw new Error("Failed to load Razorpay payment gateway script.");
+        }
+
+        const orderResponse = await fetch("/api/razorpay/order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: total,
+            orderId: orderData.id,
+          }),
+        });
+
+        if (!orderResponse.ok) {
+          const errData = await orderResponse.json();
+          throw new Error(errData.error || "Failed to initiate payment gateway order.");
+        }
+
+        const razorpayOrder = await orderResponse.json();
+
+        telemetry.track("purchase_initiated", {
+          order_id: orderData.id,
+          amount: total,
+          payment_method: "Razorpay"
+        });
+
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency,
+          name: "LUXE",
+          description: `Order ID: ${orderData.id}`,
+          order_id: razorpayOrder.id,
+          prefill: {
+            name: escapedName,
+            email: user?.email || "customer@luxe.ai",
+            contact: escapedPhone,
+          },
+          theme: {
+            color: "#C9A84C", // Gold theme accent
+          },
+          modal: {
+            ondismiss: () => {
+              telemetry.track("payment_failed", {
+                order_id: orderData.id,
+                amount: total,
+                reason: "Payment window dismissed by customer",
+                stage: "payment_popup",
+                timestamp: new Date().toISOString()
+              });
+              setIsSubmitting(false);
+              toast.dismiss(toastId);
+              toast.error("Payment cancelled. You can retry from the checkout form.");
+            }
+          },
+          handler: async function (response: any) {
+            const verifyToastId = toast.loading("Verifying payment transaction secure signature...");
+            try {
+              const verifyResponse = await fetch("/api/razorpay/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  orderId: orderData.id,
+                }),
+              });
+
+              if (!verifyResponse.ok) {
+                const verifyErr = await verifyResponse.json();
+                throw new Error(verifyErr.error || "Payment signature verification failed.");
+              }
+
+              toast.dismiss(verifyToastId);
+              toast.success("Payment verified! Custom receipt generated.");
+
+              telemetry.track("purchase_success", {
+                order_id: orderData.id,
+                payment_id: response.razorpay_payment_id,
+                amount: total
+              });
+
+              try {
+                await fetch("/api/notify-order", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    orderId: orderData.id,
+                    name: escapedName,
+                    phone: escapedPhone,
+                    address: escapedAddress,
+                    city: escapedCity,
+                    pincode: escapedPincode,
+                    paymentMethod: "Razorpay",
+                    upi: escapedUpi,
+                    items: cartItems,
+                    subtotal: subtotal.toFixed(2),
+                    deliveryFee,
+                    total: total.toFixed(2),
+                  }),
+                });
+              } catch (notifyErr) {
+                console.warn("Notification error:", notifyErr);
+              }
+
+              const itemsText = cart
+                .map((i: any) => `• ${i.name} (Size: ${i.size || "L"}, Color: ${i.color || "White"}) x ${Number(i.quantity) || 0} = ₹${((Number(i.price) || 0) * (Number(i.quantity) || 0)).toFixed(2)}`)
+                .join("\n");
+
+              const whatsappMsg = `🌟 LUXE NEW PREPAID ORDER 🌟\n━━━━━━━━━━━━━━━━━━━━━━━\n🆔 Order ID: ${orderData.id}\n💳 Payment ID: ${response.razorpay_payment_id}\n👤 Name: ${trimmedName}\n📞 Phone: ${trimmedPhone}\n📍 Address: ${trimmedAddress}\n🏙️ City: ${trimmedCity} – ${trimmedPincode}\n💳 Payment: Razorpay Paid\n\n🛍️ Items:\n${itemsText}\n\n💰 Subtotal: ₹${subtotal.toFixed(2)}\n🚚 Delivery: ${deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}\n🧾 *Total: ₹${total.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━━━`;
+
+              toast.dismiss(toastId);
+              clearCart();
+              
+              setTimeout(() => {
+                window.open(`https://wa.me/917995338472?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
+                setTimeout(() => {
+                  window.open(`https://wa.me/917337246297?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
+                }, 800);
+                router.push("/");
+              }, 1200);
+
+            } catch (err: any) {
+              toast.dismiss(verifyToastId);
+              telemetry.track("payment_failed", {
+                order_id: orderData.id,
+                amount: total,
+                reason: err.message || "Signature verification failed",
+                stage: "verification_api",
+                timestamp: new Date().toISOString()
+              });
+              setIsSubmitting(false);
+              toast.dismiss(toastId);
+              toast.error(`Verification Failed: ${err.message}`);
+            }
+          }
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
+        return;
+      }
+
+      // COD Path continues if cod is true
       // ── Trigger notification API (WhatsApp + Email + Supabase log) ──────────
       try {
         await fetch("/api/notify-order", {
@@ -233,7 +404,7 @@ export default function CheckoutPage() {
             address: escapedAddress,
             city: escapedCity,
             pincode: escapedPincode,
-            paymentMethod: cod ? "COD" : "UPI",
+            paymentMethod: "COD",
             upi: escapedUpi,
             items: cartItems,
             subtotal: subtotal.toFixed(2),
@@ -251,7 +422,7 @@ export default function CheckoutPage() {
         .map((i: any) => `• ${i.name} (Size: ${i.size || "L"}, Color: ${i.color || "White"}) x ${Number(i.quantity) || 0} = ₹${((Number(i.price) || 0) * (Number(i.quantity) || 0)).toFixed(2)}`)
         .join("\n");
 
-      const whatsappMsg = `🌟 LUXE NEW ORDER 🌟\n━━━━━━━━━━━━━━━━━━━━━━━\n👤 Name: ${trimmedName}\n📞 Phone: ${trimmedPhone}\n📍 Address: ${trimmedAddress}\n🏙️ City: ${trimmedCity} – ${trimmedPincode}\n💳 Payment: ${cod ? "COD" : `UPI (${trimmedUpi})`}\n\n🛍️ Items:\n${itemsText}\n\n💰 Subtotal: ₹${subtotal.toFixed(2)}\n🚚 Delivery: ${deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}\n🧾 *Total: ₹${total.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━━━`;
+      const whatsappMsg = `🌟 LUXE NEW COD ORDER 🌟\n━━━━━━━━━━━━━━━━━━━━━━━\n👤 Name: ${trimmedName}\n📞 Phone: ${trimmedPhone}\n📍 Address: ${trimmedAddress}\n🏙️ City: ${trimmedCity} – ${trimmedPincode}\n💳 Payment: Cash on Delivery (COD)\n\n🛍️ Items:\n${itemsText}\n\n💰 Subtotal: ₹${subtotal.toFixed(2)}\n🚚 Delivery: ${deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}\n🧾 *Total: ₹${total.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━━━`;
 
       // GTM Event Tracking for Purchase
       if (typeof window !== "undefined") {

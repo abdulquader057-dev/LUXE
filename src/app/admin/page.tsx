@@ -378,26 +378,6 @@ export default function AdminDashboard() {
       // 4. Loyalty points addition when status changes to "Delivered"
       if (newStatus === "Delivered") {
         if (order.customer_id) {
-          // If customer is a mock user, update mock user profile locally
-          const savedMockUser = localStorage.getItem("luxe-mock-user");
-          if (savedMockUser) {
-            const parsed = JSON.parse(savedMockUser);
-            if (parsed.id === order.customer_id) {
-              const currentDna = parsed.user_metadata?.style_dna || { totalXP: 2450, level: 7 };
-              currentDna.totalXP = (currentDna.totalXP || 0) + 100;
-              currentDna.level = Math.floor(currentDna.totalXP / 400);
-              parsed.user_metadata.style_dna = currentDna;
-              localStorage.setItem("luxe-mock-user", JSON.stringify(parsed));
-              
-              const savedMockProfile = localStorage.getItem("luxe-mock-profile");
-              if (savedMockProfile) {
-                const parsedProf = JSON.parse(savedMockProfile);
-                parsedProf.loyalty_points = (parsedProf.loyalty_points || 0) + 100;
-                localStorage.setItem("luxe-mock-profile", JSON.stringify(parsedProf));
-              }
-            }
-          }
-          
           // Also try to update profiles table if loyalty_points column exists (non-blocking)
           try {
             const { data: profileData } = await supabase

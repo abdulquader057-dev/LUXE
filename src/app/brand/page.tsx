@@ -63,7 +63,7 @@ export default function BrandPage() {
 
 
   return (
-    <main className="min-h-screen bg-primary text-offwhite flex flex-col items-center justify-center p-6 md:p-12 glass">
+    <main className="min-h-screen bg-void text-offwhite flex flex-col items-center justify-center p-6 md:p-12 glass">
       <Seo title="LUXE — Brand Story" description="LUXE – Affordable luxury fashion for the bold generation." />
       <section className="max-w-3xl text-center space-y-6">
         <h1 className="text-5xl md:text-7xl font-cormorant font-light text-gold mb-4">
@@ -79,7 +79,7 @@ export default function BrandPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full sm:w-auto px-4 py-2 rounded bg-primary border border-gold text-offwhite placeholder:text-offwhite/50"
+            className="w-full sm:w-auto px-4 py-2 rounded bg-void border border-gold text-offwhite placeholder:text-offwhite/50"
           />
           <button
             type="submit"

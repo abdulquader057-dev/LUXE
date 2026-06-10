@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+import { getCookie } from "@/lib/cookies";
 
 export const THEMES: Record<string, { bg: string; card: string; text: string; accent: string }> = {
-  "Noir Gold": { bg: "#0D0A06", card: "#1A1408", text: "#F5E6C8", accent: "#D4AF37" },
-  "Champagne": { bg: "#1C1410", card: "#2A1F0E", text: "#F5E6C8", accent: "#D4AF37" },
-  "Deep Slate": { bg: "#0A0F1A", card: "#111827", text: "#E8E0D0", accent: "#D4AF37" },
-  "Burgundy Luxe": { bg: "#0F0608", card: "#1A0A0E", text: "#F5E0E8", accent: "#D4AF37" },
-  "Royal Obsidian": { bg: "#050308", card: "#0D0A14", text: "#EDE8FF", accent: "#D4AF37" },
+  "Noir Gold": { bg: "#0A0A0F", card: "#12121A", text: "#F0EDE8", accent: "#C9A84C" },
+  "Champagne": { bg: "#1A1610", card: "#22200A", text: "#F5EDD5", accent: "#E8C97A" },
+  "Deep Slate": { bg: "#0D1117", card: "#111827", text: "#E8EDF5", accent: "#7B9CCC" },
+  "Burgundy Luxe": { bg: "#120810", card: "#1E0E1A", text: "#F5E0E8", accent: "#C9506A" },
+  "Royal Obsidian": { bg: "#080B14", card: "#0E1220", text: "#EDE8FF", accent: "#8B6FD4" },
   "Cognac": { bg: "#0F0800", card: "#1F1000", text: "#FFE8CC", accent: "#D4AF37" },
-  "Midnight Rose": { bg: "#080510", card: "#100818", text: "#FFE8F0", accent: "#D4AF37" }
+  "Midnight Rose": { bg: "#080510", card: "#100818", text: "#FFE8F0", accent: "#E8A0B0" }
 };
 
 export function applyTheme(themeName: string) {
@@ -39,7 +40,7 @@ export function applyTheme(themeName: string) {
 export default function ThemeColorLoader() {
   useEffect(() => {
     const handleUpdate = () => {
-      const activeTheme = localStorage.getItem("luxe-theme") || "Noir Gold";
+      const activeTheme = getCookie("luxe-theme") || localStorage.getItem("luxe-theme") || "Noir Gold";
       applyTheme(activeTheme);
     };
 

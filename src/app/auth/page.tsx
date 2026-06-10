@@ -31,14 +31,14 @@ export default function AuthPortal() {
   const [isRateLimited, setIsRateLimited] = useState(false);
 
   const router = useRouter();
-  const { user, isLoading: authLoading, loginAsDemo } = useAuth();
-
+  const { user, isLoading: authLoading } = useAuth();
+ 
   useEffect(() => {
     if (!authLoading && user) {
       router.push("/");
     }
   }, [user, authLoading, router]);
-
+ 
   // Rate Limiting Handler
   const checkRateLimit = (): boolean => {
     try {
@@ -64,14 +64,7 @@ export default function AuthPortal() {
       return true;
     }
   };
-
-  const handleBypassAuth = () => {
-    loginAsDemo();
-    setTimeout(() => {
-      router.push("/");
-    }, 100);
-  };
-
+ 
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError(null);
@@ -81,7 +74,7 @@ export default function AuthPortal() {
       setLoading(false);
       return;
     }
-
+ 
     try {
       if (typeof window !== "undefined") {
         (window as any).dataLayer = (window as any).dataLayer || [];
@@ -90,14 +83,14 @@ export default function AuthPortal() {
           method: "google"
         });
       }
-
+ 
       const { error: oAuthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/`,
         },
       });
-
+ 
       if (oAuthError) throw oAuthError;
     } catch (err: any) {
       setError(err.message || "OAuth redirection failed.");
@@ -105,7 +98,7 @@ export default function AuthPortal() {
       setLoading(false);
     }
   };
-
+ 
   const handleForgotPassword = async () => {
     if (!email) {
       setError("Please input your Email Directive first to receive the reset link.");
@@ -121,29 +114,28 @@ export default function AuthPortal() {
       if (resetError) throw resetError;
       setSuccess("Reset link sent! Check your inbox 🖤");
     } catch (err: any) {
-      console.warn("Supabase reset password failed, using local simulation mode:", err.message);
-      setSuccess("Reset link sent! Check your inbox (Local Mode) 🖤");
+      setError(err.message || "Failed to send reset link.");
     } finally {
       setLoading(false);
     }
   };
-
+ 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
-
+ 
     if (!checkRateLimit()) {
       setLoading(false);
       return;
     }
-
+ 
     const trimmedEmail = email.trim();
     const trimmedPassword = password;
     const trimmedFullName = fullName.trim();
     const trimmedPhone = phone.trim();
-
+ 
     if (
       trimmedEmail.length > 255 ||
       trimmedPassword.length > 255 ||
@@ -154,86 +146,28 @@ export default function AuthPortal() {
       setLoading(false);
       return;
     }
-
+ 
     const normalizedEmail = trimmedEmail.toLowerCase();
-
+ 
     try {
       if (isLogin) {
-        let authSuccess = false;
-        
-        try {
-          const { data, error: signInError } = await supabase.auth.signInWithPassword({
-            email: normalizedEmail,
-            password: trimmedPassword,
-          });
-
-          if (!signInError && data?.user) {
-            // Block login until verified if email is not confirmed
-            if (!data.user.email_confirmed_at) {
-              await supabase.auth.signOut();
-              setError("Please verify your email before logging in. Check your email to verify your account 🖤");
-              setLoading(false);
-              return;
-            }
-            authSuccess = true;
-          } else if (signInError) {
-            console.warn("Supabase auth error:", signInError.message);
-            // If they failed due to invalid credentials, bubble it up
-            if (signInError.message.includes("Invalid login credentials")) {
-              setError("Invalid login credentials.");
-              setLoading(false);
-              return;
-            }
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password: trimmedPassword,
+        });
+ 
+        if (signInError) throw signInError;
+ 
+        if (data?.user) {
+          // Block login until verified if email is not confirmed
+          if (!data.user.email_confirmed_at) {
+            await supabase.auth.signOut();
+            setError("Please verify your email before logging in. Check your email to verify your account 🖤");
+            setLoading(false);
+            return;
           }
-        } catch (supabaseErr) {
-          console.warn("Supabase auth exception, using local fallback");
         }
-
-        if (!authSuccess) {
-          // Local/mock authentication fallback if Supabase fails or keys are misconfigured!
-          const isSuper = normalizedEmail === ADMIN_EMAIL.toLowerCase();
-          const isStore = normalizedEmail === STORE_ADMIN_EMAIL.toLowerCase();
-
-          const mockUser = {
-            id: isSuper ? "admin-id-123" : (isStore ? "official-store-admin" : "mock-user-12345"),
-            email: normalizedEmail,
-            user_metadata: {
-              full_name: isSuper ? "Admin Master" : (isStore ? "LUXE Store Admin" : "Luxe Customer"),
-              phone_number: isStore ? "+917337246297" : "+919876543210",
-              style_dna: {
-                wardrobeCompletion: 92,
-                level: 5,
-              }
-            }
-          };
-          const mockProfile = {
-            id: mockUser.id,
-            email: normalizedEmail,
-            full_name: mockUser.user_metadata.full_name,
-            phone_number: mockUser.user_metadata.phone_number,
-            role: isSuper ? "super-admin" : (isStore ? "store-admin" : "customer")
-          };
-
-          localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
-          localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
-
-          // GTM Event Tracking for Mock Login Fallback
-          if (typeof window !== "undefined") {
-            (window as any).dataLayer = (window as any).dataLayer || [];
-            (window as any).dataLayer.push({
-              event: "login",
-              email: normalizedEmail,
-              method: "mock-email"
-            });
-          }
-
-          toast.success("Syncing Neural Profile (Local Fallback Mode)...");
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 1000);
-          return;
-        }
-
+ 
         // GTM Event Tracking for Email Login Success
         if (typeof window !== "undefined") {
           (window as any).dataLayer = (window as any).dataLayer || [];
@@ -243,84 +177,41 @@ export default function AuthPortal() {
             method: "email"
           });
         }
-
+ 
         router.push("/");
       } else {
-        try {
-          const escapedFullName = escapeString(trimmedFullName);
-          const escapedPhone = escapeString(trimmedPhone);
-
-          const { data, error: signUpError } = await supabase.auth.signUp({
-            email: normalizedEmail,
-            password: trimmedPassword,
-            options: {
-              data: {
-                full_name: escapedFullName,
-                phone_number: escapedPhone,
-              },
-              emailRedirectTo: `${window.location.origin}/auth`,
+        const escapedFullName = escapeString(trimmedFullName);
+        const escapedPhone = escapeString(trimmedPhone);
+ 
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email: normalizedEmail,
+          password: trimmedPassword,
+          options: {
+            data: {
+              full_name: escapedFullName,
+              phone_number: escapedPhone,
             },
+            emailRedirectTo: `${window.location.origin}/auth`,
+          },
+        });
+ 
+        if (signUpError) throw signUpError;
+ 
+        // GTM Event Tracking for Signup Success
+        if (typeof window !== "undefined") {
+          (window as any).dataLayer = (window as any).dataLayer || [];
+          (window as any).dataLayer.push({
+            event: "sign_up",
+            email: normalizedEmail,
+            method: "email"
           });
-
-          if (signUpError) throw signUpError;
-
-          // GTM Event Tracking for Signup Success
-          if (typeof window !== "undefined") {
-            (window as any).dataLayer = (window as any).dataLayer || [];
-            (window as any).dataLayer.push({
-              event: "sign_up",
-              email: normalizedEmail,
-              method: "email"
-            });
-          }
-
-          setSuccess("Check your email to verify your account 🖤");
-          setEmail("");
-          setPassword("");
-          setFullName("");
-          setPhone("");
-        } catch (supabaseErr: any) {
-          console.warn("Supabase signup failed, creating local profile fallback:", supabaseErr.message);
-
-          // Fallback local signup
-          const mockUser = {
-            id: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "admin-id-123" : "mock-user-12345",
-            email: normalizedEmail,
-            user_metadata: {
-              full_name: fullName || "Luxe Customer",
-              phone_number: phone || "+919876543210",
-              style_dna: {
-                wardrobeCompletion: 50,
-                level: 1,
-              }
-            }
-          };
-          const mockProfile = {
-            id: mockUser.id,
-            email: normalizedEmail,
-            full_name: mockUser.user_metadata.full_name,
-            phone_number: mockUser.user_metadata.phone_number,
-            role: normalizedEmail === ADMIN_EMAIL.toLowerCase() ? "admin" : "customer"
-          };
-
-          // GTM Event Tracking for Mock Signup Fallback
-          if (typeof window !== "undefined") {
-            (window as any).dataLayer = (window as any).dataLayer || [];
-            (window as any).dataLayer.push({
-              event: "sign_up",
-              email: normalizedEmail,
-              method: "mock-email"
-            });
-          }
-
-          localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
-          localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
-          alert("Registration successful (Local Mode)! Logging you in...");
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 1000);
-          return;
         }
+ 
+        setSuccess("Check your email to verify your account 🖤");
+        setEmail("");
+        setPassword("");
+        setFullName("");
+        setPhone("");
       }
     } catch (err: any) {
       setError(err.message || "An error occurred during authentication.");
@@ -328,9 +219,9 @@ export default function AuthPortal() {
       setLoading(false);
     }
   };
-
+ 
   const isGoldError = isRateLimited || (error && error.includes("OAuth"));
-
+ 
   return (
     <div className="min-h-screen w-full flex items-center justify-center relative z-20 bg-[#1C1410] pt-28 pb-28">
       {/* Cinematic Highlight */}
@@ -355,7 +246,7 @@ export default function AuthPortal() {
               : "Register to unlock the full potential of LUXE OS."}
           </p>
         </div>
-
+ 
         {error && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
@@ -369,7 +260,7 @@ export default function AuthPortal() {
             {error}
           </motion.div>
         )}
-
+ 
         {success && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
@@ -379,7 +270,7 @@ export default function AuthPortal() {
             {success}
           </motion.div>
         )}
-
+ 
         {/* Continue with Google button above email form */}
         {isLogin && (
           <div className="mb-6">
@@ -400,7 +291,7 @@ export default function AuthPortal() {
             </div>
           </div>
         )}
-
+ 
         <form onSubmit={handleAuth} className="space-y-5">
           
           <AnimatePresence mode="wait">
@@ -443,7 +334,7 @@ export default function AuthPortal() {
               </motion.div>
             )}
           </AnimatePresence>
-
+ 
           <div>
             <label className="block text-xs font-mono font-bold uppercase tracking-wider text-[#1C1410] mb-2">Email Address</label>
             <div className="relative">
@@ -458,7 +349,7 @@ export default function AuthPortal() {
               />
             </div>
           </div>
-
+ 
           <div>
             <label className="block text-xs font-mono font-bold uppercase tracking-wider text-[#1C1410] mb-2">Security Key</label>
             <div className="relative">
@@ -484,7 +375,7 @@ export default function AuthPortal() {
               </div>
             )}
           </div>
-
+ 
           <button
             type="submit"
             disabled={loading}
@@ -497,23 +388,8 @@ export default function AuthPortal() {
               </>
             )}
           </button>
-          
-          <div className="relative flex items-center my-6">
-            <div className="flex-grow border-t border-[#1C1410]/20"></div>
-            <span className="flex-shrink mx-4 text-[#1C1410]/40 text-[9px] font-bold tracking-widest uppercase">OR BYPASS</span>
-            <div className="flex-grow border-t border-[#1C1410]/20"></div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleBypassAuth}
-            className="w-full h-14 bg-[#1C1410]/5 border border-[#1C1410]/20 text-[#1C1410]/80 hover:text-[#1C1410] hover:bg-[#1C1410]/15 font-display font-black tracking-widest uppercase rounded-xl transition-all flex items-center justify-center gap-3"
-          >
-            Bypass Authentication (Test Mode)
-            <ShieldCheck size={20} className="text-[#1C1410]/60" />
-          </button>
         </form>
-
+ 
         <div className="mt-8 text-center">
           <button 
             type="button"

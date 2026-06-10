@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, ChevronRight, ChevronLeft, Heart,
@@ -9,11 +9,12 @@ import {
   RotateCcw, ArrowRight, Star
 } from "lucide-react";
 import Image from "next/image";
-import { MOCK_OUTFITS, VIRTUAL_STYLISTS } from "@/data/ecosystem";
-import { MOCK_PRODUCTS } from "@/data/products";
-import { AIOutfit, VirtualStylist } from "@/types";
+import { VIRTUAL_STYLISTS } from "@/data/ecosystem";
+import { parseDbProduct } from "@/data/products";
+import { AIOutfit, VirtualStylist, Product } from "@/types";
 import { cn } from "@/lib/utils";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
+import { supabase } from "@/lib/supabase";
 
 const PROMPTS = [
   { label: "Minimal Black Fit", icon: Moon, aesthetic: "Cyber-Minimal" },
@@ -38,7 +39,139 @@ export default function BuildOutfitPage() {
   const [likedOutfits, setLikedOutfits] = useState<Set<string>>(new Set());
   const { convertPrice } = useCommerce();
 
+  // Supabase Integration States
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [dbOutfits, setDbOutfits] = useState<AIOutfit[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        // 1. Fetch real products from Supabase
+        const { data: productsData, error: productsError } = await supabase
+          .from("products")
+          .select("*");
+        
+        if (productsError) throw productsError;
+        if (!productsData || productsData.length === 0) {
+          throw new Error("Catalog database returned empty. Populate the catalog to design outfits.");
+        }
+        
+        const loadedProducts = productsData.map(parseDbProduct);
+        setDbProducts(loadedProducts);
+
+        // 2. Fetch outfits from Supabase
+        let loadedOutfits: AIOutfit[] = [];
+        try {
+          const { data: outfitsData, error: outfitsError } = await supabase
+            .from("outfits")
+            .select("*");
+          
+          if (!outfitsError && outfitsData && outfitsData.length > 0) {
+            loadedOutfits = outfitsData as any[];
+          } else {
+            throw new Error("No outfits in database");
+          }
+        } catch (outfitErr) {
+          console.warn("Outfits table fetch failed, constructing outfits from live catalog:", outfitErr);
+          // Construct default outfits dynamically using actual products loaded from database!
+          if (loadedProducts.length > 0) {
+            const tops = loadedProducts.filter(p => p.category === "streetwear" || p.name.toLowerCase().includes("shirt") || p.name.toLowerCase().includes("polo") || p.name.toLowerCase().includes("tee"));
+            const accessories = loadedProducts.filter(p => p.name.toLowerCase().includes("watch") || p.name.toLowerCase().includes("chrono") || p.name.toLowerCase().includes("belt") || p.name.toLowerCase().includes("accessory") || p.name.toLowerCase().includes("bag") || p.name.toLowerCase().includes("cap"));
+            const footwear = loadedProducts.filter(p => p.name.toLowerCase().includes("sneaker") || p.name.toLowerCase().includes("footwear") || p.name.toLowerCase().includes("shoe") || p.name.toLowerCase().includes("sock") || p.name.toLowerCase().includes("slide"));
+            const outers = loadedProducts.filter(p => p.name.toLowerCase().includes("kaftan") || p.name.toLowerCase().includes("jacket") || p.name.toLowerCase().includes("outerwear") || p.name.toLowerCase().includes("vest") || p.name.toLowerCase().includes("coat") || p.name.toLowerCase().includes("hoodie"));
+
+            const getProductOrFallback = (list: Product[], index: number, fallbackList: Product[]): Product => {
+              if (list.length > 0) return list[index % list.length];
+              return fallbackList[index % fallbackList.length];
+            };
+
+            loadedOutfits = [
+              {
+                id: "outfit-live-1",
+                name: "Midnight Vanguard",
+                description: "A refined cyberpunk modular silhouette constructed from lightweight carbon-weave fabrics.",
+                aesthetic: "Cyber-Minimal",
+                occasion: "Evening / Gallery",
+                confidence: 95,
+                items: [
+                  { productId: getProductOrFallback(tops, 0, loadedProducts).id, role: "top" },
+                  { productId: getProductOrFallback(outers, 0, loadedProducts).id, role: "outerwear" },
+                  { productId: getProductOrFallback(footwear, 0, loadedProducts).id, role: "footwear" },
+                  { productId: getProductOrFallback(accessories, 0, loadedProducts).id, role: "accessory" }
+                ],
+                totalPrice: 22000,
+                fashionScore: 94,
+                colorHarmony: 92,
+                trendAlignment: 88
+              },
+              {
+                id: "outfit-live-2",
+                name: "Solstice Techwear",
+                description: "High-mobility tactical streetwear utilizing organic cotton flax layers.",
+                aesthetic: "Streetwear Futurism",
+                occasion: "Street / Festival",
+                confidence: 92,
+                items: [
+                  { productId: getProductOrFallback(tops, 1, loadedProducts).id, role: "top" },
+                  { productId: getProductOrFallback(footwear, 1, loadedProducts).id, role: "footwear" },
+                  { productId: getProductOrFallback(accessories, 1, loadedProducts).id, role: "accessory" }
+                ],
+                totalPrice: 15500,
+                fashionScore: 88,
+                colorHarmony: 86,
+                trendAlignment: 92
+              },
+              {
+                id: "outfit-live-3",
+                name: "Quantum Modest",
+                description: "Elegant and breathable geometric silhouette constructed for daily smart-casual environments.",
+                aesthetic: "Tech-Modest",
+                occasion: "Daily / Formal",
+                confidence: 97,
+                items: [
+                  { productId: getProductOrFallback(tops, 2, loadedProducts).id, role: "top" },
+                  { productId: getProductOrFallback(accessories, 2, loadedProducts).id, role: "accessory" },
+                  { productId: getProductOrFallback(outers, 1, loadedProducts).id, role: "outerwear" }
+                ],
+                totalPrice: 19800,
+                fashionScore: 95,
+                colorHarmony: 94,
+                trendAlignment: 85
+              }
+            ];
+
+            // Calculate exact total price of the outfits based on their products
+            loadedOutfits.forEach(outfit => {
+              let total = 0;
+              outfit.items.forEach(item => {
+                const p = loadedProducts.find(x => x.id === item.productId);
+                if (p) total += p.price;
+              });
+              if (total > 0) outfit.totalPrice = total;
+            });
+          }
+        }
+        setDbOutfits(loadedOutfits);
+      } catch (err: any) {
+        console.error("Failed to load catalog/outfits data:", err);
+        setError(err.message || "Failed to establish secure link to database.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
   const handleGenerate = useCallback((prompt: string) => {
+    if (dbOutfits.length === 0) {
+      toast.error("No catalog outfits available.");
+      return;
+    }
     setSelectedPrompt(prompt);
     setIsGenerating(true);
     setRevealPhase(0);
@@ -47,22 +180,24 @@ export default function BuildOutfitPage() {
     setTimeout(() => setRevealPhase(1), 800);
     setTimeout(() => setRevealPhase(2), 1600);
     setTimeout(() => {
-      const outfit = MOCK_OUTFITS[currentOutfitIndex % MOCK_OUTFITS.length];
+      const outfit = dbOutfits[currentOutfitIndex % dbOutfits.length];
       setGeneratedOutfit(outfit);
       setRevealPhase(3);
       setIsGenerating(false);
     }, 2400);
-  }, [currentOutfitIndex]);
+  }, [currentOutfitIndex, dbOutfits]);
 
   const handleNext = () => {
+    if (dbOutfits.length === 0) return;
     setCurrentOutfitIndex((prev) => prev + 1);
-    const nextOutfit = MOCK_OUTFITS[(currentOutfitIndex + 1) % MOCK_OUTFITS.length];
+    const nextOutfit = dbOutfits[(currentOutfitIndex + 1) % dbOutfits.length];
     setGeneratedOutfit(nextOutfit);
   };
 
   const handlePrev = () => {
+    if (dbOutfits.length === 0) return;
     setCurrentOutfitIndex((prev) => Math.max(0, prev - 1));
-    const prevOutfit = MOCK_OUTFITS[Math.max(0, currentOutfitIndex - 1) % MOCK_OUTFITS.length];
+    const prevOutfit = dbOutfits[Math.max(0, currentOutfitIndex - 1) % dbOutfits.length];
     setGeneratedOutfit(prevOutfit);
   };
 
@@ -78,9 +213,35 @@ export default function BuildOutfitPage() {
   const outfitProducts = useMemo(() => {
     if (!generatedOutfit) return [];
     return generatedOutfit.items
-      .map((item) => MOCK_PRODUCTS.find((p) => p.id === item.productId))
-      .filter(Boolean);
-  }, [generatedOutfit]);
+      .map((item) => dbProducts.find((p) => p.id === item.productId))
+      .filter(Boolean) as Product[];
+  }, [generatedOutfit, dbProducts]);
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-black text-white pt-28 pb-40 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-t-2 border-primary rounded-full animate-spin" />
+          <p className="text-[10px] font-mono tracking-widest text-white/40 uppercase">Loading Neural Catalog...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-black text-white pt-28 pb-40 flex items-center justify-center">
+        <div className="max-w-md p-8 rounded-3xl bg-red-500/5 border border-red-500/20 text-center space-y-4">
+          <div className="text-3xl">⚠️</div>
+          <h2 className="text-lg font-mono font-bold uppercase tracking-wider text-red-400">Database Offline</h2>
+          <p className="text-xs font-mono text-white/40 uppercase leading-relaxed">{error}</p>
+          <button onClick={() => window.location.reload()} className="px-6 py-2.5 bg-white text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl hover:scale-105 transition-transform">
+            Retry Sync
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-black text-white pt-28 pb-40 relative overflow-hidden">

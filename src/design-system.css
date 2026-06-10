@@ -7,7 +7,9 @@
 }
 
 /* Primary backgrounds and text */
-.bg-primary { background-color: var(--color-black); }
+.bg-primary { background-color: var(--primary-color); }
+.bg-void { background-color: var(--color-black); }
+.bg-base { background-color: var(--color-black); }
 .text-primary { color: var(--color-gold); }
 .text-offwhite { color: var(--color-offwhite); }
 .bg-offwhite { background-color: var(--color-offwhite); }

@@ -32,7 +32,9 @@
 .text-primary  { color: var(--text-primary, #F0EDE8); }
 .text-gold     { color: var(--gold); }
 .text-offwhite { color: var(--offwhite); }
-.bg-primary    { background-color: var(--bg-base); }
+.bg-primary    { background-color: var(--primary-color); }
+.bg-void       { background-color: var(--bg-void); }
+.bg-base       { background-color: var(--bg-base); }
 .bg-gold       { background-color: var(--gold); }
 .bg-offwhite   { background-color: var(--offwhite); }
 

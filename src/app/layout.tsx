@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Sora, Orbitron, Cormorant_Garamond } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import "./design-system.css";
 import Sidebar from "@/components/Sidebar";
@@ -10,16 +11,14 @@ import CartSidebar from "@/components/ui/CartSidebar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollProgress from "@/components/ScrollProgress";
-import EntranceAnimation from "@/components/EntranceAnimation";
-import AnimatedBackground from "@/components/AnimatedBackground";
 import { Toaster } from "react-hot-toast";
 import ThemeColorLoader from "@/components/ThemeColorLoader";
 import GtmPageViewTracker from "@/components/GtmPageViewTracker";
-import FloatingWidgets from "@/components/FloatingWidgets";
 import MobileNav from "@/components/MobileNav";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import LuxeLoadingBar from "@/components/ui/LuxeLoadingBar";
+import DynamicLayoutWidgets from "@/components/layout/DynamicLayoutWidgets";
 
 const sora = Sora({
   weight: ["300", "400", "500"],
@@ -70,18 +69,48 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+const THEMES: Record<string, { bg: string; card: string; text: string; accent: string }> = {
+  "Noir Gold": { bg: "#0A0A0F", card: "#12121A", text: "#F0EDE8", accent: "#C9A84C" },
+  "Champagne": { bg: "#1A1610", card: "#22200A", text: "#F5EDD5", accent: "#E8C97A" },
+  "Deep Slate": { bg: "#0D1117", card: "#111827", text: "#E8EDF5", accent: "#7B9CCC" },
+  "Burgundy Luxe": { bg: "#120810", card: "#1E0E1A", text: "#F5E0E8", accent: "#C9506A" },
+  "Royal Obsidian": { bg: "#080B14", card: "#0E1220", text: "#EDE8FF", accent: "#8B6FD4" },
+  "Cognac": { bg: "#0F0800", card: "#1F1000", text: "#FFE8CC", accent: "#D4AF37" },
+  "Midnight Rose": { bg: "#080510", card: "#100818", text: "#FFE8F0", accent: "#E8A0B0" }
+};
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const theme = cookieStore.get("luxe-theme")?.value || "Noir Gold";
+  const selectedTheme = THEMES[theme] || THEMES["Noir Gold"];
+  const themeClass = theme.toLowerCase().replace(/\s+/g, "-");
+
   return (
     <html
       lang="en"
-      className={`${sora.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth`}
+      className={`${sora.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth theme-${themeClass}`}
     >
       <head>
         <meta name="google-site-verification" content="TO_BE_FILLED" />
+        <style dangerouslySetInnerHTML={{ __html: `
+          :root {
+            --theme-bg: ${selectedTheme.bg};
+            --theme-card: ${selectedTheme.card};
+            --theme-text: ${selectedTheme.text};
+            --theme-accent: ${selectedTheme.accent};
+            --bg-void: ${selectedTheme.bg};
+            --bg-base: ${selectedTheme.bg};
+            --bg-surface: ${selectedTheme.card};
+            --bg-elevated: ${selectedTheme.card};
+            --text-primary: ${selectedTheme.text};
+            --primary-color: ${selectedTheme.accent};
+            --gold-accent: ${selectedTheme.accent};
+          }
+        ` }} />
       </head>
       <body className="min-h-screen flex flex-col bg-bg-base text-text-primary selection:bg-primary/30 selection:text-white relative transition-colors duration-1000">
         <script dangerouslySetInnerHTML={{ __html: `
@@ -89,40 +118,6 @@ export default function RootLayout({
             console.error("Global Luxe Exception caught:", message, error);
             return false;
           };
-        ` }} />
-        <script dangerouslySetInnerHTML={{ __html: `
-          (function() {
-            try {
-              var theme = localStorage.getItem('luxe-theme') || 'Noir Gold';
-              var themes = {
-                'Noir Gold': { bg: '#0D0A06', card: '#1A1408', text: '#F5E6C8', accent: '#D4AF37' },
-                'Champagne': { bg: '#1C1410', card: '#2A1F0E', text: '#F5E6C8', accent: '#D4AF37' },
-                'Deep Slate': { bg: '#0A0F1A', card: '#111827', text: '#E8E0D0', accent: '#D4AF37' },
-                'Burgundy Luxe': { bg: '#0F0608', card: '#1A0A0E', text: '#F5E0E8', accent: '#D4AF37' },
-                'Royal Obsidian': { bg: '#050308', card: '#0D0A14', text: '#EDE8FF', accent: '#D4AF37' },
-                'Cognac': { bg: '#0F0800', card: '#1F1000', text: '#FFE8CC', accent: '#D4AF37' },
-                'Midnight Rose': { bg: '#080510', card: '#100818', text: '#FFE8F0', accent: '#D4AF37' }
-              };
-              var selected = themes[theme] || themes['Noir Gold'];
-              var root = document.documentElement;
-              
-              root.style.setProperty('--theme-bg', selected.bg);
-              root.style.setProperty('--theme-card', selected.card);
-              root.style.setProperty('--theme-text', selected.text);
-              root.style.setProperty('--theme-accent', selected.accent);
-              
-              root.style.setProperty('--bg-void', selected.bg);
-              root.style.setProperty('--bg-base', selected.bg);
-              root.style.setProperty('--bg-surface', selected.card);
-              root.style.setProperty('--bg-elevated', selected.card);
-              root.style.setProperty('--text-primary', selected.text);
-              
-              root.style.setProperty('--primary-color', selected.accent);
-              root.style.setProperty('--gold-accent', selected.accent);
-              
-              root.classList.add('theme-' + theme.toLowerCase().replace(/\\s+/g, '-'));
-            } catch (e) {}
-          })();
         ` }} />
         <script dangerouslySetInnerHTML={{ __html: "(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-XXXXXXX');" }} />
         <noscript>
@@ -135,8 +130,7 @@ export default function RootLayout({
         </noscript>
         <ThemeColorLoader />
         <GtmPageViewTracker />
-        <AnimatedBackground />
-        <EntranceAnimation />
+        <DynamicLayoutWidgets />
         <ScrollProgress />
         <LuxeLoadingBar />
         <div className="film-grain opacity-20 mix-blend-overlay pointer-events-none" />
@@ -154,7 +148,6 @@ export default function RootLayout({
             <Footer />
           </main>
           
-          <FloatingWidgets />
           <MobileNav />
           <Analytics />
           <SpeedInsights />

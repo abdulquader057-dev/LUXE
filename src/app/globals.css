@@ -111,6 +111,17 @@
   --bg-elevated: #141A2E; --primary-color: #8B6FD4; --accent-gold: #8B6FD4;
   --text-primary: #EDE8FF; --rose-gold-light: #B8A8F0;
 }
+.theme-cognac {
+  --bg-void: #0F0800; --bg-base: #0F0800; --bg-surface: #1F1000;
+  --bg-elevated: #2A1500; --primary-color: #D4AF37; --accent-gold: #D4AF37;
+  --text-primary: #FFE8CC; --rose-gold-light: #FFE8CC;
+}
+.theme-midnight-rose {
+  --bg-void: #080510; --bg-base: #080510; --bg-surface: #100818;
+  --bg-elevated: #1A0B26; --primary-color: #E8A0B0; --accent-gold: #E8A0B0;
+  --text-primary: #FFE8F0; --rose-gold-light: #FFE8F0;
+}
+
 
 @layer base {
   * {

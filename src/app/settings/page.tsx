@@ -21,6 +21,7 @@ import { useCommerce } from "@/lib/contexts/CommerceContext";
 import confetti from "canvas-confetti";
 import Image from "next/image";
 import { track } from "@vercel/analytics";
+import { setCookie } from "@/lib/cookies";
 
 const SETTINGS_MENU = [
   { id: "account", label: "Account", icon: User, color: "#00f2ff" },
@@ -237,52 +238,42 @@ function AccountSettings() {
     }
   }, [user, profile]);
 
-  const handleUpdateProfile = () => {
-    // Save locally
-    const normalizedEmail = email.trim().toLowerCase();
-    const mockUserStr = localStorage.getItem("luxe-mock-user");
-    if (mockUserStr) {
-      const mockUser = JSON.parse(mockUserStr);
-      mockUser.email = normalizedEmail;
-      mockUser.user_metadata.full_name = name;
-      mockUser.user_metadata.phone_number = phone;
-      localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
-
-      const mockProfileStr = localStorage.getItem("luxe-mock-profile");
-      if (mockProfileStr) {
-        const mockProfile = JSON.parse(mockProfileStr);
-        mockProfile.email = normalizedEmail;
-        mockProfile.full_name = name;
-        mockProfile.phone_number = phone;
-        mockProfile.role = normalizedEmail === "abdulquader057@gmail.com" ? "admin" : "customer";
-        localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
-      }
-    } else {
-      const mockUser = {
-        id: normalizedEmail === "abdulquader057@gmail.com" ? "admin-id-123" : "mock-user-12345",
-        email: normalizedEmail,
-        user_metadata: {
-          full_name: name || "Luxe Client",
-          phone_number: phone || "",
-          style_dna: { wardrobeCompletion: 50, level: 1 }
+  const handleUpdateProfile = async () => {
+    if (!user) return;
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      
+      // 1. Update auth user metadata
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          full_name: name,
+          phone_number: phone,
         }
-      };
-      const mockProfile = {
-        id: mockUser.id,
-        email: normalizedEmail,
-        full_name: name || "Luxe Client",
-        phone_number: phone || "",
-        role: normalizedEmail === "abdulquader057@gmail.com" ? "admin" : "customer"
-      };
-      localStorage.setItem("luxe-mock-user", JSON.stringify(mockUser));
-      localStorage.setItem("luxe-mock-profile", JSON.stringify(mockProfile));
-    }
-    toast.success("Identity vectors updated successfully!");
+      });
+      if (authError) throw authError;
 
-    // Redirect and reload page to re-evaluate AuthContext states
-    setTimeout(() => {
-      window.location.href = normalizedEmail === "abdulquader057@gmail.com" ? "/admin" : "/profile";
-    }, 1000);
+      // 2. Update profiles table
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          full_name: name,
+          phone_number: phone,
+        })
+        .eq("id", user.id);
+      
+      if (profileError) {
+        console.warn("Profile table update failed:", profileError.message);
+      }
+      
+      toast.success("Identity vectors updated in Supabase!");
+      
+      // Redirect and reload page to re-evaluate AuthContext states
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err: any) {
+      toast.error(`Update failed: ${err.message || err}`);
+    }
   };
 
   const handleModifyPassword = () => {
@@ -1794,31 +1785,15 @@ function ThemeSettings() {
 
     const checkGold = () => {
       try {
-        const savedMockProfile = localStorage.getItem("luxe-mock-profile");
-        const savedMockUser = localStorage.getItem("luxe-mock-user");
         const isGoldLocal = localStorage.getItem("luxe-is-gold") === "true";
-
-        let hasGoldLevel = false;
-        if (savedMockUser) {
-          const userObj = JSON.parse(savedMockUser);
-          if (userObj?.user_metadata?.style_dna?.level >= 3) {
-            hasGoldLevel = true;
-          }
-        }
-
-        let isGoldProfile = false;
-        if (savedMockProfile) {
-          const profileObj = JSON.parse(savedMockProfile);
-          if (profileObj?.tier === "Gold" || profileObj?.role === "admin") {
-            isGoldProfile = true;
-          }
-        }
+        const hasGoldLevel = (user?.user_metadata?.style_dna?.level || 0) >= 3;
+        const isGoldProfile = profile?.tier === "Gold" || profile?.role === "admin";
 
         setIsGold(isGoldLocal || hasGoldLevel || isGoldProfile);
       } catch (e) {}
     };
     checkGold();
-  }, []);
+  }, [user, profile]);
 
   const handleSelectTheme = async (themeName: string, isExclusive: boolean) => {
     if (isExclusive && !isGold) {
@@ -1828,6 +1803,7 @@ function ThemeSettings() {
 
     setActiveTheme(themeName);
     localStorage.setItem("luxe-theme", themeName);
+    setCookie("luxe-theme", themeName, 365);
     
     // Trigger global theme apply
     const event = new CustomEvent("luxe-theme-change", { detail: themeName });
@@ -1855,13 +1831,13 @@ function ThemeSettings() {
   };
 
   const themeList = [
-    { name: "Noir Gold", bg: "#0D0A06", card: "#1A1408", text: "#F5E6C8", accent: "#D4AF37", desc: "Classic dark theme with warm gold accents.", exclusive: false },
-    { name: "Champagne", bg: "#1C1410", card: "#2A1F0E", text: "#F5E6C8", accent: "#D4AF37", desc: "Crisp and luxurious champagne style.", exclusive: false },
-    { name: "Deep Slate", bg: "#0A0F1A", card: "#111827", text: "#E8E0D0", accent: "#D4AF37", desc: "Professional deep slate look.", exclusive: false },
-    { name: "Burgundy Luxe", bg: "#0F0608", card: "#1A0A0E", text: "#F5E0E8", accent: "#D4AF37", desc: "Rich and moody burgundy essence.", exclusive: false },
-    { name: "Royal Obsidian", bg: "#050308", card: "#0D0A14", text: "#EDE8FF", accent: "#D4AF37", desc: "Exclusive obsidian with animated borders.", exclusive: true },
+    { name: "Noir Gold", bg: "#0A0A0F", card: "#12121A", text: "#F0EDE8", accent: "#C9A84C", desc: "Classic dark theme with warm gold accents.", exclusive: false },
+    { name: "Champagne", bg: "#1A1610", card: "#22200A", text: "#F5EDD5", accent: "#E8C97A", desc: "Crisp and luxurious champagne style.", exclusive: false },
+    { name: "Deep Slate", bg: "#0D1117", card: "#111827", text: "#E8EDF5", accent: "#7B9CCC", desc: "Professional deep slate look.", exclusive: false },
+    { name: "Burgundy Luxe", bg: "#120810", card: "#1E0E1A", text: "#F5E0E8", accent: "#C9506A", desc: "Rich and moody burgundy essence.", exclusive: false },
+    { name: "Royal Obsidian", bg: "#080B14", card: "#0E1220", text: "#EDE8FF", accent: "#8B6FD4", desc: "Exclusive obsidian with animated borders.", exclusive: true },
     { name: "Cognac", bg: "#0F0800", card: "#1F1000", text: "#FFE8CC", accent: "#D4AF37", desc: "Warm rich cognac with ember glows.", exclusive: true },
-    { name: "Midnight Rose", bg: "#080510", card: "#100818", text: "#FFE8F0", accent: "#D4AF37", desc: "Subtle rose shimmer on midnight sky.", exclusive: true }
+    { name: "Midnight Rose", bg: "#080510", card: "#100818", text: "#FFE8F0", accent: "#E8A0B0", desc: "Subtle rose shimmer on midnight sky.", exclusive: true }
   ];
 
   return (

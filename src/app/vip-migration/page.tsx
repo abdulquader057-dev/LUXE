@@ -75,7 +75,7 @@ export default function VipMigrationPage() {
   };
 
   return (
-    <main className="min-h-screen bg-primary text-offwhite flex flex-col items-center justify-center p-6 md:p-12 glass">
+    <main className="min-h-screen bg-void text-offwhite flex flex-col items-center justify-center p-6 md:p-12 glass">
       <Seo title="LUXE — VIP Migration" description="Join the inner circle and migrate your profile." />
       <section className="max-w-md w-full space-y-4">
         <h1 className="text-3xl font-cormorant font-light text-gold text-center mb-4">VIP Migration</h1>
@@ -88,7 +88,7 @@ export default function VipMigrationPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-4 py-2 rounded bg-primary border border-gold text-offwhite"
+              className="w-full px-4 py-2 rounded bg-void border border-gold text-offwhite"
             />
           </div>
           <div>
@@ -99,7 +99,7 @@ export default function VipMigrationPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
-              className="w-full px-4 py-2 rounded bg-primary border border-gold text-offwhite"
+              className="w-full px-4 py-2 rounded bg-void border border-gold text-offwhite"
             />
           </div>
           <div>
@@ -110,7 +110,7 @@ export default function VipMigrationPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 rounded bg-primary border border-gold text-offwhite"
+              className="w-full px-4 py-2 rounded bg-void border border-gold text-offwhite"
             />
           </div>
           {errorMsg && (

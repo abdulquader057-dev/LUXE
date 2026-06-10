@@ -1,37 +1,27 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export default function AnimatedBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isGold, setIsGold] = useState(false);
+  const { user, profile } = useAuth();
 
   useEffect(() => {
     const checkGoldStatus = () => {
       try {
-        const savedMockProfile = localStorage.getItem("luxe-mock-profile");
-        const savedMockUser = localStorage.getItem("luxe-mock-user");
         const activeTheme = localStorage.getItem("luxe-theme") || "Noir Gold";
         const isGoldTheme = ["Royal Obsidian", "Cognac", "Midnight Rose"].includes(activeTheme);
         const isGoldLocal = localStorage.getItem("luxe-is-gold") === "true";
-        let hasGoldLevel = false;
-        if (savedMockUser) {
-          const u = JSON.parse(savedMockUser);
-          if (u?.user_metadata?.style_dna?.level >= 3) hasGoldLevel = true;
-        }
-        let isGoldProfile = false;
-        if (savedMockProfile) {
-          const p = JSON.parse(savedMockProfile);
-          if (p?.tier === "Gold" || p?.role === "admin") isGoldProfile = true;
-        }
-        setIsGold(isGoldTheme || isGoldLocal || hasGoldLevel || isGoldProfile);
+        const userLevel = user?.user_metadata?.style_dna?.level || 0;
+        const isGoldProfile = profile?.tier === "Gold" || profile?.role === "admin";
+        
+        setIsGold(isGoldTheme || isGoldLocal || userLevel >= 3 || isGoldProfile);
       } catch (e) {}
     };
     checkGoldStatus();
-    window.addEventListener("storage", checkGoldStatus);
-    const interval = setInterval(checkGoldStatus, 1500);
-    return () => { window.removeEventListener("storage", checkGoldStatus); clearInterval(interval); };
-  }, []);
+  }, [user, profile]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

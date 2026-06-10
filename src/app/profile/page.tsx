@@ -12,7 +12,7 @@ import {
   TrendingUp, Eye, ShoppingBag, Sparkles,
   ChevronRight, BarChart3, Settings2
 } from "lucide-react";
-import { DEFAULT_STYLE_DNA, ALL_BADGES, MOCK_OUTFITS, TREND_RADAR } from "@/data/ecosystem";
+import { DEFAULT_STYLE_DNA, ALL_BADGES, TREND_RADAR } from "@/data/ecosystem";
 import { cn } from "@/lib/utils";
 
 const XP_PER_LEVEL = 400;
@@ -52,29 +52,12 @@ export default function ProfilePage() {
   useEffect(() => {
     const checkGold = () => {
       try {
-        const savedMockProfile = localStorage.getItem("luxe-mock-profile");
-        const savedMockUser = localStorage.getItem("luxe-mock-user");
         const activeTheme = localStorage.getItem("luxe-theme") || "Noir Gold";
         const isGoldTheme = ["Royal Obsidian", "Cognac", "Midnight Rose"].includes(activeTheme);
         const isGoldLocal = localStorage.getItem("luxe-is-gold") === "true";
+        const userLevel = user?.user_metadata?.style_dna?.level || 0;
 
-        let hasGoldLevel = false;
-        if (savedMockUser) {
-          const userObj = JSON.parse(savedMockUser);
-          if (userObj?.user_metadata?.style_dna?.level >= 3) {
-            hasGoldLevel = true;
-          }
-        }
-
-        let isGoldProfile = false;
-        if (savedMockProfile) {
-          const profileObj = JSON.parse(savedMockProfile);
-          if (profileObj?.tier === "Gold" || profileObj?.role === "admin") {
-            isGoldProfile = true;
-          }
-        }
-
-        setIsGold(isGoldTheme || isGoldLocal || hasGoldLevel || isGoldProfile || profile?.tier === "Gold" || profile?.role === "admin");
+        setIsGold(isGoldTheme || isGoldLocal || userLevel >= 3 || profile?.tier === "Gold" || profile?.role === "admin");
       } catch (e) {}
     };
     checkGold();
