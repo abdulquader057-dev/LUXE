@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { createClient } from "@supabase/supabase-js";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://valceron.in";
 
   // Static routes
@@ -21,13 +21,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route === "" ? 1.0 : 0.8,
   }));
 
-  // Dynamic product routes
-  const productRoutes = MOCK_PRODUCTS.map((product) => ({
-    url: `${baseUrl}/product/${product.id}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.7,
-  }));
+  // Dynamic product routes from Supabase
+  let productRoutes: any[] = [];
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+    if (supabaseUrl && supabaseAnonKey) {
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+      const { data } = await supabase.from("products").select("id");
+      if (data && data.length > 0) {
+        productRoutes = data.map((product) => ({
+          url: `${baseUrl}/product/${product.id}`,
+          lastModified: new Date(),
+          changeFrequency: "weekly" as const,
+          priority: 0.7,
+        }));
+      }
+    }
+  } catch (err) {
+    console.error("Sitemap generation database query failed:", err);
+  }
 
   return [...staticRoutes, ...productRoutes];
 }

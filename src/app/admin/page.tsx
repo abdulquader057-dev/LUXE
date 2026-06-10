@@ -21,15 +21,17 @@ import {
   Cpu, Network, X,
   Shield, Plus, Lock, Check, Power, Key, Trash2
 } from "lucide-react";
-import { MOCK_PRODUCTS, parseDbProduct } from "@/data/products";
+import { parseDbProduct } from "@/data/products";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 import { STORE_ADMIN_EMAIL } from "@/lib/contexts/AuthContext";
 
 export default function AdminDashboard() {
   const { user, isAdmin, isSuperAdmin, isStoreAdmin, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const { convertPrice } = useCommerce();
 
   const [activeTab, setActiveTab] = useState("overview");
   const [isBooting, setIsBooting] = useState(true);
@@ -40,6 +42,13 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
+
+  const [metrics, setMetrics] = useState({
+    totalRevenue: 0,
+    totalOrders: 0,
+    totalProducts: 0,
+    customerCount: 0
+  });
 
   // Product Modal Forms state
   const [showProductModal, setShowProductModal] = useState(false);
@@ -87,25 +96,6 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       if (!isAdmin) return;
 
-      // 1. Initial load from local storage with cache-buster
-      const cacheVersion = localStorage.getItem("luxe-catalog-version");
-      if (cacheVersion !== "v2.2") {
-        localStorage.removeItem("luxe-catalog");
-        localStorage.setItem("luxe-catalog-version", "v2.2");
-      }
-
-      const localCat = localStorage.getItem("luxe-catalog");
-      if (localCat) {
-        try {
-          setProducts(JSON.parse(localCat));
-        } catch (e) {
-          setProducts(MOCK_PRODUCTS);
-        }
-      } else {
-        setProducts(MOCK_PRODUCTS);
-        localStorage.setItem("luxe-catalog", JSON.stringify(MOCK_PRODUCTS));
-      }
-
       try {
         const [ordersRes, productsRes] = await Promise.all([
           supabase.from('orders').select('*, profiles(full_name)').order('created_at', { ascending: false }),
@@ -113,8 +103,9 @@ export default function AdminDashboard() {
         ]);
         
         // Format orders for UI
+        let formattedOrders: any[] = [];
         if (ordersRes.data) {
-          const formattedOrders = ordersRes.data.map(o => {
+          formattedOrders = ordersRes.data.map(o => {
             let parsedDetails = null;
             try {
               parsedDetails = JSON.parse(o.delivery_address || "");
@@ -138,12 +129,23 @@ export default function AdminDashboard() {
           setOrders(formattedOrders);
         }
         
+        let parsedProducts: any[] = [];
         if (productsRes.data && productsRes.data.length > 0) {
           const parsed = productsRes.data.map(parseDbProduct);
-          const unique = parsed.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
-          setProducts(unique);
-          localStorage.setItem("luxe-catalog", JSON.stringify(unique));
+          parsedProducts = parsed.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+          setProducts(parsedProducts);
         }
+
+        // Calculate dynamic metrics
+        const totalRev = ordersRes.data ? ordersRes.data.reduce((acc, curr) => acc + Number(curr.total_price || 0), 0) : 0;
+        const { count: customerCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+
+        setMetrics({
+          totalRevenue: totalRev,
+          totalOrders: formattedOrders.length,
+          totalProducts: parsedProducts.length,
+          customerCount: customerCount || 0
+        });
       } catch (error) {
         console.error("Error fetching admin data:", error);
       } finally {
@@ -156,30 +158,6 @@ export default function AdminDashboard() {
 
   // Load admins list
   const fetchAdmins = async () => {
-    const officialAdmin = {
-      id: "official-store-admin",
-      full_name: "LUXE Store Admin",
-      email: "official.valceron.in@gmail.com",
-      role: "store-admin",
-      status: "active",
-      created_at: new Date().toISOString()
-    };
-
-    let localAdmins: any[] = [];
-    const saved = localStorage.getItem("luxe-admins");
-    if (saved) {
-      try {
-        localAdmins = JSON.parse(saved);
-      } catch (e) {
-        localAdmins = [];
-      }
-    }
-
-    if (!localAdmins.some(a => a.email.toLowerCase() === officialAdmin.email.toLowerCase())) {
-      localAdmins.push(officialAdmin);
-      localStorage.setItem("luxe-admins", JSON.stringify(localAdmins));
-    }
-
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -187,27 +165,22 @@ export default function AdminDashboard() {
         .in("role", ["super-admin", "store-admin", "admin"]);
       
       if (!error && data) {
-        const merged = [...localAdmins];
-        data.forEach(dbAdmin => {
-          if (!merged.some(m => m.email.toLowerCase() === dbAdmin.email.toLowerCase())) {
-            merged.push({
-              id: dbAdmin.id,
-              full_name: dbAdmin.full_name || "Admin Account",
-              email: dbAdmin.email,
-              role: dbAdmin.role === "admin" ? "super-admin" : dbAdmin.role,
-              status: "active",
-              created_at: dbAdmin.created_at
-            });
-          }
-        });
-        setAdminsList(merged);
-        return;
+        const formatted = data.map(dbAdmin => ({
+          id: dbAdmin.id,
+          full_name: dbAdmin.full_name || "Admin Account",
+          email: dbAdmin.email,
+          role: dbAdmin.role === "admin" ? "super-admin" : dbAdmin.role,
+          status: "active",
+          created_at: dbAdmin.created_at
+        }));
+        setAdminsList(formatted);
+      } else {
+        setAdminsList([]);
       }
-    } catch (e) {
-      console.warn("Could not fetch profiles from Supabase, using local storage admins");
+    } catch (err) {
+      console.error("Error fetching admin list:", err);
+      setAdminsList([]);
     }
-
-    setAdminsList(localAdmins);
   };
 
   useEffect(() => {
@@ -234,16 +207,34 @@ export default function AdminDashboard() {
       return;
     }
 
-    const newAdmin = {
-      id: adminEditing ? adminEditing.id : `admin-${Date.now()}`,
-      full_name: trimmedName,
-      email: trimmedEmail,
-      role: "store-admin",
-      status: adminEditing ? adminEditing.status : "active",
-      created_at: adminEditing ? adminEditing.created_at : new Date().toISOString()
-    };
-
-    if (!adminEditing && adminPassword) {
+    if (adminEditing) {
+      try {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            full_name: trimmedName,
+            email: trimmedEmail,
+          })
+          .eq("id", adminEditing.id);
+          
+        if (error) throw error;
+        
+        toast.success("Admin account parameters calibrated.");
+        fetchAdmins();
+        setShowAdminModal(false);
+        setAdminName("");
+        setAdminEmail("");
+        setAdminPassword("");
+        setAdminEditing(null);
+      } catch (err: any) {
+        toast.error(`Failed to update admin: ${err.message}`);
+      }
+    } else {
+      if (!adminPassword) {
+        toast.error("Password is required for new admin.");
+        return;
+      }
+      
       try {
         const { data, error } = await supabase.auth.signUp({
           email: trimmedEmail,
@@ -255,45 +246,34 @@ export default function AdminDashboard() {
             }
           }
         });
-        if (error) console.warn("Supabase signUp for admin failed:", error.message);
+        
+        if (error) throw error;
         
         if (data?.user) {
           const { error: profileError } = await supabase
             .from("profiles")
-            .insert({
+            .upsert({
               id: data.user.id,
               email: trimmedEmail,
               full_name: trimmedName,
               role: "store-admin",
               phone_number: "+919999999999"
             });
-          if (profileError) console.warn("Supabase profile insert for admin failed:", profileError.message);
+          
+          if (profileError) throw profileError;
+          
+          toast.success("New store-admin initialized.");
+          fetchAdmins();
+          setShowAdminModal(false);
+          setAdminName("");
+          setAdminEmail("");
+          setAdminPassword("");
+          setAdminEditing(null);
         }
-      } catch (err) {
-        console.warn("Supabase auth signUp error:", err);
+      } catch (err: any) {
+        toast.error(`Failed to create admin: ${err.message}`);
       }
     }
-
-    let updated = [...adminsList];
-    if (adminEditing) {
-      updated = adminsList.map(a => a.id === adminEditing.id ? newAdmin : a);
-      toast.success("Admin account parameters calibrated.");
-    } else {
-      if (adminsList.some(a => a.email.toLowerCase() === newAdmin.email.toLowerCase())) {
-        toast.error("An admin account with this email already exists.");
-        return;
-      }
-      updated = [...adminsList, newAdmin];
-      toast.success("New store-admin initialized.");
-    }
-
-    setAdminsList(updated);
-    localStorage.setItem("luxe-admins", JSON.stringify(updated));
-    setShowAdminModal(false);
-    setAdminName("");
-    setAdminEmail("");
-    setAdminPassword("");
-    setAdminEditing(null);
   };
 
   const handleDeleteAdmin = async (id: string) => {
@@ -303,34 +283,42 @@ export default function AdminDashboard() {
     }
 
     if (confirm("Decommission this admin node?")) {
-      const updated = adminsList.filter(a => a.id !== id);
-      setAdminsList(updated);
-      localStorage.setItem("luxe-admins", JSON.stringify(updated));
-      toast.success("Admin node decommissioned.");
-      
       try {
-        await supabase.from("profiles").delete().eq("id", id);
-      } catch (e) {
-        // ignore
+        const { error } = await supabase.from("profiles").delete().eq("id", id);
+        if (error) throw error;
+        
+        setAdminsList(adminsList.filter(a => a.id !== id));
+        toast.success("Admin node decommissioned.");
+      } catch (err: any) {
+        toast.error(`Failed to decommission admin: ${err.message}`);
       }
     }
   };
 
-  const handleToggleAdminStatus = (id: string) => {
+  const handleToggleAdminStatus = async (id: string) => {
     if (id === "official-store-admin" || id === "super-admin-id-123") {
       toast.error("Root administrators cannot be deactivated.");
       return;
     }
-    const updated = adminsList.map(a => {
-      if (a.id === id) {
-        const nextStatus = a.status === "active" ? "inactive" : "active";
-        toast.success(`Admin state set to ${nextStatus}`);
-        return { ...a, status: nextStatus };
-      }
-      return a;
-    });
-    setAdminsList(updated);
-    localStorage.setItem("luxe-admins", JSON.stringify(updated));
+    
+    const admin = adminsList.find(a => a.id === id);
+    if (!admin) return;
+    
+    const newRole = admin.role === "customer" ? "store-admin" : "customer";
+    
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ role: newRole })
+        .eq("id", id);
+        
+      if (error) throw error;
+      
+      setAdminsList(adminsList.map(a => a.id === id ? { ...a, role: newRole } : a));
+      toast.success(`Admin role set to ${newRole}`);
+    } catch (err: any) {
+      toast.error(`Failed to toggle admin role: ${err.message}`);
+    }
   };
 
   const handleResetAdminPassword = (admin: any) => {
@@ -409,21 +397,15 @@ export default function AdminDashboard() {
         const { error } = await supabase.from(type).delete().eq('id', id);
         if (error) throw error;
         
-        if (type === 'orders') setOrders(orders.filter(o => o.id !== id));
-        else {
-          const updatedProds = products.filter(p => p.id !== id);
-          setProducts(updatedProds);
-          localStorage.setItem("luxe-catalog", JSON.stringify(updatedProds));
+        if (type === 'orders') {
+          setOrders(orders.filter(o => o.id !== id));
+          toast.success("Order deleted successfully.");
+        } else {
+          setProducts(products.filter(p => p.id !== id));
           toast.success("Product deleted successfully.");
         }
       } catch (err: any) {
-        console.warn("Supabase delete failed, using local fallback:", err.message);
-        if (type === 'products') {
-          const updatedProds = products.filter(p => p.id !== id);
-          setProducts(updatedProds);
-          localStorage.setItem("luxe-catalog", JSON.stringify(updatedProds));
-          toast.success("Product deleted from local cache.");
-        }
+        toast.error(`Database delete failed: ${err.message}`);
       }
     }
   };
@@ -470,36 +452,6 @@ export default function AdminDashboard() {
     const sizesArr = formSizes.split(",").map(s => s.trim()).filter(Boolean);
     const colorsArr = formColors.split(",").map(c => c.trim()).filter(Boolean);
 
-    const productData = {
-      ...editingProduct,
-      id: editingProduct ? editingProduct.id : `luxe-${formCategory.toLowerCase()}-${Date.now()}`,
-      name: formName,
-      description: formDescription,
-      price: Number(formPrice),
-      currency: "INR",
-      category: formCategory,
-      images: editingProduct?.images || [formImageUrl],
-      image_url: formImageUrl,
-      stock: Number(formStock),
-      stock_quantity: Number(formStock),
-      isTrending: formIsTrending,
-      sizes: sizesArr,
-      colors: colorsArr,
-      offer: formOffer,
-      ratings: editingProduct?.ratings || 4.8,
-      reviewsCount: editingProduct?.reviewsCount || 1,
-      discount: editingProduct?.discount || 0,
-      modelImages: editingProduct?.modelImages || {
-        front: formImageUrl,
-        side: formImageUrl,
-        back: formImageUrl,
-        variants: {}
-      }
-    };
-
-    let updatedProducts = [...products];
-
-    // Try to sync to Supabase (non-blocking)
     try {
       if (editingProduct) {
         const { error } = await supabase
@@ -516,11 +468,26 @@ export default function AdminDashboard() {
           .eq('id', editingProduct.id);
         
         if (error) throw error;
+
+        // Fetch the updated product to refresh state completely from database
+        const { data: updatedProd, error: fetchErr } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', editingProduct.id)
+          .single();
+
+        if (!fetchErr && updatedProd) {
+          const parsed = parseDbProduct(updatedProd);
+          setProducts(products.map(p => p.id === editingProduct.id ? parsed : p));
+        }
+        
+        toast.success("Product updated successfully in database.");
       } else {
+        const newId = `luxe-${formCategory.toLowerCase()}-${Date.now()}`;
         const { error } = await supabase
           .from('products')
           .insert([{
-            id: productData.id,
+            id: newId,
             name: formName,
             description: formDescription,
             price: Number(formPrice),
@@ -531,22 +498,25 @@ export default function AdminDashboard() {
           }]);
           
         if (error) throw error;
+
+        // Fetch the inserted product to refresh state completely from database
+        const { data: insertedProd, error: fetchErr } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', newId)
+          .single();
+
+        if (!fetchErr && insertedProd) {
+          const parsed = parseDbProduct(insertedProd);
+          setProducts([parsed, ...products]);
+        }
+        
+        toast.success("Product created successfully in database.");
       }
+      setShowProductModal(false);
     } catch (dbErr: any) {
-      console.warn("Supabase CRUD sync failed, updating local state only:", dbErr.message);
+      toast.error(`Database save failed: ${dbErr.message}`);
     }
-
-    if (editingProduct) {
-      updatedProducts = products.map(p => p.id === editingProduct.id ? productData : p);
-      toast.success("Product updated in local registry.");
-    } else {
-      updatedProducts = [productData, ...products];
-      toast.success("New product initialized in local registry.");
-    }
-
-    setProducts(updatedProducts);
-    localStorage.setItem("luxe-catalog", JSON.stringify(updatedProducts));
-    setShowProductModal(false);
   };
 
   useEffect(() => {
@@ -684,10 +654,10 @@ export default function AdminDashboard() {
 
                   {/* Core Statistics Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                     <StatCard label="Total Revenue" value="$12,402" change="+12.5%" isPositive={true} icon={ShoppingBag} color="#00f2ff" delay={0.1} />
-                     <StatCard label="Active Sessions" value="842" change="+5.2%" isPositive={true} icon={Users} color="#ff00ff" delay={0.2} />
-                     <StatCard label="Neural Matches" value="94%" change="+2.1%" isPositive={true} icon={BrainCircuit} color="#00ff9d" delay={0.3} />
-                     <StatCard label="Automation Load" value="12%" change="-1.5%" isPositive={false} icon={Activity} color="#ffcc00" delay={0.4} />
+                     <StatCard label="Total Revenue" value={`${convertPrice(metrics.totalRevenue).symbol}${convertPrice(metrics.totalRevenue).amount}`} change="+12.5%" isPositive={true} icon={ShoppingBag} color="#00f2ff" delay={0.1} />
+                     <StatCard label="Order Count" value={String(metrics.totalOrders)} change="+5.2%" isPositive={true} icon={ShoppingBag} color="#ff00ff" delay={0.2} />
+                     <StatCard label="Catalog Products" value={String(metrics.totalProducts)} change="+2.1%" isPositive={true} icon={BrainCircuit} color="#00ff9d" delay={0.3} />
+                     <StatCard label="Customers" value={String(metrics.customerCount)} change="+1.5%" isPositive={true} icon={Users} color="#ffcc00" delay={0.4} />
                   </div>
 
                   {/* Operational Layout */}
@@ -697,7 +667,7 @@ export default function AdminDashboard() {
                            <AIControlPanel />
                         </div>
                         <div className="h-[400px]">
-                           <AnalyticsVisuals />
+                           <AnalyticsVisuals metrics={metrics} />
                         </div>
                      </div>
                      <div className="h-full min-h-[600px]">
@@ -992,7 +962,7 @@ export default function AdminDashboard() {
                         <p className="text-sm text-white/40 tracking-widest uppercase italic">Deep-dive behavioral forecasting</p>
                      </div>
                   </div>
-                  <AnalyticsVisuals />
+                  <AnalyticsVisuals metrics={metrics} />
                 </motion.div>
               )}
            </AnimatePresence>

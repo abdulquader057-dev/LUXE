@@ -15,6 +15,7 @@ import { AIOutfit, VirtualStylist, Product } from "@/types";
 import { cn } from "@/lib/utils";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
 
 const PROMPTS = [
   { label: "Minimal Black Fit", icon: Moon, aesthetic: "Cyber-Minimal" },

@@ -1,44 +1,68 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import {
-  Heart, X, Bookmark, ShoppingBag,
-  Sparkles, RotateCcw, BrainCircuit, ArrowRight
+  Heart, X, Bookmark,
+  Sparkles, BrainCircuit
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { parseDbProduct } from "@/data/products";
+import { supabase } from "@/lib/supabase";
 import { Product } from "@/types";
 import { cn } from "@/lib/utils";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
+import { useXP } from "@/lib/hooks/useXP";
 
 type SwipeDirection = "left" | "right" | "up" | null;
 
 export default function SwipePage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
   const [liked, setLiked] = useState<Product[]>([]);
   const [saved, setSaved] = useState<Product[]>([]);
   const [showMatch, setShowMatch] = useState(false);
   const { convertPrice } = useCommerce();
+  const { awardXP } = useXP();
 
-  const currentProduct = MOCK_PRODUCTS[currentIndex % MOCK_PRODUCTS.length];
-  const nextProduct = MOCK_PRODUCTS[(currentIndex + 1) % MOCK_PRODUCTS.length];
+  useEffect(() => {
+    async function fetchProducts() {
+      setIsLoading(true);
+      try {
+        const { data } = await supabase.from("products").select("*");
+        if (data && data.length > 0) {
+          const parsed = data.map(parseDbProduct);
+          setProducts(parsed);
+        }
+      } catch (err) {
+        console.error("Failed to fetch products for swipe page:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchProducts();
+  }, []);
+
+  const currentProduct = products.length > 0 ? products[currentIndex % products.length] : null;
+  const nextProduct = products.length > 0 ? products[(currentIndex + 1) % products.length] : null;
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 0, 300], [-25, 0, 25]);
   const likeOpacity = useTransform(x, [0, 100], [0, 1]);
   const nopeOpacity = useTransform(x, [-100, 0], [1, 0]);
-  const saveScale = useTransform(x, [-50, 0, 50], [1, 1, 1]);
 
   const handleDragEnd = useCallback((_: unknown, info: PanInfo) => {
+    if (!currentProduct) return;
     const threshold = 120;
     
     if (info.offset.x > threshold) {
       // Swipe right → Like
       setSwipeDirection("right");
       setLiked((prev) => [...prev, currentProduct]);
+      awardXP('swipe_right');
       // 30% chance of "match" 
       if (Math.random() > 0.7) {
         setTimeout(() => setShowMatch(true), 300);
@@ -67,8 +91,12 @@ export default function SwipePage() {
   }, [currentProduct]);
 
   const handleButtonSwipe = (direction: SwipeDirection) => {
+    if (!currentProduct) return;
     setSwipeDirection(direction);
-    if (direction === "right") setLiked((prev) => [...prev, currentProduct]);
+    if (direction === "right") {
+      setLiked((prev) => [...prev, currentProduct]);
+      awardXP('swipe_right');
+    }
     if (direction === "up") setSaved((prev) => [...prev, currentProduct]);
     setTimeout(() => {
       setCurrentIndex((prev) => prev + 1);
@@ -81,6 +109,32 @@ export default function SwipePage() {
     right: { x: 500, rotate: 30, opacity: 0 },
     up: { y: -500, scale: 0.5, opacity: 0 },
   };
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-black text-white pt-28 pb-16 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border border-white/5 border-t-primary rounded-full animate-spin" />
+          <p className="text-[10px] font-sora tracking-[0.3em] text-white/50 uppercase">Loading Styles...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (products.length === 0 || !currentProduct) {
+    return (
+      <main className="min-h-screen bg-black text-white pt-28 pb-16 flex items-center justify-center">
+        <div className="max-w-md text-center px-6">
+          <Sparkles size={32} className="text-white/20 mx-auto mb-6 animate-pulse" />
+          <h2 className="text-3xl font-display font-black tracking-tighter mb-4 text-gradient">NO ARTIFACTS AVAILABLE</h2>
+          <p className="text-sm text-white/40 mb-8 font-sora">The archive is currently empty. Please check back later when new limited designs are catalogued.</p>
+          <Link href="/shop" className="btn-secondary px-8 py-3 rounded-full text-[10px] font-mono tracking-widest uppercase border border-white/20 hover:border-white">
+            Browse Shop
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-black text-white pt-28 pb-16 relative overflow-hidden">
@@ -125,15 +179,17 @@ export default function SwipePage() {
         {/* Card stack */}
         <div className="relative h-[520px] w-full perspective-1000">
           {/* Background card (next) */}
-          <div className="absolute inset-4 rounded-[36px] overflow-hidden border border-white/5 bg-muted">
-            <Image
-              src={nextProduct.images[0]}
-              alt=""
-              fill
-              sizes="400px"
-              className="object-cover opacity-50 scale-95 blur-sm"
-            />
-          </div>
+          {nextProduct && (
+            <div className="absolute inset-4 rounded-[36px] overflow-hidden border border-white/5 bg-muted">
+              <Image
+                src={nextProduct.images[0] || "/brand/linen_model_front.png"}
+                alt=""
+                fill
+                sizes="400px"
+                className="object-cover opacity-50 scale-95 blur-sm"
+              />
+            </div>
+          )}
 
           {/* Active card */}
           <AnimatePresence mode="wait">
@@ -154,7 +210,7 @@ export default function SwipePage() {
               className="absolute inset-0 rounded-[36px] overflow-hidden border border-white/10 cursor-grab active:cursor-grabbing shadow-2xl"
             >
               <Image
-                src={currentProduct.images[0]}
+                src={currentProduct.images[0] || "/brand/linen_model_front.png"}
                 alt={currentProduct.name}
                 fill
                 priority
@@ -192,7 +248,7 @@ export default function SwipePage() {
                     <span className="text-[9px] text-white/30">★</span>
                   </div>
                 </div>
-                <h2 className="text-3xl font-black tracking-tighter uppercase mb-2">{currentProduct.name}</h2>
+                <h2 className="text-3xl font-black tracking-tighter uppercase mb-2 line-clamp-1">{currentProduct.name}</h2>
                 <p className="text-2xl font-black text-gradient mb-3">{convertPrice(currentProduct.price).symbol}{convertPrice(currentProduct.price).amount}</p>
                 <p className="text-sm text-white/40 line-clamp-2">{currentProduct.description}</p>
               </div>
@@ -272,7 +328,7 @@ export default function SwipePage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-sm text-white/40 mt-2"
+                className="text-sm text-white/40 mt-2 font-sora"
               >
                 This piece perfectly fits your style DNA
               </motion.p>
@@ -283,4 +339,3 @@ export default function SwipePage() {
     </main>
   );
 }
-

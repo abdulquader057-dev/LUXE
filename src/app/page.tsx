@@ -17,7 +17,7 @@ const filters = [
 ];
 
 import { supabase } from "@/lib/supabase";
-import { MOCK_PRODUCTS, parseDbProduct } from "@/data/products";
+import { parseDbProduct } from "@/data/products";
 
 export default function Home() {
   const { cart, convertPrice, toggleCart, removeFromCart } = useCommerce();

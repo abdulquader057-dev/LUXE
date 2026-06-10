@@ -1,5 +1,4 @@
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
-import { MOCK_PRODUCTS } from "@/data/products";
 import ProductPageClient from "./ProductPageClient";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,7 +13,7 @@ export default async function ProductPageWrapper({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
 
-  // 1. Fetch Product from Supabase or Fallback to Offline Mock
+  // 1. Fetch Product from Supabase
   let product = null;
   const { data: dbProduct } = await supabase
     .from("products")
@@ -24,9 +23,6 @@ export default async function ProductPageWrapper({ params }: PageProps) {
 
   if (dbProduct) {
     product = parseDbProduct(dbProduct);
-  } else {
-    // Try offline mockup catalog fallback
-    product = MOCK_PRODUCTS.find((p) => p.id === id);
   }
 
   if (!product) {

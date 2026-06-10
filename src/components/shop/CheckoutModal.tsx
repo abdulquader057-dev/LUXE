@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import { telemetry } from "@/lib/telemetry";
 import { escapeString } from "@/lib/security";
+import { useXP } from "@/lib/hooks/useXP";
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ const loadRazorpayScript = () => {
 export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { cart, totalPrice, convertPrice, clearCart, toggleCart } = useCommerce();
   const { user } = useAuth();
+  const { awardXP } = useXP();
 
   const [name, setName] = useState(user?.user_metadata?.full_name || "");
   const [phone, setPhone] = useState(user?.user_metadata?.phone_number || "");
@@ -480,6 +482,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
               clearCart();
               onClose();
               toggleCart();
+              awardXP('purchase');
 
               const encodedMessage = encodeURIComponent(messageText);
               const whatsappUrl = `https://wa.me/917995338472?text=${encodedMessage}`;
@@ -597,6 +600,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
       clearCart();
       onClose();
       toggleCart();
+      awardXP('purchase');
 
       const encodedMessage = encodeURIComponent(messageText);
       const whatsappUrl = `https://wa.me/917995338472?text=${encodedMessage}`;

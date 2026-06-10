@@ -10,14 +10,17 @@ export function usePersonalization() {
   const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
 
   useEffect(() => {
-    const p = personalizationService.getPersona();
-    setPersona(p);
-    setRecommendations(personalizationService.getRecommendedProducts());
-    setRecentlyViewed(personalizationService.getRecentlyViewed());
+    async function init() {
+      await personalizationService.ensureProductsLoaded();
+      setPersona(personalizationService.getPersona());
+      setRecommendations(personalizationService.getRecommendedProducts());
+      setRecentlyViewed(personalizationService.getRecentlyViewed());
+    }
+    init();
   }, []);
 
-  const trackView = (productId: string) => {
-    personalizationService.trackView(productId);
+  const trackView = async (productId: string) => {
+    await personalizationService.trackView(productId);
     // Refresh state
     setRecentlyViewed(personalizationService.getRecentlyViewed());
     setRecommendations(personalizationService.getRecommendedProducts());

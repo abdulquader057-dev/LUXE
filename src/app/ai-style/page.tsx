@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, BrainCircuit, Wand2, Palette, Ruler, ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
-import { MOCK_PRODUCTS, parseDbProduct } from "@/data/products";
+import { parseDbProduct } from "@/data/products";
 import ProductCard from "@/components/shop/ProductCard";
 
 const AIStylePage = () => {
@@ -23,10 +23,11 @@ const AIStylePage = () => {
           const unique = parsed.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
           setAllProducts(unique);
         } else {
-          setAllProducts(MOCK_PRODUCTS);
+          setAllProducts([]);
         }
       } catch (err) {
-        setAllProducts(MOCK_PRODUCTS);
+        console.error("Failed to load products for AI Style analysis:", err);
+        setAllProducts([]);
       }
     }
     fetchProducts();
@@ -237,7 +238,7 @@ const AIStylePage = () => {
                   </div>
                 ) : (
                   <div className="text-center py-10">
-                    <p className="text-white/40 font-sora text-sm">Connecting to product database...</p>
+                    <p className="text-white/40 font-sora text-sm uppercase tracking-widest">No products available matching this aesthetic.</p>
                   </div>
                 )}
 

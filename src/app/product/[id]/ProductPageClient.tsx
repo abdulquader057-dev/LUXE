@@ -33,7 +33,9 @@ import LuxeButton from "@/components/ui/LuxeButton";
 import { useTilt } from "@/hooks/useTilt";
 import { usePersonalization } from "@/lib/hooks/usePersonalization";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
+import { useXP } from "@/lib/hooks/useXP";
 import { supabase } from "@/lib/supabase";
+import { parseDbProduct } from "@/data/products";
 import toast from "react-hot-toast";
 import { telemetry } from "@/lib/telemetry";
 import dynamic from "next/dynamic";
@@ -51,6 +53,20 @@ const ProductViewer3D = dynamic(
   }
 );
 
+// R3F viewer — only loaded when product has a GLB model_url
+const ProductViewer3DReal = dynamic(
+  () => import('@/components/shop/ProductViewer3DReal').then(m => m.ProductViewer3DReal),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[500px] md:h-[600px] rounded-[32px] bg-gradient-to-b from-[#0D0D14] to-[#1A1A26] border border-[rgba(201,168,76,0.1)] flex flex-col items-center justify-center gap-4">
+        <div className="w-8 h-8 border-2 border-[#C9A84C] border-t-transparent rounded-full animate-spin" />
+        <span className="text-[9px] font-mono text-[#C9A84C] tracking-widest uppercase">Loading 3D Environment...</span>
+      </div>
+    )
+  }
+);
+
 export default function ProductPageClient({ product }: { product: any }) {
   const searchParams = useSearchParams();
   const [selectedImage, setSelectedImage] = useState(0);
@@ -59,8 +75,30 @@ export default function ProductPageClient({ product }: { product: any }) {
   const [selectedColor, setSelectedColor] = useState("White");
   const [quantity, setQuantity] = useState(1);
   const [isStyleAnalysisOpen, setIsStyleAnalysisOpen] = useState(false);
-  const { trackView, getOutfitPairing } = usePersonalization();
+  const { trackView } = usePersonalization();
   const { convertPrice, addToCart } = useCommerce();
+  const { awardXP } = useXP();
+  const [outfitPairings, setOutfitPairings] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchPairings() {
+      if (!product?.id) return;
+      try {
+        const { data } = await supabase
+          .from("products")
+          .select("*")
+          .neq("id", product.id)
+          .limit(3);
+        if (data && data.length > 0) {
+          const parsed = data.map(parseDbProduct);
+          setOutfitPairings(parsed);
+        }
+      } catch (err) {
+        console.error("Failed to fetch outfit pairings from DB:", err);
+      }
+    }
+    fetchPairings();
+  }, [product?.id]);
 
   // Price Drop Modal and shipping pincode states
   const [showChatToOrderLabel, setShowChatToOrderLabel] = useState(false);
@@ -91,6 +129,15 @@ export default function ProductPageClient({ product }: { product: any }) {
       });
     }
   }, [product]);
+
+  // Award XP after 5 seconds of viewing a product
+  useEffect(() => {
+    if (!product?.id) return;
+    const timer = setTimeout(() => {
+      awardXP('product_view');
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [product?.id, awardXP]);
 
   const handleSizeSelect = (size: string) => {
     setSelectedSize(size);
@@ -186,7 +233,7 @@ export default function ProductPageClient({ product }: { product: any }) {
     activeImages = product.images;
   }
 
-  const outfitPairings = getOutfitPairing(product.id);
+  
 
   const handleWhatsAppBuy = () => {
     const message = `Hi, I'd like to order ${product.name} | Size: ${selectedSize || 'N/A'} | Color: ${selectedColor || 'N/A'} | Qty: ${quantity}`;
@@ -213,13 +260,21 @@ export default function ProductPageClient({ product }: { product: any }) {
                 style={tilt.style}
                 className="w-full h-full"
               >
-                <ProductViewer3D 
-                  images={activeImages} 
-                  productName={product.name} 
-                  selectedColor={selectedColor} 
-                  currentIndex={selectedImage}
-                  onChangeIndex={setSelectedImage}
-                />
+{product.model_url ? (
+                  <ProductViewer3DReal
+                    modelUrl={product.model_url}
+                    productName={product.name}
+                    selectedColor={selectedColor}
+                  />
+                ) : (
+                  <ProductViewer3D 
+                    images={activeImages} 
+                    productName={product.name} 
+                    selectedColor={selectedColor} 
+                    currentIndex={selectedImage}
+                    onChangeIndex={setSelectedImage}
+                  />
+                )}
               </div>
             </MotionItem>
             

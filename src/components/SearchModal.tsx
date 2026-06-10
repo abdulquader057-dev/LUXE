@@ -8,7 +8,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import { supabase } from "@/lib/supabase";
-import { MOCK_PRODUCTS, parseDbProduct } from "@/data/products";
+import { parseDbProduct } from "@/data/products";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -34,12 +34,13 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
           setAllProducts(unique);
           setResults(unique.slice(0, 4));
         } else {
-          setAllProducts(MOCK_PRODUCTS);
-          setResults(MOCK_PRODUCTS.slice(0, 4));
+          setAllProducts([]);
+          setResults([]);
         }
       } catch (err) {
-        setAllProducts(MOCK_PRODUCTS);
-        setResults(MOCK_PRODUCTS.slice(0, 4));
+        console.error("Search modal failed to load products:", err);
+        setAllProducts([]);
+        setResults([]);
       }
     }
     fetchProducts();

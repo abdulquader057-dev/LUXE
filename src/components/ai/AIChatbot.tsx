@@ -8,7 +8,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Magnetic } from "@/components/ui/Magnetic";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { parseDbProduct } from "@/data/products";
+import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { Product } from "@/types";
 import { aiService, ChatMessage } from "@/lib/services/ai";
@@ -16,15 +17,58 @@ import { useSpeechRecognition } from "@/lib/hooks/useSpeechRecognition";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 interface Message {
+  id?: string;
   role: string;
   content: string;
   type: string;
   product?: Product;
   items?: Product[];
+  isStreaming?: boolean;
 }
+
+const QUICK_REPLIES = [
+  ["Show me streetwear looks", "What's trending this season?", "Help me pick a size"],
+  ["Best for weddings?", "Casual day outfits?", "Office-ready styles?"],
+  ["Budget under ₹1000?", "Best selling items?", "New arrivals?"],
+  ["Care instructions?", "Exchange policy?", "Delivery time?"],
+];
 
 const AIChatbot = () => {
   const { convertPrice } = useCommerce();
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [styleDna, setStyleDna] = useState<any>(null);
+  const [quickReplies, setQuickReplies] = useState<string[]>([]);
+  const assistantMsgCountRef = useRef(0);
+
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const { data } = await supabase.from("products").select("*");
+        if (data) {
+          setDbProducts(data.map(parseDbProduct));
+        }
+      } catch (err) {
+        console.error("AI chatbot failed to load products:", err);
+      }
+    }
+    loadProducts();
+  }, []);
+
+  // Load Style DNA for the logged-in user
+  useEffect(() => {
+    const loadDna = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('style_dna')
+          .select('xp, level, badges')
+          .eq('id', user.id)
+          .single();
+        setStyleDna(data || user.user_metadata?.style_dna || null);
+      }
+    };
+    loadDna();
+  }, []);
   
   const renderMessageContent = (content: string) => {
     const recommendRegex = /\[RECOMMEND:\s*([a-zA-Z0-9-]+)\]/g;
@@ -46,7 +90,7 @@ const AIChatbot = () => {
         parts.push(<span key={`text-${lastIndex}`}>{content.substring(lastIndex, matchIndex)}</span>);
       }
       
-      const p = MOCK_PRODUCTS.find((prod) => prod.id === productId);
+      const p = dbProducts.find((prod) => prod.id === productId);
       if (p) {
         parts.push(
           <div
@@ -92,6 +136,7 @@ const AIChatbot = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
+      id: 'init',
       role: "assistant",
       content: "I am LUXE, your Neural Style Consultant. How shall we architect your silhouette today?",
       type: "text",
@@ -112,12 +157,18 @@ const AIChatbot = () => {
 
   const handleSend = async (text = input) => {
     const messageText = text.trim();
-    if (!messageText) return;
+    if (!messageText || isProcessing) return;
 
-    const userMessage: Message = { role: "user", content: messageText, type: "text" };
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: "user",
+      content: messageText,
+      type: "text",
+    };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsProcessing(true);
+    setQuickReplies([]);
 
     try {
       const chatMessages = messages.concat(userMessage).map((m) => ({
@@ -125,12 +176,12 @@ const AIChatbot = () => {
         content: m.content,
       }));
 
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/zyra", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           messages: chatMessages,
-          language: "English"
+          styleDna,
         }),
       });
 
@@ -138,48 +189,87 @@ const AIChatbot = () => {
         throw new Error("Failed to fetch response");
       }
 
-      const data = await response.json();
-      
-      const aiResponse: Message = {
-        role: "assistant",
-        content: data.message,
-        type: data.recommendations && data.recommendations.length > 0 ? "recommendation" : "text",
-        items: data.recommendations || []
-      };
+      // Add a streaming placeholder message
+      const placeholderId = `assistant-${Date.now()}`;
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: placeholderId,
+          role: "assistant",
+          content: "",
+          type: "text",
+          isStreaming: true,
+        },
+      ]);
 
-      // Fallback matching if recommendations not present in response
-      if ((!aiResponse.items || aiResponse.items.length === 0) && (
-        data.message.toLowerCase().includes("recommend") ||
-        data.message.toLowerCase().includes("curate") ||
-        data.message.toLowerCase().includes("suggest") ||
-        data.message.toLowerCase().includes("shirt") ||
-        data.message.toLowerCase().includes("luxe")
-      )) {
-        aiResponse.type = "recommendation";
-        const textLower = messageText.toLowerCase();
-        if (textLower.includes("white")) {
-          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "00000000-0000-4000-a000-000000000001")].filter(Boolean) as Product[];
-        } else if (textLower.includes("blue") || textLower.includes("sky")) {
-          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "00000000-0000-4000-a000-000000000002") || MOCK_PRODUCTS.find((p) => p.id === "00000000-0000-4000-a000-000000000006")].filter(Boolean) as Product[];
-        } else if (textLower.includes("black") || textLower.includes("dark")) {
-          aiResponse.items = [MOCK_PRODUCTS.find((p) => p.id === "00000000-0000-4000-a000-000000000007")].filter(Boolean) as Product[];
-        } else {
-          aiResponse.items = [MOCK_PRODUCTS[0], MOCK_PRODUCTS[2]];
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No response body");
+      const decoder = new TextDecoder();
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+
+        if (chunk.includes("[DONE]")) {
+          // Strip the sentinel and finalize
+          const cleanChunk = chunk.replace(/\n?\[DONE\]/, "");
+          if (cleanChunk) fullText += cleanChunk;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === placeholderId
+                ? { ...m, content: fullText, isStreaming: false }
+                : m
+            )
+          );
+          // Show quick-reply chips
+          assistantMsgCountRef.current += 1;
+          const chipSet = QUICK_REPLIES[assistantMsgCountRef.current % QUICK_REPLIES.length];
+          setQuickReplies(chipSet);
+          break;
         }
-      }
 
-      setMessages((prev) => [...prev, aiResponse]);
+        if (chunk.includes("[ERROR]")) {
+          const errorText = chunk.replace(/\n?\[ERROR\]\s*/, "");
+          fullText = errorText || "Neural uplink degraded. Please try again.";
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === placeholderId
+                ? { ...m, content: fullText, isStreaming: false }
+                : m
+            )
+          );
+          break;
+        }
+
+        fullText += chunk;
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === placeholderId ? { ...m, content: fullText } : m
+          )
+        );
+      }
     } catch (error) {
       console.error("AI Chat Error:", error);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Neural link interrupted. Re-initializing...", type: "text" },
+        {
+          id: `err-${Date.now()}`,
+          role: "assistant",
+          content: "Neural link interrupted. Re-initializing...",
+          type: "text",
+        },
       ]);
     } finally {
       setIsProcessing(false);
     }
   };
 
+  const handleQuickReply = (reply: string) => {
+    setQuickReplies([]);
+    handleSend(reply);
+  };
 
   const toggleVoice = () => {
     if (isListening) stopListening();
@@ -265,7 +355,7 @@ const AIChatbot = () => {
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-5 no-scrollbar">
               {messages.map((m, i) => (
                 <motion.div
-                  key={i}
+                  key={m.id || i}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
@@ -283,6 +373,16 @@ const AIChatbot = () => {
                     )}
                   >
                     {renderMessageContent(m.content)}
+                    {/* Blinking cursor while streaming */}
+                    {m.isStreaming && (
+                      <motion.span
+                        animate={{ opacity: [1, 0, 1] }}
+                        transition={{ repeat: Infinity, duration: 0.7 }}
+                        className="inline-block ml-0.5 text-primary font-bold"
+                      >
+                        |
+                      </motion.span>
+                    )}
                   </div>
 
                   {/* Single Product Recommendation Card */}
@@ -345,7 +445,8 @@ const AIChatbot = () => {
                 </motion.div>
               ))}
 
-              {isProcessing && (
+              {/* Processing dots (only shown before streaming starts) */}
+              {isProcessing && messages[messages.length - 1]?.role !== "assistant" && (
                 <div className="flex flex-col gap-2">
                   <div className="bg-white/[0.03] border border-white/[0.04] px-5 py-3.5 rounded-2xl rounded-tl-md w-16">
                     <motion.div
@@ -360,6 +461,28 @@ const AIChatbot = () => {
                   </div>
                 </div>
               )}
+
+              {/* Quick Reply Chips */}
+              <AnimatePresence>
+                {quickReplies.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    className="flex flex-wrap gap-2 mr-auto"
+                  >
+                    {quickReplies.map((reply) => (
+                      <button
+                        key={reply}
+                        onClick={() => handleQuickReply(reply)}
+                        className="px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-[10px] font-bold text-primary/80 hover:bg-primary/15 hover:border-primary/40 hover:text-primary transition-all whitespace-nowrap"
+                      >
+                        {reply}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Voice Listening Overlay */}
@@ -412,7 +535,7 @@ const AIChatbot = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Ask Luxe..."
+                  placeholder="Ask Zyra..."
                   className="w-full bg-white/[0.02] border border-white/[0.06] rounded-xl py-3.5 pl-5 pr-24 text-sm focus:outline-none focus:border-primary/30 transition-all placeholder:text-white/10"
                 />
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1.5">
@@ -427,7 +550,7 @@ const AIChatbot = () => {
                   </button>
                   <button
                     onClick={() => handleSend()}
-                    disabled={!input.trim()}
+                    disabled={!input.trim() || isProcessing}
                     className="w-9 h-9 bg-primary/80 text-black rounded-lg flex items-center justify-center hover:bg-primary transition-all disabled:opacity-20 active:scale-95"
                   >
                     <Send size={15} />
@@ -443,4 +566,3 @@ const AIChatbot = () => {
 };
 
 export default AIChatbot;
-

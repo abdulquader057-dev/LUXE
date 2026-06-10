@@ -2,7 +2,6 @@ export const runtime = 'edge';
 
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { MOCK_PRODUCTS } from '@/data/products';
 
 const API_KEYS = [
   process.env.GEMINI_API_KEY || '',
@@ -108,6 +107,20 @@ export async function POST(req: Request) {
       history.shift();
     }
 
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    // Fetch active products list
+    const { data: dbCatalog } = await supabase
+      .from('products')
+      .select('id, name');
+
+    const catalogListString = dbCatalog && dbCatalog.length > 0
+      ? dbCatalog.map((p: any, idx: number) => `${idx + 1}. ${p.name} [ID: ${p.id}]`).join('\n')
+      : 'No products currently available in the catalog.';
+
     const latestMessage = messages[messages.length - 1].content;
     // 2. Sanitize user input
     const sanitizedLatestMessage = sanitizeInput(latestMessage);
@@ -119,22 +132,17 @@ export async function POST(req: Request) {
         const genAI = new GoogleGenerativeAI(API_KEYS[currentKeyIndex]);
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
+        const systemPrompt = `You are Zyra, the exclusive AI style consultant for LUXE — a premium Indian fashion brand. You are warm and speak like a luxury personal stylist. Help customers with outfit recommendations, sizing (Indian charts: XS=34, S=36, M=38, L=40, XL=42, XXL=44), styling for Indian occasions (weddings, festive, casual, office), fabric care, and shipping info (standard 3-5 days across India, express 1-2 days to Mumbai, Delhi, Bangalore, Hyderabad, Chennai, Kolkata). Never discuss competitor brands. Always end with a helpful follow-up question. Keep responses under 120 words unless asked for detail. Reply in the same language the customer uses — Hindi or English.
+
+When recommending a product from our catalog, you must append a recommendation tag at the end of your response in the format: "[RECOMMEND: <product-uuid>]". For example, if you recommend a product, append "[RECOMMEND: <uuid>]" using the exact ID. Available products in our catalog are:
+${catalogListString}
+Do not discuss or recommend competitor brands.`;
+
         const chat = model.startChat({
           history: [
             {
               role: "user",
-              parts: [{ text: `You are Zyra, the exclusive AI style consultant for LUXE — a premium Indian fashion brand. You are warm and speak like a luxury personal stylist. Help customers with outfit recommendations, sizing (Indian charts: XS=34, S=36, M=38, L=40, XL=42, XXL=44), styling for Indian occasions (weddings, festive, casual, office), fabric care, and shipping info (standard 3-5 days across India, express 1-2 days to Mumbai, Delhi, Bangalore, Hyderabad, Chennai, Kolkata). Never discuss competitor brands. Always end with a helpful follow-up question. Keep responses under 120 words unless asked for detail. Reply in the same language the customer uses — Hindi or English.
-
-When recommending a product from our catalog, you must append a recommendation tag at the end of your response in the format: "[RECOMMEND: <product-uuid>]". For example, if you recommend our Luxe Signature Linen Shirt, append "[RECOMMEND: 00000000-0000-4000-a000-000000000001]". Available products in our catalog are:
-1. Luxe Signature Short-Sleeve Linen Shirt [ID: 00000000-0000-4000-a000-000000000001]
-2. Luxe Premium Long-Sleeve Knit Polo [ID: 00000000-0000-4000-a000-000000000002]
-3. Luxe Signature Cotton Button-Up [ID: 00000000-0000-4000-a000-000000000003]
-4. Luxe Premium Crew-Neck Tee [ID: 00000000-0000-4000-a000-000000000004]
-5. Luxe Tipped Collar Polo [ID: 00000000-0000-4000-a000-000000000005]
-6. Luxe Crew-Neck Embossed Tee [ID: 00000000-0000-4000-a000-000000000006]
-7. Luxe Signature Luxury Polo [ID: 00000000-0000-4000-a000-000000000007]
-8. Luxe Classic Long-Sleeve Shirt [ID: 00000000-0000-4000-a000-000000000008]
-Do not discuss or recommend competitor brands.` }]
+              parts: [{ text: systemPrompt }]
             },
             {
               role: "model",
@@ -152,7 +160,19 @@ Do not discuss or recommend competitor brands.` }]
         const recommendRegex = /\[RECOMMEND:\s*([a-zA-Z0-9-]+)\]/g;
         const matches = [...text.matchAll(recommendRegex)];
         const recommendedIds = matches.map(m => m[1]);
-        const recommendations = MOCK_PRODUCTS.filter(p => recommendedIds.includes(p.id));
+        
+        let recommendations: any[] = [];
+        if (recommendedIds.length > 0) {
+          const { data } = await supabase
+            .from('products')
+            .select('*')
+            .in('id', recommendedIds);
+          
+          if (data) {
+            const { parseDbProduct } = await import('@/data/products');
+            recommendations = data.map(parseDbProduct);
+          }
+        }
 
         return NextResponse.json({ message: text, recommendations });
       } catch (error) {
@@ -166,23 +186,12 @@ Do not discuss or recommend competitor brands.` }]
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     
-    // Fallback Mock Response with actual catalog products if all keys fail
-    const mockResponses = [
-      {
-        message: "**LUXE AI // Neural Stylist Online**\n\nI recommend calibrating your wardrobe with the ultimate silhouette:\n* **Luxe Essential Shirt - Pure White** [RECOMMEND: luxe-linen-001] (Active Offer: Buy One Get One Free)\n\nIt features classic styling, lightweight and breathable fabric.",
-        recommendations: [MOCK_PRODUCTS[0]]
-      },
-      {
-        message: "**LUXE AI // Style DNA Recommendation**\n\nFor a softer luxury aesthetic, I recommend:\n* **Luxe Essential Shirt - Sunset Pink** [RECOMMEND: luxe-linen-002]\n\nPair it with clean neutral trousers for a high-end look.",
-        recommendations: [MOCK_PRODUCTS[1]]
-      },
-      {
-        message: "**LUXE AI // Premium Curation**\n\nI recommend our sharpest dark silhouette:\n* **Premium Short-Sleeve Polo - Carbon Black** [RECOMMEND: luxe-linen-003]\n\nPerfect for versatile everyday wear.",
-        recommendations: [MOCK_PRODUCTS[2]]
-      }
-    ];
-    const random = mockResponses[Math.floor(Math.random() * mockResponses.length)];
-    
-    return NextResponse.json(random);
+    return NextResponse.json(
+      { 
+        message: "Neural uplink degraded. Zyra's cognitive core is currently offline. Please calibrate your system credentials or try again shortly.", 
+        recommendations: [] 
+      }, 
+      { status: 503 }
+    );
   }
 }

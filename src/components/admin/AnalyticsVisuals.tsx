@@ -8,8 +8,20 @@ import {
   ArrowUpRight, Globe, Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 
-export const AnalyticsVisuals = () => {
+interface AnalyticsVisualsProps {
+  metrics: {
+    totalRevenue: number;
+    totalOrders: number;
+    totalProducts: number;
+    customerCount: number;
+  };
+}
+
+export const AnalyticsVisuals = ({ metrics }: AnalyticsVisualsProps) => {
+  const { convertPrice } = useCommerce();
+
   return (
     <div className="space-y-8">
       {/* Top Intelligence Grid */}
@@ -25,7 +37,9 @@ export const AnalyticsVisuals = () => {
             <div className="relative z-10">
                <h3 className="text-sm font-black text-white/20 uppercase tracking-[0.4em] mb-2">Revenue Growth Engine</h3>
                <div className="flex items-end gap-6 mb-12">
-                  <span className="text-6xl font-display font-black tracking-tighter text-white">$142,502</span>
+                  <span className="text-6xl font-display font-black tracking-tighter text-white">
+                    {convertPrice(metrics?.totalRevenue || 0).symbol}{convertPrice(metrics?.totalRevenue || 0).amount}
+                  </span>
                   <div className="flex items-center gap-2 text-green-500 font-bold mb-3">
                      <ArrowUpRight size={20} />
                      <span className="text-xl">+24.5%</span>

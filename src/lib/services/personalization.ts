@@ -1,5 +1,6 @@
 import { Product } from "@/types";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { supabase } from "@/lib/supabase";
+import { parseDbProduct } from "@/data/products";
 
 export interface UserPersona {
   preferredCategories: Record<string, number>;
@@ -21,9 +22,13 @@ export class PersonalizationService {
     wishlist: [],
     purchaseHistory: [],
   };
+  private dbProducts: Product[] = [];
+  private isLoaded = false;
+  public loadPromise: Promise<void> | null = null;
 
   private constructor() {
     this.loadPersona();
+    this.loadPromise = this.fetchProducts();
   }
 
   public static getInstance(): PersonalizationService {
@@ -31,6 +36,18 @@ export class PersonalizationService {
       PersonalizationService.instance = new PersonalizationService();
     }
     return PersonalizationService.instance;
+  }
+
+  private async fetchProducts() {
+    try {
+      const { data } = await supabase.from("products").select("*");
+      if (data) {
+        this.dbProducts = data.map(parseDbProduct);
+        this.isLoaded = true;
+      }
+    } catch (err) {
+      console.error("Personalization service failed to fetch products:", err);
+    }
   }
 
   private loadPersona() {
@@ -50,7 +67,9 @@ export class PersonalizationService {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.persona));
   }
 
-  public trackView(productId: string) {
+  public async trackView(productId: string) {
+    await this.ensureProductsLoaded();
+    
     // Add to recently viewed (keep last 10)
     this.persona.recentlyViewed = [
       productId,
@@ -58,7 +77,7 @@ export class PersonalizationService {
     ].slice(0, 10);
 
     // Update category preference
-    const product = MOCK_PRODUCTS.find((p) => p.id === productId);
+    const product = this.dbProducts.find((p) => p.id === productId);
     if (product) {
       this.persona.preferredCategories[product.category] =
         (this.persona.preferredCategories[product.category] || 0) + 1;
@@ -72,9 +91,15 @@ export class PersonalizationService {
     this.savePersona();
   }
 
+  public async ensureProductsLoaded() {
+    if (!this.isLoaded && this.loadPromise) {
+      await this.loadPromise;
+    }
+  }
+
   public getRecentlyViewed(): Product[] {
     return this.persona.recentlyViewed
-      .map((id) => MOCK_PRODUCTS.find((p) => p.id === id))
+      .map((id) => this.dbProducts.find((p) => p.id === id))
       .filter((p): p is Product => !!p);
   }
 
@@ -83,7 +108,7 @@ export class PersonalizationService {
       .sort((a, b) => b[1] - a[1])
       .map(([cat]) => cat);
 
-    const recommendations = MOCK_PRODUCTS.filter((p) => {
+    const recommendations = this.dbProducts.filter((p) => {
       const isPreferredCat = topCategories.includes(p.category);
       const isRecentlyViewed = this.persona.recentlyViewed.includes(p.id);
       return (isPreferredCat || p.isTrending) && !isRecentlyViewed;
@@ -91,13 +116,12 @@ export class PersonalizationService {
 
     // If we don't have enough recommendations, add some trending ones
     if (recommendations.length < 4) {
-      const trending = MOCK_PRODUCTS.filter(
+      const trending = this.dbProducts.filter(
         (p) => p.isTrending && !this.persona.recentlyViewed.includes(p.id)
       );
       const combined = [...new Set([...recommendations, ...trending])];
       if (combined.length < 4) {
-        // Safe fallback: append any products from MOCK_PRODUCTS to fill up the list
-        return [...new Set([...combined, ...MOCK_PRODUCTS])].slice(0, 8);
+        return [...new Set([...combined, ...this.dbProducts])].slice(0, 8);
       }
       return combined.slice(0, 8);
     }
@@ -106,11 +130,11 @@ export class PersonalizationService {
   }
 
   public getOutfitPairing(productId: string): Product[] {
-    const product = MOCK_PRODUCTS.find((p) => p.id === productId);
+    const product = this.dbProducts.find((p) => p.id === productId);
     if (!product) return [];
 
     // Pairings should suggest other products, excluding the current one itself
-    return MOCK_PRODUCTS.filter(
+    return this.dbProducts.filter(
       (p) => p.id !== product.id
     ).slice(0, 3);
   }

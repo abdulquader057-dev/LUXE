@@ -35,6 +35,7 @@ export interface Product {
       original?: string;
     }>;
   };
+  model_url?: string | null;
 }
 
 export interface CartItem extends Product {

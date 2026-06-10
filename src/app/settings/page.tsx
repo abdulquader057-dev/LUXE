@@ -1248,7 +1248,6 @@ function NotificationSettings() {
       setLoading(true);
       try {
         if (user) {
-          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id);
           const { data } = await supabase
             .from("orders")
             .select("*")
@@ -1267,10 +1266,37 @@ function NotificationSettings() {
     fetchLatestOrder();
   }, [user]);
 
-  const orderId = latestOrder 
-    ? `LX-ORD${latestOrder.id.slice(0, 4).toUpperCase()}` 
-    : "LX-ORD5676";
-  const status = latestOrder?.status || "processing";
+  if (loading) {
+    return (
+      <div className="space-y-12 text-left">
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-display font-light italic">Status Feedback</h2>
+          <span className="text-[8px] font-mono text-[#00ff9d]/30 bg-[#00ff9d]/5 px-3 py-1 rounded-full uppercase tracking-widest animate-pulse">Connecting...</span>
+        </div>
+        <div className="p-8 rounded-3xl bg-white/[0.01] border border-white/5 py-16 text-center">
+          <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest animate-pulse">Scanning uplink logs...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!latestOrder) {
+    return (
+      <div className="space-y-12 text-left">
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-display font-light italic">Status Feedback</h2>
+          <span className="text-[8px] font-mono text-white/20 bg-white/5 px-3 py-1 rounded-full uppercase tracking-widest">No Transmission</span>
+        </div>
+        <div className="p-8 rounded-3xl bg-white/[0.01] border border-white/5 py-16 text-center space-y-4">
+          <ShoppingBag className="mx-auto text-white/10 animate-pulse" size={32} />
+          <p className="text-xs font-mono text-white/40 uppercase tracking-widest">No active deliveries detected in LUXE OS.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const orderId = `LX-ORD${latestOrder.id.slice(0, 4).toUpperCase()}`;
+  const status = latestOrder.status || "processing";
   
   let currentStep = 0;
   if (status.toLowerCase().includes("deliver") && !status.toLowerCase().includes("out")) {
@@ -1427,23 +1453,7 @@ function SupportCenter() {
           setOrders([]);
         }
       } else {
-        // Unauthenticated Guest sees mock order logs to see how it works!
-        setOrders([
-          {
-            id: "ord-98741",
-            created_at: new Date().toISOString(),
-            total_price: 4398,
-            status: "shipped",
-            delivery_address: "102 Cognitive Way, Hyderabad, IN"
-          },
-          {
-            id: "ord-88321",
-            created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
-            total_price: 2999,
-            status: "delivered",
-            delivery_address: "102 Cognitive Way, Hyderabad, IN"
-          }
-        ]);
+        setOrders([]);
       }
       setLoading(false);
     }

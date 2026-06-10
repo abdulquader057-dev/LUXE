@@ -341,6 +341,7 @@ export function parseDbProduct(p: any): Product {
     ratings,
     reviewsCount,
     offer,
-    modelImages
+    modelImages,
+    model_url: p.model_url || null,
   };
 }

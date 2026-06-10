@@ -1,26 +1,23 @@
 import React, { Suspense } from "react";
 import ProductCatalogGrid from "@/components/shop/ProductCatalogGrid";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
-import { MOCK_PRODUCTS, parseDbProduct } from "@/data/products";
+import { parseDbProduct } from "@/data/products";
 
 // Revalidate on every request to show real-time catalog changes
 export const revalidate = 0;
 
 async function CatalogLoader() {
   const supabase = await createSupabaseServerClient();
-  let products = [];
+  let products: ReturnType<typeof parseDbProduct>[] = [];
   
   try {
     const { data } = await supabase.from("products").select("*");
     if (data && data.length > 0) {
       const parsed = data.map(parseDbProduct);
       products = parsed.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
-    } else {
-      products = MOCK_PRODUCTS.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
     }
   } catch (err) {
-    console.warn("Using offline catalog fallback inside Server Component:", err);
-    products = MOCK_PRODUCTS.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+    console.error("Error loading products inside Server Component:", err);
   }
 
   return <ProductCatalogGrid initialProducts={products} />;
