@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useAnimation } from "framer-motion";
-import { Search, ShoppingBag, User, Zap, LogIn, Globe } from "lucide-react";
+import { Search, ShoppingBag, User, Zap, LogIn, Globe, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -19,7 +19,7 @@ const Navbar = () => {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const cartControls = useAnimation();
   const { t } = useLanguage();
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const { currency, setCurrency, cartCount, toggleCart, availableCurrencies } = useCommerce();
   const [isGold, setIsGold] = useState(false);
 
@@ -166,6 +166,15 @@ const Navbar = () => {
                 </span>
               )}
             </button>
+
+            {/* Admin OS Shortcut */}
+            {isAdmin && (
+              <Link href="/admin">
+                <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center border border-primary/30 text-primary hover:bg-primary/20 transition-colors shadow-[0_0_10px_rgba(0,242,255,0.2)]">
+                  <Settings size={16} className="animate-spin-slow" />
+                </button>
+              </Link>
+            )}
 
             {/* User / Login */}
             <Link href={user ? "/profile" : "/auth"} className="flex items-center gap-2">
