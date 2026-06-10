@@ -243,13 +243,19 @@ function AccountSettings() {
     try {
       const normalizedEmail = email.trim().toLowerCase();
       
-      // 1. Update auth user metadata
-      const { error: authError } = await supabase.auth.updateUser({
+      const updatePayload: any = {
         data: {
           full_name: name,
           phone_number: phone,
         }
-      });
+      };
+      
+      if (normalizedEmail !== user.email) {
+        updatePayload.email = normalizedEmail;
+      }
+      
+      // 1. Update auth user metadata
+      const { error: authError } = await supabase.auth.updateUser(updatePayload);
       if (authError) throw authError;
 
       // 2. Update profiles table
@@ -265,12 +271,11 @@ function AccountSettings() {
         console.warn("Profile table update failed:", profileError.message);
       }
       
-      toast.success("Identity vectors updated in Supabase!");
-      
-      // Redirect and reload page to re-evaluate AuthContext states
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      if (normalizedEmail !== user.email) {
+        toast.success("Identity updated! Check your new email to confirm.");
+      } else {
+        toast.success("Identity vectors updated successfully.");
+      }
     } catch (err: any) {
       toast.error(`Update failed: ${err.message || err}`);
     }

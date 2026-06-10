@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<any | null>(null);
 
-  const isSuperAdmin = !!user && (user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() || profile?.role === "super-admin" || profile?.role === "admin");
+  const isSuperAdmin = !!user && (user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() || user.email?.toLowerCase() === STORE_ADMIN_EMAIL.toLowerCase() || profile?.role === "super-admin" || profile?.role === "admin");
   const isStoreAdmin = !!user && (user.email?.toLowerCase() === STORE_ADMIN_EMAIL.toLowerCase() || profile?.role === "store-admin");
   const isAdmin = isSuperAdmin || isStoreAdmin;
 
