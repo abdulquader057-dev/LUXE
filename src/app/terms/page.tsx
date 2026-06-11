@@ -7,7 +7,7 @@ import { ArrowLeft, MapPin, CreditCard, RotateCcw, Award, AlertCircle } from "lu
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-bg-base text-text-primary pt-32 pb-40 relative overflow-hidden">
+    <main className="min-h-screen bg-transparent text-text-primary pt-32 pb-40 relative overflow-hidden">
       {/* Background radial highlight */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-[50%] bg-[#C9A84C]/5 blur-[120px] rounded-full" />

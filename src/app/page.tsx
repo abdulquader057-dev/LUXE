@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, Sparkles, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Hero from "@/components/home/Hero";
+import SciFiWrapper from "@/components/home/SciFiWrapper";
 import ProductCard from "@/components/shop/ProductCard";
 import Image from "next/image";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
@@ -66,6 +67,9 @@ export default function Home() {
 
   return (
     <div className="w-full">
+      {/* Immersive Sci-Fi Interactive Portal (First Viewport) */}
+      <SciFiWrapper />
+
       {/* 1. ABOVE THE FOLD (100vh) - Interactive 3D Luxury Experience */}
       <Hero />
 

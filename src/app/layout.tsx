@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Sora, Orbitron, Cormorant_Garamond } from "next/font/google";
 import { cookies } from "next/headers";
+import dynamic from "next/dynamic";
 import "./globals.css";
 import "./design-system.css";
 import Sidebar from "@/components/Sidebar";
@@ -20,6 +21,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import LuxeLoadingBar from "@/components/ui/LuxeLoadingBar";
 import DynamicLayoutWidgets from "@/components/layout/DynamicLayoutWidgets";
 import Global3DWrapper from "@/components/layout/Global3DWrapper";
+import CinematicSplashWrapper from "@/components/layout/CinematicSplashWrapper";
 
 const sora = Sora({
   weight: ["300", "400", "500"],
@@ -130,6 +132,7 @@ export default async function RootLayout({
           ></iframe>
         </noscript>
         <Global3DWrapper />
+        <CinematicSplashWrapper />
         <ThemeColorLoader />
         <GtmPageViewTracker />
         <ScrollProgress />

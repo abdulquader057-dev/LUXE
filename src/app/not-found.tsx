@@ -7,7 +7,7 @@ import { ArrowLeft, Compass } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen bg-bg-base text-text-primary flex items-center justify-center p-6 relative overflow-hidden">
+    <main className="min-h-screen bg-transparent text-text-primary flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background aesthetics */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-red-500/5 blur-[120px]" />

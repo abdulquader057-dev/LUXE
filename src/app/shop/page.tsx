@@ -25,7 +25,7 @@ async function CatalogLoader() {
 
 export default function ShopPage() {
   return (
-    <main className="min-h-screen pt-24 bg-bg-base relative overflow-hidden">
+    <main className="min-h-screen pt-24 bg-transparent relative overflow-hidden">
       {/* Background Obsidian Texture & Fog Layer */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-[url(/noise.png)] opacity-[0.03] mix-blend-overlay" />
