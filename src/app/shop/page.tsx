@@ -28,7 +28,7 @@ export default function ShopPage() {
     <main className="min-h-screen pt-24 bg-bg-base relative overflow-hidden">
       {/* Background Obsidian Texture & Fog Layer */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
+        <div className="absolute inset-0 bg-[url(/noise.png)] opacity-[0.03] mix-blend-overlay" />
         <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-bg-base via-bg-base/80 to-transparent" />
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#C9A84C]/5 blur-[120px] rounded-full mix-blend-screen" />
       </div>

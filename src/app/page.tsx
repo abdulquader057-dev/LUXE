@@ -184,7 +184,7 @@ export default function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16 items-stretch">
         {/* Left column: Flyer image */}
         <div className="lg:col-span-5 relative rounded-2xl overflow-hidden border border-white/10 group min-h-[350px] lg:min-h-[420px] flex items-center justify-center bg-black/40">
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay z-10" />
+          <div className="absolute inset-0 bg-[url(/noise.png)] opacity-[0.03] mix-blend-overlay z-10" />
           <Image 
             src="/brand/linen_flyer.jpg" 
             alt="Luxe Collection Flyer" 

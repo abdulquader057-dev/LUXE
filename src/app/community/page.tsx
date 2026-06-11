@@ -15,7 +15,7 @@ export default function CommunityPage() {
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/10 blur-[150px] rounded-full" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[150px] rounded-full" />
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-overlay" />
+        <div className="absolute inset-0 bg-[url(/noise.png)] opacity-[0.02] mix-blend-overlay" />
       </div>
 
       <div className="max-w-2xl mx-auto px-6 relative z-10 text-center">

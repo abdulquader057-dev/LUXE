@@ -223,7 +223,7 @@ export default function DropsPage() {
       
       {/* Background Depth & Textures */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
+        <div className="absolute inset-0 bg-[url(/noise.png)] opacity-[0.03] mix-blend-overlay" />
         <div className="absolute top-[10%] right-[-10%] w-[60%] h-[60%] bg-primary/5 blur-[150px] rounded-full mix-blend-screen" />
       </div>
 
