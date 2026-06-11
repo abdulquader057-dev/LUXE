@@ -32,10 +32,11 @@ const nextConfig: NextConfig = {
     const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live https://www.googletagmanager.com",
+      "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' blob: data: https://images.unsplash.com https://images.pexels.com https://*.supabase.co https://*.supabase.in https://lh3.googleusercontent.com https://www.googletagmanager.com",
-      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://generativelanguage.googleapis.com https://va.vercel-scripts.com wss://*.supabase.co https://raw.githack.com https://www.googletagmanager.com",
+      "connect-src 'self' blob: https://*.supabase.co https://*.supabase.in https://generativelanguage.googleapis.com https://va.vercel-scripts.com wss://*.supabase.co https://raw.githack.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://unpkg.com https://www.googletagmanager.com",
       "frame-src 'self' https://vercel.live",
       "frame-ancestors 'self' https://vercel.com https://*.vercel.com https://*.vercel.app",
       "object-src 'none'",
