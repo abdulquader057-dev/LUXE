@@ -19,7 +19,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import LuxeLoadingBar from "@/components/ui/LuxeLoadingBar";
 import DynamicLayoutWidgets from "@/components/layout/DynamicLayoutWidgets";
-import Global3DBackground from "@/components/layout/Global3DBackground";
+import Global3DWrapper from "@/components/layout/Global3DWrapper";
 
 const sora = Sora({
   weight: ["300", "400", "500"],
@@ -129,7 +129,7 @@ export default async function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           ></iframe>
         </noscript>
-        <Global3DBackground />
+        <Global3DWrapper />
         <ThemeColorLoader />
         <GtmPageViewTracker />
         <ScrollProgress />
