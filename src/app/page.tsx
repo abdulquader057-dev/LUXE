@@ -155,7 +155,7 @@ export default function Home() {
             <h2 className="text-3xl font-orbitron font-bold text-white tracking-widest text-center">FEATURED DROPS</h2>
             <Sparkles size={20} className="text-white/70" />
           </div>
-          <CinematicShowcase />
+          <CinematicShowcase products={products} />
         </div>
 
         {/* 4. SEARCH AND FILTERS */}
