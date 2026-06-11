@@ -3,8 +3,10 @@
 
 import React, { useEffect, useRef } from "react";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
-import { Sparkles, TrendingUp, ArrowRight } from "lucide-react";
+import { Sparkles as LucideSparkles, TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { Canvas } from "@react-three/fiber";
+import { Stars, Sparkles } from "@react-three/drei";
 
 const Hero = () => {
   const mouseX = useMotionValue(0);
@@ -65,6 +67,16 @@ const Hero = () => {
       className="relative w-full min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-28 pb-16"
       style={{ perspective: "1200px" }}
     >
+      {/* 3D WebGL Background Particles */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-60">
+        <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 2]}>
+          <React.Suspense fallback={null}>
+            <Stars radius={50} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
+            <Sparkles count={200} scale={15} size={2} speed={0.4} opacity={0.3} color="#C9A84C" />
+          </React.Suspense>
+        </Canvas>
+      </div>
+
       {/* Layer 1 — background gradient (slowest, 0.02x) */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
@@ -112,7 +124,7 @@ const Hero = () => {
             border: "1px solid rgba(201,168,76,0.2)",
           }}
         >
-          <Sparkles size={12} style={{ color: "#C9A84C" }} />
+          <LucideSparkles size={12} style={{ color: "#C9A84C" }} />
           <span
             className="text-[10px] uppercase tracking-[0.25em] font-semibold"
             style={{ fontFamily: "var(--font-sora)", color: "#C9A84C" }}
@@ -203,7 +215,7 @@ const Hero = () => {
           className="flex flex-wrap gap-8 justify-center mt-16"
         >
           {[
-            { icon: <Sparkles size={14} />, label: "Premium Luxury Fabric", sub: "Breathable & Soft" },
+            { icon: <LucideSparkles size={14} />, label: "Premium Luxury Fabric", sub: "Breathable & Soft" },
             { icon: <TrendingUp size={14} />, label: "Trending Styles",      sub: "New drops weekly" },
             { icon: <span className="text-xs font-mono">📍</span>, label: "Hyderabad", sub: "Fast delivery" },
           ].map((stat, i) => (
