@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, Sparkles, MapPin, Truck, CheckCircle2, ShieldCheck, Heart, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Hero from "@/components/home/Hero";
+import CinematicHero from "@/components/home/CinematicHero";
+import CinematicShowcase from "@/components/home/CinematicShowcase";
 import ProductCard from "@/components/shop/ProductCard";
 import Image from "next/image";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
@@ -64,8 +65,9 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      <Hero />
+    <div className="w-full bg-[#030508] min-h-screen">
+      <CinematicHero />
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-12">
 
       {/* Search and Filters Section */}
       <div className="flex flex-col lg:flex-row items-center gap-6 mb-10 w-full">
@@ -173,26 +175,9 @@ export default function Home() {
         </div>
       )}
 
-      {/* RECOMMENDED PICKS Grid */}
+      {/* RECOMMENDED PICKS 3D Showcase */}
       <div className="mb-16">
-        <div className="flex items-center gap-3 mb-8">
-          <Sparkles size={20} className="text-white/70" />
-          <h2 className="text-2xl font-orbitron font-bold text-white tracking-wide">RECOMMENDED FOR YOU</h2>
-          <div className="h-[1px] flex-1 bg-gradient-to-r from-white/20 to-transparent ml-4" />
-        </div>
-
-        <div className="product-grid">
-          {products.map((product, i) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + (0.1 * i), duration: 1.2, ease: "easeOut" }}
-            >
-              <ProductCard product={product} />
-            </motion.div>
-          ))}
-        </div>
+        <CinematicShowcase products={products} />
       </div>
 
       {/* Brand Philosophy & Trust Grid (Moved to bottom of the page) */}
@@ -305,8 +290,7 @@ export default function Home() {
           })
         }}
       />
+      </div>
     </div>
   );
 }
-
-
