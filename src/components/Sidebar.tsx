@@ -44,10 +44,7 @@ const Sidebar = () => {
 
   const categoryLinks = [
     { name: t("cat.sneakers"), href: "/shop?cat=sneakers", icon: Footprints, subtitle: "Premium Kicks" },
-    { name: t("cat.accessories"), href: "/shop?cat=accessories", icon: Award, subtitle: "Elevate Your Fit" },
     { name: t("cat.watches"), href: "/shop?cat=watches", icon: Watch, subtitle: "Timeless Style" },
-    { name: t("cat.bags"), href: "/shop?cat=bags", icon: Briefcase, subtitle: "Carry the Future" },
-    { name: t("cat.brands"), href: "/shop?cat=brands", icon: Award, subtitle: "Top Rated Brands" },
   ];
 
   const bottomLinks = [
