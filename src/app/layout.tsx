@@ -19,6 +19,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import LuxeLoadingBar from "@/components/ui/LuxeLoadingBar";
 import DynamicLayoutWidgets from "@/components/layout/DynamicLayoutWidgets";
+import Global3DBackground from "@/components/layout/Global3DBackground";
 
 const sora = Sora({
   weight: ["300", "400", "500"],
@@ -70,13 +71,13 @@ export const metadata: Metadata = {
 };
 
 const THEMES: Record<string, { bg: string; card: string; text: string; accent: string }> = {
-  "Noir Gold": { bg: "#0A0A0F", card: "#12121A", text: "#F0EDE8", accent: "#C9A84C" },
-  "Champagne": { bg: "#1A1610", card: "#22200A", text: "#F5EDD5", accent: "#E8C97A" },
-  "Deep Slate": { bg: "#0D1117", card: "#111827", text: "#E8EDF5", accent: "#7B9CCC" },
-  "Burgundy Luxe": { bg: "#120810", card: "#1E0E1A", text: "#F5E0E8", accent: "#C9506A" },
-  "Royal Obsidian": { bg: "#080B14", card: "#0E1220", text: "#EDE8FF", accent: "#8B6FD4" },
-  "Cognac": { bg: "#0F0800", card: "#1F1000", text: "#FFE8CC", accent: "#D4AF37" },
-  "Midnight Rose": { bg: "#080510", card: "#100818", text: "#FFE8F0", accent: "#E8A0B0" }
+  "Noir Gold": { bg: "transparent", card: "#12121A", text: "#F0EDE8", accent: "#C9A84C" },
+  "Champagne": { bg: "transparent", card: "#22200A", text: "#F5EDD5", accent: "#E8C97A" },
+  "Deep Slate": { bg: "transparent", card: "#111827", text: "#E8EDF5", accent: "#7B9CCC" },
+  "Burgundy Luxe": { bg: "transparent", card: "#1E0E1A", text: "#F5E0E8", accent: "#C9506A" },
+  "Royal Obsidian": { bg: "transparent", card: "#0E1220", text: "#EDE8FF", accent: "#8B6FD4" },
+  "Cognac": { bg: "transparent", card: "#1F1000", text: "#FFE8CC", accent: "#D4AF37" },
+  "Midnight Rose": { bg: "transparent", card: "#100818", text: "#FFE8F0", accent: "#E8A0B0" }
 };
 
 export default async function RootLayout({
@@ -112,7 +113,7 @@ export default async function RootLayout({
           }
         ` }} />
       </head>
-      <body className="min-h-screen flex flex-col bg-bg-base text-text-primary selection:bg-primary/30 selection:text-white relative transition-colors duration-1000">
+      <body className="min-h-screen flex flex-col bg-transparent text-text-primary selection:bg-primary/30 selection:text-white relative transition-colors duration-1000">
         <script dangerouslySetInnerHTML={{ __html: `
           window.onerror = function(message, source, lineno, colno, error) {
             console.error("Global Luxe Exception caught:", message, error);
@@ -128,6 +129,7 @@ export default async function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           ></iframe>
         </noscript>
+        <Global3DBackground />
         <ThemeColorLoader />
         <GtmPageViewTracker />
         <ScrollProgress />

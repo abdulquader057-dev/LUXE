@@ -5,8 +5,6 @@ import React, { useEffect, useRef } from "react";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { Sparkles as LucideSparkles, TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Canvas } from "@react-three/fiber";
-import { Stars, Sparkles } from "@react-three/drei";
 
 const Hero = () => {
   const mouseX = useMotionValue(0);
@@ -64,19 +62,9 @@ const Hero = () => {
   return (
     <section
       ref={containerRef}
-      className="relative w-full min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-28 pb-16"
+      className="relative w-full min-h-[100vh] flex flex-col items-center justify-center overflow-hidden"
       style={{ perspective: "1200px" }}
     >
-      {/* 3D WebGL Background Particles */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-60">
-        <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 2]}>
-          <React.Suspense fallback={null}>
-            <Stars radius={50} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
-            <Sparkles count={200} scale={15} size={2} speed={0.4} opacity={0.3} color="#C9A84C" />
-          </React.Suspense>
-        </Canvas>
-      </div>
-
       {/* Layer 1 — background gradient (slowest, 0.02x) */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
