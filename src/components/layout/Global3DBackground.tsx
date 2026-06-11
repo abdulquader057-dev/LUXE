@@ -1,139 +1,155 @@
 "use client";
 
-import React, { Component, type ErrorInfo, type ReactNode, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Stars, Float, Sparkles } from "@react-three/drei";
-import * as THREE from "three";
+import React, { useEffect, useRef } from "react";
 
-// ─── Error Boundary ────────────────────────────────────────────────────────────
-class ThreeErrorBoundary extends Component<{ children: ReactNode }, { crashed: boolean }> {
-  state = { crashed: false };
-  static getDerivedStateFromError() { return { crashed: true }; }
-  componentDidCatch(err: Error, info: ErrorInfo) {
-    console.warn("[Global3D] WebGL crashed, hiding background:", err.message, info);
-  }
-  render() {
-    if (this.state.crashed) return null;
-    return this.props.children;
-  }
-}
-
-// ─── Animated Gold Torus Knot ──────────────────────────────────────────────────
-function GoldKnot() {
-  const mesh = useRef<THREE.Mesh>(null!);
-
-  useFrame(({ clock, camera }) => {
-    const t = clock.elapsedTime;
-    // Rotate the knot
-    mesh.current.rotation.y = t * 0.15;
-    mesh.current.rotation.x = t * 0.08;
-    // Cinematic camera drift — no lookAt, just smooth float
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, Math.sin(t * 0.18) * 2, 0.02);
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, Math.cos(t * 0.12) * 1, 0.02);
-  });
-
-  return (
-    <Float speed={1.5} rotationIntensity={0.8} floatIntensity={1.5}>
-      <mesh ref={mesh} scale={2.2}>
-        <torusKnotGeometry args={[1.2, 0.38, 200, 48]} />
-        <meshStandardMaterial
-          color="#C9A84C"
-          metalness={0.95}
-          roughness={0.08}
-          envMapIntensity={1.8}
-          emissive="#7A5000"
-          emissiveIntensity={0.35}
-        />
-      </mesh>
-    </Float>
-  );
-}
-
-// ─── Floating Orbs ─────────────────────────────────────────────────────────────
-function FloatingOrbs() {
-  const group = useRef<THREE.Group>(null!);
-  useFrame(({ clock }) => {
-    group.current.rotation.y = clock.elapsedTime * 0.05;
-  });
-
-  const orbs = [
-    { pos: [4, 2, -3] as [number, number, number], scale: 0.35, color: "#E8C97A" },
-    { pos: [-5, -1, -4] as [number, number, number], scale: 0.5, color: "#C9A84C" },
-    { pos: [3, -3, -5] as [number, number, number], scale: 0.28, color: "#9A7B30" },
-    { pos: [-4, 3, -6] as [number, number, number], scale: 0.4, color: "#D4AF37" },
-    { pos: [0, 4, -7] as [number, number, number], scale: 0.22, color: "#E8C97A" },
-  ];
-
-  return (
-    <group ref={group}>
-      {orbs.map((o, i) => (
-        <mesh key={i} position={o.pos} scale={o.scale}>
-          <sphereGeometry args={[1, 24, 24]} />
-          <meshStandardMaterial
-            color={o.color}
-            metalness={0.9}
-            roughness={0.1}
-            transparent
-            opacity={0.65}
-          />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-// ─── Inner Canvas Scene ────────────────────────────────────────────────────────
-function Scene() {
-  return (
-    <>
-      {/* Deep space stars */}
-      <Stars radius={80} depth={60} count={3500} factor={3.5} saturation={0} fade speed={0.8} />
-
-      {/* Gold dust / energy streams */}
-      <Sparkles count={120} scale={14} size={2.5} speed={0.3} opacity={0.25} color="#E8C97A" />
-
-      {/* Main centerpiece */}
-      <GoldKnot />
-
-      {/* Floating accent orbs */}
-      <FloatingOrbs />
-
-      {/* Lighting */}
-      <ambientLight intensity={0.25} />
-      <directionalLight position={[8, 8, 4]} intensity={1.2} color="#ffffff" />
-      <pointLight position={[-6, 4, 2]} intensity={3} color="#C9A84C" distance={25} decay={2} />
-      <pointLight position={[6, -4, -2]} intensity={2} color="#9A7B30" distance={20} decay={2} />
-    </>
-  );
-}
-
-// ─── Public Export ─────────────────────────────────────────────────────────────
 export default function Global3DBackground() {
-  // Only render on client
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => { setMounted(true); }, []);
-  if (!mounted) return null;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    let w = (canvas.width = window.innerWidth);
+    let h = (canvas.height = window.innerHeight);
+
+    const onResize = () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", onResize);
+
+    // Particles: gold stars + depth layers
+    const PARTICLES = 280;
+    type Particle = {
+      x: number; y: number;
+      vx: number; vy: number;
+      r: number; opacity: number;
+      color: string; depth: number;
+    };
+
+    const COLORS = ["#C9A84C", "#E8C97A", "#D4AF37", "#9A7B30", "#F5D781"];
+
+    const particles: Particle[] = Array.from({ length: PARTICLES }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 1.8 + 0.4,
+      opacity: Math.random() * 0.7 + 0.15,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      depth: Math.random(),
+    }));
+
+    // Large ambient orbs (3D-like volumetric blobs)
+    type Orb = { x: number; y: number; r: number; vx: number; vy: number; hue: number };
+    const ORBS: Orb[] = [
+      { x: w * 0.2, y: h * 0.3, r: 220, vx: 0.12, vy: 0.07, hue: 40 },
+      { x: w * 0.8, y: h * 0.7, r: 180, vx: -0.09, vy: -0.11, hue: 35 },
+      { x: w * 0.5, y: h * 0.5, r: 140, vx: 0.06, vy: -0.08, hue: 45 },
+    ];
+
+    let t = 0;
+
+    const draw = () => {
+      t += 0.005;
+
+      // Background
+      ctx.fillStyle = "#050508";
+      ctx.fillRect(0, 0, w, h);
+
+      // Draw ambient gold orbs (volumetric glow)
+      ORBS.forEach((orb) => {
+        orb.x += orb.vx;
+        orb.y += orb.vy;
+        if (orb.x < -orb.r || orb.x > w + orb.r) orb.vx *= -1;
+        if (orb.y < -orb.r || orb.y > h + orb.r) orb.vy *= -1;
+
+        const pulse = 0.8 + 0.2 * Math.sin(t + orb.hue);
+        const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r * pulse);
+        grad.addColorStop(0, `rgba(201,168,76,0.07)`);
+        grad.addColorStop(0.4, `rgba(201,168,76,0.04)`);
+        grad.addColorStop(1, `rgba(201,168,76,0)`);
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, orb.r * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      });
+
+      // Draw particles
+      particles.forEach((p) => {
+        // Parallax drift by depth
+        p.x += p.vx * (0.4 + p.depth * 0.8);
+        p.y += p.vy * (0.4 + p.depth * 0.8);
+
+        // Wrap around
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+
+        // Twinkle
+        const twinkle = p.opacity * (0.7 + 0.3 * Math.sin(t * 2 + p.x));
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color + Math.round(twinkle * 255).toString(16).padStart(2, "0");
+        ctx.fill();
+
+        // Glow for brighter stars
+        if (p.r > 1.2) {
+          const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+          glow.addColorStop(0, `rgba(201,168,76,${twinkle * 0.3})`);
+          glow.addColorStop(1, "rgba(201,168,76,0)");
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+          ctx.fillStyle = glow;
+          ctx.fill();
+        }
+      });
+
+      // Draw connecting lines between close particles (constellation effect)
+      for (let i = 0; i < PARTICLES; i++) {
+        for (let j = i + 1; j < PARTICLES; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 90) {
+            const alpha = (1 - dist / 90) * 0.08;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(201,168,76,${alpha})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      animId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
 
   return (
     <div
       className="fixed inset-0 pointer-events-none overflow-hidden"
-      style={{ zIndex: -1, background: "#050508" }}
+      style={{ zIndex: -1 }}
       aria-hidden="true"
     >
-      <ThreeErrorBoundary>
-        <Canvas
-          camera={{ position: [0, 0, 11], fov: 42 }}
-          dpr={[1, 1.5]}
-          gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
-          onCreated={({ gl }) => {
-            gl.setClearColor(new THREE.Color("#050508"), 1);
-          }}
-        >
-          <React.Suspense fallback={null}>
-            <Scene />
-          </React.Suspense>
-        </Canvas>
-      </ThreeErrorBoundary>
+      <canvas
+        ref={canvasRef}
+        style={{ display: "block", width: "100%", height: "100%" }}
+      />
     </div>
   );
 }
