@@ -124,7 +124,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
         id: "00000000-0000-4000-a000-000000000001",
         name: "Luxe Signature Short-Sleeve Linen Shirt",
         price: 799,
-        image: "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg",
+        image: "/brand/linen_model_front.png",
         match: "95.2%",
         color: "White",
         badge: "Highly Compatible"

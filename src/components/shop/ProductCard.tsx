@@ -24,7 +24,7 @@ interface Product {
 }
 
 function getFirstImage(images: any): string {
-  const fallback = "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg";
+  const fallback = "/brand/linen_model_front.png";
   if (!images) return fallback;
   if (Array.isArray(images)) return images[0] || fallback;
   if (typeof images === "string") {

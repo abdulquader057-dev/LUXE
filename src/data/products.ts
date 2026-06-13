@@ -9,9 +9,9 @@ export const MOCK_PRODUCTS: Product[] = [
     "currency": "INR",
     "category": "streetwear",
     "images": [
-      "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg",
-      "/brand/WhatsApp Image 2026-05-26 at 8.37.23 PM (1).jpeg",
-      "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM.jpeg"
+      "/brand/linen_model_front.png",
+      "/brand/linen_model_side.png",
+      "/brand/linen_model_back.png"
     ],
     "stock": 150,
     "isTrending": true,
@@ -22,15 +22,15 @@ export const MOCK_PRODUCTS: Product[] = [
     "discount": 0,
     "offer": "Buy One Get One Free",
     "modelImages": {
-      "front": "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg",
-      "side": "/brand/WhatsApp Image 2026-05-26 at 8.37.23 PM (1).jpeg",
-      "back": "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM.jpeg",
+      "front": "/brand/linen_model_front.png",
+      "side": "/brand/linen_model_side.png",
+      "back": "/brand/linen_model_back.png",
       "variants": {
         "White": {
-          "front": "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg",
-          "side": "/brand/WhatsApp Image 2026-05-26 at 8.37.23 PM (1).jpeg",
-          "back": "/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM.jpeg",
-          "original": "/brand/WhatsApp Image 2026-05-26 at 8.37.13 PM.jpeg"
+          "front": "/brand/linen_model_front.png",
+          "side": "/brand/linen_model_side.png",
+          "back": "/brand/linen_model_back.png",
+          "original": "/brand/linen_model_front.png"
         },
         "Desert Sand": {
           "front": "/brand/WhatsApp Image 2026-05-26 at 8.37.14 PM.jpeg",
