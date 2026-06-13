@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { Cpu, Terminal, Compass, Zap, Shield, HelpCircle, Layers, ArrowDown } from "lucide-react";
+import { Cpu, Terminal, Compass, Zap, Shield, HelpCircle, Layers, ArrowDown, Volume2, VolumeX } from "lucide-react";
 
 export default function SciFiHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,6 +24,12 @@ export default function SciFiHero() {
     "HYDERABAD HUB SYNCED // DIRECT SHIFT",
     "DESIGN MATRIX PROTOCOL-L227 ACTIVE.",
   ]);
+
+  // LUXE-FIX [1] & [2]: Track animation frame ID and mute refs
+  const animFrameIdRef = useRef<number>(0);
+  const isMutedRef = useRef<boolean>(true); // Audio defaults to muted (gain = 0)
+  const muteIconRef = useRef<HTMLDivElement>(null);
+  const unmuteIconRef = useRef<HTMLDivElement>(null);
 
   // Add a helper to push logs
   const addLog = (msg: string) => {
@@ -62,7 +68,7 @@ export default function SciFiHero() {
       transparent: true,
       opacity: 0.8,
     });
-    const torusKnotMesh = new THREE.Mesh(torusKnotGeo, torusKnotMat);
+    const torusKnotMesh: THREE.Mesh<THREE.BufferGeometry, THREE.Material> = new THREE.Mesh(torusKnotGeo, torusKnotMat);
     scene.add(torusKnotMesh);
 
     // Outer cage structure (Dodecahedron wireframe)
@@ -74,6 +80,20 @@ export default function SciFiHero() {
     });
     const outerCage = new THREE.LineSegments(new THREE.WireframeGeometry(outerDodecahedronGeo), outerCageMat);
     scene.add(outerCage);
+
+    // LUXE-FIX [6]: Volumetric glow on outer cage wireframe (scaled to 1.05x, basic material, additive blending, opacity 0.08)
+    const glowCage = outerCage.clone() as any;
+    glowCage.scale.multiplyScalar(1.05);
+    const glowCageMat = new THREE.MeshBasicMaterial({
+      color: COLORS.gold,
+      transparent: true,
+      opacity: 0.08,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      wireframe: true,
+    });
+    glowCage.material = glowCageMat;
+    scene.add(glowCage);
 
     // Swap geometries helpers
     const setGeometryShape = (shape: string) => {
@@ -182,12 +202,15 @@ export default function SciFiHero() {
       laserMat.color.lerp(targetColor, 0.05);
       particleMat.color.lerp(targetColor, 0.05);
       cyanLight.color.lerp(targetColor, 0.05);
+      glowCageMat.color.lerp(targetColor, 0.05);
 
       // Core rotation
       torusKnotMesh.rotation.y = elapsed * 0.25 * sysSpeed;
       torusKnotMesh.rotation.x = elapsed * 0.15 * sysSpeed;
       outerCage.rotation.y = -elapsed * 0.1 * sysSpeed;
       outerCage.rotation.z = elapsed * 0.05 * sysSpeed;
+      glowCage.rotation.y = outerCage.rotation.y;
+      glowCage.rotation.z = outerCage.rotation.z;
 
       // Laser scanner sweeping
       laserRing1.position.y = Math.sin(elapsed * 1.5) * 2.2;
@@ -229,7 +252,26 @@ export default function SciFiHero() {
 
       renderer.render(scene, camera);
     };
-    loop();
+
+    // LUXE-FIX [1]: IntersectionObserver on canvas element to pause loop out of view
+    let isIntersecting = true;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isIntersecting = entry.isIntersecting;
+        if (isIntersecting) {
+          if (!animFrameIdRef.current) {
+            animFrameIdRef.current = requestAnimationFrame(loop);
+          }
+        } else {
+          if (animFrameIdRef.current) {
+            cancelAnimationFrame(animFrameIdRef.current);
+            animFrameIdRef.current = 0;
+          }
+        }
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(canvas);
 
     /* ── Resize handler ── */
     const onResize = () => {
@@ -241,14 +283,18 @@ export default function SciFiHero() {
     window.addEventListener("resize", onResize);
 
     return () => {
-      cancelAnimationFrame(animId);
+      if (animFrameIdRef.current) {
+        cancelAnimationFrame(animFrameIdRef.current);
+      }
+      observer.disconnect();
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", onResize);
       renderer.dispose();
       torusKnotGeo.dispose();
       torusKnotMat.dispose();
-      outerIcosahedronGeo.dispose();
+      outerDodecahedronGeo.dispose();
       outerCageMat.dispose();
+      glowCageMat.dispose();
       laserRingGeo.dispose();
       laserMat.dispose();
       particleGeo.dispose();
@@ -262,6 +308,20 @@ export default function SciFiHero() {
     speedRef.current = spd;
     setCurrentSpeed(spd);
     addLog(`COMPILER VELOCITY MODIFIED: ${spd.toFixed(1)}x`);
+  };
+
+  // LUXE-FIX [2]: Toggle mute state and update speaker icons
+  const handleMuteToggle = () => {
+    isMutedRef.current = !isMutedRef.current;
+    if (isMutedRef.current) {
+      if (muteIconRef.current) muteIconRef.current.style.display = "block";
+      if (unmuteIconRef.current) unmuteIconRef.current.style.display = "none";
+      addLog("AUDIO OUTPUT DEACTIVATED");
+    } else {
+      if (muteIconRef.current) muteIconRef.current.style.display = "none";
+      if (unmuteIconRef.current) unmuteIconRef.current.style.display = "block";
+      addLog("AUDIO OUTPUT ACTIVATED // 440Hz SYNTH");
+    }
   };
 
   // Handler to swap color protocols
@@ -297,7 +357,9 @@ export default function SciFiHero() {
         osc.type = "sine";
         osc.frequency.setValueAtTime(440, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        // LUXE-FIX [2]: Default to gain = 0 when muted, else 0.08
+        const volume = isMutedRef.current ? 0 : 0.08;
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
         gain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.2);
@@ -327,37 +389,50 @@ export default function SciFiHero() {
         {/* Top telemetry and status stats row */}
         <div className="flex flex-col md:flex-row justify-between items-start gap-4 w-full">
           {/* Left Panel: Telemetry HUD */}
-          <div className="glass bg-[#050508]/60 backdrop-blur-lg border border-white/10 rounded-2xl p-5 shadow-[0_0_30px_rgba(0,242,255,0.08)] flex flex-col gap-3 pointer-events-auto max-w-[280px] w-full">
+          {/* LUXE-FIX [3]: Change panel background, critical numerical readouts, and secondary labels for high contrast */}
+          <div className="glass bg-[#050508]/85 backdrop-blur-lg border border-white/10 rounded-2xl p-5 shadow-[0_0_30px_rgba(0,242,255,0.08)] flex flex-col gap-3 pointer-events-auto max-w-[280px] w-full">
             <div className="flex items-center gap-2.5 pb-2.5 border-b border-white/10">
               <Cpu size={14} className="text-[#00f2ff] animate-pulse" />
               <span className="text-[10px] font-mono tracking-[0.25em] text-white font-bold">LUXE OS // NEURAL TAILOR</span>
             </div>
             
-            <div className="flex flex-col gap-1.5 font-mono text-[8.5px] text-white/50 tracking-wider">
+            <div className="flex flex-col gap-1.5 font-mono text-[8.5px] text-white/90 tracking-wider">
               <div className="flex justify-between">
                 <span>WEAVE INTEGRITY:</span>
                 <span className="text-[#00f2ff] font-bold animate-pulse">OPTIMAL // 100%</span>
               </div>
               <div className="flex justify-between">
                 <span>FABRIC CORE TEMP:</span>
-                <span className="text-white font-bold">BREATHABLE // 28°C</span>
+                <span className="text-[#00f2ff] font-bold">BREATHABLE // 28°C</span>
               </div>
               <div className="flex justify-between">
                 <span>THREAD COUNT:</span>
-                <span className="text-white">800 TC // SHIFT</span>
+                <span className="text-[#00f2ff] font-bold">800 TC // SHIFT</span>
               </div>
               <div className="flex justify-between">
                 <span>COD TRANSACTIONS:</span>
-                <span className="text-[#c9a84c] font-bold">100% SECURE</span>
+                <span className="text-[#00f2ff] font-bold">100% SECURE</span>
               </div>
             </div>
           </div>
 
           {/* Right Panel: Active Calibration logs */}
-          <div className="glass bg-[#050508]/60 backdrop-blur-lg border border-white/10 rounded-2xl p-5 shadow-[0_0_30px_rgba(0,242,255,0.08)] flex flex-col gap-3 pointer-events-auto max-w-[280px] w-full">
-            <div className="flex items-center gap-2.5 pb-2.5 border-b border-white/10">
-              <Terminal size={14} className="text-[#c9a84c]" />
-              <span className="text-[10px] font-mono tracking-[0.25em] text-white font-bold">WEAVE SYNTHESIS LOG</span>
+          {/* LUXE-FIX [3]: Change panel background to bg-[#050508]/85 */}
+          <div className="glass bg-[#050508]/85 backdrop-blur-lg border border-white/10 rounded-2xl p-5 shadow-[0_0_30px_rgba(0,242,255,0.08)] flex flex-col gap-3 pointer-events-auto max-w-[280px] w-full">
+            <div className="flex items-center justify-between pb-2.5 border-b border-white/10">
+              <div className="flex items-center gap-2.5">
+                <Terminal size={14} className="text-[#c9a84c]" />
+                <span className="text-[10px] font-mono tracking-[0.25em] text-white font-bold">WEAVE SYNTHESIS LOG</span>
+              </div>
+              {/* LUXE-FIX [2]: Audio mute/unmute toggle speaker button */}
+              <button
+                onClick={handleMuteToggle}
+                className="text-white/40 hover:text-white transition-colors cursor-pointer p-0.5 focus:outline-none flex items-center justify-center"
+                title="Toggle Sound"
+              >
+                <div ref={unmuteIconRef} style={{ display: "none" }}><Volume2 size={12} className="text-[#00f2ff]" /></div>
+                <div ref={muteIconRef} style={{ display: "block" }}><VolumeX size={12} className="text-white/40" /></div>
+              </button>
             </div>
             <div className="flex flex-col gap-1 font-mono text-[8px] text-[#00f2ff] tracking-wide text-left h-[50px] overflow-hidden leading-relaxed">
               {logMessages.map((log, index) => (
@@ -370,8 +445,9 @@ export default function SciFiHero() {
         </div>
 
         {/* Center Interactive Core Controls Panel */}
+        {/* LUXE-FIX [3]: Change panel background to bg-[#050508]/85 and adjust label/readout contrast */}
         <div className="absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center pointer-events-none select-none max-w-[320px] md:max-w-md w-full">
-          <div className="relative pointer-events-auto flex flex-col gap-6 w-full p-6 bg-[#050508]/40 border border-white/5 backdrop-blur-md rounded-[32px] shadow-2xl">
+          <div className="relative pointer-events-auto flex flex-col gap-6 w-full p-6 bg-[#050508]/85 border border-white/5 backdrop-blur-md rounded-[32px] shadow-2xl">
             {/* Glass panel border brackets */}
             <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-[#00f2ff]/60" />
             <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-[#00f2ff]/60" />
@@ -379,14 +455,14 @@ export default function SciFiHero() {
             <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-[#00f2ff]/60" />
 
             <div>
-              <span className="text-[8px] font-mono tracking-[0.45em] text-white/40 uppercase block mb-1">STYLE DECK</span>
+              <span className="text-[8px] font-mono tracking-[0.45em] text-white/90 uppercase block mb-1">STYLE DECK</span>
               <h2 className="text-3xl font-cormorant tracking-[0.1em] text-white uppercase font-bold">THE FABRIC NEXUS</h2>
               <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-[#00f2ff] to-transparent mx-auto mt-3" />
             </div>
 
             {/* Slider Control */}
             <div className="space-y-2">
-              <div className="flex justify-between font-mono text-[9px] text-white/50 tracking-wider">
+              <div className="flex justify-between font-mono text-[9px] text-white/90 tracking-wider">
                 <span>DESIGN FRAME ROTATION</span>
                 <span className="text-[#00f2ff] font-bold">{currentSpeed.toFixed(1)}x</span>
               </div>
@@ -403,7 +479,7 @@ export default function SciFiHero() {
 
             {/* Color protocols triggers */}
             <div className="space-y-2">
-              <span className="text-[9px] font-mono text-white/40 uppercase tracking-[0.3em] block text-left">DESIGN COLORWAY PROTOCOL</span>
+              <span className="text-[9px] font-mono text-white/90 uppercase tracking-[0.3em] block text-left">DESIGN COLORWAY PROTOCOL</span>
               <div className="flex gap-2">
                 {[
                   { id: "cyan", label: "ONYX_NEON" },
@@ -427,7 +503,7 @@ export default function SciFiHero() {
 
             {/* Fabric Geometry compiler */}
             <div className="space-y-2">
-              <span className="text-[9px] font-mono text-white/40 uppercase tracking-[0.3em] block text-left">ACTIVE TEXTILE FILAMENT</span>
+              <span className="text-[9px] font-mono text-white/90 uppercase tracking-[0.3em] block text-left">ACTIVE TEXTILE FILAMENT</span>
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { id: "tesseract", label: "Oversized Knit" },

@@ -104,7 +104,8 @@ const ProductCard = ({ product }: { product: Product }) => {
   return (
     <motion.div
       ref={cardRef}
-      className="product-card group relative rounded-xl h-[500px] bg-transparent"
+      // LUXE-FIX [4]: Replace rounded-xl on card with rounded-luxe
+      className="product-card group relative rounded-luxe h-[500px] bg-transparent"
       style={{
         perspective: 800,
         rotateX,
@@ -118,7 +119,8 @@ const ProductCard = ({ product }: { product: Product }) => {
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <div
-        className="w-full h-full rounded-xl overflow-hidden flex flex-col relative"
+        // LUXE-FIX [4]: Replace rounded-xl with rounded-luxe
+        className="w-full h-full rounded-luxe overflow-hidden flex flex-col relative"
         style={{
           background: "var(--surface-card, #1A1A26)",
           border: "0.5px solid var(--border-subtle, #2A2A3E)",
@@ -131,7 +133,8 @@ const ProductCard = ({ product }: { product: Product }) => {
       >
         {/* Specular highlight overlay */}
         <div
-          className="absolute inset-0 pointer-events-none z-30 rounded-xl transition-opacity duration-300"
+          // LUXE-FIX [4]: Replace rounded-xl with rounded-luxe
+          className="absolute inset-0 pointer-events-none z-30 rounded-luxe transition-opacity duration-300"
           style={{
             opacity: isHovered ? 1 : 0,
             background: `radial-gradient(circle at ${specX}% ${specY}%, rgba(201,168,76,0.08) 0%, transparent 55%)`,
@@ -139,7 +142,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         />
 
         {/* Gold border shimmer overlay */}
-        <div className="absolute inset-0 z-20 pointer-events-none rounded-xl overflow-hidden">
+        <div className="absolute inset-0 z-20 pointer-events-none rounded-luxe overflow-hidden">
           <div
             className="absolute inset-0"
             style={{
@@ -212,7 +215,8 @@ const ProductCard = ({ product }: { product: Product }) => {
           {/* Heart */}
           <button
             onClick={(e) => { e.preventDefault(); setIsLiked(!isLiked); }}
-            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 z-10 ${
+            // LUXE-FIX [4]: Replace rounded-full on button with rounded-luxe
+            className={`absolute top-3 right-3 w-8 h-8 rounded-luxe flex items-center justify-center backdrop-blur-md transition-all duration-300 z-10 ${
               isLiked
                 ? "bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#C9A84C] shadow-[0_0_15px_rgba(201,168,76,0.25)]"
                 : "bg-black/40 border border-white/10 text-white/50 hover:bg-black/60 hover:text-white"
@@ -269,7 +273,8 @@ const ProductCard = ({ product }: { product: Product }) => {
             ) : (
               <motion.button
                 onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, image: imageUrl, quantity: 1, size: "L", color: selectedColor })}
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
+                // LUXE-FIX [4]: Replace rounded-full on button with rounded-luxe
+                className="w-10 h-10 rounded-luxe flex items-center justify-center transition-all duration-300"
                 style={{
                   background: showCartBtn ? "var(--accent-gold, #C9A84C)" : "rgba(255,255,255,0.05)",
                   border: "1px solid rgba(201,168,76,0.3)",

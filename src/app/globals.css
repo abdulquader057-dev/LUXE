@@ -1,12 +1,14 @@
 @import "tailwindcss";
 @import "../styles/designTokens.css";
 
+/* LUXE-FIX [4]: Add custom border-radius token 'luxe' (12px) in Tailwind theme */
 @theme {
   --color-primary: var(--primary-color, #C9A84C);
   --color-accent: var(--accent-color, #6B1E3C);
   --font-sora: var(--font-sora);
   --font-orbitron: var(--font-orbitron);
   --font-cormorant: var(--font-cormorant);
+  --radius-luxe: 12px;
 }
 
 :root {

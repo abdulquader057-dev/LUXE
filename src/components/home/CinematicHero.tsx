@@ -122,7 +122,7 @@ function Scene() {
         />
       </mesh>
 
-      <EffectComposer disableNormalPass>
+      <EffectComposer {...({ disableNormalPass: true } as any)}>
         <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} intensity={1.5} />
         <DepthOfField focusDistance={0} focalLength={0.02} bokehScale={2} height={480} />
         <Vignette eskil={false} offset={0.1} darkness={1.1} />

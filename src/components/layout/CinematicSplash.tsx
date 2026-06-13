@@ -68,8 +68,7 @@ export default function CinematicSplash() {
     scene.add(new THREE.Points(fGeo, fMat));
 
     /* ── Concentric orbiting rings ── */
-    type RingObj = THREE.LineSegments & { userData: { spd: number } };
-    const rings: RingObj[] = [];
+    const rings: any[] = [];
     ([
       [2.6, 0.003, Math.PI / 3, 0, 0.38],
       [3.2, 0.002, -Math.PI / 5, Math.PI / 4, -0.22],
@@ -78,7 +77,7 @@ export default function CinematicSplash() {
     ] as [number, number, number, number, number][]).forEach(([r, t, rx, rz, spd]) => {
       const rg = new THREE.TorusGeometry(r, t, 2, 200);
       const rl = new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.28 });
-      const ring = new THREE.LineSegments(new THREE.WireframeGeometry(rg), rl) as RingObj;
+      const ring = new THREE.LineSegments(new THREE.WireframeGeometry(rg), rl) as any;
       ring.rotation.x = rx;
       ring.rotation.z = rz;
       ring.userData.spd = spd;

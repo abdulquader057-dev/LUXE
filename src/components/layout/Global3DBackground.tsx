@@ -33,8 +33,7 @@ export default function Global3DBackground() {
     scene.add(sphere);
 
     /* ── Orbiting concentric rings ── */
-    type RingObj = THREE.LineSegments & { userData: { spd: number } };
-    const rings: RingObj[] = [];
+    const rings: any[] = [];
     ([
       [2.8, 0.002, Math.PI / 4, 0, 0.2],
       [3.5, 0.0025, -Math.PI / 6, Math.PI / 5, -0.12],
@@ -46,7 +45,7 @@ export default function Global3DBackground() {
         transparent: true,
         opacity: 0.06,
       });
-      const ring = new THREE.LineSegments(new THREE.WireframeGeometry(ringGeo), ringMat) as RingObj;
+      const ring = new THREE.LineSegments(new THREE.WireframeGeometry(ringGeo), ringMat) as any;
       ring.rotation.x = rx;
       ring.rotation.z = rz;
       ring.userData.spd = spd;

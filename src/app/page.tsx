@@ -22,7 +22,7 @@ import { supabase } from "@/lib/supabase";
 import { parseDbProduct } from "@/data/products";
 
 export default function Home() {
-  const { cart, convertPrice, toggleCart, removeFromCart } = useCommerce();
+  const { cart, convertPrice, toggleCart, removeFromCart, cartCount, totalPrice } = useCommerce();
   const [activeFilter, setActiveFilter] = useState("ALL DESIGNS");
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<any[]>([]);
@@ -177,7 +177,8 @@ export default function Home() {
                 className="w-full bg-[#0A0A0C] border border-white/10 rounded-full py-3.5 pl-12 pr-4 text-white text-[11px] font-sora tracking-wide focus:outline-none focus:border-white/50 focus:ring-1 focus:ring-white/50 transition-all shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]"
               />
             </form>
-            <button className="absolute inset-y-1 right-1 px-4 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center border border-white/5 transition-colors">
+            {/* LUXE-FIX [4]: Replace rounded-full on button with rounded-luxe */}
+            <button className="absolute inset-y-1 right-1 px-4 bg-white/5 hover:bg-white/10 rounded-luxe flex items-center justify-center border border-white/5 transition-colors">
               <SlidersHorizontal size={14} className="text-white/70" />
               <span className="ml-2 text-[9px] font-sora tracking-widest text-white/70">FILTERS</span>
             </button>
@@ -202,66 +203,31 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 5. SHOPPING EXPERIENCE (Product Grid) */}
+        {/* 5. SHOPPING EXPERIENCE (Curation Summary Banner) */}
         {cart.length > 0 && (
-          <div className="mb-16 p-8 rounded-3xl border border-primary/20 bg-white/[0.02] backdrop-blur-md relative overflow-hidden group">
+          // LUXE-FIX [5]: Replace inline cart grid with a premium summary banner calling the sidebar drawer
+          <div className="mb-16 p-8 rounded-luxe border border-primary/20 bg-[#050508]/85 backdrop-blur-md relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-[150px] h-[150px] rounded-full bg-primary/5 blur-[50px] pointer-events-none" />
             
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-              <div className="flex items-center gap-3">
-                <ShoppingBag size={20} className="text-primary animate-pulse" />
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-luxe border border-primary/20 flex items-center justify-center text-primary bg-primary/5">
+                  <ShoppingBag size={20} className="animate-pulse" />
+                </div>
                 <div>
-                  <h2 className="text-2xl font-orbitron font-bold text-white tracking-wide uppercase">Your Active Curation</h2>
-                  <p className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em] mt-1">Ready for initialization // {cart.length} unique shapes</p>
+                  <h2 className="text-xl font-orbitron font-bold text-white tracking-wide uppercase">Your Active Curation</h2>
+                  <p className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em] mt-1">
+                    {cartCount} {cartCount === 1 ? "Item" : "Items"} in your arsenal // Total: <span className="text-[#00f2ff] font-bold">{convertPrice(totalPrice).symbol}{convertPrice(totalPrice).amount}</span>
+                  </p>
                 </div>
               </div>
               
               <button 
                 onClick={toggleCart}
-                className="text-[9px] font-mono tracking-widest text-primary border border-primary/30 hover:border-primary px-4 py-2 rounded-full uppercase transition-all bg-primary/5 hover:bg-primary/10 cursor-pointer"
+                className="px-8 py-3.5 bg-primary text-black text-[10px] font-mono font-bold tracking-widest uppercase rounded-luxe hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-[0_0_20px_rgba(201,168,76,0.3)] hover:shadow-[0_0_30px_rgba(201,168,76,0.6)]"
               >
-                Open Arsenal Sidebar
+                Review & Checkout
               </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {cart.map((item) => (
-                <div 
-                  key={`${item.id}-${item.size}-${item.color}`} 
-                  className="flex gap-4 p-4 rounded-2xl border border-white/5 bg-[#0A0A0C]/50 hover:border-white/10 transition-all group"
-                >
-                  <div className="relative w-16 h-20 rounded-xl overflow-hidden bg-white/5 flex-shrink-0">
-                    <Image src={item.image} alt={item.name} fill sizes="80px" className="w-full h-full object-cover" />
-                  </div>
-                  
-                  <div className="flex-1 flex flex-col justify-between min-w-0">
-                    <div>
-                      <h3 className="text-xs font-mono font-bold tracking-widest uppercase truncate text-white">{item.name}</h3>
-                      <div className="flex gap-2 text-[9px] font-mono text-white/40 uppercase mt-1">
-                        {item.size && <span>Size: {item.size}</span>}
-                        {item.color && (
-                          <>
-                            <span>•</span>
-                            <span>Color: {item.color}</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs font-mono text-primary font-bold">
-                        {convertPrice(item.price).symbol}{convertPrice(item.price).amount} x {item.quantity}
-                      </span>
-                      <button 
-                        onClick={() => removeFromCart(item.id, item.size, item.color)}
-                        className="text-[9px] font-mono tracking-wider text-red-500/60 hover:text-red-400 uppercase transition-all cursor-pointer"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         )}

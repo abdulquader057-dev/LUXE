@@ -115,7 +115,8 @@ export default function CartSidebar() {
                         toggleCart();
                         router.push("/shop");
                       }}
-                      className="px-6 py-3 border border-white/10 hover:border-white/30 bg-white/5 hover:bg-white/10 text-[9px] font-mono font-bold tracking-widest uppercase rounded-full transition-all cursor-pointer text-white"
+                      // LUXE-FIX [4]: Replace rounded-full on button with rounded-luxe
+                      className="px-6 py-3 border border-white/10 hover:border-white/30 bg-white/5 hover:bg-white/10 text-[9px] font-mono font-bold tracking-widest uppercase rounded-luxe transition-all cursor-pointer text-white"
                     >
                       Explore Collection
                     </button>
@@ -215,7 +216,8 @@ export default function CartSidebar() {
                     </LuxeButton>
                     <button
                       onClick={handleWhatsAppCheckout}
-                      className="w-full py-4 border border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20 text-xs font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(34,197,94,0.1)]"
+                      // LUXE-FIX [4]: Replace rounded-xl on button with rounded-luxe
+                      className="w-full py-4 border border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20 text-xs font-mono font-bold tracking-widest uppercase rounded-luxe transition-all cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(34,197,94,0.1)]"
                     >
                       <MessageCircle size={14} /> ORDER VIA WHATSAPP
                     </button>

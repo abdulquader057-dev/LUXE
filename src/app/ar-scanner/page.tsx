@@ -9,6 +9,13 @@ import { parseDbProduct } from "@/data/products";
 import { Product } from "@/types";
 import { cn } from "@/lib/utils";
 
+// LUXE-FIX [7]: Calibration constants for Standard Fit
+const DEFAULT_SCALE = 1.0;
+const DEFAULT_OFFSET_Y = 0;
+const DEFAULT_OFFSET_X = 0;
+const DEFAULT_ROTATION_Y = 0;
+const DEFAULT_PERSPECTIVE = 800;
+
 export default function ARScannerPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -17,11 +24,11 @@ export default function ARScannerPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
   // Transform controls
-  const [scale, setScale] = useState(1);
-  const [offsetY, setOffsetY] = useState(0);
-  const [offsetX, setOffsetX] = useState(0);
-  const [rotationY, setRotationY] = useState(0);
-  const [perspective, setPerspective] = useState(800);
+  const [scale, setScale] = useState(DEFAULT_SCALE);
+  const [offsetY, setOffsetY] = useState(DEFAULT_OFFSET_Y);
+  const [offsetX, setOffsetX] = useState(DEFAULT_OFFSET_X);
+  const [rotationY, setRotationY] = useState(DEFAULT_ROTATION_Y);
+  const [perspective, setPerspective] = useState(DEFAULT_PERSPECTIVE);
   const [isCapturing, setIsCapturing] = useState(false);
 
   // Load products to try on
@@ -90,12 +97,22 @@ export default function ARScannerPage() {
 
   // Reset controls
   const handleReset = () => {
-    setScale(1);
-    setOffsetY(0);
-    setOffsetX(0);
-    setRotationY(0);
-    setPerspective(800);
+    setScale(DEFAULT_SCALE);
+    setOffsetY(DEFAULT_OFFSET_Y);
+    setOffsetX(DEFAULT_OFFSET_X);
+    setRotationY(DEFAULT_ROTATION_Y);
+    setPerspective(DEFAULT_PERSPECTIVE);
     toast.success("Spatial Calibration Reset.");
+  };
+
+  // LUXE-FIX [7]: Standard Fit resets parameters and triggers calibrated toast
+  const handleStandardFit = () => {
+    setScale(DEFAULT_SCALE);
+    setOffsetY(DEFAULT_OFFSET_Y);
+    setOffsetX(DEFAULT_OFFSET_X);
+    setRotationY(DEFAULT_ROTATION_Y);
+    setPerspective(DEFAULT_PERSPECTIVE);
+    toast.success("Calibrated", { duration: 1500 });
   };
 
   // Simulate snapshot capture
@@ -157,9 +174,10 @@ export default function ARScannerPage() {
                   We need camera permission to render the interactive clothing overlay. Please grant camera access or re-enable the link.
                 </p>
               </div>
+              {/* LUXE-FIX [4]: Replace rounded-xl on button with rounded-luxe */}
               <button
                 onClick={startCamera}
-                className="px-6 py-2.5 bg-primary text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl hover:scale-105 transition-transform cursor-pointer"
+                className="px-6 py-2.5 bg-primary text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-luxe hover:scale-105 transition-transform cursor-pointer"
               >
                 Sync Device Optical Link
               </button>
@@ -258,11 +276,12 @@ export default function ARScannerPage() {
               <RotateCcw size={16} />
             </button>
 
+            {/* LUXE-FIX [4]: Replace rounded-full on button with rounded-luxe */}
             <button
               onClick={handleCapture}
               disabled={!stream || isCapturing}
               className={cn(
-                "px-8 py-3 rounded-full font-mono font-bold text-[10px] tracking-widest uppercase transition-all flex items-center gap-2 cursor-pointer border",
+                "px-8 py-3 rounded-luxe font-mono font-bold text-[10px] tracking-widest uppercase transition-all flex items-center gap-2 cursor-pointer border",
                 isCapturing 
                   ? "bg-primary border-primary text-black" 
                   : "bg-black/60 border-primary/40 text-primary hover:bg-primary hover:text-black"
@@ -319,6 +338,14 @@ export default function ARScannerPage() {
               <Sliders size={14} className="text-primary" />
               <span className="text-[10px] font-mono font-bold tracking-widest uppercase">Calibration Sliders</span>
             </div>
+
+            {/* LUXE-FIX [7]: Standard Fit button resets all sliders */}
+            <button
+              onClick={handleStandardFit}
+              className="w-full py-2.5 border border-primary/30 bg-primary/5 hover:bg-primary/15 text-primary text-[9px] font-mono font-bold tracking-widest uppercase rounded-luxe transition-all cursor-pointer text-center"
+            >
+              Standard Fit
+            </button>
 
             {/* Scale Slider */}
             <div className="space-y-2">
@@ -418,6 +445,7 @@ export default function ARScannerPage() {
                 {products.map((prod) => {
                   const isSelected = selectedProduct?.id === prod.id;
                   return (
+                    // LUXE-FIX [4]: Replace rounded-xl on card button with rounded-luxe
                     <button
                       key={prod.id}
                       onClick={() => {
@@ -425,7 +453,7 @@ export default function ARScannerPage() {
                         toast.success(`Active Garment Model: ${prod.name}`);
                       }}
                       className={cn(
-                        "aspect-[3/4] rounded-xl overflow-hidden relative border transition-all cursor-pointer",
+                        "aspect-[3/4] rounded-luxe overflow-hidden relative border transition-all cursor-pointer",
                         isSelected 
                           ? "border-primary bg-primary/10 shadow-[0_0_10px_rgba(201,168,76,0.3)]" 
                           : "border-white/5 hover:border-white/20"
