@@ -4,9 +4,10 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, ContactShadows, Environment, OrbitControls } from "@react-three/drei";
+import { EffectComposer, Bloom, DepthOfField, Vignette } from "@react-three/postprocessing";
 import { Cpu, Terminal, Sliders, X, Volume2, VolumeX } from "lucide-react";
 
-// Preload the male mannequin model for instant switching
+// Preload the mannequin GLB asset
 useGLTF.preload("/models/male_model.glb");
 
 // ── SUBCOMPONENT: FLOWING SILK BACKDROP ──
@@ -25,11 +26,11 @@ function SilkBackdrop({ color, speed }: { color: THREE.Color; speed: number }) {
       const x = pos.getX(i);
       const y = pos.getY(i);
 
-      // Organic sine/cosine wave deformation for flowing silk
+      // Multi-wave sine/cosine calculations to simulate wind-blown silk folds
       const z =
-        Math.sin(x * 0.45 + time * speed * 0.9) * 0.28 +
-        Math.cos(y * 0.35 + time * speed * 0.75) * 0.22 +
-        Math.sin((x + y) * 0.3 + time * speed * 1.1) * 0.14;
+        Math.sin(x * 0.45 + time * speed * 0.85) * 0.3 +
+        Math.cos(y * 0.35 + time * speed * 0.7) * 0.24 +
+        Math.sin((x + y) * 0.28 + time * speed * 1.05) * 0.15;
 
       pos.setZ(i, z);
     }
@@ -43,9 +44,66 @@ function SilkBackdrop({ color, speed }: { color: THREE.Color; speed: number }) {
       <planeGeometry ref={geomRef} args={[12, 8, 24, 24]} />
       <meshStandardMaterial
         color={color}
-        roughness={0.24}
-        metalness={0.15}
+        roughness={0.22}
+        metalness={0.12}
         side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
+}
+
+// ── SUBCOMPONENT: WINDING SILK RIBBON ──
+// A helical flowing fabric sash wrapping dynamically around the mannequin
+function SilkRibbon({ color, speed }: { color: THREE.Color; speed: number }) {
+  const geomRef = useRef<THREE.PlaneGeometry>(null);
+
+  useFrame((state) => {
+    const geom = geomRef.current;
+    if (!geom) return;
+
+    const pos = geom.attributes.position as THREE.BufferAttribute;
+    const count = pos.count;
+    const time = state.clock.getElapsedTime();
+
+    for (let i = 0; i < count; i++) {
+      const origX = pos.getX(i);
+      const origY = pos.getY(i); // goes from -3 to +3
+
+      // Wrap Y height into a helical angle winding around the Y-axis
+      const angle = (origY + 3) * 0.95 + time * speed * 0.65;
+
+      // Base radius of the helix, with organic fluctuation
+      const baseRadius = 1.25 + Math.sin(origY * 0.75 + time * 0.8) * 0.08;
+      
+      // Offset radius by horizontal coordinate (ribbon width)
+      const radius = baseRadius + origX;
+
+      // Ripple folds running through the flowing sash
+      const ripple = Math.sin(origY * 3.5 - time * speed * 1.5) * 0.07;
+
+      const targetX = Math.sin(angle) * (radius + ripple);
+      const targetZ = Math.cos(angle) * (radius + ripple);
+      const targetY = origY * 0.52; // Scale down height to fit mannequin bounds
+
+      pos.setX(i, targetX);
+      pos.setY(i, targetY);
+      pos.setZ(i, targetZ);
+    }
+
+    pos.needsUpdate = true;
+    geom.computeVertexNormals();
+  });
+
+  return (
+    <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
+      <planeGeometry ref={geomRef} args={[0.3, 6.0, 4, 64]} />
+      <meshStandardMaterial
+        color={color}
+        roughness={0.16}
+        metalness={0.32}
+        side={THREE.DoubleSide}
+        transparent
+        opacity={0.88}
       />
     </mesh>
   );
@@ -71,13 +129,13 @@ function DrapedCotton({ color, speed }: { color: THREE.Color; speed: number }) {
       const x = pos.getX(i);
       const y = pos.getY(i);
 
-      // Create vertical draped dress-folds using angular mathematics
+      // Create vertical draped folds
       const angle = Math.atan2(pos.getZ(i), x);
       const ripple =
         Math.sin(angle * 7 + y * 1.2 + time * speed * 1.3) * 0.07 +
         Math.cos(y * 2.2 + time * speed * 0.8) * 0.05;
 
-      const r = 1.05 + ripple - y * 0.12; // Taper at the top
+      const r = 1.05 + ripple - y * 0.12; // taper at top
       pos.setX(i, Math.cos(angle) * r);
       pos.setZ(i, Math.sin(angle) * r);
     }
@@ -91,8 +149,8 @@ function DrapedCotton({ color, speed }: { color: THREE.Color; speed: number }) {
       <cylinderGeometry ref={geomRef} args={[0.7, 1.1, 2.0, 32, 16, true]} />
       <meshStandardMaterial
         color={color}
-        roughness={0.6}
-        metalness={0.05}
+        roughness={0.62}
+        metalness={0.04}
         side={THREE.DoubleSide}
       />
     </mesh>
@@ -126,7 +184,6 @@ function LinenSphere({ color, speed }: { color: THREE.Color; speed: number }) {
       const ny = y / len;
       const nz = z / len;
 
-      // Organic linen expansion/deflation waves
       const wave =
         Math.sin(x * 1.3 + time * speed * 1.1) * 0.07 +
         Math.cos(y * 1.3 + time * speed * 0.95) * 0.07 +
@@ -146,14 +203,14 @@ function LinenSphere({ color, speed }: { color: THREE.Color; speed: number }) {
       <sphereGeometry ref={geomRef} args={[1.2, 24, 24]} />
       <meshStandardMaterial
         color={color}
-        roughness={0.78}
+        roughness={0.8}
         metalness={0.03}
       />
     </mesh>
   );
 }
 
-// ── SUBCOMPONENT: MARBLE pedestal ──
+// ── SUBCOMPONENT: MARBLE PEDESTAL ──
 function Pedestal() {
   return (
     <mesh position={[0, -2.1, 0]} receiveShadow castShadow>
@@ -204,7 +261,6 @@ function Mannequin({ speed }: { speed: number }) {
 
 // ── MAIN EXPORT COMPONENT ──
 export default function SciFiHero() {
-  // Config states
   const [currentSpeed, setCurrentSpeed] = useState<number>(1.0);
   const [activeColor, setActiveColor] = useState<string>("cyan"); // "cyan" | "gold" | "burgundy"
   const [activeGeometry, setActiveGeometry] = useState<string>("tesseract"); // "tesseract" | "spherical" | "hyperbolic"
@@ -217,7 +273,6 @@ export default function SciFiHero() {
     "DESIGN NEXUS PROTOCOL-L227 ACTIVE.",
   ]);
 
-  // Animation reveal sync
   const [introComplete, setIntroComplete] = useState(() => {
     if (typeof window !== "undefined") {
       return !!sessionStorage.getItem("luxe_intro_played");
@@ -226,7 +281,6 @@ export default function SciFiHero() {
   });
 
   useEffect(() => {
-    // Reveal HUD shortly after mount
     const timer = setTimeout(() => {
       setIntroComplete(true);
       sessionStorage.setItem("luxe_intro_played", "true");
@@ -238,27 +292,23 @@ export default function SciFiHero() {
     setLogMessages((prev) => [msg, ...prev.slice(0, 3)]);
   };
 
-  // Speed Slider Handler
   const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const spd = parseFloat(e.target.value);
     setCurrentSpeed(spd);
     addLog(`WEAVE FLOW ROTATION MODIFIED: ${spd.toFixed(1)}x`);
   };
 
-  // Mute Handler
   const handleMuteToggle = () => {
     const nextMute = !isMuted;
     setIsMuted(nextMute);
     addLog(nextMute ? "AUDIO OUTPUT DEACTIVATED" : "AUDIO OUTPUT ACTIVATED // 440Hz SYNTH");
   };
 
-  // Color selection triggers
   const selectColorProtocol = (mode: string) => {
     setActiveColor(mode);
     addLog(`PALETTE SELECTOR CONFIGURED: ${mode.toUpperCase()} EMBERS`);
   };
 
-  // Geometry Silhouette synthesis
   const synthesizeGeometry = (geom: string) => {
     setActiveGeometry(geom);
 
@@ -267,7 +317,6 @@ export default function SciFiHero() {
     if (geom === "hyperbolic") label = "Draped Cotton Silhouette";
     addLog(`GARMENT SILHOUETTE PROFILE SYNTHESIZED -> ${label.toUpperCase()}`);
 
-    // Synthesize audio feedback if unmuted
     if (!isMuted && typeof window !== "undefined" && window.AudioContext) {
       try {
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -323,28 +372,28 @@ export default function SciFiHero() {
       >
         <color attach="background" args={["#030305"]} />
         
-        {/* Soft, luxury ambient lighting */}
-        <ambientLight intensity={0.7} />
+        {/* Soft studio ambient light */}
+        <ambientLight intensity={0.65} />
         
-        {/* Crisp studio key light & fill light */}
+        {/* Directional lights for PBR textures */}
         <directionalLight
           position={[0, 4, 5]}
-          intensity={1.4}
+          intensity={1.5}
           castShadow
           shadow-mapSize-width={1024}
           shadow-mapSize-height={1024}
         />
-        <directionalLight position={[0, 2, -5]} intensity={0.35} />
+        <directionalLight position={[0, 2, -5]} intensity={0.4} />
 
-        {/* Dynamic colored point lights (act as futuristic rim reflections on the fabrics) */}
-        <pointLight position={[-3, 2, 2]} intensity={2.2} color={currentColors.lights} />
-        <pointLight position={[3, -2, 2]} intensity={1.6} color={currentColors.lights} />
+        {/* Dynamic colored lights */}
+        <pointLight position={[-3, 2, 2]} intensity={2.4} color={currentColors.lights} />
+        <pointLight position={[3, -2, 2]} intensity={1.8} color={currentColors.lights} />
 
-        {/* Studio environment maps for realistic metallic/gloss reflections */}
+        {/* High-fidelity studio environment preset */}
         <Environment preset="studio" />
 
         <group position={[0, 0.2, 0]}>
-          {/* Silk Cloth Backdrop waves continuously */}
+          {/* Flowing backdrop silk */}
           <SilkBackdrop color={currentColors.backdrop} speed={currentSpeed} />
 
           {/* Render active silhouette shape */}
@@ -352,6 +401,8 @@ export default function SciFiHero() {
             <>
               <Pedestal />
               <Mannequin speed={currentSpeed} />
+              {/* Helical Silk Ribbon wrapping dynamically around the mannequin */}
+              <SilkRibbon color={currentColors.lights} speed={currentSpeed} />
             </>
           )}
 
@@ -363,28 +414,46 @@ export default function SciFiHero() {
             <DrapedCotton color={currentColors.backdrop} speed={currentSpeed} />
           )}
 
-          {/* Smooth contact shadows underneath the pedestal */}
+          {/* Pedestal contact shadows */}
           <ContactShadows
             position={[0, -2.09, 0]}
-            opacity={0.65}
-            scale={6}
-            blur={2.2}
+            opacity={0.7}
+            scale={6.5}
+            blur={2.4}
             far={2}
           />
         </group>
 
-        {/* Orbit control allowing drag-to-rotate with auto-rotation */}
+        {/* High-Fidelity Cinematic Post-Processing Compositing */}
+        <EffectComposer>
+          {/* Depth of Field automatically locks onto target [0,0,0] (mannequin position) and softly blurs the background */}
+          <DepthOfField
+            target={[0, 0.2, 0]}
+            focalLength={0.34}
+            bokehScale={4.5}
+            height={480}
+          />
+          {/* Bloom diffuses the light highlight edges for a satiny glow */}
+          <Bloom
+            intensity={1.2}
+            luminanceThreshold={0.2}
+            luminanceSmoothing={0.85}
+          />
+          {/* Vignette creates high-end editorial border shading */}
+          <Vignette eskil={false} offset={0.14} darkness={1.1} />
+        </EffectComposer>
+
         <OrbitControls
           enableZoom={false}
           enablePan={false}
-          minPolarAngle={Math.PI / 2.5}
+          minPolarAngle={Math.PI / 2.4}
           maxPolarAngle={Math.PI / 1.8}
           autoRotate
-          autoRotateSpeed={0.3 * currentSpeed}
+          autoRotateSpeed={0.32 * currentSpeed}
         />
       </Canvas>
 
-      {/* Elegant overlay textures (Luxury, subtle noise overlay) */}
+      {/* Luxury film grain overlay texture */}
       <div className="absolute inset-0 pointer-events-none bg-[url('/noise.png')] opacity-[0.012] z-10" />
 
       {/* Floating Holographic Interface Panels (HUD) */}
