@@ -36,11 +36,11 @@ export default function CinematicSplash() {
     const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.z = 6;
 
-    const GOLD = 0xc9a84c;
+    const CYAN = 0x00f2ff;
 
-    /* ── Gold wireframe sphere ── */
+    /* ── Cyan wireframe sphere ── */
     const sGeo = new THREE.SphereGeometry(1.6, 28, 28);
-    const sLineMat = new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.75 });
+    const sLineMat = new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: 0.75 });
     const sphere = new THREE.LineSegments(new THREE.WireframeGeometry(sGeo), sLineMat);
     scene.add(sphere);
 
@@ -64,7 +64,7 @@ export default function CinematicSplash() {
 
     const fGeo = new THREE.BufferGeometry();
     fGeo.setAttribute("position", new THREE.BufferAttribute(fragP, 3));
-    const fMat = new THREE.PointsMaterial({ color: GOLD, size: 0.07, transparent: true, opacity: 0 });
+    const fMat = new THREE.PointsMaterial({ color: CYAN, size: 0.07, transparent: true, opacity: 0 });
     scene.add(new THREE.Points(fGeo, fMat));
 
     /* ── Concentric orbiting rings ── */
@@ -76,7 +76,7 @@ export default function CinematicSplash() {
       [4.4, 0.0015, -Math.PI / 3, Math.PI / 6, -0.09],
     ] as [number, number, number, number, number][]).forEach(([r, t, rx, rz, spd]) => {
       const rg = new THREE.TorusGeometry(r, t, 2, 200);
-      const rl = new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.28 });
+      const rl = new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: 0.28 });
       const ring = new THREE.LineSegments(new THREE.WireframeGeometry(rg), rl) as any;
       ring.rotation.x = rx;
       ring.rotation.z = rz;
@@ -86,7 +86,7 @@ export default function CinematicSplash() {
       rings.push(ring);
     });
 
-    /* ── Background gold dust ── */
+    /* ── Background cyan dust ── */
     const BGCT = 700;
     const bgP = new Float32Array(BGCT * 3);
     const bgV = new Float32Array(BGCT);
@@ -98,11 +98,11 @@ export default function CinematicSplash() {
     }
     const bgGeo = new THREE.BufferGeometry();
     bgGeo.setAttribute("position", new THREE.BufferAttribute(bgP, 3));
-    const bgPts = new THREE.Points(bgGeo, new THREE.PointsMaterial({ color: GOLD, size: 0.038, transparent: true, opacity: 0.45 }));
+    const bgPts = new THREE.Points(bgGeo, new THREE.PointsMaterial({ color: CYAN, size: 0.038, transparent: true, opacity: 0.45 }));
     scene.add(bgPts);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    const pl = new THREE.PointLight(GOLD, 3, 12);
+    const pl = new THREE.PointLight(CYAN, 3, 12);
     pl.position.set(0, 0, 3);
     scene.add(pl);
 
@@ -209,7 +209,7 @@ export default function CinematicSplash() {
             fontSize: "clamp(5rem, 12vw, 9rem)",
             fontWeight: 300,
             letterSpacing: "0.35em",
-            background: "linear-gradient(135deg, #8a6a1f, #c9a84c, #f5e0a0, #c9a84c)",
+            background: "linear-gradient(135deg, #0088cc, #00f2ff, #a0f9ff, #00f2ff)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
@@ -226,13 +226,13 @@ export default function CinematicSplash() {
             fontWeight: 500,
             letterSpacing: "0.55em",
             textTransform: "uppercase",
-            color: "rgba(201,168,76,0.55)",
+            color: "rgba(0, 242, 255, 0.55)",
           }}
         >
           Luxury &nbsp;·&nbsp; Redefined
         </div>
       </div>
-
+ 
       {/* Skip button */}
       <button
         onClick={exit}
@@ -244,8 +244,8 @@ export default function CinematicSplash() {
           fontSize: "0.6rem",
           letterSpacing: "0.3em",
           textTransform: "uppercase",
-          color: "rgba(201,168,76,0.5)",
-          border: "1px solid rgba(201,168,76,0.2)",
+          color: "rgba(0, 242, 255, 0.5)",
+          border: "1px solid rgba(0, 242, 255, 0.2)",
           padding: "0.55rem 1.3rem",
           cursor: "pointer",
           background: "transparent",
@@ -253,8 +253,8 @@ export default function CinematicSplash() {
           opacity: textVisible ? 1 : 0,
           transition: "opacity 0.5s, color 0.3s, border-color 0.3s",
         }}
-        onMouseEnter={e => { (e.target as HTMLButtonElement).style.color = "#c9a84c"; (e.target as HTMLButtonElement).style.borderColor = "rgba(201,168,76,0.5)"; }}
-        onMouseLeave={e => { (e.target as HTMLButtonElement).style.color = "rgba(201,168,76,0.5)"; (e.target as HTMLButtonElement).style.borderColor = "rgba(201,168,76,0.2)"; }}
+        onMouseEnter={e => { (e.target as HTMLButtonElement).style.color = "#00f2ff"; (e.target as HTMLButtonElement).style.borderColor = "rgba(0, 242, 255, 0.5)"; }}
+        onMouseLeave={e => { (e.target as HTMLButtonElement).style.color = "rgba(0, 242, 255, 0.5)"; (e.target as HTMLButtonElement).style.borderColor = "rgba(0, 242, 255, 0.2)"; }}
       >
         Enter &nbsp;→
       </button>
