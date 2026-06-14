@@ -103,18 +103,19 @@ export default function SciFiHero() {
         model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
-            mesh.material = new THREE.MeshBasicMaterial({
-              color: COLORS.cyan,
-              wireframe: true,
-              transparent: true,
-              opacity: 0.8,
-            });
+            // Use original materials with clothing textures, configuring Standard properties for realistic fabric
+            if (mesh.material) {
+              const mat = mesh.material as THREE.MeshStandardMaterial;
+              mat.roughness = 0.6;
+              mat.metalness = 0.1;
+              mat.side = THREE.DoubleSide;
+            }
           }
         });
         
-        // Scale and position the model to fit inside the hologram core
-        model.scale.setScalar(1.55);
-        model.position.set(0, -1.5, 0);
+        // Scale and position the model to center it perfectly inside the hologram core
+        model.scale.setScalar(2.2);
+        model.position.set(0.2, -1.9, 0.3);
         
         maleModel = model;
         
@@ -291,15 +292,27 @@ export default function SciFiHero() {
     hologramGroup.add(trailSystem);
 
     /* ── Lights ── */
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+    // Brighten ambient light to make textures clearly visible
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
-    const cyanLight = new THREE.PointLight(COLORS.cyan, 3, 15);
-    cyanLight.position.set(-2, 2, 3);
+    // Front directional light for clear illumination of the clothing
+    const frontLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    frontLight.position.set(0, 3, 5);
+    scene.add(frontLight);
+
+    // Back directional light for depth and rim highlight
+    const backLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    backLight.position.set(0, 1, -5);
+    scene.add(backLight);
+
+    // Dynamic colored point lights to cast futuristic glows on the clothing sides
+    const cyanLight = new THREE.PointLight(COLORS.cyan, 2.5, 12);
+    cyanLight.position.set(-3, 2, 2);
     scene.add(cyanLight);
 
-    const goldLight = new THREE.PointLight(COLORS.gold, 2.5, 15);
-    goldLight.position.set(2, -2, 3);
+    const goldLight = new THREE.PointLight(COLORS.gold, 2.0, 12);
+    goldLight.position.set(3, -2, 2);
     scene.add(goldLight);
 
     // LUXE-ANIM-2 & ANIM-3: Cinematic shatter-reform intro and lag positions initialization
@@ -458,9 +471,10 @@ export default function SciFiHero() {
         maleModel.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
-            const mat = mesh.material as THREE.MeshBasicMaterial;
+            const mat = mesh.material as THREE.MeshStandardMaterial;
             if (mat && mat.color) {
-              mat.color.lerp(targetColor, 0.05);
+              // Keep base color white so clothing textures render with natural colors
+              mat.color.setHex(0xffffff);
             }
           }
         });

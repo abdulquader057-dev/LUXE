@@ -43,6 +43,65 @@ export default function Home() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-24">
 
+        {/* 2. BRAND HUB */}
+        <div className="mb-24 p-8 md:p-12 rounded-3xl border border-white/10 bg-[#0A0A0C]/65 backdrop-blur-md relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] rounded-full bg-white/5 blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-[250px] h-[250px] rounded-full bg-[#00f2ff]/5 blur-[80px] pointer-events-none" />
+          
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-2 mb-6">
+              <span className="h-px w-8 bg-[#D4AF37]/50" />
+              <span className="text-[10px] font-sora text-[#D4AF37] uppercase tracking-[0.4em] font-bold">Brand Hub</span>
+            </div>
+            
+            <h2 className="text-3xl md:text-5xl font-cormorant font-light tracking-wide text-white mb-6 leading-snug">
+              Everyday comfort crafted with <span className="italic text-white/60">premium luxury-inspired</span> soft fabrics.
+            </h2>
+            
+            <p className="text-sm font-sora text-white/50 tracking-wider leading-relaxed mb-10 max-w-2xl">
+              We have been providing these premium collections directly to our WhatsApp community, and now we are elevating your shopping experience. 100% trusted, minimal pricing, with zero hidden or extra charges.
+            </p>
+
+            <div className="space-y-6 pt-8 border-t border-white/5">
+              <span className="text-[9px] font-mono text-[#D4AF37] uppercase tracking-[0.2em] block font-bold">{"// Collection DNA & Trust Indicators"}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
+                    <span className="text-[#D4AF37] select-none text-base">✨</span>
+                    <span className="font-sora">Premium luxury soft fabric collection</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
+                    <span className="text-[#D4AF37] select-none text-base">📍</span>
+                    <span className="font-sora">Hafiz Baba Nagar, Hyderabad</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
+                    <span className="text-[#D4AF37] select-none text-base">🚚</span>
+                    <span className="font-sora">Cash on Delivery available</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
+                    <span className="text-[#D4AF37] select-none text-base">✨</span>
+                    <span className="font-sora">100% trusted & reliable</span>
+                  </div>
+                </div>
+                <div className="space-y-4 md:border-l md:border-white/5 md:pl-8">
+                  <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
+                    <span className="text-[#D4AF37] select-none text-base">▫️</span>
+                    <span className="font-sora">Everyday Essential</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
+                    <span className="text-[#D4AF37] select-none text-base">▫️</span>
+                    <span className="font-sora">Premium</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
+                    <span className="text-[#D4AF37] select-none text-base">▫️</span>
+                    <span className="font-sora">Luxury Inspired</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* 3. FEATURED COLLECTION */}
         <div className="mb-24">
            <div className="flex items-center justify-center gap-3 mb-10">
