@@ -554,13 +554,13 @@ button, a, .clickable { transition: transform 0.4s var(--ease-cinematic), opacit
 ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
 
-/* LUXE-FIX D: Custom sci-fi slider styling */
+/* LUXE-FIX D: Custom luxury slider styling */
 .luxe-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
   height: 2px;
-  background: linear-gradient(to right, #00f2ff, #003344) !important;
+  background: linear-gradient(to right, #C9A84C, #3D3014) !important;
   outline: none;
   transition: box-shadow 0.2s ease-in-out;
 }
@@ -577,16 +577,16 @@ button, a, .clickable { transition: transform 0.4s var(--ease-cinematic), opacit
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #00f2ff !important;
+  background: #C9A84C !important;
   cursor: pointer;
-  box-shadow: 0 0 8px #00f2ff;
+  box-shadow: 0 0 8px #C9A84C;
   margin-top: -6px; /* center thumb vertically */
   transition: transform 0.1s ease, box-shadow 0.2s ease-in-out;
 }
 
 .luxe-slider::-webkit-slider-thumb:hover,
 .luxe-slider:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 12px #00f2ff;
+  box-shadow: 0 0 12px #C9A84C;
   transform: scale(1.15);
 }
 
@@ -601,14 +601,14 @@ button, a, .clickable { transition: transform 0.4s var(--ease-cinematic), opacit
   height: 14px;
   border: none;
   border-radius: 50%;
-  background: #00f2ff !important;
+  background: #C9A84C !important;
   cursor: pointer;
-  box-shadow: 0 0 8px #00f2ff;
+  box-shadow: 0 0 8px #C9A84C;
   transition: transform 0.1s ease, box-shadow 0.2s ease-in-out;
 }
 
 .luxe-slider::-moz-range-thumb:hover,
 .luxe-slider:focus::-moz-range-thumb {
-  box-shadow: 0 0 12px #00f2ff;
+  box-shadow: 0 0 12px #C9A84C;
   transform: scale(1.15);
 }
