@@ -1,26 +1,22 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import OpeningAnimation from "@/components/OpeningAnimation";
 
 export default function CinematicRevealWrapper({ children }: { children: React.ReactNode }) {
   const [revealActive, setRevealActive] = useState(false);
   const [openingDone, setOpeningDone] = useState(false);
 
-  const handleStartReveal = useCallback(() => {
-    setRevealActive(true);
-  }, []);
-
-  const handleComplete = useCallback(() => {
+  const handleComplete = () => {
     setRevealActive(true);
     setOpeningDone(true);
-  }, []);
+  };
 
   return (
     <>
       {!openingDone && (
         <OpeningAnimation
-          onStartReveal={handleStartReveal}
+          onStartReveal={() => setRevealActive(true)}
           onComplete={handleComplete}
         />
       )}

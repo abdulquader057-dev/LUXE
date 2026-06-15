@@ -84,31 +84,20 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
   const glassCanvasRef = useRef<HTMLCanvasElement>(null);
   const isReducedMotion = useReducedMotion();
 
-  const onStartRevealRef = useRef(onStartReveal);
-  const onCompleteRef = useRef(onComplete);
-
-  useEffect(() => {
-    onStartRevealRef.current = onStartReveal;
-  }, [onStartReveal]);
-
-  useEffect(() => {
-    onCompleteRef.current = onComplete;
-  }, [onComplete]);
-
   // Handle skip if reduced motion is requested
   useEffect(() => {
     console.log("[Luxe] OpeningAnimation mounted. prefers-reduced-motion status:", isReducedMotion);
     if (isReducedMotion) {
       console.log("[Luxe] Skipping opening animation to respect user accessibility preferences.");
-      if (onStartRevealRef.current) onStartRevealRef.current();
+      if (onStartReveal) onStartReveal();
       setTimeout(() => {
-        if (onCompleteRef.current) onCompleteRef.current();
+        onComplete();
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("open-country-modal"));
         }
       }, 300);
     }
-  }, [isReducedMotion]);
+  }, [isReducedMotion, onStartReveal, onComplete]);
 
   // 1. Procedural static fabric weave background drawing
   useEffect(() => {
@@ -339,25 +328,7 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
         0.5
       );
 
-      // Fade in WebGL canvas when shards start to show
-      tl.to(
-        glassCanvasRef.current,
-        { opacity: 1, duration: 0.5, ease: "power2.out" },
-        2.0
-      );
-
-      // Fade in lighting behind shards
-      tl.to(
-        letterLights,
-        {
-          intensity: 4.5,
-          duration: 0.4,
-          ease: "power2.out",
-        },
-        2.0
-      );
-
-      // Step 4: Stagger HTML text rise with blur-in and spacing expansion (triggered first)
+      // Step 3: Stagger HTML text rise with blur-in and spacing expansion (triggered first)
       tl.to(
         ".opening-brand span",
         {
@@ -408,81 +379,111 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
         0.8
       );
 
-      // Fade out HTML text overlay as shards take over at 2.0s
+      // Step 4: Fade out HTML text overlay completely before showing 3D shards (from t=2.2s to t=2.7s)
       tl.to(
         [".opening-brand", ".opening-shimmer-line", ".opening-taglines"],
         {
           opacity: 0,
           scale: 0.96,
-          duration: 0.8,
+          duration: 0.5,
           ease: "power2.inOut",
         },
-        2.0
+        2.2
       );
 
-      // Step 5: Explode/Disperse glass shards outward right as text logo finishes entrance
+      // Step 5: Fade in WebGL canvas exactly as HTML logo completes fade-out (at t=2.7s)
       tl.to(
-        {},
-        {
-          duration: 0.1,
-          onComplete: () => {
-            shards.forEach((shard, i) => {
-              const target = targetPoints[i];
-              gsap.to(shard.position, {
-                x: target.x + (Math.random() - 0.5) * 4.0,
-                y: target.y + (Math.random() - 0.5) * 4.0,
-                z: target.z + 6.0 + Math.random() * 4.0, // Float forward past camera
-                duration: 2.2,
-                ease: "power2.out",
-              });
-              gsap.to(shard.rotation, {
-                x: (Math.random() - 0.5) * Math.PI,
-                y: (Math.random() - 0.5) * Math.PI,
-                z: (Math.random() - 0.5) * Math.PI,
-                duration: 2.2,
-                ease: "power2.out",
-              });
-              const currentMat = shard.material as THREE.MeshPhysicalMaterial;
-              gsap.to(currentMat, {
-                opacity: 0,
-                duration: 1.8,
-                ease: "power2.out",
-              });
-            });
-            gsap.to(letterLights, {
-              intensity: 0,
-              duration: 1.8,
-              ease: "power2.out",
-            });
-          },
-        },
-        2.4
+        glassCanvasRef.current,
+        { opacity: 1, duration: 0.1, ease: "none" },
+        2.7
       );
 
-      // Step 6: Soft cinematic fade-out of the entire overlay to reveal home page
+      // Fade in lighting behind shards instantly
+      tl.to(
+        letterLights,
+        {
+          intensity: 4.5,
+          duration: 0.1,
+          ease: "none",
+        },
+        2.7
+      );
+
+      // Ensure glass material starts fully opaque at t=2.7s
+      tl.set(glassMat, { opacity: 0.9 }, 2.7);
+
+      // Step 6: Shatter / Explode glass shards immediately at t=2.8s (no static pause/double show)
+      shards.forEach((shard, i) => {
+        const target = targetPoints[i];
+        
+        tl.to(
+          shard.position,
+          {
+            x: target.x + (Math.random() - 0.5) * 4.0,
+            y: target.y + (Math.random() - 0.5) * 4.0,
+            z: target.z + 6.0 + Math.random() * 4.0,
+            duration: 2.0,
+            ease: "power2.out",
+          },
+          2.8
+        );
+        
+        tl.to(
+          shard.rotation,
+          {
+            x: (Math.random() - 0.5) * Math.PI,
+            y: (Math.random() - 0.5) * Math.PI,
+            z: (Math.random() - 0.5) * Math.PI,
+            duration: 2.0,
+            ease: "power2.out",
+          },
+          2.8
+        );
+      });
+
+      // Fade out material and point lights during shatter
+      tl.to(
+        glassMat,
+        {
+          opacity: 0,
+          duration: 1.8,
+          ease: "power2.out",
+        },
+        2.8
+      );
+
+      tl.to(
+        letterLights,
+        {
+          intensity: 0,
+          duration: 1.8,
+          ease: "power2.out",
+        },
+        2.8
+      );
+
+      // Step 7: Fade out the entire overlay to reveal the home page (starting at t=3.2s)
       tl.to(
         overlayRef.current,
         {
           opacity: 0,
           scale: 1.04,
           pointerEvents: "none",
-          duration: 2.2,
+          duration: 1.6,
           ease: "power2.out",
           onStart: () => {
-            if (onStartRevealRef.current) {
-              onStartRevealRef.current();
+            if (onStartReveal) {
+              onStartReveal();
             }
           },
           onComplete: () => {
-            if (onCompleteRef.current) {
-              onCompleteRef.current();
-            }
+            onComplete();
             if (typeof window !== "undefined") {
               window.dispatchEvent(new CustomEvent("open-country-modal"));
             }
           },
         },
-        2.4
+        3.2
       );
     });
 
@@ -515,7 +516,7 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       });
       ctx.revert();
     };
-  }, [isReducedMotion]);
+  }, [isReducedMotion, onComplete]);
 
   if (isReducedMotion) return null;
 
