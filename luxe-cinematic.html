@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUXE — Luxury Redefined</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#c9a84c;--gold-light:#f5e0a0;--gold-dark:#8a6a1f;
+  --bg:#080806;--text:#f0ede8;--muted:rgba(240,237,232,0.45);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;overflow-x:hidden}
+
+/* ── SPLASH ──────────────────────────────── */
+#splash{
+  position:fixed;inset:0;z-index:9999;background:#080806;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+#splash canvas{position:absolute;inset:0;width:100%;height:100%}
+#splash-content{
+  position:relative;z-index:10;text-align:center;
+  opacity:0;transform:translateY(20px);pointer-events:none;
+}
+#splash-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(5rem,12vw,9rem);font-weight:300;letter-spacing:.35em;
+  background:linear-gradient(135deg,#8a6a1f,#c9a84c,#f5e0a0,#c9a84c);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;margin-bottom:.8rem;text-shadow:none;
+}
+#splash-tagline{
+  font-size:.6rem;font-weight:500;letter-spacing:.55em;
+  text-transform:uppercase;color:rgba(201,168,76,.55);
+}
+#splash-skip{
+  position:absolute;bottom:2.5rem;right:2.5rem;
+  font-family:'Montserrat',sans-serif;font-size:.6rem;
+  letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(201,168,76,.45);border:1px solid rgba(201,168,76,.2);
+  padding:.55rem 1.3rem;cursor:pointer;background:transparent;
+  border-radius:2px;opacity:0;transition:all .3s;
+}
+#splash-skip:hover{color:var(--gold);border-color:rgba(201,168,76,.5);background:rgba(201,168,76,.05)}
+
+/* ── TICKER ──────────────────────────────── */
+.ticker-bar{
+  background:#0c0c0a;border-bottom:1px solid rgba(201,168,76,.1);
+  padding:.42rem 0;overflow:hidden;white-space:nowrap;position:fixed;
+  top:0;left:0;right:0;z-index:910;
+}
+.ticker-wrap{display:flex}
+.ticker-content{
+  display:inline-block;animation:tick 35s linear infinite;
+  font-size:.55rem;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(201,168,76,.65);font-family:'Montserrat',sans-serif;font-weight:500;
+}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-content span{margin:0 2rem}
+.ticker-content span::before{content:'◆';margin-right:.7rem;opacity:.35}
+
+/* ── NAVBAR ──────────────────────────────── */
+#navbar{
+  position:fixed;left:0;right:0;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.2rem 4rem;transition:background .4s,backdrop-filter .4s;
+  top:28px;
+}
+#navbar.scrolled{
+  background:rgba(8,8,6,.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(201,168,76,.08);
+}
+.nav-logo{
+  font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;
+  letter-spacing:.2em;background:linear-gradient(135deg,#c9a84c,#f5e0a0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;text-decoration:none;
+}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{
+  font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(240,237,232,.55);text-decoration:none;position:relative;transition:color .3s;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;
+  width:0;height:1px;background:var(--gold);transition:width .3s;
+}
+.nav-links a:hover{color:var(--gold)}
+.nav-links a:hover::after{width:100%}
+
+/* ── HERO ──────────────────────────────── */
+#hero{min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero-content{position:relative;z-index:10;text-align:center;padding:0 1.5rem;max-width:820px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  border:1px solid rgba(201,168,76,.22);background:rgba(201,168,76,.07);
+  padding:.42rem 1.2rem;border-radius:100px;font-size:.58rem;
+  letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:2rem;
+}
+.hero-badge::before{content:'✦';opacity:.6}
+.hero-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(3.8rem,9.5vw,8rem);font-weight:300;
+  line-height:.92;margin-bottom:1.5rem;letter-spacing:-.01em;
+}
+.hero-title .line1{display:block;color:#f0ede8}
+.hero-title .line2{
+  display:block;font-style:italic;
+  background:linear-gradient(135deg,#8a6a1f,#c9a84c,#f5e0a0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{
+  font-size:.78rem;color:var(--muted);line-height:1.85;
+  max-width:430px;margin:0 auto 2.5rem;font-weight:300;letter-spacing:.02em;
+}
+.hero-btns{display:flex;gap:1rem;justify-content:center;margin-bottom:3.5rem;flex-wrap:wrap}
+.btn-primary{
+  font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  padding:.88rem 2rem;background:linear-gradient(135deg,#8a6a1f,#c9a84c);
+  color:#080806;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;
+  font-weight:700;text-decoration:none;border-radius:3px;transition:all .3s;
+  box-shadow:0 4px 20px rgba(201,168,76,.22);display:inline-block;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(201,168,76,.35)}
+.btn-ghost{
+  font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  padding:.88rem 2rem;background:transparent;color:var(--gold);
+  border:1px solid rgba(201,168,76,.35);cursor:pointer;
+  font-family:'Montserrat',sans-serif;font-weight:500;
+  text-decoration:none;border-radius:3px;transition:all .3s;display:inline-block;
+}
+.btn-ghost:hover{background:rgba(201,168,76,.07);border-color:var(--gold);transform:translateY(-2px)}
+.hero-stats{
+  display:flex;gap:2rem;justify-content:center;
+  font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(240,237,232,.3);flex-wrap:wrap;
+}
+.hero-stats span{position:relative}
+.hero-stats span+span::before{content:'·';position:absolute;left:-1.1rem;color:rgba(201,168,76,.3)}
+.scroll-ind{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  z-index:10;animation:scrollB 2.2s ease-in-out infinite;
+}
+.scroll-ind span{font-size:.42rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(201,168,76,.35)}
+.scroll-line{width:1px;height:38px;background:linear-gradient(to bottom,rgba(201,168,76,.4),transparent)}
+@keyframes scrollB{
+  0%,100%{transform:translateX(-50%) translateY(0);opacity:.6}
+  50%{transform:translateX(-50%) translateY(6px);opacity:1}
+}
+
+/* ── SECTION LABEL ──────────────────────── */
+.section-label{
+  font-size:.52rem;letter-spacing:.4em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.2rem;display:flex;align-items:center;gap:1rem;
+}
+.section-label::before{content:'';display:block;width:28px;height:1px;background:var(--gold);opacity:.5}
+
+/* ── DROPS ──────────────────────────────── */
+#drops{padding:8rem 4rem}
+.drops-header{text-align:center;margin-bottom:4rem}
+.drops-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.5rem,5vw,4.2rem);font-weight:300;color:var(--text);
+}
+.drops-title em{
+  font-style:italic;
+  background:linear-gradient(135deg,#c9a84c,#f5e0a0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.products-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1.5rem;max-width:1400px;margin:0 auto;
+}
+.product-card{
+  background:#0e0e0c;border:1px solid rgba(201,168,76,.06);
+  border-radius:4px;overflow:hidden;cursor:pointer;
+  transition:transform .4s cubic-bezier(.25,1,.35,1),box-shadow .4s,border-color .4s;
+  position:relative;
+}
+.product-card:hover{
+  transform:translateY(-8px);border-color:rgba(201,168,76,.28);
+  box-shadow:0 20px 40px rgba(0,0,0,.45),0 0 50px rgba(201,168,76,.06);
+}
+.card-visual{
+  aspect-ratio:3/4;display:flex;align-items:center;
+  justify-content:center;position:relative;overflow:hidden;
+}
+.cv1{background:linear-gradient(135deg,#0a0a18,#12102a)}
+.cv2{background:linear-gradient(135deg,#0f0a14,#1e1028)}
+.cv3{background:linear-gradient(135deg,#0a1208,#101e0c)}
+.cv4{background:linear-gradient(135deg,#100a08,#1e100c)}
+.card-orb{
+  width:130px;height:130px;border-radius:50%;
+  opacity:.2;filter:blur(35px);transition:all .4s;
+}
+.cv1 .card-orb{background:radial-gradient(#5560cc,transparent)}
+.cv2 .card-orb{background:radial-gradient(#8844cc,transparent)}
+.cv3 .card-orb{background:radial-gradient(#44aa66,transparent)}
+.cv4 .card-orb{background:radial-gradient(#cc7744,transparent)}
+.product-card:hover .card-orb{opacity:.4;transform:scale(1.4)}
+.card-badge{
+  position:absolute;top:1rem;left:1rem;font-size:.48rem;letter-spacing:.2em;
+  text-transform:uppercase;background:rgba(201,168,76,.12);
+  border:1px solid rgba(201,168,76,.3);color:var(--gold);
+  padding:.22rem .65rem;border-radius:2px;
+}
+.card-info{padding:1.3rem;border-top:1px solid rgba(201,168,76,.06)}
+.card-cat{font-size:.48rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(201,168,76,.45);margin-bottom:.35rem}
+.card-name{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:400;color:var(--gold);margin-bottom:.55rem}
+.card-price{font-size:.78rem;font-weight:600;color:var(--text);letter-spacing:.05em}
+
+/* ── PILLARS ──────────────────────────────── */
+#pillars{
+  border-top:1px solid rgba(201,168,76,.1);border-bottom:1px solid rgba(201,168,76,.1);
+  background:linear-gradient(180deg,rgba(201,168,76,.025) 0%,transparent 100%);
+}
+.pillars-inner{display:grid;grid-template-columns:repeat(3,1fr);max-width:1200px;margin:0 auto}
+.pillar{padding:4.5rem 3rem;text-align:center;position:relative}
+.pillar+.pillar::before{
+  content:'';position:absolute;left:0;top:18%;bottom:18%;
+  width:1px;background:linear-gradient(to bottom,transparent,rgba(201,168,76,.2),transparent);
+}
+.pillar-icon{font-size:2rem;margin-bottom:1rem;display:block;opacity:.75}
+.pillar-title{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:400;color:var(--gold);margin-bottom:.7rem}
+.pillar-desc{font-size:.68rem;line-height:1.85;color:var(--muted);max-width:220px;margin:0 auto}
+
+/* ── ABOUT ──────────────────────────────── */
+#about{padding:8rem 4rem;max-width:1400px;margin:0 auto}
+.about-headline{
+  font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,4.5vw,3.5rem);
+  font-weight:300;line-height:1.3;max-width:680px;margin-bottom:4rem;
+}
+.about-headline em{
+  font-style:italic;background:linear-gradient(135deg,#c9a84c,#f5e0a0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.about-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.about-card{
+  background:rgba(201,168,76,.03);border:1px solid rgba(201,168,76,.08);
+  border-radius:4px;padding:2.5rem;position:relative;overflow:hidden;
+  transition:transform .4s,border-color .4s,background .4s;
+}
+.about-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,168,76,.4),transparent);
+}
+.about-card:hover{transform:translateY(-4px);border-color:rgba(201,168,76,.16);background:rgba(201,168,76,.05)}
+.about-num{font-family:'Cormorant Garamond',serif;font-size:4.5rem;font-weight:300;color:rgba(201,168,76,.1);line-height:1;margin-bottom:1rem}
+.about-card-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--text);margin-bottom:.7rem}
+.about-card-desc{font-size:.68rem;line-height:1.9;color:var(--muted)}
+
+/* ── MANIFESTO ──────────────────────────── */
+#manifesto{
+  padding:9rem 4rem;text-align:center;
+  background:linear-gradient(180deg,transparent,rgba(201,168,76,.03),transparent);
+}
+.manifesto-quote{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.8rem,4vw,3.2rem);font-style:italic;font-weight:300;
+  line-height:1.65;max-width:920px;margin:0 auto 2rem;color:var(--text);
+}
+.manifesto-quote .gw{
+  background:linear-gradient(135deg,#8a6a1f,#c9a84c,#f5e0a0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.manifesto-attr{font-size:.52rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(201,168,76,.32)}
+
+/* ── FOOTER ──────────────────────────────── */
+footer{border-top:1px solid rgba(201,168,76,.1);padding:4rem;background:#050504}
+.footer-main{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3rem;flex-wrap:wrap;gap:2rem}
+.footer-brand{
+  font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:300;letter-spacing:.2em;
+  background:linear-gradient(135deg,#c9a84c,#f5e0a0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.footer-tagline{font-size:.55rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(201,168,76,.3);margin-top:.4rem}
+.footer-links{display:flex;gap:2rem;list-style:none}
+.footer-links a{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s}
+.footer-links a:hover{color:var(--gold)}
+.footer-bottom{
+  display:flex;justify-content:space-between;padding-top:2rem;
+  border-top:1px solid rgba(255,255,255,.04);font-size:.52rem;
+  letter-spacing:.2em;text-transform:uppercase;color:rgba(240,237,232,.18);flex-wrap:wrap;gap:1rem;
+}
+
+/* ── REVEAL ──────────────────────────────── */
+.reveal{opacity:0;transform:translateY(28px)}
+
+/* ── RESPONSIVE ──────────────────────────── */
+@media(max-width:900px){
+  #navbar{padding:1rem 1.5rem}
+  .nav-links{display:none}
+  #drops,#about,#manifesto{padding:5rem 1.5rem}
+  .products-grid{grid-template-columns:repeat(2,1fr)}
+  .pillars-inner{grid-template-columns:1fr}
+  .pillar+.pillar::before{display:none}
+  .about-cards{grid-template-columns:1fr}
+  footer{padding:3rem 1.5rem}
+  .footer-main{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── SPLASH ─────────────────────────────────────────── -->
+<div id="splash">
+  <canvas id="splash-canvas"></canvas>
+  <div id="splash-content">
+    <div id="splash-logo">LUXE</div>
+    <div id="splash-tagline">Luxury &nbsp;·&nbsp; Redefined</div>
+  </div>
+  <button id="splash-skip" onclick="exitSplash()">Skip →</button>
+</div>
+
+<!-- ─── HOMEPAGE ──────────────────────────────────────── -->
+<div id="homepage" style="opacity:0;pointer-events:none">
+
+  <!-- Ticker -->
+  <div class="ticker-bar">
+    <div class="ticker-wrap">
+      <div class="ticker-content">
+        <span>Free Shipping Across India</span>
+        <span>Cash on Delivery Available</span>
+        <span>100% Secure Transactions</span>
+        <span>7-Day No-Questions Return Policy</span>
+        <span>Luxury Soft Cotton Collection</span>
+        <span>Premium Breathable Fabric</span>
+        <span>Hyderabad's Finest Fashion</span>
+        <span>Free Shipping Across India</span>
+        <span>Cash on Delivery Available</span>
+        <span>100% Secure Transactions</span>
+        <span>7-Day No-Questions Return Policy</span>
+        <span>Luxury Soft Cotton Collection</span>
+        <span>Premium Breathable Fabric</span>
+        <span>Hyderabad's Finest Fashion</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo">LUXE</a>
+    <ul class="nav-links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#drops">Drops</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#manifesto">Manifesto</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── SECTION 1: HERO ── -->
+  <section id="hero">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-badge">Premium LUXE Collection — Latest Drop</div>
+      <h1 class="hero-title">
+        <span class="line1">Luxury</span>
+        <span class="line2">Redefined</span>
+      </h1>
+      <p class="hero-sub">
+        Affordable luxury fashion crafted from premium breathable fabrics.<br>
+        Designed for the bold generation of Hyderabad.
+      </p>
+      <div class="hero-btns">
+        <a href="#drops" class="btn-primary">Shop Collection →</a>
+        <a href="#drops" class="btn-ghost">Upcoming Drops</a>
+      </div>
+      <div class="hero-stats">
+        <span>100% Premium Fabric</span>
+        <span>7-Day Returns</span>
+        <span>Pan India Delivery</span>
+      </div>
+    </div>
+    <div class="scroll-ind">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ── SECTION 2: DROPS GRID ── -->
+  <section id="drops">
+    <div class="drops-header reveal">
+      <div class="section-label" style="justify-content:center">New Arrivals</div>
+      <h2 class="drops-title">Current <em>Drops</em></h2>
+    </div>
+    <div class="products-grid">
+      <div class="product-card reveal">
+        <div class="card-visual cv1"><div class="card-orb"></div><div class="card-badge">New</div></div>
+        <div class="card-info"><div class="card-cat">Essentials</div><div class="card-name">Noir Oversized</div><div class="card-price">₹899</div></div>
+      </div>
+      <div class="product-card reveal">
+        <div class="card-visual cv2"><div class="card-orb"></div><div class="card-badge">New</div></div>
+        <div class="card-info"><div class="card-cat">Premium</div><div class="card-name">Velvet Touch</div><div class="card-price">₹1,199</div></div>
+      </div>
+      <div class="product-card reveal">
+        <div class="card-visual cv3"><div class="card-orb"></div><div class="card-badge">Soon</div></div>
+        <div class="card-info"><div class="card-cat">Limited</div><div class="card-name">Sage Luxe</div><div class="card-price">₹999</div></div>
+      </div>
+      <div class="product-card reveal">
+        <div class="card-visual cv4"><div class="card-orb"></div><div class="card-badge">New</div></div>
+        <div class="card-info"><div class="card-cat">Signature</div><div class="card-name">Cognac Drape</div><div class="card-price">₹1,099</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SECTION 3: PILLARS ── -->
+  <section id="pillars">
+    <div class="pillars-inner">
+      <div class="pillar reveal"><span class="pillar-icon">✦</span><div class="pillar-title">Premium Fabric</div><p class="pillar-desc">Breathable, long-lasting luxury cotton blends sourced from certified mills. Crafted to feel as good as it looks.</p></div>
+      <div class="pillar reveal"><span class="pillar-icon">◈</span><div class="pillar-title">Minimal Pricing</div><p class="pillar-desc">No middlemen. No hidden charges. We bring luxury-grade fashion directly to you at honest, transparent prices.</p></div>
+      <div class="pillar reveal"><span class="pillar-icon">⬡</span><div class="pillar-title">7-Day Returns</div><p class="pillar-desc">Shop with complete confidence. No-questions-asked returns within 7 days. Your satisfaction is our standard.</p></div>
+    </div>
+  </section>
+
+  <!-- ── SECTION 4: ABOUT ── -->
+  <section id="about">
+    <div class="section-label reveal">Our Philosophy</div>
+    <h2 class="about-headline reveal">We believe luxury is not a <em>price tag</em> — it is a feeling worn every single day.</h2>
+    <div class="about-cards">
+      <div class="about-card reveal"><div class="about-num">01</div><div class="about-card-title">Born in Hyderabad</div><p class="about-card-desc">Rooted in the city's culture and hustle. LUXE was born to give the bold generation access to fashion that matches their ambition.</p></div>
+      <div class="about-card reveal"><div class="about-num">02</div><div class="about-card-title">Crafted for Comfort</div><p class="about-card-desc">Every piece goes through rigorous quality checks. Premium stitching, breathable materials, and silhouettes made for everyday wear.</p></div>
+      <div class="about-card reveal"><div class="about-num">03</div><div class="about-card-title">Community First</div><p class="about-card-desc">Started from WhatsApp communities, scaled by trust. Our customers are our co-creators — every drop is shaped by your voice.</p></div>
+    </div>
+  </section>
+
+  <!-- ── SECTION 5: MANIFESTO ── -->
+  <section id="manifesto">
+    <div class="section-label reveal" style="justify-content:center">Manifesto</div>
+    <blockquote class="manifesto-quote reveal">
+      "Wear what <span class="gw">moves</span> you. Dress like the world is watching.
+      Because <span class="gw">luxury</span> was never about how much you spend —
+      it was always about how you <span class="gw">carry</span> yourself."
+    </blockquote>
+    <p class="manifesto-attr reveal">— The LUXE Creed &nbsp;·&nbsp; Hyderabad &nbsp;·&nbsp; 2024</p>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="footer-main">
+      <div><div class="footer-brand">LUXE</div><div class="footer-tagline">Luxury Redefined · Hyderabad</div></div>
+      <ul class="footer-links">
+        <li><a href="#drops">Collections</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#manifesto">Manifesto</a></li>
+      </ul>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2024 LUXE. All Rights Reserved.</span>
+      <span>Hyderabad · India · 2024</span>
+    </div>
+  </footer>
+
+</div><!-- /#homepage -->
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ═══════════════════════════════════════════════
+   SPLASH — Three.js shatter-reform gold sphere
+═══════════════════════════════════════════════ */
+const splashEl = document.getElementById('splash');
+const splashCanvas = document.getElementById('splash-canvas');
+
+const SR = new THREE.WebGLRenderer({ canvas: splashCanvas, antialias: true });
+SR.setPixelRatio(Math.min(devicePixelRatio, 2));
+SR.setSize(innerWidth, innerHeight);
+SR.setClearColor(0x080806, 1);
+
+const SS = new THREE.Scene();
+const SC = new THREE.PerspectiveCamera(58, innerWidth/innerHeight, 0.1, 100);
+SC.position.z = 6;
+
+const GOLD = 0xc9a84c;
+
+// ─ Wireframe Sphere ─
+const sGeo = new THREE.SphereGeometry(1.6, 28, 28);
+const sWire = new THREE.WireframeGeometry(sGeo);
+const sLineMat = new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.75 });
+const sSphere = new THREE.LineSegments(sWire, sLineMat);
+SS.add(sSphere);
+
+// ─ Sphere glow (Point) ─
+const glowMesh = new THREE.Mesh(
+  new THREE.SphereGeometry(1.7, 16, 16),
+  new THREE.MeshBasicMaterial({ color: GOLD, transparent: true, opacity: 0.04 })
+);
+SS.add(glowMesh);
+
+// ─ Fragment particles ─
+const sPos = sGeo.attributes.position;
+const FC = sPos.count;
+const origP = new Float32Array(FC * 3);
+const blastDir = new Float32Array(FC * 3);
+const fragP = new Float32Array(FC * 3);
+
+for (let i = 0; i < FC; i++) {
+  const x = sPos.getX(i), y = sPos.getY(i), z = sPos.getZ(i);
+  origP[i*3]=x; origP[i*3+1]=y; origP[i*3+2]=z;
+  fragP[i*3]=x; fragP[i*3+1]=y; fragP[i*3+2]=z;
+  const len = Math.sqrt(x*x+y*y+z*z)||1;
+  const mag = 5 + Math.random()*10;
+  blastDir[i*3]   = (x/len)*mag + (Math.random()-.5)*4;
+  blastDir[i*3+1] = (y/len)*mag + (Math.random()-.5)*4;
+  blastDir[i*3+2] = (z/len)*mag + (Math.random()-.5)*4;
+}
+
+const fGeo = new THREE.BufferGeometry();
+fGeo.setAttribute('position', new THREE.BufferAttribute(fragP, 3));
+const fMat = new THREE.PointsMaterial({ color: GOLD, size: 0.07, transparent: true, opacity: 0 });
+const frags = new THREE.Points(fGeo, fMat);
+SS.add(frags);
+
+const blast = { p: 0 };
+function applyBlast() {
+  for (let i = 0; i < FC; i++) {
+    fragP[i*3]   = origP[i*3]   + blastDir[i*3]   * blast.p;
+    fragP[i*3+1] = origP[i*3+1] + blastDir[i*3+1] * blast.p;
+    fragP[i*3+2] = origP[i*3+2] + blastDir[i*3+2] * blast.p;
+  }
+  fGeo.attributes.position.needsUpdate = true;
+}
+
+// ─ Orbiting Rings ─
+const RINGS = [];
+[
+  [2.6, .003, Math.PI/3,  0,          .38],
+  [3.2, .002, -Math.PI/5, Math.PI/4,  -.22],
+  [3.8, .002, Math.PI/7,  Math.PI/2,  .15],
+  [4.4, .0015,-Math.PI/3, Math.PI/6, -.09],
+].forEach(([r,t,rx,rz,spd]) => {
+  const rg = new THREE.TorusGeometry(r, t, 2, 200);
+  const rl = new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.28 });
+  const ring = new THREE.LineSegments(new THREE.WireframeGeometry(rg), rl);
+  ring.rotation.x = rx; ring.rotation.z = rz;
+  ring.userData.spd = spd;
+  ring.visible = false;
+  SS.add(ring);
+  RINGS.push(ring);
+});
+
+// ─ Background dust ─
+const BGCT = 700;
+const bgP = new Float32Array(BGCT*3), bgV = new Float32Array(BGCT);
+for (let i = 0; i < BGCT; i++) {
+  bgP[i*3]=(Math.random()-.5)*32; bgP[i*3+1]=(Math.random()-.5)*22; bgP[i*3+2]=(Math.random()-.5)*16-4;
+  bgV[i] = .002 + Math.random()*.004;
+}
+const bgGeo = new THREE.BufferGeometry();
+bgGeo.setAttribute('position', new THREE.BufferAttribute(bgP, 3));
+const bgPts = new THREE.Points(bgGeo, new THREE.PointsMaterial({ color: GOLD, size: .038, transparent: true, opacity: .45 }));
+SS.add(bgPts);
+
+// ─ Lights ─
+SS.add(new THREE.AmbientLight(0xffffff, .3));
+const pl = new THREE.PointLight(GOLD, 3, 12); pl.position.set(0,0,3); SS.add(pl);
+
+// ─ Shatter Timeline ─
+const sTL = gsap.timeline({ delay: .4 });
+sTL
+  // 1. Explode
+  .to(sLineMat, { opacity:0, duration:.25 }, .5)
+  .to(fMat,     { opacity:1, duration:.2  }, .5)
+  .to(blast, { p:1, duration:1.0, ease:'power3.out', onUpdate:applyBlast }, .72)
+  // 2. Reform
+  .to(blast, { p:0, duration:1.3, ease:'power3.inOut', onUpdate:applyBlast }, 1.9)
+  .to(fMat,     { opacity:0, duration:.4 }, 2.9)
+  .to(sLineMat, { opacity:.75, duration:.5 }, 2.85)
+  // 3. Reveal rings + brand
+  .call(() => RINGS.forEach(r => r.visible=true), [], 3.1)
+  .to('#splash-content', { opacity:1, y:0, duration:.9, ease:'power2.out' }, 3.1)
+  .to('#splash-skip',    { opacity:1, duration:.5 }, 3.7);
+
+// ─ Splash Render Loop ─
+const splashClock = new THREE.Clock();
+let splashAlive = true;
+(function loopSplash() {
+  if (!splashAlive) return;
+  requestAnimationFrame(loopSplash);
+  const t = splashClock.getElapsedTime();
+  sSphere.rotation.y = t*.18; sSphere.rotation.x = t*.1; sSphere.rotation.z = t*.05;
+  glowMesh.rotation.copy(sSphere.rotation);
+  RINGS.forEach(r => r.rotation.y += r.userData.spd*.012);
+  for (let i=0; i<BGCT; i++) { bgP[i*3+1]+=bgV[i]; if(bgP[i*3+1]>13) bgP[i*3+1]=-13; }
+  bgGeo.attributes.position.needsUpdate = true;
+  SR.render(SS, SC);
+})();
+
+window.addEventListener('resize', () => {
+  SR.setSize(innerWidth, innerHeight);
+  SC.aspect = innerWidth/innerHeight;
+  SC.updateProjectionMatrix();
+});
+
+// ─ Exit Splash ─
+let exited = false;
+function exitSplash() {
+  if (exited) return;
+  exited = true;
+  gsap.to('#splash', {
+    opacity:0, duration:1.2, ease:'power2.inOut',
+    onComplete() {
+      splashEl.style.display = 'none';
+      splashAlive = false;
+      gsap.to('#homepage', { opacity:1, duration:.8, pointerEvents:'all',
+        onComplete: initHero
+      });
+      initScrollReveal();
+    }
+  });
+}
+document.getElementById('splash-skip').addEventListener('click', exitSplash);
+setTimeout(exitSplash, 9500);
+
+
+/* ═══════════════════════════════════════════════
+   HERO — Interactive Three.js scene
+═══════════════════════════════════════════════ */
+function initHero() {
+  const heroEl = document.getElementById('hero');
+  const hCanvas = document.getElementById('hero-canvas');
+
+  const HR = new THREE.WebGLRenderer({ canvas: hCanvas, antialias: true, alpha: true });
+  HR.setPixelRatio(Math.min(devicePixelRatio, 2));
+  HR.setSize(heroEl.offsetWidth, heroEl.offsetHeight);
+  HR.setClearColor(0x000000, 0);
+
+  const HS = new THREE.Scene();
+  const HC = new THREE.PerspectiveCamera(50, heroEl.offsetWidth/heroEl.offsetHeight, .1, 100);
+  HC.position.z = 6.5;
+
+  // Gold icosahedron wireframe
+  const iGeo = new THREE.IcosahedronGeometry(2.2, 2);
+  const iWire = new THREE.WireframeGeometry(iGeo);
+  const iMat = new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: .2 });
+  const ico = new THREE.LineSegments(iWire, iMat);
+  HS.add(ico);
+
+  // Inner torusknot
+  const kGeo = new THREE.TorusKnotGeometry(.9, .28, 120, 16);
+  const kWire = new THREE.WireframeGeometry(kGeo);
+  const kMat = new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: .38 });
+  const knot = new THREE.LineSegments(kWire, kMat);
+  HS.add(knot);
+
+  // Outer ring
+  const orGeo = new THREE.TorusGeometry(3.2, .003, 2, 200);
+  const orMat = new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: .18 });
+  const outerRing = new THREE.LineSegments(new THREE.WireframeGeometry(orGeo), orMat);
+  outerRing.rotation.x = Math.PI/4;
+  HS.add(outerRing);
+
+  // BG particles
+  const HPT = 500;
+  const hpP = new Float32Array(HPT*3);
+  for (let i=0; i<HPT; i++) {
+    hpP[i*3]=(Math.random()-.5)*22;
+    hpP[i*3+1]=(Math.random()-.5)*16;
+    hpP[i*3+2]=(Math.random()-.5)*12;
+  }
+  const hpGeo = new THREE.BufferGeometry();
+  hpGeo.setAttribute('position', new THREE.BufferAttribute(hpP, 3));
+  const hpPts = new THREE.Points(hpGeo, new THREE.PointsMaterial({ color: GOLD, size:.032, transparent:true, opacity:.4 }));
+  HS.add(hpPts);
+
+  HS.add(new THREE.AmbientLight(0xffffff, .2));
+
+  // Mouse parallax
+  const m = { x:0, y:0, tx:0, ty:0 };
+  window.addEventListener('mousemove', e => {
+    m.tx = (e.clientX/innerWidth-.5)*2;
+    m.ty = -(e.clientY/innerHeight-.5)*2;
+  });
+
+  const hClock = new THREE.Clock();
+  (function loopHero() {
+    requestAnimationFrame(loopHero);
+    const t = hClock.getElapsedTime();
+    m.x += (m.tx-m.x)*.05;
+    m.y += (m.ty-m.y)*.05;
+    ico.rotation.y  = t*.07 + m.x*.14;
+    ico.rotation.x  = t*.04 + m.y*.09;
+    knot.rotation.y = -t*.11;
+    knot.rotation.x =  t*.07;
+    outerRing.rotation.y = t*.05;
+    hpPts.rotation.y = t*.015;
+    HR.render(HS, HC);
+  })();
+
+  window.addEventListener('resize', () => {
+    HR.setSize(heroEl.offsetWidth, heroEl.offsetHeight);
+    HC.aspect = heroEl.offsetWidth/heroEl.offsetHeight;
+    HC.updateProjectionMatrix();
+  });
+}
+
+
+/* ═══════════════════════════════════════════════
+   SCROLL REVEALS
+═══════════════════════════════════════════════ */
+function initScrollReveal() {
+  gsap.utils.toArray('.reveal').forEach(el => {
+    gsap.fromTo(el,
+      { opacity:0, y:28 },
+      { opacity:1, y:0, duration:.9, ease:'power2.out',
+        scrollTrigger: { trigger:el, start:'top 88%', toggleActions:'play none none none' }
+      }
+    );
+  });
+}
+
+
+/* ─── NAVBAR SCROLL ─────────────────────────── */
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if (scrollY > 60) nav.classList.add('scrolled');
+  else nav.classList.remove('scrolled');
+});
+
+/* ─── SMOOTH SCROLL ─────────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior:'smooth' });
+  });
+});
+</script>
+</body>
+</html>

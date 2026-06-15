@@ -277,7 +277,7 @@ export const ProductViewer3D = ({
             initial={{ opacity: 0, y: 10, x: "-50%" }}
             animate={{ opacity: 1, y: 0, x: "-50%" }}
             exit={{ opacity: 0, y: -10, x: "-50%" }}
-            className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 text-[8px] font-mono tracking-widest text-[#D4AF37] uppercase z-30 flex items-center gap-2"
+            className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 text-[8px] font-mono tracking-widest text-[#00f2ff] uppercase z-30 flex items-center gap-2"
           >
             <span>🔄</span> Swipe/Drag to rotate
             <button 

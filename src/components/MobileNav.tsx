@@ -58,7 +58,7 @@ export default function MobileNav() {
                   item.isAi
                     ? "bg-gradient-to-tr from-[#D4AF37]/20 to-primary/20 border border-primary/30 text-white animate-pulse"
                     : isSelected
-                    ? "text-[#D4AF37]"
+                    ? "text-[#00f2ff]"
                     : "text-white/40 group-hover:text-white"
                 )}
               >
@@ -73,7 +73,7 @@ export default function MobileNav() {
               <span
                 className={cn(
                   "text-[9px] font-mono tracking-wider mt-0.5",
-                  isSelected ? "text-[#D4AF37] font-bold" : "text-white/30"
+                  isSelected ? "text-[#00f2ff] font-bold" : "text-white/30"
                 )}
               >
                 {item.name}

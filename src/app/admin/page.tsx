@@ -787,7 +787,7 @@ export default function AdminDashboard() {
                                     <h5 className="text-[9px] font-mono text-white/30 uppercase tracking-widest font-bold">Financial Stream</h5>
                                     <div className="flex justify-between items-baseline text-white">
                                       <span className="text-white/40 uppercase tracking-wider text-[9px]">Total Value:</span>
-                                      <span className="text-lg font-orbitron font-bold text-[#D4AF37] tracking-wider">₹{order.total_price}</span>
+                                      <span className="text-lg font-orbitron font-bold text-[#00f2ff] tracking-wider">₹{order.total_price}</span>
                                     </div>
                                     <div className="flex justify-between text-[10px] font-mono">
                                       <span className="text-white/40">Transfer Method:</span>

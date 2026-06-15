@@ -30,7 +30,7 @@
 
 /* Utility Classes */
 .text-primary  { color: var(--text-primary, #F0EDE8); }
-.text-gold     { color: var(--gold); }
+.text-gold     { color: #00f2ff; }
 .text-offwhite { color: var(--offwhite); }
 .bg-primary    { background-color: var(--primary-color); }
 .bg-void       { background-color: var(--bg-void); }

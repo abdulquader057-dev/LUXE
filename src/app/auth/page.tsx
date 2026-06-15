@@ -237,7 +237,7 @@ export default function AuthPortal() {
           <div className="w-16 h-16 rounded-2xl bg-[#1C1410]/5 border border-[#D4AF37]/40 flex items-center justify-center mb-6">
             <ShieldCheck size={32} className="text-[#1C1410]/80" />
           </div>
-          <h1 className="text-3xl font-display font-black tracking-[0.2em] uppercase mb-2 text-center text-[#D4AF37] text-shadow">
+          <h1 className="text-3xl font-display font-black tracking-[0.2em] uppercase mb-2 text-center text-[#00f2ff] text-shadow">
             {isLogin ? "Neural Access" : "Initialize Identity"}
           </h1>
           <p className="text-[#1C1410]/60 text-sm font-sora text-center">
@@ -253,7 +253,7 @@ export default function AuthPortal() {
             animate={{ opacity: 1, scale: 1 }}
             className={`mb-6 p-4 border rounded-xl text-xs font-sora text-center ${
               isGoldError
-                ? "bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#D4AF37]"
+                ? "bg-[#D4AF37]/10 border-[#D4AF37]/30 text-[#00f2ff]"
                 : "bg-[#C0392B]/10 border-[#C0392B]/30 text-[#C0392B]"
             }`}
           >
@@ -265,7 +265,7 @@ export default function AuthPortal() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mb-6 p-4 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl text-[#D4AF37] text-xs font-sora text-center"
+            className="mb-6 p-4 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl text-[#00f2ff] text-xs font-sora text-center"
           >
             {success}
           </motion.div>
@@ -368,7 +368,7 @@ export default function AuthPortal() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-[#D4AF37] hover:underline font-mono tracking-wider uppercase text-[10px] font-bold"
+                  className="text-[#00f2ff] hover:underline font-mono tracking-wider uppercase text-[10px] font-bold"
                 >
                   Forgot Password?
                 </button>

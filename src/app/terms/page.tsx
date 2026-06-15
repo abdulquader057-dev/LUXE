@@ -23,7 +23,7 @@ export default function TermsPage() {
         >
           <Link 
             href="/" 
-            className="inline-flex items-center gap-2 text-[10px] font-mono text-[#C9A84C] hover:text-text-primary uppercase tracking-[0.2em] transition-colors"
+            className="inline-flex items-center gap-2 text-[10px] font-mono text-[#00f2ff] hover:text-text-primary uppercase tracking-[0.2em] transition-colors"
           >
             <ArrowLeft size={14} /> Back to Nexus
           </Link>
@@ -36,11 +36,11 @@ export default function TermsPage() {
           transition={{ duration: 0.8 }}
           className="mb-16 text-center md:text-left"
         >
-          <h1 className="text-4xl md:text-7xl font-cormorant font-bold text-[#C9A84C] uppercase tracking-[0.25em] leading-[0.9] mb-4">
+          <h1 className="text-4xl md:text-7xl font-cormorant font-bold text-[#00f2ff] uppercase tracking-[0.25em] leading-[0.9] mb-4">
             Terms &<br />
             <span className="text-text-primary italic font-light font-cormorant tracking-normal text-3xl md:text-6xl lowercase">conditions.</span>
           </h1>
-          <p className="text-[10px] font-mono text-[#C9A84C]/80 uppercase tracking-[0.3em] mt-4">
+          <p className="text-[10px] font-mono text-[#00f2ff]/80 uppercase tracking-[0.3em] mt-4">
             Service rules. System parameters. User responsibilities.
           </p>
         </motion.div>
@@ -58,7 +58,7 @@ export default function TermsPage() {
               <div className="w-10 h-10 rounded-full bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
                 <MapPin size={20} />
               </div>
-              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#C9A84C]">
+              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#00f2ff]">
                 01 // Shipping Parameter
               </h2>
             </div>
@@ -82,7 +82,7 @@ export default function TermsPage() {
               <div className="w-10 h-10 rounded-full bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
                 <RotateCcw size={20} />
               </div>
-              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#C9A84C]">
+              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#00f2ff]">
                 02 // Returns Protocol
               </h2>
             </div>
@@ -107,7 +107,7 @@ export default function TermsPage() {
               <div className="w-10 h-10 rounded-full bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
                 <CreditCard size={20} />
               </div>
-              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#C9A84C]">
+              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#00f2ff]">
                 03 // Transaction & Checkout
               </h2>
             </div>
@@ -131,7 +131,7 @@ export default function TermsPage() {
               <div className="w-10 h-10 rounded-full bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
                 <AlertCircle size={20} />
               </div>
-              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#C9A84C]">
+              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#00f2ff]">
                 04 // Governing Law
               </h2>
             </div>

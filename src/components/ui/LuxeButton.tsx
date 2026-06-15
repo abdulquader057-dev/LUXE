@@ -37,11 +37,11 @@ export const LuxeButton = ({
       "bg-white text-[#050508] font-bold rounded-luxe shadow-[0_4px_20px_rgba(255,255,255,0.15)] hover:bg-white/90 hover:shadow-[0_8px_30px_rgba(255,255,255,0.25)] hover:scale-[1.02] active:bg-white/80 active:text-[#050508] focus:outline-none focus:ring-2 focus:ring-white/50",
     // Outline — bordered gold
     outline:
-      "border-2 border-[#D4AF37]/60 text-[#D4AF37] font-bold rounded-luxe hover:border-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0a0a0a] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:scale-[1.02] active:bg-[#cda42b] active:text-black focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30",
+      "border-2 border-[#D4AF37]/60 text-[#00f2ff] font-bold rounded-luxe hover:border-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0a0a0a] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:scale-[1.02] active:bg-[#cda42b] active:text-black focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/30",
     // Ghost — subtle
     ghost: "text-white/60 hover:text-white hover:bg-white/5 rounded-luxe active:bg-white/10 focus:outline-none",
     // HUD — techy glass
-    hud: "border-2 border-white/20 bg-black/60 backdrop-blur-md text-white font-bold rounded-luxe hover:text-[#D4AF37] hover:border-[#D4AF37]/60 hover:shadow-[0_0_20px_rgba(0,242,255,0.2)] active:bg-white/10 active:text-white focus:outline-none focus:ring-2 focus:ring-white/30",
+    hud: "border-2 border-white/20 bg-black/60 backdrop-blur-md text-white font-bold rounded-luxe hover:text-[#00f2ff] hover:border-[#D4AF37]/60 hover:shadow-[0_0_20px_rgba(0,242,255,0.2)] active:bg-white/10 active:text-white focus:outline-none focus:ring-2 focus:ring-white/30",
   };
 
   return (

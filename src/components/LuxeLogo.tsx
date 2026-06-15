@@ -48,16 +48,16 @@ const LuxeLogo = ({ className, showTagline = true }: LuxeLogoProps) => {
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path 
             d="M12 2L22 12L12 22L2 12L12 2" 
-            stroke="#C9A96E" 
+            stroke="#00f2ff" 
             strokeWidth="1.5" 
             strokeLinecap="round" 
             strokeLinejoin="round"
           />
           <path 
             d="M12 6L18 12L12 18L6 12L12 6" 
-            fill="#C9A96E" 
+            fill="#00f2ff" 
             fillOpacity="0.3" 
-            stroke="#C9A96E" 
+            stroke="#00f2ff" 
             strokeWidth="1" 
             strokeLinecap="round" 
             strokeLinejoin="round"
@@ -88,7 +88,7 @@ const LuxeLogo = ({ className, showTagline = true }: LuxeLogoProps) => {
       {showTagline && (
         <p className="logo-tagline min-h-[15px]">
           {taglineText}
-          <span className={cn("inline-block w-[3px] h-[10px] ml-[2px] bg-[rgba(201,169,110,0.8)] align-middle", !isTyping && "animate-pulse")}></span>
+          <span className={cn("inline-block w-[3px] h-[10px] ml-[2px] bg-[rgba(0,242,255,0.8)] align-middle", !isTyping && "animate-pulse")}></span>
         </p>
       )}
     </div>

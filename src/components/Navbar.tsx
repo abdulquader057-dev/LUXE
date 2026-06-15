@@ -66,6 +66,17 @@ const Navbar = () => {
     };
   }, [lastScrollY]);
 
+  useEffect(() => {
+    const hasSeenModal = sessionStorage.getItem("luxe-country-modal-seen") === "true";
+    if (!hasSeenModal) {
+      const timer = setTimeout(() => {
+        setIsCountryModalOpen(true);
+        sessionStorage.setItem("luxe-country-modal-seen", "true");
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   const navLinks = [
     { name: t("nav.home"), href: "/" },
     { name: t("nav.aiStylist"), href: "/ai-style" },
@@ -179,13 +190,13 @@ const Navbar = () => {
             {/* User / Login */}
             <Link href={user ? "/profile" : "/auth"} className="flex items-center gap-2">
               {isGold && (
-                <span className="text-[#D4AF37] font-sora font-bold text-[10px] tracking-wider uppercase animate-pulse-glow mr-1">
+                <span className="text-[#00f2ff] font-sora font-bold text-[10px] tracking-wider uppercase animate-pulse-glow mr-1">
                   {profile?.full_name || user?.user_metadata?.full_name || "Vanguard"}
                 </span>
               )}
               <button className={cn(
                 "w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border text-white/70 hover:text-white hover:bg-white/10 transition-colors",
-                isGold ? "border-[#D4AF37]/50 text-[#D4AF37] hover:text-[#D4AF37]/80" : "border-white/10"
+                isGold ? "border-[#D4AF37]/50 text-[#00f2ff] hover:text-[#00f2ff]/80" : "border-white/10"
               )}>
                 {user ? <User size={16} /> : <LogIn size={16} />}
               </button>
@@ -216,7 +227,7 @@ const Navbar = () => {
         <motion.div
           animate={{ x: ["0%", "-50%"] }}
           transition={{ ease: "linear", duration: 25, repeat: Infinity }}
-          className="flex whitespace-nowrap gap-16 text-[8px] font-mono tracking-[0.25em] text-[#D4AF37] uppercase"
+          className="flex whitespace-nowrap gap-16 text-[8px] font-mono tracking-[0.25em] text-[#00f2ff] uppercase"
         >
           <span>✦ FREE SHIPPING ACROSS INDIA</span>
           <span>✦ CASH ON DELIVERY (COD) AVAILABLE</span>

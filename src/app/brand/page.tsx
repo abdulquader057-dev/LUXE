@@ -90,7 +90,7 @@ export default function BrandPage() {
           </button>
         </form>
         {errorMsg && (
-          <div className="p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded text-xs font-mono text-center max-w-sm mx-auto">
+          <div className="p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#00f2ff] rounded text-xs font-mono text-center max-w-sm mx-auto">
             {errorMsg}
           </div>
         )}

@@ -367,7 +367,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
                               <Image src={prod.image} alt={prod.name} fill sizes="48px" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[8px] font-mono text-[#D4AF37] uppercase tracking-widest font-bold mb-0.5">{prod.badge}</span>
+                              <span className="text-[8px] font-mono text-[#00f2ff] uppercase tracking-widest font-bold mb-0.5">{prod.badge}</span>
                               <span className="text-xs font-mono font-bold text-white line-clamp-1">{prod.color} Shirt</span>
                               <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest">₹{prod.price} • Match: {prod.match}</span>
                             </div>

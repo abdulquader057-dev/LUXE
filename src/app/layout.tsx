@@ -20,8 +20,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import LuxeLoadingBar from "@/components/ui/LuxeLoadingBar";
 import DynamicLayoutWidgets from "@/components/layout/DynamicLayoutWidgets";
-import Global3DWrapper from "@/components/layout/Global3DWrapper";
-import CinematicSplashWrapper from "@/components/layout/CinematicSplashWrapper";
+import CinematicRevealWrapper from "@/components/layout/CinematicRevealWrapper";
 
 const sora = Sora({
   weight: ["300", "400", "500"],
@@ -131,8 +130,6 @@ export default async function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           ></iframe>
         </noscript>
-        <Global3DWrapper />
-        <CinematicSplashWrapper />
         <ThemeColorLoader />
         <GtmPageViewTracker />
         <ScrollProgress />
@@ -141,19 +138,21 @@ export default async function RootLayout({
         <LanguageProvider>
         <AuthProvider>
         <CommerceProvider>
-          <DynamicLayoutWidgets />
-          <Sidebar />
-          <CartSidebar />
+          <CinematicRevealWrapper>
+            <DynamicLayoutWidgets />
+            <Sidebar />
+            <CartSidebar />
+            
+            <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden relative scroll-smooth pb-20 md:pb-0">
+              <Navbar />
+              <div className="flex-1 w-full relative z-10 animate-page-transition">
+                {children}
+              </div>
+              <Footer />
+            </main>
+            <MobileNav />
+          </CinematicRevealWrapper>
           
-          <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden relative scroll-smooth pb-20 md:pb-0">
-            <Navbar />
-            <div className="flex-1 w-full relative z-10 animate-page-transition">
-              {children}
-            </div>
-            <Footer />
-          </main>
-          
-          <MobileNav />
           <Analytics />
           <SpeedInsights />
                 </CommerceProvider>

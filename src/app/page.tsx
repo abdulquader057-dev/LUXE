@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Sparkles, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Hero from "@/components/home/Hero";
-import SciFiWrapper from "@/components/home/SciFiWrapper";
+import HomeScene from "@/components/HomeScene";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import CinematicShowcase from "@/components/home/CinematicShowcase";
 
@@ -34,14 +34,18 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="w-full">
-      {/* Immersive Sci-Fi Interactive Portal (First Viewport) */}
-      <SciFiWrapper />
+    <>
+      <HomeScene />  {/* always mounted, always running behind */}
+      <main
+        style={{
+          position: "relative",
+          zIndex: 10
+        }}
+        className="w-full"
+      >
+        <Hero />
 
-      {/* 1. ABOVE THE FOLD (100vh) - Interactive 3D Luxury Experience */}
-      <Hero />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-24">
 
         {/* 2. BRAND HUB */}
         <div className="mb-24 p-8 md:p-12 rounded-3xl border border-white/10 bg-[#0A0A0C]/65 backdrop-blur-md relative overflow-hidden group">
@@ -51,7 +55,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-2 mb-6">
               <span className="h-px w-8 bg-[#D4AF37]/50" />
-              <span className="text-[10px] font-sora text-[#D4AF37] uppercase tracking-[0.4em] font-bold">Brand Hub</span>
+              <span className="text-[10px] font-sora text-[#00f2ff] uppercase tracking-[0.4em] font-bold">Brand Hub</span>
             </div>
             
             <h2 className="text-3xl md:text-5xl font-cormorant font-light tracking-wide text-white mb-6 leading-snug">
@@ -63,37 +67,37 @@ export default function Home() {
             </p>
 
             <div className="space-y-6 pt-8 border-t border-white/5">
-              <span className="text-[9px] font-mono text-[#D4AF37] uppercase tracking-[0.2em] block font-bold">{"// Collection DNA & Trust Indicators"}</span>
+              <span className="text-[9px] font-mono text-[#00f2ff] uppercase tracking-[0.2em] block font-bold">{"// Collection DNA & Trust Indicators"}</span>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
-                    <span className="text-[#D4AF37] select-none text-base">✨</span>
+                    <span className="text-[#00f2ff] select-none text-base">✨</span>
                     <span className="font-sora">Premium luxury soft fabric collection</span>
                   </div>
                   <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
-                    <span className="text-[#D4AF37] select-none text-base">📍</span>
+                    <span className="text-[#00f2ff] select-none text-base">📍</span>
                     <span className="font-sora">Hafiz Baba Nagar, Hyderabad</span>
                   </div>
                   <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
-                    <span className="text-[#D4AF37] select-none text-base">🚚</span>
+                    <span className="text-[#00f2ff] select-none text-base">🚚</span>
                     <span className="font-sora">Cash on Delivery available</span>
                   </div>
                   <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
-                    <span className="text-[#D4AF37] select-none text-base">✨</span>
+                    <span className="text-[#00f2ff] select-none text-base">✨</span>
                     <span className="font-sora">100% trusted & reliable</span>
                   </div>
                 </div>
                 <div className="space-y-4 md:border-l md:border-white/5 md:pl-8">
                   <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
-                    <span className="text-[#D4AF37] select-none text-base">▫️</span>
+                    <span className="text-[#00f2ff] select-none text-base">▫️</span>
                     <span className="font-sora">Everyday Essential</span>
                   </div>
                   <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
-                    <span className="text-[#D4AF37] select-none text-base">▫️</span>
+                    <span className="text-[#00f2ff] select-none text-base">▫️</span>
                     <span className="font-sora">Premium</span>
                   </div>
                   <div className="flex items-center gap-3 text-xs md:text-sm tracking-wider text-white/80">
-                    <span className="text-[#D4AF37] select-none text-base">▫️</span>
+                    <span className="text-[#00f2ff] select-none text-base">▫️</span>
                     <span className="font-sora">Luxury Inspired</span>
                   </div>
                 </div>
@@ -178,6 +182,7 @@ export default function Home() {
           }}
         />
       </div>
-    </div>
+    </main>
+  </>
   );
 }

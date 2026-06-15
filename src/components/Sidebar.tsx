@@ -189,12 +189,12 @@ const Sidebar = () => {
                 )}>
                   <div className={cn(
                     "transition-colors", 
-                    link.isPremium ? "text-[#D4AF37]" : "group-hover:text-white"
+                    link.isPremium ? "text-[#00f2ff]" : "group-hover:text-white"
                   )}>
                     <link.icon size={20} strokeWidth={link.isPremium ? 2 : 1.5} />
                   </div>
                   <div>
-                    <div className={cn("text-[13px] font-medium tracking-wide", link.isPremium && "text-[#D4AF37]")}>
+                    <div className={cn("text-[13px] font-medium tracking-wide", link.isPremium && "text-[#00f2ff]")}>
                       {link.name}
                     </div>
                     <div className="text-[10px] text-white/30 mt-0.5">{link.subtitle}</div>

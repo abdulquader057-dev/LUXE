@@ -115,7 +115,7 @@ const Hero = () => {
           <LucideSparkles size={12} style={{ color: "#C9A84C" }} />
           <span
             className="text-[10px] uppercase tracking-[0.25em] font-semibold"
-            style={{ fontFamily: "var(--font-sora)", color: "#C9A84C" }}
+            style={{ fontFamily: "var(--font-sora)", color: "#00f2ff" }}
           >
             Premium LUXE Collection — Latest Drop
           </span>
@@ -128,18 +128,18 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-cormorant font-light leading-none tracking-tight mb-4 floatHeadline"
           style={{
-            background: "linear-gradient(135deg, #C9A84C 0%, #E8C97A 50%, #9A7B30 100%)",
+            background: "linear-gradient(135deg, #00f2ff 0%, #00d8ff 50%, #008da5 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
-            filter: "drop-shadow(0 0 30px rgba(201,168,76,0.2))",
+            filter: "drop-shadow(0 0 30px rgba(0,242,255,0.2))",
           }}
         >
           Luxury
           <span
             className="block italic"
             style={{
-              background: "linear-gradient(135deg, #E8C97A 0%, #C9A84C 100%)",
+              background: "linear-gradient(135deg, #00d8ff 0%, #00f2ff 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -187,7 +187,7 @@ const Hero = () => {
             style={{
               background: "transparent",
               border: "1px solid rgba(201,168,76,0.3)",
-              color: "#C9A84C",
+              color: "#00f2ff",
               fontFamily: "var(--font-sora)",
             }}
           >

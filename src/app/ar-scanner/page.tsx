@@ -473,7 +473,7 @@ export default function ARScannerPage() {
             {selectedProduct && (
               <div className="border-t border-white/5 pt-4 mt-4 text-left">
                 <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-white truncate">{selectedProduct.name}</h4>
-                <p className="text-[10px] font-mono text-[#D4AF37] font-bold uppercase mt-1">₹{selectedProduct.price}</p>
+                <p className="text-[10px] font-mono text-[#00f2ff] font-bold uppercase mt-1">₹{selectedProduct.price}</p>
               </div>
             )}
           </div>

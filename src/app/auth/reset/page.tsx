@@ -79,7 +79,7 @@ export default function PasswordResetPortal() {
           <div className="w-16 h-16 rounded-2xl bg-[#1C1410]/5 border border-[#D4AF37]/40 flex items-center justify-center mb-6">
             <Lock size={32} className="text-[#1C1410]/80" />
           </div>
-          <h1 className="text-3xl font-display font-black tracking-[0.15em] uppercase mb-2 text-center text-[#D4AF37] text-shadow">
+          <h1 className="text-3xl font-display font-black tracking-[0.15em] uppercase mb-2 text-center text-[#00f2ff] text-shadow">
             Key Reset
           </h1>
           <p className="text-[#1C1410]/60 text-sm font-sora text-center">
@@ -101,7 +101,7 @@ export default function PasswordResetPortal() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mb-6 p-4 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl text-[#D4AF37] text-xs font-sora text-center"
+            className="mb-6 p-4 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-xl text-[#00f2ff] text-xs font-sora text-center"
           >
             {success}
           </motion.div>

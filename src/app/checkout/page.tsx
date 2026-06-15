@@ -560,7 +560,7 @@ export default function CheckoutPage() {
 
             {/* Toggle COD / UPI */}
             <div className="pt-4 border-t border-white/5 space-y-4">
-              <label className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest block font-bold">Payment Protocol</label>
+              <label className="text-[10px] font-mono text-[#00f2ff] uppercase tracking-widest block font-bold">Payment Protocol</label>
               
               <div className="grid grid-cols-2 gap-4">
                 <button
@@ -643,7 +643,7 @@ export default function CheckoutPage() {
             </div>
 
             {errorMsg && (
-              <div className="p-3.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl text-xs font-mono text-center">
+              <div className="p-3.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#00f2ff] rounded-xl text-xs font-mono text-center">
                 {errorMsg}
               </div>
             )}
@@ -712,7 +712,7 @@ export default function CheckoutPage() {
 
                   <div className="pt-4 border-t border-white/5 flex justify-between items-baseline text-white">
                     <span className="text-xs font-bold">Total Payable</span>
-                    <span className="text-xl font-orbitron font-bold text-[#D4AF37] tracking-wider">₹{total.toFixed(2)}</span>
+                    <span className="text-xl font-orbitron font-bold text-[#00f2ff] tracking-wider">₹{total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -721,7 +721,7 @@ export default function CheckoutPage() {
 
           {/* Verification Badge info */}
           <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/15 rounded-[24px] p-6 space-y-3">
-            <h4 className="text-[10px] font-mono text-[#D4AF37] uppercase tracking-widest font-bold flex items-center gap-1.5">
+            <h4 className="text-[10px] font-mono text-[#00f2ff] uppercase tracking-widest font-bold flex items-center gap-1.5">
               <CheckCircle2 size={12} /> Dispatch Protocol
             </h4>
             <p className="text-[9px] font-mono text-white/40 leading-relaxed uppercase">

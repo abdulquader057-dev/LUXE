@@ -694,7 +694,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
 
             {/* Brand Handoff & Trust tags */}
             <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-[9px] font-mono uppercase tracking-widest text-white/50 space-y-2 leading-relaxed">
-              <div className="flex items-center gap-2 text-[#D4AF37]">
+              <div className="flex items-center gap-2 text-[#00f2ff]">
                 <MapPin size={12} className="animate-pulse" />
                 <span>Hub: Hafiz Baba Nagar, Hyderabad</span>
               </div>
