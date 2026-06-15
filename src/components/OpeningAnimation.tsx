@@ -84,20 +84,31 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
   const glassCanvasRef = useRef<HTMLCanvasElement>(null);
   const isReducedMotion = useReducedMotion();
 
+  const onStartRevealRef = useRef(onStartReveal);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onStartRevealRef.current = onStartReveal;
+  }, [onStartReveal]);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
   // Handle skip if reduced motion is requested
   useEffect(() => {
     console.log("[Luxe] OpeningAnimation mounted. prefers-reduced-motion status:", isReducedMotion);
     if (isReducedMotion) {
       console.log("[Luxe] Skipping opening animation to respect user accessibility preferences.");
-      if (onStartReveal) onStartReveal();
+      if (onStartRevealRef.current) onStartRevealRef.current();
       setTimeout(() => {
-        onComplete();
+        if (onCompleteRef.current) onCompleteRef.current();
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("open-country-modal"));
         }
       }, 300);
     }
-  }, [isReducedMotion, onStartReveal, onComplete]);
+  }, [isReducedMotion]);
 
   // 1. Procedural static fabric weave background drawing
   useEffect(() => {
@@ -458,12 +469,14 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
           duration: 2.2,
           ease: "power2.out",
           onStart: () => {
-            if (onStartReveal) {
-              onStartReveal();
+            if (onStartRevealRef.current) {
+              onStartRevealRef.current();
             }
           },
           onComplete: () => {
-            onComplete();
+            if (onCompleteRef.current) {
+              onCompleteRef.current();
+            }
             if (typeof window !== "undefined") {
               window.dispatchEvent(new CustomEvent("open-country-modal"));
             }
@@ -502,7 +515,7 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       });
       ctx.revert();
     };
-  }, [isReducedMotion, onComplete]);
+  }, [isReducedMotion]);
 
   if (isReducedMotion) return null;
 
