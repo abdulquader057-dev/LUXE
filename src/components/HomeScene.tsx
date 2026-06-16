@@ -16,7 +16,8 @@ export default function HomeScene() {
         dpr={tier === "high" ? [1, 2] : [1, 1]}
         camera={{ position: [0, 0, 5], fov: 45 }}
         shadows
-        style={{ background: "#0a0a0a", position: "absolute", inset: 0 }}
+        gl={{ alpha: true }}
+        style={{ background: "transparent", position: "absolute", inset: 0 }}
       >
         <SceneLighting />
         <Suspense fallback={null}>

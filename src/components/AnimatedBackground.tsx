@@ -50,8 +50,8 @@ export default function AnimatedBackground() {
         stars.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          size: Math.random() * 0.7 + 0.3, // Tiny stars: 0.3px to 1.0px
-          baseOpacity: Math.random() * 0.20 + 0.05, // Faint: 0.05 to 0.25 opacity
+          size: Math.random() * 1.0 + 0.4, // Stars size: 0.4px to 1.4px
+          baseOpacity: Math.random() * 0.35 + 0.10, // Brightness: 0.10 to 0.45 opacity
           twinkleSpeed: Math.random() * 0.008 + 0.003, // Slow twinkling
           phase: Math.random() * Math.PI * 2,
         });
@@ -81,7 +81,7 @@ export default function AnimatedBackground() {
         const opacity = s.baseOpacity + Math.sin(s.phase) * 0.05;
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(240, 245, 255, ${Math.max(0.02, opacity)})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0.05, opacity)})`;
         ctx.fill();
       });
 
