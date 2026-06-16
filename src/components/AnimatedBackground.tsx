@@ -29,16 +29,62 @@ export default function AnimatedBackground() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     let animId: number;
+    
+    interface Star {
+      x: number;
+      y: number;
+      size: number;
+      baseOpacity: number;
+      twinkleSpeed: number;
+      phase: number;
+    }
+    
+    const stars: Star[] = [];
     const particles: Array<{ x:number; y:number; size:number; speedY:number; speedX:number; opacity:number; swayRange:number; swaySpeed:number; time:number }> = [];
-    const handleResize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    
+    const populateStars = () => {
+      stars.length = 0;
+      const isMobile = window.innerWidth < 768;
+      const starCount = isMobile ? 60 : 150;
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 0.7 + 0.3, // Tiny stars: 0.3px to 1.0px
+          baseOpacity: Math.random() * 0.20 + 0.05, // Faint: 0.05 to 0.25 opacity
+          twinkleSpeed: Math.random() * 0.008 + 0.003, // Slow twinkling
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+    };
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      populateStars();
+    };
+    
     handleResize();
     window.addEventListener("resize", handleResize);
+    
     const count = isGold ? 35 : 0;
     for (let k = 0; k < count; k++) {
       particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.8+0.5, speedY: -(Math.random()*0.35+0.1), speedX: 0, opacity: Math.random()*0.35+0.08, swayRange: Math.random()*0.5+0.2, swaySpeed: Math.random()*0.002+0.001, time: Math.random()*10000 });
     }
+    
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw Twinkling Stars
+      stars.forEach(s => {
+        s.phase += s.twinkleSpeed;
+        const opacity = s.baseOpacity + Math.sin(s.phase) * 0.05;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(240, 245, 255, ${Math.max(0.02, opacity)})`;
+        ctx.fill();
+      });
+
       if (isGold) {
         particles.forEach(p => {
           p.time += 16; p.y += p.speedY;
