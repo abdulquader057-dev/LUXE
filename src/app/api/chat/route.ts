@@ -1,4 +1,4 @@
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -107,13 +107,10 @@ export async function POST(req: Request) {
       history.shift();
     }
 
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const { supabaseAdmin } = await import('@/lib/supabase');
 
     // Fetch active products list
-    const { data: dbCatalog } = await supabase
+    const { data: dbCatalog } = await supabaseAdmin
       .from('products')
       .select('id, name');
 
@@ -163,7 +160,7 @@ Do not discuss or recommend competitor brands.`;
         
         let recommendations: any[] = [];
         if (recommendedIds.length > 0) {
-          const { data } = await supabase
+          const { data } = await supabaseAdmin
             .from('products')
             .select('*')
             .in('id', recommendedIds);

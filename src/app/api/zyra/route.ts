@@ -1,7 +1,7 @@
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase';
 
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
@@ -38,11 +38,7 @@ export async function POST(req: Request) {
   if (!apiKey) return new Response('API key not configured', { status: 500 });
 
   // Fetch catalog
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  );
-  const { data: catalog } = await supabase.from('products').select('id, name, category').eq('is_active', true);
+  const { data: catalog } = await supabaseAdmin.from('products').select('id, name, category').eq('is_active', true);
   const catalogStr = catalog && catalog.length > 0
     ? catalog.map((p: any, i: number) => `${i+1}. ${p.name} [ID: ${p.id}]`).join('\n')
     : 'Catalog loading.';

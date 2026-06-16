@@ -98,6 +98,7 @@ export default async function RootLayout({
     >
       <head>
         <meta name="google-site-verification" content="TO_BE_FILLED" />
+        <link rel="preload" href="/models/male_model.glb" as="fetch" crossOrigin="anonymous" />
         <style dangerouslySetInnerHTML={{ __html: `
           :root {
             --theme-bg: ${selectedTheme.bg};

@@ -487,6 +487,21 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       );
     });
 
+    // ── WebGL Context Loss Handlers ──
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      console.warn("[Luxe WebGL] context lost in OpeningAnimation");
+      cancelAnimationFrame(animId);
+    };
+
+    const handleContextRestored = () => {
+      console.log("[Luxe WebGL] context restored in OpeningAnimation");
+      loop();
+    };
+
+    canvas.addEventListener("webglcontextlost", handleContextLost);
+    canvas.addEventListener("webglcontextrestored", handleContextRestored);
+
     // ── Three.js Loop ──
     let animId: number;
     const loop = () => {
@@ -507,6 +522,8 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
     window.addEventListener("resize", onResize);
 
     return () => {
+      canvas.removeEventListener("webglcontextlost", handleContextLost);
+      canvas.removeEventListener("webglcontextrestored", handleContextRestored);
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", onResize);
       renderer.dispose();

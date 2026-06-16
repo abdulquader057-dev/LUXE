@@ -149,7 +149,6 @@ export default function ProfilePage() {
             { id: "overview", label: "Overview", icon: Eye },
             { id: "aesthetics", label: "Aesthetics", icon: Palette },
             { id: "badges", label: "Badges", icon: Trophy },
-            { id: "trends", label: "Trend Radar", icon: TrendingUp },
             { id: "settings", label: "Control Hub", icon: Settings2 },
           ].map((tab) => (
             <button
@@ -264,70 +263,6 @@ export default function ProfilePage() {
           </motion.div>
         )}
 
-        {/* Trend Radar Section */}
-        {activeSection === "trends" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-4"
-          >
-            <div className="grid gap-4">
-              {TREND_RADAR.map((trend, i) => {
-                const forecastColors = {
-                  rising: "#00ff9d",
-                  peaking: "#ffcc00",
-                  declining: "#ff4466",
-                  emerging: "#c084fc",
-                };
-                return (
-                  <motion.div
-                    key={trend.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.06 }}
-                    className="glass-panel !rounded-[24px] p-6 border border-white/5 flex items-center gap-6"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="text-lg font-black tracking-wider uppercase">{trend.name}</h4>
-                        <span
-                          className="text-[8px] font-black tracking-[0.3em] uppercase px-3 py-1 rounded-full"
-                          style={{
-                            color: forecastColors[trend.forecast],
-                            backgroundColor: `${forecastColors[trend.forecast]}15`,
-                            border: `1px solid ${forecastColors[trend.forecast]}30`,
-                          }}
-                        >
-                          {trend.forecast}
-                        </span>
-                      </div>
-                      <span className="text-[9px] font-black tracking-widest text-white/20 uppercase">{trend.category}</span>
-                    </div>
-
-                    {/* Momentum bar */}
-                    <div className="w-32">
-                      <div className="text-[8px] font-black tracking-widest text-white/20 uppercase mb-1">Momentum</div>
-                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${Math.abs(trend.momentum)}%` }}
-                          transition={{ duration: 1, delay: i * 0.1 }}
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: trend.momentum > 0 ? "#00ff9d" : "#ff4466" }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Popularity */}
-                    <CircularProgress value={trend.popularity} size={56} strokeWidth={4} color={forecastColors[trend.forecast]}>
-                      <span className="text-xs font-black">{trend.popularity}</span>
-                    </CircularProgress>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
 
         {/* Aesthetics Section */}
         {activeSection === "aesthetics" && (

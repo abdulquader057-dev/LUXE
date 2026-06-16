@@ -145,6 +145,13 @@ export default function SwipePage() {
       </div>
 
       <div className="max-w-lg mx-auto px-6 relative z-10">
+        {/* Return Link */}
+        <div className="mb-8 flex justify-center">
+          <Link href="/shop" className="flex items-center gap-2 text-primary hover:text-white text-[9px] font-mono tracking-widest uppercase transition-colors cursor-pointer group">
+            <span className="group-hover:-translate-x-1 transition-transform inline-block">←</span> Return to Archive Catalog
+          </Link>
+        </div>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

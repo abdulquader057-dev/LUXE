@@ -36,6 +36,9 @@ export default function ProductCatalogGrid({ initialProducts }: ProductCatalogGr
     { id: "white", name: "White Shirts" },
     { id: "pastel", name: "Pastel Shirts" },
     { id: "dark", name: "Dark Shirts" },
+    { id: "wash", name: "Washed Drop" },
+    { id: "sneakers", name: "Sneakers" },
+    { id: "shirts", name: "Shirts" },
   ];
 
   const filteredProducts = initialProducts.filter((p) => {
@@ -63,6 +66,25 @@ export default function ProductCatalogGrid({ initialProducts }: ProductCatalogGr
                           p.description.toLowerCase().includes("navy") || 
                           p.description.toLowerCase().includes("black") || 
                           p.description.toLowerCase().includes("brown");
+      } else if (selCat === "wash") {
+        matchesCategory = p.category?.toLowerCase() === "wash" || 
+                          p.name.toLowerCase().includes("wash") || 
+                          p.name.toLowerCase().includes("acid") || 
+                          p.description.toLowerCase().includes("wash") || 
+                          p.description.toLowerCase().includes("acid");
+      } else if (selCat === "sneakers") {
+        matchesCategory = p.category?.toLowerCase() === "sneakers" || 
+                          p.name.toLowerCase().includes("sneaker") || 
+                          p.name.toLowerCase().includes("footwear") || 
+                          p.description.toLowerCase().includes("sneaker") || 
+                          p.description.toLowerCase().includes("footwear");
+      } else if (selCat === "shirts") {
+        matchesCategory = p.category?.toLowerCase() === "shirts" || 
+                          p.category?.toLowerCase() === "shirt" || 
+                          p.name.toLowerCase().includes("shirt") || 
+                          p.name.toLowerCase().includes("polo") || 
+                          p.name.toLowerCase().includes("knit") || 
+                          p.description.toLowerCase().includes("shirt");
       } else {
         matchesCategory = p.category?.toLowerCase() === selCat;
       }
@@ -142,6 +164,14 @@ export default function ProductCatalogGrid({ initialProducts }: ProductCatalogGr
             </button>
           </MagneticWrapper>
         ))}
+        <MagneticWrapper>
+          <button
+            onClick={() => router.push("/swipe")}
+            className="glass-pill px-6 py-3 text-[9px] font-sora uppercase tracking-[0.3em] transition-all duration-700 ease-[0.25,1,0.5,1] text-primary hover:text-white border-primary/20 hover:border-primary/50 bg-primary/5 hover:bg-primary/10 shadow-[0_0_15px_rgba(201,168,76,0.1)]"
+          >
+            ⚡ AI Swipe Matcher
+          </button>
+        </MagneticWrapper>
       </motion.div>
 
       {/* Product Grid */}

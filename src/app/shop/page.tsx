@@ -3,8 +3,8 @@ import ProductCatalogGrid from "@/components/shop/ProductCatalogGrid";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { parseDbProduct } from "@/data/products";
 
-// Revalidate on every request to show real-time catalog changes
-export const revalidate = 0;
+// Revalidate cached page every 60s (ISR)
+export const revalidate = 60;
 
 async function CatalogLoader() {
   const supabase = await createSupabaseServerClient();

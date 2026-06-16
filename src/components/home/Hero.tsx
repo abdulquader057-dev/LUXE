@@ -204,7 +204,7 @@ const Hero = () => {
         >
           {[
             { icon: <LucideSparkles size={14} />, label: "Premium Luxury Fabric", sub: "Breathable & Soft" },
-            { icon: <TrendingUp size={14} />, label: "Trending Styles",      sub: "New drops weekly" },
+            { icon: <LucideSparkles size={14} />, label: "Calibrated Fit",       sub: "Perfect sizing" },
             { icon: <span className="text-xs font-mono">📍</span>, label: "Hyderabad", sub: "Fast delivery" },
           ].map((stat, i) => (
             <div key={i} className="flex flex-col items-center gap-1.5 text-center">

@@ -228,21 +228,25 @@ export default function CheckoutPage() {
         items: cartItems,
       });
 
-      // Save order to Supabase orders table
-      const { data: orderData, error: dbError } = await supabase
-        .from("orders")
-        .insert([
-          {
-            customer_id: isUuid ? user.id : null,
-            total_price: total,
-            status: "Pending",
-            delivery_address: orderPayload,
-          }
-        ])
-        .select("id")
-        .single();
+      // Save order to Supabase orders table via server checkout API
+      const checkoutResponse = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer_id: isUuid ? user.id : null,
+          total_price: total,
+          status: "Pending",
+          delivery_address: orderPayload,
+        }),
+      });
 
-      if (dbError) throw dbError;
+      if (!checkoutResponse.ok) {
+        const checkErr = await checkoutResponse.json();
+        throw new Error(checkErr.error || "Failed to create order on server.");
+      }
+
+      const checkoutResData = await checkoutResponse.json();
+      const orderData = checkoutResData.data;
 
       if (!cod) {
         // Prepaid order via Razorpay

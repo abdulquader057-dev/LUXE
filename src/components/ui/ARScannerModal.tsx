@@ -23,9 +23,21 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
     description: string;
     recommendations: any[];
   } | null>(null);
+  const [activeStream, setActiveStream] = useState<MediaStream | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Stop active camera stream helper
+  const stopActiveStream = () => {
+    if (activeStream) {
+      activeStream.getTracks().forEach(track => track.stop());
+      setActiveStream(null);
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -34,13 +46,18 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
       setProgress(0);
       setSelectedPhoto(null);
       setAnalysisResult(null);
-      
-      if (videoRef.current?.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach(t => t.stop());
-      }
+      stopActiveStream();
     }
-  }, [isOpen]);
+  }, [isOpen, activeStream]);
+
+  // Clean up on component unmount
+  useEffect(() => {
+    return () => {
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [activeStream]);
 
   const startCameraScan = async () => {
     setScanningStatus("initializing");
@@ -50,7 +67,8 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "user" } } });
+        setActiveStream(stream);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           videoRef.current.play();
@@ -75,11 +93,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
     if (!file) return;
 
     // Stop active camera stream if any
-    if (videoRef.current?.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach(t => t.stop());
-      videoRef.current.srcObject = null;
-    }
+    stopActiveStream();
 
     const reader = new FileReader();
     reader.onload = (event) => {

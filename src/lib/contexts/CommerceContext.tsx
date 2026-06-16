@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 
 export type Currency = "INR" | "USD" | "EUR" | "GBP";
@@ -107,12 +107,12 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
     checkGoldStatus();
   }, [user, profile]);
 
-  const handleSetCurrency = (cur: Currency) => {
+  const handleSetCurrency = useCallback((cur: Currency) => {
     setCurrency(cur);
     localStorage.setItem("luxe-currency", cur);
-  };
+  }, []);
 
-  const handleSetCountry = (newCountry: string) => {
+  const handleSetCountry = useCallback((newCountry: string) => {
     setCountry(newCountry);
     localStorage.setItem("luxe-country", newCountry);
 
@@ -122,9 +122,21 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
       setCurrency(defaultCur as Currency);
       localStorage.setItem("luxe-currency", defaultCur);
     }
-  };
+  }, [currency]);
 
-  const addToCart = (item: CartItem) => {
+  const convertPrice = useCallback((priceINR: number, skipDiscount = false) => {
+    let finalPrice = priceINR;
+    if (isGold && !skipDiscount) {
+      finalPrice = priceINR * 0.85;
+    }
+    const converted = finalPrice * exchangeRates[currency];
+    return {
+      amount: Math.round(converted),
+      symbol: currencySymbols[currency],
+    };
+  }, [isGold, currency]);
+
+  const addToCart = useCallback((item: CartItem) => {
     try {
       track("cart_item_added", {
         id: item.id,
@@ -204,69 +216,73 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("luxe-cart", JSON.stringify(newCart));
       return newCart;
     });
-  };
+  }, [currency, convertPrice]);
 
-  const removeFromCart = (id: string, size?: string, color?: string) => {
+  const removeFromCart = useCallback((id: string, size?: string, color?: string) => {
     setCart((prev) => {
       const newCart = prev.filter((i) => !(i.id === id && i.size === size && i.color === color));
       localStorage.setItem("luxe-cart", JSON.stringify(newCart));
       return newCart;
     });
     toast.error("Item removed from Arsenal");
-  };
+  }, []);
 
-  const updateQuantity = (id: string, quantity: number, size?: string, color?: string) => {
+  const updateQuantity = useCallback((id: string, quantity: number, size?: string, color?: string) => {
     if (quantity < 1) return removeFromCart(id, size, color);
     setCart((prev) => {
       const newCart = prev.map(i => (i.id === id && i.size === size && i.color === color) ? { ...i, quantity } : i);
       localStorage.setItem("luxe-cart", JSON.stringify(newCart));
       return newCart;
     });
-  };
+  }, [removeFromCart]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
     localStorage.removeItem("luxe-cart");
-  };
+  }, []);
 
-  const toggleCart = () => setIsCartOpen(!isCartOpen);
+  const toggleCart = useCallback(() => setIsCartOpen(prev => !prev), []);
 
   const cartCount = cart.reduce((total, item) => total + (Number(item.quantity) || 0), 0);
   const rawTotalPrice = cart.reduce((total, item) => total + ((Number(item.price) || 0) * (Number(item.quantity) || 0)), 0);
   const totalPrice = isGold ? rawTotalPrice * 0.85 : rawTotalPrice;
 
-  const convertPrice = (priceINR: number, skipDiscount = false) => {
-    let finalPrice = priceINR;
-    if (isGold && !skipDiscount) {
-      finalPrice = priceINR * 0.85;
-    }
-    const converted = finalPrice * exchangeRates[currency];
-    return {
-      amount: Math.round(converted),
-      symbol: currencySymbols[currency],
-    };
-  };
+  const contextValue = useMemo(() => ({
+    currency,
+    setCurrency: handleSetCurrency,
+    cart,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    cartCount,
+    totalPrice,
+    isCartOpen,
+    toggleCart,
+    convertPrice,
+    country,
+    setCountry: handleSetCountry,
+    availableCurrencies,
+  }), [
+    currency,
+    handleSetCurrency,
+    cart,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    cartCount,
+    totalPrice,
+    isCartOpen,
+    toggleCart,
+    convertPrice,
+    country,
+    handleSetCountry,
+    availableCurrencies,
+  ]);
 
   return (
-    <CommerceContext.Provider
-      value={{
-        currency,
-        setCurrency: handleSetCurrency,
-        cart,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        cartCount,
-        totalPrice,
-        isCartOpen,
-        toggleCart,
-        convertPrice,
-        country,
-        setCountry: handleSetCountry,
-        availableCurrencies,
-      }}
-    >
+    <CommerceContext.Provider value={contextValue}>
       {children}
     </CommerceContext.Provider>
   );

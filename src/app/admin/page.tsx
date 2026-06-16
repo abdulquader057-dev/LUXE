@@ -1199,19 +1199,18 @@ export default function AdminDashboard() {
                        placeholder="Enter garment styling specifics..."
                        className="w-full bg-white/[0.02] border border-white/10 rounded-xl p-4 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all resize-none"
                      />
-                   </div>
-
-                   <div className="flex items-center gap-3 p-3 bg-white/[0.01] border border-white/5 rounded-xl">
-                     <input
-                       type="checkbox"
-                       checked={formIsTrending}
-                       onChange={(e) => setFormIsTrending(e.target.checked)}
-                       id="is-trending-checkbox"
-                       className="w-4 h-4 accent-primary rounded cursor-pointer"
-                     />
-                     <label htmlFor="is-trending-checkbox" className="text-[10px] font-mono text-white/50 uppercase tracking-widest cursor-pointer select-none">
-                       Feature on Storefront Trending Drop
-                     </label>
+                     <div className="hidden items-center gap-3 p-3 bg-white/[0.01] border border-white/5 rounded-xl">
+                       <input
+                         type="checkbox"
+                         checked={formIsTrending}
+                         onChange={(e) => setFormIsTrending(e.target.checked)}
+                         id="is-trending-checkbox"
+                         className="w-4 h-4 accent-primary rounded cursor-pointer"
+                       />
+                       <label htmlFor="is-trending-checkbox" className="text-[10px] font-mono text-white/50 uppercase tracking-widest cursor-pointer select-none">
+                         Feature on Storefront Trending Drop
+                       </label>
+                     </div>
                    </div>
 
                    <div className="pt-4 flex gap-4">

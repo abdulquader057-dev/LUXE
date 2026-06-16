@@ -8,7 +8,10 @@ import BackToTop from "@/components/BackToTop";
 
 // Lazy-load client-only widgets with SSR disabled to optimize FCP/hydration
 const ZyraChat = dynamic(() => import("@/components/ZyraChat"), { ssr: false });
-const CustomCursor = dynamic(() => import("@/components/CustomCursor"), { ssr: false });
+const CustomCursor = dynamic(() => import("@/components/CustomCursor"), {
+  ssr: false,
+  loading: () => <div className="cursor-placeholder" />,
+});
 
 export default function FloatingWidgets() {
   const [isOffline, setIsOffline] = useState(false);

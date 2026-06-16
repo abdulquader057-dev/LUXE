@@ -273,44 +273,46 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         localStorage.setItem("luxe-coupons", JSON.stringify(savedCoupons));
       }
 
-      // 2. Create order record in Supabase orders table
-      const isUuid = user?.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id);
-      
-      const { data: orderData, error: dbError } = await supabase
-        .from("orders")
-        .insert([
-          {
-            customer_id: isUuid ? user.id : null,
-            total_price: grandTotal,
-            status: paymentMethod === "cod" ? "processing" : "Pending",
-            delivery_address: JSON.stringify({
-              name,
-              phone,
-              email,
-              address,
-              landmark,
-              city,
-              state,
-              pincode,
-              instructions,
-              paymentMethod: paymentMethod === "cod" ? "COD" : "Razorpay Online",
-              items: cart.map(item => ({
-                id: item.id,
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                size: item.size || "L",
-                color: item.color || "White"
-              }))
-            })
-          }
-        ])
-        .select("id")
-        .single();
+      // 2. Create order record in Supabase orders table via server checkout API
+      const deliveryAddressPayload = JSON.stringify({
+        name,
+        phone,
+        email,
+        address,
+        landmark,
+        city,
+        state,
+        pincode,
+        instructions,
+        paymentMethod: paymentMethod === "cod" ? "COD" : "Razorpay Online",
+        items: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          size: item.size || "L",
+          color: item.color || "White"
+        }))
+      });
 
-      if (dbError) {
-        throw new Error(`Failed to log order: ${dbError.message}`);
+      const checkoutResponse = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer_id: isUuid ? user.id : null,
+          total_price: grandTotal,
+          status: paymentMethod === "cod" ? "processing" : "Pending",
+          delivery_address: deliveryAddressPayload,
+        }),
+      });
+
+      if (!checkoutResponse.ok) {
+        const checkErr = await checkoutResponse.json();
+        throw new Error(checkErr.error || "Failed to create order on server.");
       }
+
+      const checkoutResData = await checkoutResponse.json();
+      const orderData = checkoutResData.data;
 
       // 3. Prepaid payment path using Razorpay
       if (paymentMethod !== "cod") {

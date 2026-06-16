@@ -5,11 +5,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BrainCircuit, Globe, Server, Activity, ShieldAlert, Cpu, X, Terminal, RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function CognitionHub() {
+  const { isAdmin, isLoading } = useAuth();
+  const router = useRouter();
   const [activeNode, setActiveNode] = useState<any | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && !isAdmin) {
+      router.push("/");
+    }
+  }, [isLoading, isAdmin, router]);
 
   useEffect(() => {
     if (!activeNode) return;
@@ -112,6 +122,14 @@ export default function CognitionHub() {
       ]
     }
   ];
+
+  if (isLoading || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="w-16 h-16 border-t-2 border-primary rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-6 max-w-6xl">

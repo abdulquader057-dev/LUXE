@@ -242,6 +242,11 @@ function AccountSettings() {
     if (!user) return;
     try {
       const normalizedEmail = email.trim().toLowerCase();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(normalizedEmail)) {
+        toast.error("Please enter a valid email address.");
+        return;
+      }
       
       const updatePayload: any = {
         data: {
@@ -264,6 +269,7 @@ function AccountSettings() {
         .update({
           full_name: name,
           phone_number: phone,
+          email: normalizedEmail,
         })
         .eq("id", user.id);
       
@@ -383,13 +389,22 @@ function ClothingPreferences() {
   const [activeFit, setActiveFit] = React.useState("Oversized");
   const [monogram, setMonogram] = useState(false);
 
+  React.useEffect(() => {
+    const savedMaterial = localStorage.getItem("luxe-pref-material");
+    const savedFit = localStorage.getItem("luxe-pref-fit");
+    if (savedMaterial) setActiveMaterial(savedMaterial);
+    if (savedFit) setActiveFit(savedFit);
+  }, []);
+
   const handleMaterialChange = (mat: string) => {
     setActiveMaterial(mat);
+    localStorage.setItem("luxe-pref-material", mat);
     toast.success(`Material filter updated: ${mat}`);
   };
 
   const handleFitChange = (fit: string) => {
     setActiveFit(fit);
+    localStorage.setItem("luxe-pref-fit", fit);
     toast.success(`Fit profile locked: ${fit}`);
   };
 
@@ -706,7 +721,7 @@ function AccessoryHub() {
 
 function SubscriptionServices() {
   const { convertPrice } = useCommerce();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   
   // Tiers and pricing details
   const [insiderBase, setInsiderBase] = useState(450);
@@ -733,8 +748,6 @@ function SubscriptionServices() {
   // Success Celebration state
   const [showSuccessCelebration, setShowSuccessCelebration] = useState(false);
   const [celebrationPlanName, setCelebrationPlanName] = useState("");
-
-  const isAdmin = user?.email?.toLowerCase() === "abdulquader057@gmail.com";
 
   useEffect(() => {
     const p1 = localStorage.getItem("price-insider");
@@ -1396,10 +1409,15 @@ function NotificationSettings() {
 }
 
 function SupportCenter() {
-  const { user } = useAuth();
+  const { user, isAdmin, profile } = useAuth();
+  const { cart, totalPrice } = useCommerce();
   const [orders, setOrders] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   
+  // Preferences loaded from storage
+  const [prefMaterial, setPrefMaterial] = React.useState("Silk");
+  const [prefFit, setPrefFit] = React.useState("Oversized");
+
   // Modals state
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
@@ -1418,11 +1436,17 @@ function SupportCenter() {
   const [feedbackRating, setFeedbackRating] = useState(5);
 
   React.useEffect(() => {
+    const savedMaterial = localStorage.getItem("luxe-pref-material") || "Silk";
+    const savedFit = localStorage.getItem("luxe-pref-fit") || "Oversized";
+    setPrefMaterial(savedMaterial);
+    setPrefFit(savedFit);
+  }, [activeModal]);
+
+  React.useEffect(() => {
     async function fetchOrders() {
       setLoading(true);
       if (user) {
         try {
-          const isAdmin = user.email?.toLowerCase() === "abdulquader057@gmail.com";
           if (isAdmin) {
             // Admin fetches all orders in the system
             const { data, error } = await supabase
@@ -1463,7 +1487,7 @@ function SupportCenter() {
       setLoading(false);
     }
     fetchOrders();
-  }, [user]);
+  }, [user, isAdmin]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1471,14 +1495,45 @@ function SupportCenter() {
     
     const newMsg = { sender: "user", text: inputText };
     setChatMessages((prev) => [...prev, newMsg]);
+    const userQuery = inputText.toLowerCase();
     setInputText("");
 
     setTimeout(() => {
-      let botResponse = "Your request has been logged. An expert concierge will contact you shortly.";
-      if (inputText.toLowerCase().includes("order")) {
-        botResponse = "I see your active orders are currently in transit. We are optimizing shipping protocols for Mars Colony and Neural District.";
-      } else if (inputText.toLowerCase().includes("size") || inputText.toLowerCase().includes("ar")) {
-        botResponse = "To recalibrate your size profile, please run the Interactive AR Scanner under preferences.";
+      let botResponse: React.ReactNode = "";
+      
+      if (userQuery.includes("order") || userQuery.includes("delivery") || userQuery.includes("track") || userQuery.includes("dispatch")) {
+        if (orders && orders.length > 0) {
+          const latest = orders[0];
+          const orderDisplayId = latest.id.startsWith("ord-") ? `LX-${latest.id.slice(4).toUpperCase()}` : `LX-${latest.id.slice(0, 4).toUpperCase()}`;
+          botResponse = `I see your latest order ${orderDisplayId} is currently in status: "${latest.status || "Processing"}". Placed on: ${new Date(latest.created_at).toLocaleDateString()}. We are optimizing courier dispatch routes to ensure swift transit to your location.`;
+        } else {
+          botResponse = "No active orders found in your database profile transmission history. Let me know if you would like to explore our latest streetwear drop collections.";
+        }
+      } else if (userQuery.includes("cart") || userQuery.includes("bag") || userQuery.includes("item") || userQuery.includes("price") || userQuery.includes("total")) {
+        if (cart && cart.length > 0) {
+          const itemsList = cart.map(item => `${item.name} (${item.quantity}x)`).join(", ");
+          botResponse = `Your cart currently contains ${cart.length} item(s): [${itemsList}] with a total valuation of ₹${totalPrice}. Please proceed to checkout to confirm allocation.`;
+        } else {
+          botResponse = "Your shopping cart is currently empty. Our latest Collections Grid under the Store tab has new pieces ready to try on.";
+        }
+      } else if (userQuery.includes("size") || userQuery.includes("preference") || userQuery.includes("style") || userQuery.includes("fit") || userQuery.includes("material") || userQuery.includes("fabric") || userQuery.includes("profile")) {
+        const clientName = profile?.full_name || user?.user_metadata?.full_name || "Luxe Client";
+        const clientEmail = profile?.email || user?.email || "N/A";
+        const clientPhone = profile?.phone_number || user?.user_metadata?.phone_number || "N/A";
+        botResponse = `Styling DNA profile coordinates:\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nPreferred Fit: ${prefFit}\nPreferred Material: ${prefMaterial}\nLevel: ${user?.user_metadata?.style_dna?.level || 1}\nXP: ${user?.user_metadata?.style_dna?.xp || 0}\nYou can recalibrate these vectors under settings profile management.`;
+      } else {
+        botResponse = (
+          <div className="space-y-2">
+            <p>Your request has been logged in LUXE OS. If you require immediate assistance, please connect with our support team directly:</p>
+            <div className="border-t border-white/10 pt-2 mt-2 space-y-1 text-primary">
+              <p>Primary Call: <a href="tel:+917995338472" className="underline hover:text-white transition-colors">+91 7995338472</a></p>
+              <p>Secondary Call: <a href="tel:+917337246297" className="underline hover:text-white transition-colors">+91 7337246297</a></p>
+              <p>Support Email: <a href="mailto:official.valceron.in@gmail.com" className="underline hover:text-white transition-colors">official.valceron.in@gmail.com</a></p>
+              <p className="text-[10px] text-white/40 font-bold mt-2">For extreme/worst-case escalations only:</p>
+              <p>Escalation: <a href="mailto:abdulquader057@gmail.com" className="underline hover:text-white transition-colors">abdulquader057@gmail.com</a></p>
+            </div>
+          </div>
+        );
       }
       setChatMessages((prev) => [...prev, { sender: "bot", text: botResponse }]);
     }, 1000);
@@ -1596,9 +1651,15 @@ function SupportCenter() {
               </div>
               <div className="flex-1 p-6 overflow-y-auto space-y-4 custom-scrollbar">
                 {chatMessages.map((m, i) => (
-                  <div key={i} className={cn("flex flex-col max-w-[80%] rounded-2xl p-4 text-xs font-mono leading-relaxed", 
+                  <div key={i} className={cn("flex flex-col max-w-[80%] rounded-2xl p-4 text-xs font-mono leading-relaxed space-y-1", 
                     m.sender === "bot" ? "bg-white/5 text-white/80 self-start" : "bg-primary/20 text-white self-end border border-primary/30")}>
-                    {m.text}
+                    {typeof m.text === "string" ? (
+                      m.text.split("\n").map((line: string, idx: number) => (
+                        <p key={idx}>{line}</p>
+                      ))
+                    ) : (
+                      m.text
+                    )}
                   </div>
                 ))}
               </div>
@@ -1624,8 +1685,15 @@ function SupportCenter() {
                 <h3 className="text-xl font-display font-light italic">Schedule Expert Stylist</h3>
                 <button onClick={() => setActiveModal(null)} className="p-2 text-white/40 hover:text-white rounded-full hover:bg-white/5"><X size={18} /></button>
               </div>
-              <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-500 text-[10px] font-mono uppercase tracking-wider mb-6 leading-relaxed">
-                ⚠️ Currently, our expert fashion designers are fully booked. Stylist services and scheduling numbers are temporarily unavailable at this time.
+              <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-500 text-[10px] font-mono uppercase tracking-wider mb-6 leading-relaxed space-y-3">
+                <p>⚠️ Currently, our expert fashion designers are fully booked. Stylist services and scheduling numbers are temporarily unavailable at this time.</p>
+                <div className="border-t border-yellow-500/20 pt-3 mt-3 space-y-2">
+                  <p className="font-bold text-white">Direct Support Channels:</p>
+                  <p>Primary Call: <a href="tel:+917995338472" className="text-primary underline hover:text-white transition-colors">+91 7995338472</a></p>
+                  <p>Secondary Call: <a href="tel:+917337246297" className="text-primary underline hover:text-white transition-colors">+91 7337246297</a></p>
+                  <p>Support Email: <a href="mailto:official.valceron.in@gmail.com" className="text-primary underline hover:text-white transition-colors">official.valceron.in@gmail.com</a></p>
+                  <p className="text-[9px] text-yellow-500/60 font-bold mt-2">Worst-Case Escalation: <a href="mailto:abdulquader057@gmail.com" className="text-primary underline hover:text-white transition-colors">abdulquader057@gmail.com</a></p>
+                </div>
               </div>
               <form onSubmit={handleScheduleStylist} className="space-y-4 opacity-40 pointer-events-none">
                 <div className="space-y-2">

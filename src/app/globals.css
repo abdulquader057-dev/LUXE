@@ -488,6 +488,24 @@ button, .btn, .btn-primary, .btn-secondary, [role="button"] { min-height: 44px; 
   pointer-events: none; z-index: 10000; mix-blend-mode: difference;
 }
 
+/* CLS Placeholders */
+.cursor-placeholder {
+  width: 20px;
+  height: 20px;
+  position: fixed;
+  visibility: hidden; /* holds layout space */
+}
+
+.scene-placeholder {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+  z-index: -10;
+}
+
 /* MICRO ANIMATIONS */
 button, a, .clickable { will-change: transform; }
 button:active, a:active, .clickable:active { transform: scale(0.96); transition: transform 0.1s ease-out; }

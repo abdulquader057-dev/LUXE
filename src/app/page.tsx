@@ -5,17 +5,32 @@ import { motion } from "framer-motion";
 import { Sparkles, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Hero from "@/components/home/Hero";
-import HomeScene from "@/components/HomeScene";
+import dynamic from "next/dynamic";
 import { useCommerce } from "@/lib/contexts/CommerceContext";
 import CinematicShowcase from "@/components/home/CinematicShowcase";
 
 import { supabase } from "@/lib/supabase";
 import { parseDbProduct } from "@/data/products";
 
+const HomeScene = dynamic(() => import("@/components/HomeScene"), {
+  ssr: false,
+  loading: () => <div className="scene-placeholder" />,
+});
+
 export default function Home() {
   const { cart, convertPrice, toggleCart, removeFromCart, cartCount, totalPrice } = useCommerce();
   const [products, setProducts] = useState<any[]>([]);
   const router = useRouter();
+  const [isLowEnd, setIsLowEnd] = useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const lowEnd = (navigator.hardwareConcurrency || 4) <= 4 || 
+                     /Android [4-7]/.test(navigator.userAgent) ||
+                     localStorage.getItem("luxe_disable_webgl") === "true";
+      setIsLowEnd(lowEnd);
+    }
+  }, []);
 
   React.useEffect(() => {
     async function fetchProducts() {
@@ -35,7 +50,7 @@ export default function Home() {
 
   return (
     <>
-      <HomeScene />  {/* always mounted, always running behind */}
+      {!isLowEnd && <HomeScene />}  {/* only mounted on capable client devices */}
       <main
         style={{
           position: "relative",
