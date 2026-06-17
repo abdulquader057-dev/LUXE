@@ -121,41 +121,41 @@ const Hero = () => {
           </span>
         </motion.div>
 
-        {/* Main headline — LUXE cyan logo */}
+        {/* Main headline — gold gradient */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-cormorant font-light leading-none tracking-widest mb-4 floatHeadline uppercase"
+          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-cormorant font-light leading-none tracking-tight mb-4 floatHeadline"
           style={{
             background: "linear-gradient(135deg, #00f2ff 0%, #00d8ff 50%, #008da5 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
-            filter: "drop-shadow(0 0 30px rgba(0,242,255,0.25))",
+            filter: "drop-shadow(0 0 30px rgba(0,242,255,0.2))",
           }}
         >
-          LUXE
+          Luxury
+          <span
+            className="block italic"
+            style={{
+              background: "linear-gradient(135deg, #00d8ff 0%, #00f2ff 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Redefined
+          </span>
         </motion.h1>
-
-        {/* Tagline */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-xs sm:text-sm uppercase tracking-[0.4em] font-semibold mb-6 text-[#00f2ff]"
-          style={{ fontFamily: "var(--font-sora)" }}
-        >
-          Premium Indian Fashion
-        </motion.div>
 
         {/* Sub-headline */}
         <motion.p
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.0, delay: 0.3, ease: [0.25, 1, 0.15, 1] }}
-          className="text-xs sm:text-sm max-w-xl mx-auto leading-relaxed mb-10 text-white/50"
-          style={{ fontFamily: "var(--font-sora)", lineHeight: 1.75 }}
+          className="text-sm sm:text-base max-w-xl mx-auto leading-relaxed mb-10"
+          style={{ fontFamily: "var(--font-sora)", color: "rgba(240,237,232,0.55)", lineHeight: 1.75 }}
         >
           Affordable luxury fashion crafted from premium breathable fabrics.
           Designed for the bold generation of Hyderabad.
