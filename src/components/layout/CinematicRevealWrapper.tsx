@@ -7,16 +7,20 @@ export default function CinematicRevealWrapper({ children }: { children: React.R
   const [revealActive, setRevealActive] = useState(false);
   const [openingDone, setOpeningDone] = useState(false);
 
-  const handleComplete = () => {
+  const handleStartReveal = React.useCallback(() => {
+    setRevealActive(true);
+  }, []);
+
+  const handleComplete = React.useCallback(() => {
     setRevealActive(true);
     setOpeningDone(true);
-  };
+  }, []);
 
   return (
     <>
       {!openingDone && (
         <OpeningAnimation
-          onStartReveal={() => setRevealActive(true)}
+          onStartReveal={handleStartReveal}
           onComplete={handleComplete}
         />
       )}

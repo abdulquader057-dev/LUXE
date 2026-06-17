@@ -84,24 +84,60 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
   const glassCanvasRef = useRef<HTMLCanvasElement>(null);
   const isReducedMotion = useReducedMotion();
 
+  const onStartRevealRef = useRef(onStartReveal);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onStartRevealRef.current = onStartReveal;
+    onCompleteRef.current = onComplete;
+  }, [onStartReveal, onComplete]);
+
+  // Singleton guard state to prevent duplicate rendering and animation timelines
+  const [shouldRender, setShouldRender] = React.useState(false);
+  const animationCompletedRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if ((window as any).__LUXE_INTRO_PLAYED__) {
+        console.log("[Luxe] Intro singleton guard. Skipping animation rendering.");
+        if (onStartRevealRef.current) onStartRevealRef.current();
+        onCompleteRef.current();
+        return;
+      }
+      // Set played flag immediately to lock other potential mounts
+      (window as any).__LUXE_INTRO_PLAYED__ = true;
+      setShouldRender(true);
+    }
+  }, []);
+
+  // Strict mode / early unmount cleanup guard
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && !animationCompletedRef.current) {
+        console.log("[Luxe] Intro unmounted before completion. Resetting played flag.");
+        delete (window as any).__LUXE_INTRO_PLAYED__;
+      }
+    };
+  }, []);
+
   // Handle skip if reduced motion is requested
   useEffect(() => {
     console.log("[Luxe] OpeningAnimation mounted. prefers-reduced-motion status:", isReducedMotion);
     if (isReducedMotion) {
       console.log("[Luxe] Skipping opening animation to respect user accessibility preferences.");
-      if (onStartReveal) onStartReveal();
+      if (onStartRevealRef.current) onStartRevealRef.current();
       setTimeout(() => {
-        onComplete();
+        onCompleteRef.current();
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("open-country-modal"));
         }
       }, 300);
     }
-  }, [isReducedMotion, onStartReveal, onComplete]);
+  }, [isReducedMotion]);
 
   // 1. Procedural static fabric weave background drawing
   useEffect(() => {
-    if (isReducedMotion) return;
+    if (isReducedMotion || !shouldRender) return;
 
     const canvas = bgCanvasRef.current;
     if (!canvas) return;
@@ -179,11 +215,11 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
     return () => {
       window.removeEventListener("resize", drawFabricBackground);
     };
-  }, [isReducedMotion]);
+  }, [isReducedMotion, shouldRender]);
 
   // 2. Three.js Refractive Glass Shards Assembly setup
   useEffect(() => {
-    if (isReducedMotion) return;
+    if (isReducedMotion || !shouldRender) return;
 
     const canvas = glassCanvasRef.current;
     if (!canvas) return;
@@ -472,12 +508,15 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
           duration: 1.6,
           ease: "power2.out",
           onStart: () => {
-            if (onStartReveal) {
-              onStartReveal();
+            if (onStartRevealRef.current) {
+              onStartRevealRef.current();
             }
           },
           onComplete: () => {
-            onComplete();
+            animationCompletedRef.current = true;
+            if (onCompleteRef.current) {
+              onCompleteRef.current();
+            }
             if (typeof window !== "undefined") {
               window.dispatchEvent(new CustomEvent("open-country-modal"));
             }
@@ -533,9 +572,9 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       });
       ctx.revert();
     };
-  }, [isReducedMotion, onComplete]);
+  }, [isReducedMotion, shouldRender]);
 
-  if (isReducedMotion) return null;
+  if (isReducedMotion || !shouldRender) return null;
 
   return (
     <div ref={overlayRef} className="opening-overlay">
