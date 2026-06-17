@@ -5,14 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, BrainCircuit, Wand2, Palette, Ruler, ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
-import { parseDbProduct } from "@/data/products";
+import { parseDbProduct, MOCK_PRODUCTS } from "@/data/products";
 import ProductCard from "@/components/shop/ProductCard";
+import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 const AIStylePage = () => {
   const [step, setStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [allProducts, setAllProducts] = useState<any[]>([]);
+  const { addToCart, toggleCart } = useCommerce();
 
   useEffect(() => {
     async function fetchProducts() {
@@ -23,11 +25,12 @@ const AIStylePage = () => {
           const unique = parsed.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
           setAllProducts(unique);
         } else {
-          setAllProducts([]);
+          console.log("Supabase products empty, falling back to mock catalog.");
+          setAllProducts(MOCK_PRODUCTS);
         }
       } catch (err) {
-        console.error("Failed to load products for AI Style analysis:", err);
-        setAllProducts([]);
+        console.error("Failed to load products for AI Style analysis, falling back to mock catalog:", err);
+        setAllProducts(MOCK_PRODUCTS);
       }
     }
     fetchProducts();
@@ -40,7 +43,7 @@ const AIStylePage = () => {
     setTimeout(() => {
       setIsAnalyzing(false);
       // Use real Supabase products, fallback to mock if DB empty
-      const pool = allProducts.length > 0 ? allProducts : [];
+      const pool = allProducts.length > 0 ? allProducts : MOCK_PRODUCTS;
       // Shuffle and take 3
       const shuffled = [...pool].sort(() => 0.5 - Math.random());
       setRecommendations(shuffled.slice(0, 3));
@@ -49,7 +52,7 @@ const AIStylePage = () => {
   };
 
   return (
-    <div className="container mx-auto px-6 max-w-4xl">
+    <div className="container mx-auto px-6 max-w-4xl pt-32 pb-24 min-h-screen">
         <div className="text-center mb-16">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -248,7 +251,28 @@ const AIStylePage = () => {
                       <h4 className="text-xl font-orbitron font-bold tracking-tight uppercase mb-2 text-white">Buy the Full Bundle</h4>
                       <p className="text-white/40 text-sm font-sora">Save 15% when you purchase the AI recommended ensemble.</p>
                     </div>
-                    <button className="px-8 py-4 bg-white text-black rounded-xl font-orbitron font-bold tracking-tight hover:scale-105 transition-transform flex items-center gap-2">
+                    <button 
+                      onClick={() => {
+                        recommendations.forEach((p) => {
+                          const modelImg = p.modelImages?.variants?.[p.colors?.[0]] || p.modelImages || {};
+                          const img = modelImg.front && modelImg.front !== "/model_placeholder.png" 
+                            ? modelImg.front 
+                            : (Array.isArray(p.images) ? p.images[0] : p.images) || "/brand/linen_model_front.png";
+                          
+                          addToCart({
+                            id: p.id,
+                            name: p.name,
+                            price: p.price,
+                            image: img,
+                            quantity: 1,
+                            size: "L",
+                            color: p.colors?.[0] || "White",
+                          });
+                        });
+                        toggleCart();
+                      }}
+                      className="px-8 py-4 bg-white text-black rounded-xl font-orbitron font-bold tracking-tight hover:scale-105 transition-transform flex items-center gap-2"
+                    >
                       ADD BUNDLE TO CART <ArrowRight size={18} />
                     </button>
                   </div>
