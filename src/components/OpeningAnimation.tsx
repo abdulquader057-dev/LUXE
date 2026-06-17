@@ -356,20 +356,20 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       // Ensure glass material starts fully opaque at t=0s
       tl.set(glassMat, { opacity: 0.9 }, 0);
 
-      // Step 1: Fade weave background from 0 to 1 over 1.8s starting at 0.1s
+      // Step 1: Fade weave background from 0 to 1 over 1.5s starting at 0.1s
       tl.fromTo(
         bgCanvasRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 1.8, ease: "power2.inOut" },
+        { opacity: 1, duration: 1.5, ease: "power2.inOut" },
         0.1
       );
 
-      // Slowly push camera Z position in from 7.5 to 5.2 over 5.5s
+      // Slowly push camera Z position in from 7.5 to 5.2 over 3.2s
       tl.to(
         camera.position,
         {
           z: 5.2,
-          duration: 5.5,
+          duration: 3.2,
           ease: "power1.inOut",
         },
         0.3
@@ -404,7 +404,7 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
         );
       });
 
-      // Step 3: Fade in lighting behind shards to make them glow (LUXE Reveal) at t=1.5s
+      // Step 3: Fade in lighting behind shards to make them glow (LUXE Reveal) at t=1.4s
       tl.to(
         letterLights,
         {
@@ -412,61 +412,10 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
           duration: 0.8,
           ease: "power2.out",
         },
-        1.5
+        1.4
       );
 
-      // Step 4: Stagger HTML text rise with blur-in and spacing expansion (aligned with glow) at t=1.6s
-      tl.to(
-        ".opening-brand span",
-        {
-          y: 0,
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 1.2,
-          stagger: 0.08,
-          ease: "power3.out",
-        },
-        1.6
-      );
-
-      // Breathe letter spacing on the brand header container
-      tl.fromTo(
-        ".opening-brand",
-        { gap: "0.02em" },
-        {
-          gap: "0.22em",
-          duration: 2.2,
-          ease: "power2.out",
-        },
-        1.6
-      );
-
-      // Step 5: Fade in shimmer line and taglines at t=2.2s (Typography Reveal)
-      tl.to(
-        ".opening-shimmer-line",
-        {
-          opacity: 1,
-          scaleX: 1,
-          duration: 0.8,
-          ease: "power2.out",
-        },
-        2.2
-      );
-
-      // Fade taglines over 0.8s below the logo
-      tl.to(
-        [".opening-tagline", ".opening-subtagline"],
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "power2.out",
-        },
-        2.4
-      );
-
-      // Step 6: Shatter / Explode glass shards and fade out HTML overlays simultaneously at t=5.6s
+      // Step 4: Shatter / Explode glass shards and fade out WebGL material completely from t=2.4s to t=3.2s
       shards.forEach((shard, i) => {
         const target = targetPoints[i];
         
@@ -476,10 +425,10 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
             x: target.x + (Math.random() - 0.5) * 5.0,
             y: target.y + (Math.random() - 0.5) * 5.0,
             z: target.z + 8.0 + Math.random() * 4.0,
-            duration: 1.6,
-            ease: "power2.inOut",
+            duration: 0.8,
+            ease: "power2.in",
           },
-          5.6
+          2.4
         );
         
         tl.to(
@@ -488,54 +437,114 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
             x: (Math.random() - 0.5) * Math.PI,
             y: (Math.random() - 0.5) * Math.PI,
             z: (Math.random() - 0.5) * Math.PI,
-            duration: 1.6,
-            ease: "power2.inOut",
+            duration: 0.8,
+            ease: "power2.in",
           },
-          5.6
+          2.4
         );
       });
 
-      // Fade out material and point lights during shatter
+      // Fade out glass material, lights, and Three.js canvas to 0 opacity at t=2.4s (duration 0.8s)
       tl.to(
         glassMat,
         {
           opacity: 0,
-          duration: 1.2,
+          duration: 0.8,
           ease: "power2.out",
         },
-        5.6
+        2.4
       );
 
       tl.to(
         letterLights,
         {
           intensity: 0,
-          duration: 1.2,
+          duration: 0.8,
           ease: "power2.out",
         },
-        5.6
+        2.4
       );
 
-      // Fade out HTML text overlay
+      tl.to(
+        glassCanvasRef.current,
+        {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        2.4
+      );
+
+      // Step 5: ONLY AFTER shards are completely gone (t=3.2s), fade in HTML typography cyan LUXE logo
+      tl.to(
+        ".opening-brand span",
+        {
+          y: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 1.0,
+          stagger: 0.08,
+          ease: "power3.out",
+        },
+        3.2
+      );
+
+      // Breathe letter spacing on the brand header container starting at t=3.2s
+      tl.fromTo(
+        ".opening-brand",
+        { gap: "0.02em" },
+        {
+          gap: "0.22em",
+          duration: 2.0,
+          ease: "power2.out",
+        },
+        3.2
+      );
+
+      // Fade in shimmer line and taglines at t=3.8s and t=4.0s
+      tl.to(
+        ".opening-shimmer-line",
+        {
+          opacity: 1,
+          scaleX: 1,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        3.8
+      );
+
+      tl.to(
+        [".opening-tagline", ".opening-subtagline"],
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power2.out",
+        },
+        4.0
+      );
+
+      // Step 6: Fade out HTML text overlay starting at t=6.6s (duration 1.0s)
       tl.to(
         [".opening-brand", ".opening-shimmer-line", ".opening-taglines"],
         {
           opacity: 0,
           scale: 0.96,
-          duration: 0.8,
+          duration: 1.0,
           ease: "power2.out",
         },
-        5.6
+        6.6
       );
 
-      // Step 7: Fade out the entire overlay to reveal the home page (starting at t=5.4s)
+      // Step 7: Fade out the entire overlay to reveal the home page starting at t=6.4s (duration 1.4s)
       tl.to(
         overlayRef.current,
         {
           opacity: 0,
           scale: 1.04,
           pointerEvents: "none",
-          duration: 1.6,
+          duration: 1.4,
           ease: "power2.out",
           onStart: () => {
             if (onStartRevealRef.current) {
@@ -552,7 +561,7 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
             }
           },
         },
-        5.4
+        6.4
       );
     });
 
