@@ -356,26 +356,26 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       // Ensure glass material starts fully opaque at t=0s
       tl.set(glassMat, { opacity: 0.9 }, 0);
 
-      // Step 1: Fade weave background from 0 to 1 over 1.5s starting at 0.2s
+      // Step 1: Fade weave background from 0 to 1 over 1.2s starting at 0.1s
       tl.fromTo(
         bgCanvasRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 1.5, ease: "power2.inOut" },
-        0.2
+        { opacity: 1, duration: 1.2, ease: "power2.inOut" },
+        0.1
       );
 
-      // Slowly push camera Z position in from 7.5 to 5.2 over 4.5s
+      // Slowly push camera Z position in from 7.5 to 5.2 over 2.5s
       tl.to(
         camera.position,
         {
           z: 5.2,
-          duration: 4.5,
+          duration: 2.5,
           ease: "power1.inOut",
         },
-        0.5
+        0.3
       );
 
-      // Step 2: Assemble shards to target position (Particle Formation) from t=0.2s to t=1.8s
+      // Step 2: Assemble shards to target position (Particle Formation) from t=0.1s to t=1.4s
       shards.forEach((shard, i) => {
         const target = targetPoints[i];
         
@@ -385,10 +385,10 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
             x: target.x,
             y: target.y,
             z: target.z,
-            duration: 1.6,
+            duration: 1.3,
             ease: "power2.out",
           },
-          0.2
+          0.1
         );
         
         tl.to(
@@ -397,76 +397,25 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
             x: (Math.random() - 0.5) * 0.15,
             y: (Math.random() - 0.5) * 0.15,
             z: (Math.random() - 0.5) * 0.15,
-            duration: 1.6,
+            duration: 1.3,
             ease: "power2.out",
           },
-          0.2
+          0.1
         );
       });
 
-      // Step 3: Fade in lighting behind shards to make them glow (LUXE Reveal) at t=1.5s
+      // Step 3: Fade in lighting behind shards to make them glow (LUXE Reveal) at t=1.2s
       tl.to(
         letterLights,
         {
           intensity: 4.5,
-          duration: 0.8,
+          duration: 0.6,
           ease: "power2.out",
         },
-        1.5
+        1.2
       );
 
-      // Step 4: Stagger HTML text rise with blur-in and spacing expansion (aligned with glow) at t=1.6s
-      tl.to(
-        ".opening-brand span",
-        {
-          y: 0,
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 1.0,
-          stagger: 0.08,
-          ease: "power3.out",
-        },
-        1.6
-      );
-
-      // Breathe letter spacing on the brand header container
-      tl.fromTo(
-        ".opening-brand",
-        { gap: "0.02em" },
-        {
-          gap: "0.22em",
-          duration: 2.2,
-          ease: "power2.out",
-        },
-        1.6
-      );
-
-      // Step 5: Fade in shimmer line and taglines at t=2.2s (Typography Reveal)
-      tl.to(
-        ".opening-shimmer-line",
-        {
-          opacity: 1,
-          scaleX: 1,
-          duration: 0.8,
-          ease: "power2.out",
-        },
-        2.2
-      );
-
-      // Fade taglines over 0.8s below the logo
-      tl.to(
-        [".opening-tagline", ".opening-subtagline"],
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "power2.out",
-        },
-        2.4
-      );
-
-      // Step 6: Shatter / Explode glass shards and fade out HTML overlays simultaneously at t=3.6s
+      // Step 4: Shatter / Explode glass shards and fade out material at t=1.9s
       shards.forEach((shard, i) => {
         const target = targetPoints[i];
         
@@ -476,10 +425,10 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
             x: target.x + (Math.random() - 0.5) * 5.0,
             y: target.y + (Math.random() - 0.5) * 5.0,
             z: target.z + 8.0 + Math.random() * 4.0,
-            duration: 1.6,
+            duration: 1.2,
             ease: "power2.inOut",
           },
-          3.6
+          1.9
         );
         
         tl.to(
@@ -488,10 +437,10 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
             x: (Math.random() - 0.5) * Math.PI,
             y: (Math.random() - 0.5) * Math.PI,
             z: (Math.random() - 0.5) * Math.PI,
-            duration: 1.6,
+            duration: 1.2,
             ease: "power2.inOut",
           },
-          3.6
+          1.9
         );
       });
 
@@ -500,52 +449,30 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
         glassMat,
         {
           opacity: 0,
-          duration: 1.2,
+          duration: 0.9,
           ease: "power2.out",
         },
-        3.6
+        1.9
       );
 
       tl.to(
         letterLights,
         {
           intensity: 0,
-          duration: 1.2,
+          duration: 0.9,
           ease: "power2.out",
         },
-        3.6
+        1.9
       );
 
-      // Fade out HTML text overlay
-      tl.to(
-        [".opening-brand", ".opening-shimmer-line", ".opening-taglines"],
-        {
-          opacity: 0,
-          scale: 0.96,
-          duration: 0.8,
-          ease: "power2.out",
-        },
-        3.6
-      );
-
-      tl.to(
-        letterLights,
-        {
-          intensity: 0,
-          duration: 1.8,
-          ease: "power2.out",
-        },
-        2.8
-      );
-
-      // Step 7: Fade out the entire overlay to reveal the home page (starting at t=3.2s)
+      // Step 5: Fade out the entire overlay to reveal the home page (starting at t=1.8s)
       tl.to(
         overlayRef.current,
         {
           opacity: 0,
           scale: 1.04,
           pointerEvents: "none",
-          duration: 1.6,
+          duration: 1.2,
           ease: "power2.out",
           onStart: () => {
             if (onStartRevealRef.current) {
@@ -562,7 +489,7 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
             }
           },
         },
-        3.2
+        1.8
       );
     });
 
@@ -623,23 +550,6 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
 
       {/* Foreground WebGL canvas for glass shards */}
       <canvas ref={glassCanvasRef} className="glass-shards-canvas" />
-
-      {/* Typography Overlay */}
-      <div className="opening-brand">
-        {BRAND_NAME.split("").map((letter, idx) => (
-          <span key={idx}>{letter}</span>
-        ))}
-      </div>
-      
-      {/* Shimmer Line */}
-      <div className="opening-shimmer-line">
-        <div className="opening-shimmer-bar" />
-      </div>
-
-      <div className="opening-taglines">
-        <p className="opening-tagline">Premium Indian Fashion</p>
-        <p className="opening-subtagline">Hyderabad · Est. 2026</p>
-      </div>
     </div>
   );
 }
