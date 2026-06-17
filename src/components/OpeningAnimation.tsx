@@ -324,14 +324,18 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
 
       const mesh = new THREE.Mesh(geom, glassMat);
 
-      // Initialize directly at target coordinates (already assembled)
-      mesh.position.copy(target);
+      // Start scattered in 3D space (Particle Formation start state)
+      mesh.position.set(
+        target.x + (Math.random() - 0.5) * 6.0,
+        target.y + (Math.random() - 0.5) * 6.0,
+        target.z + 4.0 + Math.random() * 4.0
+      );
 
-      // Add a tiny random rotation for organic glass facet look
+      // Add a full random rotation for organic glass facet look
       mesh.rotation.set(
-        (Math.random() - 0.5) * 0.1,
-        (Math.random() - 0.5) * 0.1,
-        (Math.random() - 0.5) * 0.1
+        (Math.random() - 0.5) * 2 * Math.PI,
+        (Math.random() - 0.5) * 2 * Math.PI,
+        (Math.random() - 0.5) * 2 * Math.PI
       );
 
       scene.add(mesh);
@@ -342,10 +346,17 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
     const ctx = gsap.context(() => {
       const tl = gsap.timeline();
 
-      // Step 1: Pause 0.5s
-      tl.to({}, { duration: 0.5 });
+      // Step 0: Fade in WebGL canvas instantly at start to show scattered shards
+      tl.to(
+        glassCanvasRef.current,
+        { opacity: 1, duration: 0.1, ease: "none" },
+        0
+      );
 
-      // Step 2: Fade weave background from 0 to 1 over 1.5s starting at 0.2s
+      // Ensure glass material starts fully opaque at t=0s
+      tl.set(glassMat, { opacity: 0.9 }, 0);
+
+      // Step 1: Fade weave background from 0 to 1 over 1.5s starting at 0.2s
       tl.fromTo(
         bgCanvasRef.current,
         { opacity: 0 },
@@ -364,18 +375,58 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
         0.5
       );
 
-      // Step 3: Stagger HTML text rise with blur-in and spacing expansion (triggered first)
+      // Step 2: Assemble shards to target position (Particle Formation) from t=0.2s to t=1.8s
+      shards.forEach((shard, i) => {
+        const target = targetPoints[i];
+        
+        tl.to(
+          shard.position,
+          {
+            x: target.x,
+            y: target.y,
+            z: target.z,
+            duration: 1.6,
+            ease: "power2.out",
+          },
+          0.2
+        );
+        
+        tl.to(
+          shard.rotation,
+          {
+            x: (Math.random() - 0.5) * 0.15,
+            y: (Math.random() - 0.5) * 0.15,
+            z: (Math.random() - 0.5) * 0.15,
+            duration: 1.6,
+            ease: "power2.out",
+          },
+          0.2
+        );
+      });
+
+      // Step 3: Fade in lighting behind shards to make them glow (LUXE Reveal) at t=1.5s
+      tl.to(
+        letterLights,
+        {
+          intensity: 4.5,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        1.5
+      );
+
+      // Step 4: Stagger HTML text rise with blur-in and spacing expansion (aligned with glow) at t=1.6s
       tl.to(
         ".opening-brand span",
         {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 1.2,
+          duration: 1.0,
           stagger: 0.08,
           ease: "power3.out",
         },
-        0.3
+        1.6
       );
 
       // Breathe letter spacing on the brand header container
@@ -387,81 +438,48 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
           duration: 2.2,
           ease: "power2.out",
         },
-        0.3
+        1.6
       );
 
-      // Fade in shimmer line
+      // Step 5: Fade in shimmer line and taglines at t=2.2s (Typography Reveal)
       tl.to(
         ".opening-shimmer-line",
         {
           opacity: 1,
           scaleX: 1,
-          duration: 1.0,
+          duration: 0.8,
           ease: "power2.out",
         },
-        0.6
+        2.2
       );
 
-      // Fade taglines over 1.0s below the logo
+      // Fade taglines over 0.8s below the logo
       tl.to(
         [".opening-tagline", ".opening-subtagline"],
         {
           opacity: 1,
           y: 0,
-          duration: 1.0,
+          duration: 0.8,
           stagger: 0.15,
           ease: "power2.out",
         },
-        0.8
+        2.4
       );
 
-      // Step 4: Fade out HTML text overlay completely before showing 3D shards (from t=2.2s to t=2.7s)
-      tl.to(
-        [".opening-brand", ".opening-shimmer-line", ".opening-taglines"],
-        {
-          opacity: 0,
-          scale: 0.96,
-          duration: 0.5,
-          ease: "power2.inOut",
-        },
-        2.2
-      );
-
-      // Step 5: Fade in WebGL canvas exactly as HTML logo completes fade-out (at t=2.7s)
-      tl.to(
-        glassCanvasRef.current,
-        { opacity: 1, duration: 0.1, ease: "none" },
-        2.7
-      );
-
-      // Fade in lighting behind shards instantly
-      tl.to(
-        letterLights,
-        {
-          intensity: 4.5,
-          duration: 0.1,
-          ease: "none",
-        },
-        2.7
-      );
-
-      // Ensure glass material starts fully opaque at t=2.7s
-      tl.set(glassMat, { opacity: 0.9 }, 2.7);
-
-      // Step 6: Shatter / Explode glass shards immediately at t=2.8s (no static pause/double show)
+      // Step 6: Shatter / Explode glass shards and fade out HTML overlays simultaneously at t=3.6s
       shards.forEach((shard, i) => {
         const target = targetPoints[i];
         
         tl.to(
           shard.position,
           {
-            x: target.x + (Math.random() - 0.5) * 4.0,
-            y: target.y + (Math.random() - 0.5) * 4.0,
-            z: target.z + 6.0 + Math.random() * 4.0,
-            duration: 2.0,
-            ease: "power2.out",
+            x: target.x + (Math.random() - 0.5) * 5.0,
+            y: target.y + (Math.random() - 0.5) * 5.0,
+            z: target.z + 8.0 + Math.random() * 4.0,
+            duration: 1.6,
+            ease: "power2.inOut",
           },
-          2.8
+          3.6
         );
         
         tl.to(
@@ -470,10 +488,10 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
             x: (Math.random() - 0.5) * Math.PI,
             y: (Math.random() - 0.5) * Math.PI,
             z: (Math.random() - 0.5) * Math.PI,
-            duration: 2.0,
-            ease: "power2.out",
+            duration: 1.6,
+            ease: "power2.inOut",
           },
-          2.8
+          3.6
         );
       });
 
@@ -482,10 +500,32 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
         glassMat,
         {
           opacity: 0,
-          duration: 1.8,
+          duration: 1.2,
           ease: "power2.out",
         },
-        2.8
+        3.6
+      );
+
+      tl.to(
+        letterLights,
+        {
+          intensity: 0,
+          duration: 1.2,
+          ease: "power2.out",
+        },
+        3.6
+      );
+
+      // Fade out HTML text overlay
+      tl.to(
+        [".opening-brand", ".opening-shimmer-line", ".opening-taglines"],
+        {
+          opacity: 0,
+          scale: 0.96,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        3.6
       );
 
       tl.to(
