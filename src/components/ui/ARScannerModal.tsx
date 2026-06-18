@@ -65,6 +65,20 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
     setSelectedPhoto(null);
     setAnalysisResult(null);
 
+    const cameraOverride = typeof window !== "undefined" ? localStorage.getItem("luxe-override-camera") : "default";
+
+    if (cameraOverride === "denied") {
+      toast.error("Camera access denied. Please try uploading a photo instead.");
+      setScanningStatus("idle");
+      return;
+    }
+
+    if (cameraOverride === "granted") {
+      setActiveStream(null);
+      runScannerSequence();
+      return;
+    }
+
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "user" } } });

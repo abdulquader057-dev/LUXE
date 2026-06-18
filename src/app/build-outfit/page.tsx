@@ -38,7 +38,7 @@ export default function BuildOutfitPage() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [revealPhase, setRevealPhase] = useState(0);
   const [likedOutfits, setLikedOutfits] = useState<Set<string>>(new Set());
-  const { convertPrice } = useCommerce();
+  const { convertPrice, addToCart } = useCommerce();
 
   // Supabase Integration States
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
@@ -575,7 +575,29 @@ export default function BuildOutfitPage() {
                   >
                     <RotateCcw size={16} /> Regenerate
                   </button>
-                  <button className="px-10 py-5 rounded-[24px] bg-[var(--primary-color)] text-black font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-all flex items-center gap-3">
+                  <button 
+                    onClick={() => {
+                      if (outfitProducts.length === 0 || !generatedOutfit) {
+                        toast.error("No outfit products to add.");
+                        return;
+                      }
+                      outfitProducts.forEach((product) => {
+                        if (product) {
+                          addToCart({
+                            id: product.id,
+                            name: product.name,
+                            price: product.price,
+                            image: product.images[0],
+                            quantity: 1,
+                            size: product.sizes?.[0] || "L",
+                            color: product.colors?.[0] || "Obsidian"
+                          });
+                        }
+                      });
+                      toast.success("Complete outfit added to your shopping bag!");
+                    }}
+                    className="px-10 py-5 rounded-[24px] bg-[var(--primary-color)] text-black font-black text-[10px] tracking-widest uppercase hover:scale-105 transition-all flex items-center gap-3 cursor-pointer"
+                  >
                     <ShoppingBag size={16} /> Add Complete Fit
                   </button>
                 </div>

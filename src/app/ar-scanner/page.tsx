@@ -124,6 +124,20 @@ export default function AIStudioPage() {
         stream.getTracks().forEach(track => track.stop());
       }
       
+      const cameraOverride = typeof window !== "undefined" ? localStorage.getItem("luxe-override-camera") : "default";
+      if (cameraOverride === "denied") {
+        throw new Error("Camera permission overridden to denied");
+      }
+      
+      if (cameraOverride === "granted") {
+        setStream(null);
+        setHasCamera(true);
+        if (showToast) {
+          toast.success("LUXE Optical Camera Link Active (Simulated).", { id: "camera-status" });
+        }
+        return;
+      }
+      
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: { ideal: "user" }, // Default to user camera for self-scanning
@@ -526,6 +540,34 @@ export default function AIStudioPage() {
               />
             ) : null}
 
+            {/* Simulated/Mock Camera Feed (when camera is mock-granted but no actual stream exists) */}
+            {hasCamera === true && !stream && !userPhoto && (
+              <div className="absolute inset-0 bg-[#050508] z-10 flex flex-col items-center justify-center overflow-hidden">
+                {/* Simulated luxury scanning background mesh */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,242,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,242,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80" />
+                
+                {/* Rotating HUD mesh rings */}
+                <div className="relative w-72 h-72 rounded-full border border-primary/20 flex items-center justify-center animate-pulse-glow">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+                    className="absolute inset-4 rounded-full border border-dashed border-[#00f2ff]/30"
+                  />
+                  <motion.div
+                    animate={{ rotate: -360 }}
+                    transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
+                    className="absolute inset-10 rounded-full border border-primary/10"
+                  />
+                  <div className="text-center space-y-2 relative z-20">
+                    <span className="text-[10px] font-mono text-primary tracking-[0.4em] uppercase block">LUXE SIMULATOR</span>
+                    <h4 className="text-sm font-mono font-bold uppercase tracking-wider text-white">OPTICAL SCAN ACTIVE</h4>
+                    <span className="text-[8px] font-mono text-white/30 uppercase tracking-[0.2em] block">SKELETAL DNA FEED READY</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Real AR Body Tracking overlay */}
             {activeTab === "fitting" && selectedProduct && hasCamera === true && stream && !userPhoto && (
               <ARBodyTracker
@@ -549,7 +591,7 @@ export default function AIStudioPage() {
             ) : null}
 
             {/* Camera Offline Fallback */}
-            {(!stream && !userPhoto) && (
+            {(hasCamera === false && !userPhoto) && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 z-10 p-8 text-center bg-black/85">
                 <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40">
                   <Camera size={28} />
@@ -572,9 +614,9 @@ export default function AIStudioPage() {
             {/* Top Viewport Metadata Overlay */}
             <div className="relative z-30 p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
               <div className="flex items-center gap-3">
-                <div className={cn("w-2.5 h-2.5 rounded-full animate-pulse", stream || userPhoto ? "bg-green-500 shadow-[0_0_8px_#22c55e]" : "bg-red-500")} />
+                <div className={cn("w-2.5 h-2.5 rounded-full animate-pulse", hasCamera === true || userPhoto ? "bg-green-500 shadow-[0_0_8px_#22c55e]" : "bg-red-500")} />
                 <span className="text-[10px] font-mono font-bold tracking-widest uppercase text-white/70">
-                  {userPhoto ? "STYLE DATA SOURCE: CUSTOM FILE" : stream ? "LIVE CAMERA LINK ACTIVE" : "CAMERA FEED OFFLINE"}
+                  {userPhoto ? "STYLE DATA SOURCE: CUSTOM FILE" : stream ? "LIVE CAMERA LINK ACTIVE" : hasCamera === true ? "SIMULATED CAMERA LINK ACTIVE" : "CAMERA FEED OFFLINE"}
                 </span>
               </div>
               {selectedProduct && activeTab === "fitting" && (

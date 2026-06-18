@@ -167,13 +167,45 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
   // Auto-detect address using Geolocation and Nominatim
   const detectLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
+    setDetecting(true);
+    const toastId = toast.loading("Acquiring GPS coordinates...");
+
+    const geoOverride = typeof window !== "undefined" ? localStorage.getItem("luxe-override-geolocation") : "default";
+
+    if (geoOverride === "denied") {
+      setTimeout(() => {
+        toast.dismiss(toastId);
+        toast.error("GPS access denied. Please fill manually.");
+        setDetecting(false);
+      }, 800);
       return;
     }
 
-    setDetecting(true);
-    const toastId = toast.loading("Acquiring GPS coordinates...");
+    if (geoOverride === "granted") {
+      setTimeout(() => {
+        toast.dismiss(toastId);
+        const lat = 17.3850;
+        const lon = 78.4867;
+        setCoords({ lat, lon });
+        const dist = getDistanceKM(lat, lon, BABA_NAGAR.lat, BABA_NAGAR.lon);
+        setDistance(dist);
+        setAddress("Neural District, Sector 12");
+        setCity("Hyderabad");
+        setState("Telangana");
+        setPincode("500024");
+        setError(null);
+        toast.success(`Location synced! Distance from Baba Nagar: ${dist.toFixed(1)} km (Simulated)`);
+        setDetecting(false);
+      }, 800);
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      toast.dismiss(toastId);
+      toast.error("Geolocation is not supported by your browser");
+      setDetecting(false);
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {

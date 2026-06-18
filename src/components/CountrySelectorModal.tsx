@@ -42,13 +42,36 @@ export const CountrySelectorModal = ({ isOpen, onClose }: CountrySelectorModalPr
   };
 
   const autoDetectCountry = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
+    setDetecting(true);
+    const toastId = toast.loading("Locating coordinates...");
+
+    const geoOverride = typeof window !== "undefined" ? localStorage.getItem("luxe-override-geolocation") : "default";
+
+    if (geoOverride === "denied") {
+      setTimeout(() => {
+        toast.dismiss(toastId);
+        toast.error("Location access denied. Please select manually.");
+        setDetecting(false);
+      }, 800);
       return;
     }
 
-    setDetecting(true);
-    const toastId = toast.loading("Locating coordinates...");
+    if (geoOverride === "granted") {
+      setTimeout(() => {
+        toast.dismiss(toastId);
+        handleSelect("India", "INR");
+        toast.success("Detected location: India (Simulated). Welcome to LUXE!");
+        setDetecting(false);
+      }, 800);
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      toast.dismiss(toastId);
+      toast.error("Geolocation is not supported by your browser");
+      setDetecting(false);
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {

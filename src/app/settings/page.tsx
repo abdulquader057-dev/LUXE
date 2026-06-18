@@ -1995,6 +1995,11 @@ function PermissionSettings() {
   const [cameraStatus, setCameraStatus] = useState<PermissionState>("prompt");
   const [geoStatus, setGeoStatus] = useState<PermissionState>("prompt");
   const [notificationStatus, setNotificationStatus] = useState<PermissionState>("prompt");
+  
+  const [cameraOverride, setCameraOverride] = useState<"default" | "granted" | "denied">("default");
+  const [geoOverride, setGeoOverride] = useState<"default" | "granted" | "denied">("default");
+  const [notificationOverride, setNotificationOverride] = useState<"default" | "granted" | "denied">("default");
+  
   const [checking, setChecking] = useState(true);
 
   const queryPermissions = async () => {
@@ -2046,8 +2051,22 @@ function PermissionSettings() {
   };
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCameraOverride((localStorage.getItem("luxe-override-camera") as any) || "default");
+      setGeoOverride((localStorage.getItem("luxe-override-geolocation") as any) || "default");
+      setNotificationOverride((localStorage.getItem("luxe-override-notifications") as any) || "default");
+    }
     queryPermissions();
   }, []);
+
+  const handleUpdateOverride = (type: "camera" | "geolocation" | "notifications", val: "default" | "granted" | "denied") => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(`luxe-override-${type}`, val);
+    if (type === "camera") setCameraOverride(val);
+    if (type === "geolocation") setGeoOverride(val);
+    if (type === "notifications") setNotificationOverride(val);
+    toast.success(`Permission override for ${type} set to: ${val === "default" ? "Browser default" : val.toUpperCase()}`);
+  };
 
   const requestCamera = async () => {
     if (typeof window === "undefined" || !navigator.mediaDevices) return;
@@ -2102,6 +2121,11 @@ function PermissionSettings() {
     );
   }
 
+  // Calculate effective status based on active overrides
+  const effectiveCamera = cameraOverride === "default" ? cameraStatus : cameraOverride;
+  const effectiveGeo = geoOverride === "default" ? geoStatus : geoOverride;
+  const effectiveNotification = notificationOverride === "default" ? notificationStatus : notificationOverride;
+
   return (
     <div className="space-y-8">
       <div>
@@ -2112,13 +2136,13 @@ function PermissionSettings() {
           System Permissions
         </h2>
         <p className="text-[11px] font-sora text-white/40 leading-relaxed uppercase mt-2 max-w-xl">
-          Manage system permissions for real-time 3D camera tracking, location logistics, and drop alert notifications.
+          Manage system permissions for real-time 3D camera tracking, location logistics, and drop alert notifications. Adjust overrides to test denied/granted states.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
         {/* Camera Permission Card */}
-        <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 flex flex-col justify-between min-h-[180px] hover:border-white/10 transition-colors">
+        <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 flex flex-col justify-between min-h-[220px] hover:border-white/10 transition-colors">
           <div className="space-y-4">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-3">
@@ -2131,51 +2155,82 @@ function PermissionSettings() {
                 </div>
               </div>
               
-              <span className={cn(
-                "px-2.5 py-1 rounded-full text-[8px] font-mono tracking-widest uppercase font-bold border",
-                cameraStatus === "granted" ? "bg-green-500/10 border-green-500/20 text-green-400" :
-                cameraStatus === "denied" ? "bg-red-500/10 border-red-500/20 text-red-400" :
-                "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
-              )}>
-                {cameraStatus}
-              </span>
+              <div className="flex flex-col items-end gap-1">
+                <span className={cn(
+                  "px-2 py-0.5 rounded-full text-[7px] font-mono tracking-widest uppercase font-bold border",
+                  effectiveCamera === "granted" ? "bg-green-500/10 border-green-500/20 text-green-400" :
+                  effectiveCamera === "denied" ? "bg-red-500/10 border-red-500/20 text-red-400" :
+                  "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
+                )}>
+                  {effectiveCamera} {cameraOverride !== "default" && "(Simulated)"}
+                </span>
+                {cameraOverride === "default" && (
+                  <span className="text-[6px] font-mono text-white/20 uppercase tracking-widest">Browser Actual: {cameraStatus}</span>
+                )}
+              </div>
             </div>
+            
             <p className="text-[9px] font-mono text-white/40 leading-relaxed uppercase">
               Powers the interactive ER skeletal scanner. Fits clothing models directly to your body posture.
             </p>
           </div>
 
-          <div className="pt-4 mt-auto">
-            {cameraStatus === "granted" ? (
-              <div className="flex items-center gap-2 text-green-400 text-[9px] font-mono uppercase bg-green-500/5 p-2.5 rounded-xl border border-green-500/10">
-                <CheckCircle2 size={12} />
-                <span>Camera access authorized</span>
+          <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
+            {/* Override Control selector */}
+            <div className="space-y-1.5">
+              <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest block">Configure Override:</span>
+              <div className="flex bg-white/[0.03] border border-white/5 p-0.5 rounded-xl">
+                {(["default", "denied", "granted"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => handleUpdateOverride("camera", opt)}
+                    className={cn(
+                      "flex-grow py-1.5 px-2 rounded-lg text-[8px] font-mono tracking-widest uppercase transition-all cursor-pointer text-center",
+                      cameraOverride === opt
+                        ? "bg-primary text-black font-bold"
+                        : "text-white/40 hover:text-white"
+                    )}
+                  >
+                    {opt === "default" ? "Browser" : opt === "denied" ? "Deny" : "Grant"}
+                  </button>
+                ))}
               </div>
-            ) : cameraStatus === "denied" ? (
-              <div className="space-y-3">
+            </div>
+
+            <div className="pt-2">
+              {effectiveCamera === "granted" ? (
+                <div className="flex items-center gap-2 text-green-400 text-[9px] font-mono uppercase bg-green-500/5 p-2.5 rounded-xl border border-green-500/10">
+                  <CheckCircle2 size={12} />
+                  <span>Camera access authorized</span>
+                </div>
+              ) : effectiveCamera === "denied" ? (
+                <div className="space-y-3">
+                  {cameraOverride === "default" && (
+                    <button
+                      onClick={requestCamera}
+                      className="w-full py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
+                    >
+                      Retry browser request
+                    </button>
+                  )}
+                  <div className="p-3 bg-red-500/5 border border-red-500/10 text-red-400 text-[8px] font-mono leading-relaxed uppercase rounded-xl">
+                    🔒 Camera Blocked: Reset permissions by clicking the lock/camera icon next to the URL in your browser bar, toggle 'Camera' to 'Allow', then refresh this page.
+                  </div>
+                </div>
+              ) : (
                 <button
                   onClick={requestCamera}
-                  className="w-full py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center"
+                  className="w-full py-2 bg-primary hover:bg-[#E8C97A] text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
                 >
-                  Retry request
+                  Authenticate Camera
                 </button>
-                <div className="p-3 bg-red-500/5 border border-red-500/10 text-red-400 text-[8px] font-mono leading-relaxed uppercase rounded-xl">
-                  🔒 Camera Blocked: Reset permissions by clicking the lock/camera icon next to the URL in your browser bar, toggle 'Camera' to 'Allow', then refresh this page.
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={requestCamera}
-                className="w-full py-2 bg-primary hover:bg-[#E8C97A] text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
-              >
-                Authenticate Camera
-              </button>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
         {/* Geolocation Card */}
-        <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 flex flex-col justify-between min-h-[180px] hover:border-white/10 transition-colors">
+        <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 flex flex-col justify-between min-h-[220px] hover:border-white/10 transition-colors">
           <div className="space-y-4">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-3">
@@ -2188,51 +2243,81 @@ function PermissionSettings() {
                 </div>
               </div>
               
-              <span className={cn(
-                "px-2.5 py-1 rounded-full text-[8px] font-mono tracking-widest uppercase font-bold border",
-                geoStatus === "granted" ? "bg-green-500/10 border-green-500/20 text-green-400" :
-                geoStatus === "denied" ? "bg-red-500/10 border-red-500/20 text-red-400" :
-                "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
-              )}>
-                {geoStatus}
-              </span>
+              <div className="flex flex-col items-end gap-1">
+                <span className={cn(
+                  "px-2 py-0.5 rounded-full text-[7px] font-mono tracking-widest uppercase font-bold border",
+                  effectiveGeo === "granted" ? "bg-green-500/10 border-green-500/20 text-green-400" :
+                  effectiveGeo === "denied" ? "bg-red-500/10 border-red-500/20 text-red-400" :
+                  "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
+                )}>
+                  {effectiveGeo} {geoOverride !== "default" && "(Simulated)"}
+                </span>
+                {geoOverride === "default" && (
+                  <span className="text-[6px] font-mono text-white/20 uppercase tracking-widest">Browser Actual: {geoStatus}</span>
+                )}
+              </div>
             </div>
             <p className="text-[9px] font-mono text-white/40 leading-relaxed uppercase">
               Calibrates shipping distances to Baba Nagar express node for precise express shipping estimations.
             </p>
           </div>
 
-          <div className="pt-4 mt-auto">
-            {geoStatus === "granted" ? (
-              <div className="flex items-center gap-2 text-green-400 text-[9px] font-mono uppercase bg-green-500/5 p-2.5 rounded-xl border border-green-500/10">
-                <CheckCircle2 size={12} />
-                <span>Location access authorized</span>
+          <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
+            {/* Override Control selector */}
+            <div className="space-y-1.5">
+              <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest block">Configure Override:</span>
+              <div className="flex bg-white/[0.03] border border-white/5 p-0.5 rounded-xl">
+                {(["default", "denied", "granted"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => handleUpdateOverride("geolocation", opt)}
+                    className={cn(
+                      "flex-grow py-1.5 px-2 rounded-lg text-[8px] font-mono tracking-widest uppercase transition-all cursor-pointer text-center",
+                      geoOverride === opt
+                        ? "bg-primary text-black font-bold"
+                        : "text-white/40 hover:text-white"
+                    )}
+                  >
+                    {opt === "default" ? "Browser" : opt === "denied" ? "Deny" : "Grant"}
+                  </button>
+                ))}
               </div>
-            ) : geoStatus === "denied" ? (
-              <div className="space-y-3">
+            </div>
+
+            <div className="pt-2">
+              {effectiveGeo === "granted" ? (
+                <div className="flex items-center gap-2 text-green-400 text-[9px] font-mono uppercase bg-green-500/5 p-2.5 rounded-xl border border-green-500/10">
+                  <CheckCircle2 size={12} />
+                  <span>Location access authorized</span>
+                </div>
+              ) : effectiveGeo === "denied" ? (
+                <div className="space-y-3">
+                  {geoOverride === "default" && (
+                    <button
+                      onClick={requestGeo}
+                      className="w-full py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
+                    >
+                      Retry browser request
+                    </button>
+                  )}
+                  <div className="p-3 bg-red-500/5 border border-red-500/10 text-red-400 text-[8px] font-mono leading-relaxed uppercase rounded-xl">
+                    🔒 Location Blocked: Reset location tracking permissions in your browser URL details.
+                  </div>
+                </div>
+              ) : (
                 <button
                   onClick={requestGeo}
-                  className="w-full py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center"
+                  className="w-full py-2 bg-[#c084fc] hover:bg-[#d8b4fe] text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
                 >
-                  Retry request
+                  Authenticate Location
                 </button>
-                <div className="p-3 bg-red-500/5 border border-red-500/10 text-red-400 text-[8px] font-mono leading-relaxed uppercase rounded-xl">
-                  🔒 Location Blocked: Reset location tracking permissions in your browser URL details.
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={requestGeo}
-                className="w-full py-2 bg-[#c084fc] hover:bg-[#d8b4fe] text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
-              >
-                Authenticate Location
-              </button>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
         {/* Notifications Card */}
-        <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 flex flex-col justify-between min-h-[180px] hover:border-white/10 transition-colors">
+        <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 flex flex-col justify-between min-h-[220px] hover:border-white/10 transition-colors">
           <div className="space-y-4">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-3">
@@ -2245,46 +2330,76 @@ function PermissionSettings() {
                 </div>
               </div>
               
-              <span className={cn(
-                "px-2.5 py-1 rounded-full text-[8px] font-mono tracking-widest uppercase font-bold border",
-                notificationStatus === "granted" ? "bg-green-500/10 border-green-500/20 text-green-400" :
-                notificationStatus === "denied" ? "bg-red-500/10 border-red-500/20 text-red-400" :
-                "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
-              )}>
-                {notificationStatus}
-              </span>
+              <div className="flex flex-col items-end gap-1">
+                <span className={cn(
+                  "px-2 py-0.5 rounded-full text-[7px] font-mono tracking-widest uppercase font-bold border",
+                  effectiveNotification === "granted" ? "bg-green-500/10 border-green-500/20 text-green-400" :
+                  effectiveNotification === "denied" ? "bg-red-500/10 border-red-500/20 text-red-400" :
+                  "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
+                )}>
+                  {effectiveNotification} {notificationOverride !== "default" && "(Simulated)"}
+                </span>
+                {notificationOverride === "default" && (
+                  <span className="text-[6px] font-mono text-white/20 uppercase tracking-widest">Browser Actual: {notificationStatus}</span>
+                )}
+              </div>
             </div>
             <p className="text-[9px] font-mono text-white/40 leading-relaxed uppercase">
               Sends instant alerts for new drop notifications, loyalty level ups, and order checkout confirmations.
             </p>
           </div>
 
-          <div className="pt-4 mt-auto">
-            {notificationStatus === "granted" ? (
-              <div className="flex items-center gap-2 text-green-400 text-[9px] font-mono uppercase bg-green-500/5 p-2.5 rounded-xl border border-green-500/10">
-                <CheckCircle2 size={12} />
-                <span>Alerts authorized</span>
+          <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
+            {/* Override Control selector */}
+            <div className="space-y-1.5">
+              <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest block">Configure Override:</span>
+              <div className="flex bg-white/[0.03] border border-white/5 p-0.5 rounded-xl">
+                {(["default", "denied", "granted"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => handleUpdateOverride("notifications", opt)}
+                    className={cn(
+                      "flex-grow py-1.5 px-2 rounded-lg text-[8px] font-mono tracking-widest uppercase transition-all cursor-pointer text-center",
+                      notificationOverride === opt
+                        ? "bg-primary text-black font-bold"
+                        : "text-white/40 hover:text-white"
+                    )}
+                  >
+                    {opt === "default" ? "Browser" : opt === "denied" ? "Deny" : "Grant"}
+                  </button>
+                ))}
               </div>
-            ) : notificationStatus === "denied" ? (
-              <div className="space-y-3">
+            </div>
+
+            <div className="pt-2">
+              {effectiveNotification === "granted" ? (
+                <div className="flex items-center gap-2 text-green-400 text-[9px] font-mono uppercase bg-green-500/5 p-2.5 rounded-xl border border-green-500/10">
+                  <CheckCircle2 size={12} />
+                  <span>Alerts authorized</span>
+                </div>
+              ) : effectiveNotification === "denied" ? (
+                <div className="space-y-3">
+                  {notificationOverride === "default" && (
+                    <button
+                      onClick={requestNotifications}
+                      className="w-full py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
+                    >
+                      Retry browser request
+                    </button>
+                  )}
+                  <div className="p-3 bg-red-500/5 border border-red-500/10 text-red-400 text-[8px] font-mono leading-relaxed uppercase rounded-xl">
+                    🔒 Alerts Blocked: Allow notifications in your browser site permissions to receive drop alerts.
+                  </div>
+                </div>
+              ) : (
                 <button
                   onClick={requestNotifications}
-                  className="w-full py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center"
+                  className="w-full py-2 bg-[#00ff9d] hover:bg-[#66ffc2] text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
                 >
-                  Retry request
+                  Authenticate Alerts
                 </button>
-                <div className="p-3 bg-red-500/5 border border-red-500/10 text-red-400 text-[8px] font-mono leading-relaxed uppercase rounded-xl">
-                  🔒 Alerts Blocked: Allow notifications in your browser site permissions to receive drop alerts.
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={requestNotifications}
-                className="w-full py-2 bg-[#00ff9d] hover:bg-[#66ffc2] text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
-              >
-                Authenticate Alerts
-              </button>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
