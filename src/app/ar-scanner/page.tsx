@@ -139,13 +139,13 @@ export default function AIStudioPage() {
       }
       setHasCamera(true);
       if (showToast) {
-        toast.success("LUXE Optical Camera Link Active.");
+        toast.success("LUXE Optical Camera Link Active.", { id: "camera-status" });
       }
     } catch (err) {
       console.error("Camera access failed:", err);
       setHasCamera(false);
       if (showToast) {
-        toast.error("Camera access denied or unavailable.");
+        toast.error("Camera access denied or unavailable.", { id: "camera-status" });
       }
     }
   };

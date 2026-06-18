@@ -30,6 +30,7 @@ const SETTINGS_MENU = [
   { id: "accessories", label: "Accessory Hub", icon: Watch, color: "#ffcc00" },
   { id: "subscription", label: "Luxe Elite", icon: Crown, color: "#ff4466" },
   { id: "notifications", label: "Status Feed", icon: Bell, color: "#00ff9d" },
+  { id: "permissions", label: "Permissions", icon: Shield, color: "#22c55e" },
   { id: "support", label: "Support", icon: HelpCircle, color: "#f8f8f8" },
 ];
 
@@ -59,6 +60,8 @@ export default function SettingsPage() {
         return <SubscriptionServices />;
       case "notifications":
         return <NotificationSettings />;
+      case "permissions":
+        return <PermissionSettings />;
       case "support":
         return <SupportCenter />;
       default:
@@ -1983,6 +1986,307 @@ function ThemeSettings() {
             </motion.div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+function PermissionSettings() {
+  const [cameraStatus, setCameraStatus] = useState<PermissionState>("prompt");
+  const [geoStatus, setGeoStatus] = useState<PermissionState>("prompt");
+  const [notificationStatus, setNotificationStatus] = useState<PermissionState>("prompt");
+  const [checking, setChecking] = useState(true);
+
+  const queryPermissions = async () => {
+    if (typeof window === "undefined" || !navigator.permissions) {
+      setChecking(false);
+      return;
+    }
+
+    try {
+      const cam = await navigator.permissions.query({ name: "camera" as any }).catch(() => null);
+      if (cam) {
+        setCameraStatus(cam.state);
+        cam.onchange = () => setCameraStatus(cam.state);
+      } else {
+        if (navigator.mediaDevices?.enumerateDevices) {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const hasVideo = devices.some(d => d.kind === "videoinput");
+          if (hasVideo) {
+            const hasPermission = devices.some(d => d.kind === "videoinput" && d.label !== "");
+            setCameraStatus(hasPermission ? "granted" : "prompt");
+          } else {
+            setCameraStatus("denied");
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not query camera permission:", e);
+    }
+
+    try {
+      const geo = await navigator.permissions.query({ name: "geolocation" }).catch(() => null);
+      if (geo) {
+        setGeoStatus(geo.state);
+        geo.onchange = () => setGeoStatus(geo.state);
+      }
+    } catch (e) {}
+
+    try {
+      const notif = await navigator.permissions.query({ name: "notifications" }).catch(() => null);
+      if (notif) {
+        setNotificationStatus(notif.state);
+        notif.onchange = () => setNotificationStatus(notif.state);
+      } else if (typeof Notification !== "undefined") {
+        setNotificationStatus(Notification.permission === "default" ? "prompt" : Notification.permission);
+      }
+    } catch (e) {}
+
+    setChecking(false);
+  };
+
+  useEffect(() => {
+    queryPermissions();
+  }, []);
+
+  const requestCamera = async () => {
+    if (typeof window === "undefined" || !navigator.mediaDevices) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop());
+      toast.success("Camera Link Authenticated!");
+      queryPermissions();
+    } catch (err) {
+      console.error("Camera request failed:", err);
+      toast.error("Camera access denied or unavailable.");
+      setCameraStatus("denied");
+    }
+  };
+
+  const requestGeo = () => {
+    if (typeof window === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        toast.success("Location link authenticated!");
+        queryPermissions();
+      },
+      (err) => {
+        console.error("Geo request failed:", err);
+        toast.error("Location access denied.");
+        setGeoStatus("denied");
+      }
+    );
+  };
+
+  const requestNotifications = async () => {
+    if (typeof window === "undefined" || typeof Notification === "undefined") return;
+    try {
+      const permission = await Notification.requestPermission();
+      setNotificationStatus(permission === "default" ? "prompt" : permission);
+      if (permission === "granted") {
+        toast.success("Notifications enabled!");
+      } else {
+        toast.error("Notifications blocked.");
+      }
+    } catch (err) {
+      console.error("Notification request failed:", err);
+    }
+  };
+
+  if (checking) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <span className="animate-spin text-primary">⚙️</span>
+        <span className="text-[10px] font-mono tracking-widest uppercase text-white/50">Querying security tokens...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <span className="text-[10px] font-mono text-primary tracking-[0.4em] uppercase block mb-1">
+          Privacy Console // Core
+        </span>
+        <h2 className="text-3xl font-display font-light uppercase tracking-tight">
+          System Permissions
+        </h2>
+        <p className="text-[11px] font-sora text-white/40 leading-relaxed uppercase mt-2 max-w-xl">
+          Manage system permissions for real-time 3D camera tracking, location logistics, and drop alert notifications.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+        {/* Camera Permission Card */}
+        <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 flex flex-col justify-between min-h-[180px] hover:border-white/10 transition-colors">
+          <div className="space-y-4">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                  <Camera size={18} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">Camera Access</h3>
+                  <p className="text-[9px] font-mono text-white/30 uppercase mt-0.5">BlazePose 3D scanner</p>
+                </div>
+              </div>
+              
+              <span className={cn(
+                "px-2.5 py-1 rounded-full text-[8px] font-mono tracking-widest uppercase font-bold border",
+                cameraStatus === "granted" ? "bg-green-500/10 border-green-500/20 text-green-400" :
+                cameraStatus === "denied" ? "bg-red-500/10 border-red-500/20 text-red-400" :
+                "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
+              )}>
+                {cameraStatus}
+              </span>
+            </div>
+            <p className="text-[9px] font-mono text-white/40 leading-relaxed uppercase">
+              Powers the interactive ER skeletal scanner. Fits clothing models directly to your body posture.
+            </p>
+          </div>
+
+          <div className="pt-4 mt-auto">
+            {cameraStatus === "granted" ? (
+              <div className="flex items-center gap-2 text-green-400 text-[9px] font-mono uppercase bg-green-500/5 p-2.5 rounded-xl border border-green-500/10">
+                <CheckCircle2 size={12} />
+                <span>Camera access authorized</span>
+              </div>
+            ) : cameraStatus === "denied" ? (
+              <div className="space-y-3">
+                <button
+                  onClick={requestCamera}
+                  className="w-full py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center"
+                >
+                  Retry request
+                </button>
+                <div className="p-3 bg-red-500/5 border border-red-500/10 text-red-400 text-[8px] font-mono leading-relaxed uppercase rounded-xl">
+                  🔒 Camera Blocked: Reset permissions by clicking the lock/camera icon next to the URL in your browser bar, toggle 'Camera' to 'Allow', then refresh this page.
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={requestCamera}
+                className="w-full py-2 bg-primary hover:bg-[#E8C97A] text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
+              >
+                Authenticate Camera
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Geolocation Card */}
+        <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 flex flex-col justify-between min-h-[180px] hover:border-white/10 transition-colors">
+          <div className="space-y-4">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#c084fc]/10 border border-[#c084fc]/20 flex items-center justify-center text-[#c084fc]">
+                  <Globe size={18} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">Geolocation</h3>
+                  <p className="text-[9px] font-mono text-white/30 uppercase mt-0.5">Shipping logistics</p>
+                </div>
+              </div>
+              
+              <span className={cn(
+                "px-2.5 py-1 rounded-full text-[8px] font-mono tracking-widest uppercase font-bold border",
+                geoStatus === "granted" ? "bg-green-500/10 border-green-500/20 text-green-400" :
+                geoStatus === "denied" ? "bg-red-500/10 border-red-500/20 text-red-400" :
+                "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
+              )}>
+                {geoStatus}
+              </span>
+            </div>
+            <p className="text-[9px] font-mono text-white/40 leading-relaxed uppercase">
+              Calibrates shipping distances to Baba Nagar express node for precise express shipping estimations.
+            </p>
+          </div>
+
+          <div className="pt-4 mt-auto">
+            {geoStatus === "granted" ? (
+              <div className="flex items-center gap-2 text-green-400 text-[9px] font-mono uppercase bg-green-500/5 p-2.5 rounded-xl border border-green-500/10">
+                <CheckCircle2 size={12} />
+                <span>Location access authorized</span>
+              </div>
+            ) : geoStatus === "denied" ? (
+              <div className="space-y-3">
+                <button
+                  onClick={requestGeo}
+                  className="w-full py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center"
+                >
+                  Retry request
+                </button>
+                <div className="p-3 bg-red-500/5 border border-red-500/10 text-red-400 text-[8px] font-mono leading-relaxed uppercase rounded-xl">
+                  🔒 Location Blocked: Reset location tracking permissions in your browser URL details.
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={requestGeo}
+                className="w-full py-2 bg-[#c084fc] hover:bg-[#d8b4fe] text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
+              >
+                Authenticate Location
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Notifications Card */}
+        <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-6 flex flex-col justify-between min-h-[180px] hover:border-white/10 transition-colors">
+          <div className="space-y-4">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#00ff9d]/10 border border-[#00ff9d]/20 flex items-center justify-center text-[#00ff9d]">
+                  <Bell size={18} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">Status Alerts</h3>
+                  <p className="text-[9px] font-mono text-white/30 uppercase mt-0.5">Realtime notification sync</p>
+                </div>
+              </div>
+              
+              <span className={cn(
+                "px-2.5 py-1 rounded-full text-[8px] font-mono tracking-widest uppercase font-bold border",
+                notificationStatus === "granted" ? "bg-green-500/10 border-green-500/20 text-green-400" :
+                notificationStatus === "denied" ? "bg-red-500/10 border-red-500/20 text-red-400" :
+                "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
+              )}>
+                {notificationStatus}
+              </span>
+            </div>
+            <p className="text-[9px] font-mono text-white/40 leading-relaxed uppercase">
+              Sends instant alerts for new drop notifications, loyalty level ups, and order checkout confirmations.
+            </p>
+          </div>
+
+          <div className="pt-4 mt-auto">
+            {notificationStatus === "granted" ? (
+              <div className="flex items-center gap-2 text-green-400 text-[9px] font-mono uppercase bg-green-500/5 p-2.5 rounded-xl border border-green-500/10">
+                <CheckCircle2 size={12} />
+                <span>Alerts authorized</span>
+              </div>
+            ) : notificationStatus === "denied" ? (
+              <div className="space-y-3">
+                <button
+                  onClick={requestNotifications}
+                  className="w-full py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center"
+                >
+                  Retry request
+                </button>
+                <div className="p-3 bg-red-500/5 border border-red-500/10 text-red-400 text-[8px] font-mono leading-relaxed uppercase rounded-xl">
+                  🔒 Alerts Blocked: Allow notifications in your browser site permissions to receive drop alerts.
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={requestNotifications}
+                className="w-full py-2 bg-[#00ff9d] hover:bg-[#66ffc2] text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center font-bold"
+              >
+                Authenticate Alerts
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
