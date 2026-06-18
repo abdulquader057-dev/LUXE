@@ -2178,7 +2178,7 @@ function PermissionSettings() {
           <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
             {/* Override Control selector */}
             <div className="space-y-1.5">
-              <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest block">Configure Override:</span>
+              <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest block">App Override (Revoke / Grant):</span>
               <div className="flex bg-white/[0.03] border border-white/5 p-0.5 rounded-xl">
                 {(["default", "denied", "granted"] as const).map((opt) => (
                   <button
@@ -2191,7 +2191,7 @@ function PermissionSettings() {
                         : "text-white/40 hover:text-white"
                     )}
                   >
-                    {opt === "default" ? "Browser" : opt === "denied" ? "Deny" : "Grant"}
+                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Force Revoke" : "Force Grant"}
                   </button>
                 ))}
               </div>
@@ -2265,7 +2265,7 @@ function PermissionSettings() {
           <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
             {/* Override Control selector */}
             <div className="space-y-1.5">
-              <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest block">Configure Override:</span>
+              <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest block">App Override (Revoke / Grant):</span>
               <div className="flex bg-white/[0.03] border border-white/5 p-0.5 rounded-xl">
                 {(["default", "denied", "granted"] as const).map((opt) => (
                   <button
@@ -2278,7 +2278,7 @@ function PermissionSettings() {
                         : "text-white/40 hover:text-white"
                     )}
                   >
-                    {opt === "default" ? "Browser" : opt === "denied" ? "Deny" : "Grant"}
+                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Force Revoke" : "Force Grant"}
                   </button>
                 ))}
               </div>
@@ -2352,7 +2352,7 @@ function PermissionSettings() {
           <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
             {/* Override Control selector */}
             <div className="space-y-1.5">
-              <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest block">Configure Override:</span>
+              <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest block">App Override (Revoke / Grant):</span>
               <div className="flex bg-white/[0.03] border border-white/5 p-0.5 rounded-xl">
                 {(["default", "denied", "granted"] as const).map((opt) => (
                   <button
@@ -2365,7 +2365,7 @@ function PermissionSettings() {
                         : "text-white/40 hover:text-white"
                     )}
                   >
-                    {opt === "default" ? "Browser" : opt === "denied" ? "Deny" : "Grant"}
+                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Force Revoke" : "Force Grant"}
                   </button>
                 ))}
               </div>
