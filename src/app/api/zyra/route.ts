@@ -3,17 +3,7 @@ export const runtime = 'nodejs';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabaseAdmin } from '@/lib/supabase';
 
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const limit = rateLimitMap.get(ip);
-  if (!limit) { rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 }); return false; }
-  if (now > limit.resetTime) { rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 }); return false; }
-  if (limit.count >= 20) return true;
-  limit.count += 1;
-  return false;
-}
+import { rateLimit } from '@/lib/rateLimit';
 
 function sanitize(text: string): string {
   if (typeof text !== 'string') return '';
@@ -22,7 +12,8 @@ function sanitize(text: string): string {
 
 export async function POST(req: Request) {
   const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
-  if (isRateLimited(ip)) {
+  const limitResult = await rateLimit(ip, 20, 60);
+  if (!limitResult.success) {
     return new Response('Rate limit exceeded', { status: 429 });
   }
 

@@ -7,6 +7,8 @@ import ProductCard from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import MagneticWrapper from "@/components/MagneticWrapper";
+import { useSupabaseRealtime } from "@/hooks/useSupabaseRealtime";
+import { parseDbProduct } from "@/data/products";
 
 interface ProductCatalogGridProps {
   initialProducts: any[];
@@ -15,6 +17,29 @@ interface ProductCatalogGridProps {
 export default function ProductCatalogGrid({ initialProducts }: ProductCatalogGridProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  
+  const [products, setProducts] = useState(initialProducts);
+
+  useEffect(() => {
+    setProducts(initialProducts);
+  }, [initialProducts]);
+
+  // Realtime product updates subscription
+  useSupabaseRealtime<any>(
+    { table: "products" },
+    (payload) => {
+      console.log("Realtime product update in shop page grid:", payload);
+      if (payload.eventType === "UPDATE") {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === payload.new.id ? { ...p, ...parseDbProduct(payload.new) } : p))
+        );
+      } else if (payload.eventType === "INSERT") {
+        setProducts((prev) => [...prev, parseDbProduct(payload.new)]);
+      } else if (payload.eventType === "DELETE") {
+        setProducts((prev) => prev.filter((p) => p.id !== (payload.old as any).id));
+      }
+    }
+  );
   
   const initialCategory = searchParams?.get("category") || searchParams?.get("cat") || "all";
   const initialSearch = searchParams?.get("q") || "";
@@ -41,7 +66,7 @@ export default function ProductCatalogGrid({ initialProducts }: ProductCatalogGr
     { id: "shirts", name: "Shirts" },
   ];
 
-  const filteredProducts = initialProducts.filter((p) => {
+  const filteredProducts = products.filter((p) => {
     let matchesCategory = false;
     if (selectedCategory === "all") {
       matchesCategory = true;

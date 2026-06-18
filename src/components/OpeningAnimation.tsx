@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import useReducedMotion from "@/hooks/useReducedMotion";
+import { useAdaptivePerformance } from "@/hooks/useAdaptivePerformance";
 import "@/styles/opening.css";
 
 const BRAND_NAME = "LUXE";
@@ -14,67 +15,75 @@ interface OpeningAnimationProps {
 }
 
 // Dictionary of procedural 3D target coordinates tracing out L-U-X-E letter forms
-type PointGenerator = (centerX: number) => THREE.Vector3[];
+type PointGenerator = (centerX: number, densityScale: number) => THREE.Vector3[];
 
 const characterPaths: Record<string, PointGenerator> = {
-  L: (cx) => {
+  L: (cx, ds) => {
     const pts: THREE.Vector3[] = [];
-    for (let i = 0; i < 30; i++) {
-      pts.push(new THREE.Vector3(cx - 0.4, -1.1 + (i / 29) * 2.2, 0));
+    const countY = Math.max(8, Math.round(30 * ds));
+    const countX = Math.max(4, Math.round(15 * ds));
+    for (let i = 0; i < countY; i++) {
+      pts.push(new THREE.Vector3(cx - 0.4, -1.1 + (i / (countY - 1)) * 2.2, 0));
     }
-    for (let i = 1; i <= 15; i++) {
-      pts.push(new THREE.Vector3(cx - 0.4 + (i / 15) * 0.9, -1.1, 0));
+    for (let i = 1; i <= countX; i++) {
+      pts.push(new THREE.Vector3(cx - 0.4 + (i / countX) * 0.9, -1.1, 0));
     }
     return pts;
   },
-  U: (cx) => {
+  U: (cx, ds) => {
     const pts: THREE.Vector3[] = [];
-    for (let i = 0; i < 18; i++) {
-      pts.push(new THREE.Vector3(cx - 0.5, -0.3 + (i / 17) * 1.4, 0));
+    const countY = Math.max(6, Math.round(18 * ds));
+    const countCurve = Math.max(4, Math.round(9 * ds));
+    for (let i = 0; i < countY; i++) {
+      pts.push(new THREE.Vector3(cx - 0.5, -0.3 + (i / (countY - 1)) * 1.4, 0));
     }
-    for (let i = 0; i < 18; i++) {
-      pts.push(new THREE.Vector3(cx + 0.5, -0.3 + (i / 17) * 1.4, 0));
+    for (let i = 0; i < countY; i++) {
+      pts.push(new THREE.Vector3(cx + 0.5, -0.3 + (i / (countY - 1)) * 1.4, 0));
     }
-    for (let i = 0; i < 9; i++) {
-      const angle = Math.PI + (i / 8) * Math.PI;
+    for (let i = 0; i < countCurve; i++) {
+      const angle = Math.PI + (i / (countCurve - 1)) * Math.PI;
       pts.push(new THREE.Vector3(cx + Math.cos(angle) * 0.5, -0.3 + Math.sin(angle) * 0.4, 0));
     }
     return pts;
   },
-  X: (cx) => {
+  X: (cx, ds) => {
     const pts: THREE.Vector3[] = [];
-    for (let i = 0; i < 22; i++) {
-      const y = -1.1 + (i / 21) * 2.2;
+    const count = Math.max(8, Math.round(22 * ds));
+    for (let i = 0; i < count; i++) {
+      const y = -1.1 + (i / (count - 1)) * 2.2;
       pts.push(new THREE.Vector3(cx + y * 0.82, y, 0));
     }
-    for (let i = 0; i < 23; i++) {
-      const y = -1.1 + (i / 22) * 2.2;
+    for (let i = 0; i < count; i++) {
+      const y = -1.1 + (i / (count - 1)) * 2.2;
       pts.push(new THREE.Vector3(cx - y * 0.82, y, 0));
     }
     return pts;
   },
-  E: (cx) => {
+  E: (cx, ds) => {
     const pts: THREE.Vector3[] = [];
-    for (let i = 0; i < 24; i++) {
-      pts.push(new THREE.Vector3(cx - 0.4, -1.1 + (i / 23) * 2.2, 0));
+    const countY = Math.max(8, Math.round(24 * ds));
+    const countX = Math.max(3, Math.round(7 * ds));
+    for (let i = 0; i < countY; i++) {
+      pts.push(new THREE.Vector3(cx - 0.4, -1.1 + (i / (countY - 1)) * 2.2, 0));
     }
-    for (let i = 1; i <= 7; i++) {
-      pts.push(new THREE.Vector3(cx - 0.4 + (i / 7) * 0.8, 1.1, 0));
+    for (let i = 1; i <= countX; i++) {
+      pts.push(new THREE.Vector3(cx - 0.4 + (i / countX) * 0.8, 1.1, 0));
     }
-    for (let i = 1; i <= 7; i++) {
-      pts.push(new THREE.Vector3(cx - 0.4 + (i / 7) * 0.6, 0.0, 0));
+    for (let i = 1; i <= countX; i++) {
+      pts.push(new THREE.Vector3(cx - 0.4 + (i / countX) * 0.6, 0.0, 0));
     }
-    for (let i = 1; i <= 7; i++) {
-      pts.push(new THREE.Vector3(cx - 0.4 + (i / 7) * 0.8, -1.1, 0));
+    for (let i = 1; i <= countX; i++) {
+      pts.push(new THREE.Vector3(cx - 0.4 + (i / countX) * 0.8, -1.1, 0));
     }
     return pts;
   }
 };
 
-const getFallbackPoints = (cx: number): THREE.Vector3[] => {
+const getFallbackPoints = (cx: number, ds: number): THREE.Vector3[] => {
   const pts: THREE.Vector3[] = [];
-  for (let i = 0; i < 15; i++) pts.push(new THREE.Vector3(cx - 0.4, -1.1 + (i / 14) * 2.2, 0));
-  for (let i = 0; i < 15; i++) pts.push(new THREE.Vector3(cx + 0.4, -1.1 + (i / 14) * 2.2, 0));
+  const count = Math.max(5, Math.round(15 * ds));
+  for (let i = 0; i < count; i++) pts.push(new THREE.Vector3(cx - 0.4, -1.1 + (i / (count - 1)) * 2.2, 0));
+  for (let i = 0; i < count; i++) pts.push(new THREE.Vector3(cx + 0.4, -1.1 + (i / (count - 1)) * 2.2, 0));
   return pts;
 };
 
@@ -217,6 +226,8 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
     };
   }, [isReducedMotion, shouldRender]);
 
+  const perfTier = useAdaptivePerformance();
+
   // 2. Three.js Refractive Glass Shards Assembly setup
   useEffect(() => {
     if (isReducedMotion || !shouldRender) return;
@@ -224,8 +235,10 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
     const canvas = glassCanvasRef.current;
     if (!canvas) return;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    const densityScale = perfTier === "low" ? 0.45 : perfTier === "medium" ? 0.75 : 1.0;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: perfTier !== "low", alpha: true });
+    renderer.setPixelRatio(perfTier === "low" ? 1.0 : Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     const scene = new THREE.Scene();
@@ -271,7 +284,7 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       const char = BRAND_NAME[i].toUpperCase();
       const cx = startX + i * spacing;
       const generator = characterPaths[char] || getFallbackPoints;
-      const pts = generator(cx);
+      const pts = generator(cx, densityScale);
 
       const indices: number[] = [];
       pts.forEach((pt) => {
@@ -293,20 +306,44 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       letterLights.push(light);
     }
 
-    // High Transmission Physical Glass Material
-    const glassMat = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.9,
-      transmission: 0.96,
-      roughness: 0.06,
-      metalness: 0.1,
-      ior: 1.54,
-      thickness: 0.4,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.08,
-      side: THREE.DoubleSide,
-    });
+    // Glass Material based on performance tier (Physical material is extremely expensive)
+    let glassMat: THREE.Material;
+    if (perfTier === "low") {
+      glassMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.65,
+        roughness: 0.2,
+        metalness: 0.15,
+        side: THREE.DoubleSide
+      });
+    } else if (perfTier === "medium") {
+      glassMat = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.8,
+        transmission: 0.45,
+        roughness: 0.1,
+        metalness: 0.1,
+        ior: 1.45,
+        thickness: 0.25,
+        side: THREE.DoubleSide,
+      });
+    } else {
+      glassMat = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.9,
+        transmission: 0.96,
+        roughness: 0.06,
+        metalness: 0.1,
+        ior: 1.54,
+        thickness: 0.4,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.08,
+        side: THREE.DoubleSide,
+      });
+    }
 
     // Generate responsive size shards
     const shards: THREE.Mesh[] = [];
@@ -347,6 +384,7 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       const tl = gsap.timeline();
 
       // Step 0: Fade in WebGL canvas instantly at start to show scattered shards
+      tl.set(glassCanvasRef.current, { display: "block" }, 0);
       tl.to(
         glassCanvasRef.current,
         { opacity: 1, duration: 0.1, ease: "none" },
@@ -354,7 +392,11 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       );
 
       // Ensure glass material starts fully opaque at t=0s
-      tl.set(glassMat, { opacity: 0.9 }, 0);
+      const matResetTarget: any = { opacity: perfTier === "low" ? 0.65 : perfTier === "medium" ? 0.8 : 0.9 };
+      if ("transmission" in glassMat) {
+        matResetTarget.transmission = perfTier === "medium" ? 0.45 : 0.96;
+      }
+      tl.set(glassMat, matResetTarget, 0);
 
       // Step 1: Fade weave background from 0 to 1 over 1.5s starting at 0.1s
       tl.fromTo(
@@ -445,15 +487,15 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       });
 
       // Fade out glass material, lights, and Three.js canvas to 0 opacity at t=2.4s (duration 0.8s)
-      tl.to(
-        glassMat,
-        {
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.out",
-        },
-        2.4
-      );
+      const matFadeTarget: any = {
+        opacity: 0,
+        duration: 0.8,
+        ease: "power2.out",
+      };
+      if ("transmission" in glassMat) {
+        matFadeTarget.transmission = 0;
+      }
+      tl.to(glassMat, matFadeTarget, 2.4);
 
       tl.to(
         letterLights,
@@ -471,6 +513,11 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
           opacity: 0,
           duration: 0.8,
           ease: "power2.out",
+          onComplete: () => {
+            if (glassCanvasRef.current) {
+              glassCanvasRef.current.style.display = "none";
+            }
+          }
         },
         2.4
       );

@@ -8,10 +8,12 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabase";
-import { parseDbProduct } from "@/data/products";
+import { parseDbProduct, MOCK_PRODUCTS } from "@/data/products";
 import { Product } from "@/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import ARBodyTracker from "@/components/ai/ARBodyTracker";
+import { useSupabaseRealtime } from "@/hooks/useSupabaseRealtime";
 
 // Calibration constants for Standard Fit
 const DEFAULT_SCALE = 1.0;
@@ -34,6 +36,7 @@ export default function AIStudioPage() {
   const [hasCamera, setHasCamera] = useState<boolean | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isArTrackingActive, setIsArTrackingActive] = useState(false);
   
   // Transform controls (ER Scanner)
   const [scale, setScale] = useState(DEFAULT_SCALE);
@@ -81,18 +84,41 @@ export default function AIStudioPage() {
           setProducts(parsed);
           setSelectedProduct(parsed[0]);
         } else {
-          toast.error("No try-on models found in catalog.");
+          console.warn("No products found in database, falling back to mock catalog.");
+          setProducts(MOCK_PRODUCTS);
+          setSelectedProduct(MOCK_PRODUCTS[0]);
         }
       } catch (err) {
-        console.error("Error fetching try-on models:", err);
-        toast.error("Unable to load try-on models from catalog.");
+        console.error("Error fetching try-on models, falling back to mock catalog:", err);
+        setProducts(MOCK_PRODUCTS);
+        setSelectedProduct(MOCK_PRODUCTS[0]);
       }
     }
     fetchProducts();
   }, []);
 
+  // Realtime product updates subscription
+  useSupabaseRealtime<any>(
+    { table: "products" },
+    (payload) => {
+      console.log("Supabase Realtime product update received:", payload);
+      if (payload.eventType === "UPDATE") {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === payload.new.id ? { ...p, ...parseDbProduct(payload.new) } : p))
+        );
+        setSelectedProduct((prev) =>
+          prev && prev.id === payload.new.id ? { ...prev, ...parseDbProduct(payload.new) } : prev
+        );
+      } else if (payload.eventType === "INSERT") {
+        setProducts((prev) => [...prev, parseDbProduct(payload.new)]);
+      } else if (payload.eventType === "DELETE") {
+        setProducts((prev) => prev.filter((p) => p.id !== (payload.old as any).id));
+      }
+    }
+  );
+
   // Access device camera
-  const startCamera = async () => {
+  const startCamera = async (showToast = true) => {
     try {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -112,11 +138,15 @@ export default function AIStudioPage() {
         videoRef.current.srcObject = mediaStream;
       }
       setHasCamera(true);
-      toast.success("LUXE Optical Camera Link Active.");
+      if (showToast) {
+        toast.success("LUXE Optical Camera Link Active.");
+      }
     } catch (err) {
       console.error("Camera access failed:", err);
       setHasCamera(false);
-      toast.error("Camera access denied or unavailable.");
+      if (showToast) {
+        toast.error("Camera access denied or unavailable.");
+      }
     }
   };
 
@@ -128,11 +158,18 @@ export default function AIStudioPage() {
   };
 
   useEffect(() => {
-    startCamera();
+    // Initial camera startup attempt is silent to avoid intrusive error toasts on load
+    startCamera(false);
     return () => {
       stopCamera();
     };
   }, []);
+
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -489,6 +526,17 @@ export default function AIStudioPage() {
               />
             ) : null}
 
+            {/* Real AR Body Tracking overlay */}
+            {activeTab === "fitting" && selectedProduct && hasCamera === true && stream && !userPhoto && (
+              <ARBodyTracker
+                modelUrl={selectedProduct.model_url}
+                productColor="#C9A84C"
+                isStreaming={!!stream}
+                videoRef={videoRef}
+                onTrackingStatusChange={(active) => setIsArTrackingActive(active)}
+              />
+            )}
+
             {/* Static User Uploaded Photo display */}
             {userPhoto ? (
               <div className="absolute inset-0 bg-[#060609] flex items-center justify-center z-10">
@@ -513,7 +561,7 @@ export default function AIStudioPage() {
                   </p>
                 </div>
                 <button
-                  onClick={startCamera}
+                  onClick={() => startCamera()}
                   className="px-6 py-2.5 bg-primary text-black text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl hover:scale-105 transition-transform cursor-pointer"
                 >
                   Reconnect Camera
@@ -536,8 +584,8 @@ export default function AIStudioPage() {
               )}
             </div>
 
-            {/* ER Fitting Calibrator Overlay Model (Only in Fitting Tab) */}
-            {activeTab === "fitting" && selectedProduct && (stream || userPhoto) && (
+            {/* ER Fitting Calibrator Overlay Model (2D manual fallback, shown only if NOT active AR tracking or if using static userPhoto) */}
+            {activeTab === "fitting" && selectedProduct && (stream || userPhoto) && (!isArTrackingActive || userPhoto) && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 overflow-hidden">
                 <div
                   style={{
@@ -721,9 +769,17 @@ export default function AIStudioPage() {
               </div>
 
               <div className="glass-luxury p-6 border border-white/5 space-y-5 rounded-[32px]">
+                {isArTrackingActive && !userPhoto && (
+                  <div className="p-3 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-400 text-[9px] font-mono uppercase tracking-wider text-center flex items-center justify-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
+                    Auto skeletal tracking active. Sliders locked.
+                  </div>
+                )}
+
                 <button
                   onClick={handleStandardFit}
-                  className="w-full py-2.5 border border-primary/25 bg-primary/5 hover:bg-primary/10 text-primary text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center"
+                  disabled={isArTrackingActive && !userPhoto}
+                  className="w-full py-2.5 border border-primary/25 bg-primary/5 hover:bg-primary/10 text-primary text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer text-center disabled:opacity-30 disabled:pointer-events-none"
                 >
                   Standard Fit Calibrate
                 </button>
@@ -741,8 +797,9 @@ export default function AIStudioPage() {
                       max="2.0"
                       step="0.05"
                       value={scale}
+                      disabled={isArTrackingActive && !userPhoto}
                       onChange={(e) => setScale(parseFloat(e.target.value))}
-                      className="w-full accent-primary bg-white/5 rounded-full h-1 cursor-pointer"
+                      className="w-full accent-primary bg-white/5 rounded-full h-1 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -758,8 +815,9 @@ export default function AIStudioPage() {
                       max="180"
                       step="5"
                       value={rotationY}
+                      disabled={isArTrackingActive && !userPhoto}
                       onChange={(e) => setRotationY(parseInt(e.target.value))}
-                      className="w-full accent-primary bg-white/5 rounded-full h-1 cursor-pointer"
+                      className="w-full accent-primary bg-white/5 rounded-full h-1 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -775,8 +833,9 @@ export default function AIStudioPage() {
                       max="200"
                       step="5"
                       value={offsetY}
+                      disabled={isArTrackingActive && !userPhoto}
                       onChange={(e) => setOffsetY(parseInt(e.target.value))}
-                      className="w-full accent-primary bg-white/5 rounded-full h-1 cursor-pointer"
+                      className="w-full accent-primary bg-white/5 rounded-full h-1 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -792,8 +851,9 @@ export default function AIStudioPage() {
                       max="150"
                       step="5"
                       value={offsetX}
+                      disabled={isArTrackingActive && !userPhoto}
                       onChange={(e) => setOffsetX(parseInt(e.target.value))}
-                      className="w-full accent-primary bg-white/5 rounded-full h-1 cursor-pointer"
+                      className="w-full accent-primary bg-white/5 rounded-full h-1 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -809,8 +869,9 @@ export default function AIStudioPage() {
                       max="1200"
                       step="50"
                       value={perspective}
+                      disabled={isArTrackingActive && !userPhoto}
                       onChange={(e) => setPerspective(parseInt(e.target.value))}
-                      className="w-full accent-primary bg-white/5 rounded-full h-1 cursor-pointer"
+                      className="w-full accent-primary bg-white/5 rounded-full h-1 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                     />
                   </div>
                 </div>

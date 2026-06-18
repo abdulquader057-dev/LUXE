@@ -299,7 +299,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer_id: isUuid ? user.id : null,
+          customer_id: user?.id || null,
           total_price: grandTotal,
           status: paymentMethod === "cod" ? "processing" : "Pending",
           delivery_address: deliveryAddressPayload,

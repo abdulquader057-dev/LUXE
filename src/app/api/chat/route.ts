@@ -3,36 +3,14 @@ export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+import { rateLimit } from '@/lib/rateLimit';
+
 const API_KEYS = [
   process.env.GEMINI_API_KEY || '',
   process.env.GEMINI_API_KEY_2 || '',
 ].filter(Boolean);
 
 let currentKeyIndex = 0;
-
-// In-memory rate limiting map
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const limit = rateLimitMap.get(ip);
-  if (!limit) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
-    return false;
-  }
-  
-  if (now > limit.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
-    return false;
-  }
-  
-  if (limit.count >= 20) {
-    return true;
-  }
-  
-  limit.count += 1;
-  return false;
-}
 
 // Input sanitization: strips HTML tags and clamps input to 500 characters
 function sanitizeInput(text: string): string {
@@ -45,7 +23,8 @@ export async function POST(req: Request) {
   try {
     // 1. Rate Limiting Check
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
-    if (isRateLimited(ip)) {
+    const limitResult = await rateLimit(ip, 20, 60);
+    if (!limitResult.success) {
       return NextResponse.json(
         { message: "Too many requests, please wait" },
         { status: 429 }
