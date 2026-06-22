@@ -247,8 +247,19 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           setError(null);
           toast.success(`Location synced! Distance from Baba Nagar: ${dist.toFixed(1)} km`);
         } catch (err) {
+          console.error("Error geocoding:", err);
           toast.dismiss(toastId);
-          toast.error("Could not fetch location details. Please enter manually.");
+          if (dist <= 50) {
+            setAddress(`GPS: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+            setCity("Hyderabad");
+            setState("Telangana");
+            setPincode("500024");
+            setError(null);
+            toast.success(`Location synced! Distance from Baba Nagar: ${dist.toFixed(1)} km (Offline Fallback)`);
+          } else {
+            setError(`Detected location is outside Hyderabad. Distance from Baba Nagar: ${dist.toFixed(1)} km. Delivery is currently exclusive to Hyderabad.`);
+            toast.error("Location outside Hyderabad!");
+          }
         } finally {
           setDetecting(false);
         }

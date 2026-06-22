@@ -2191,7 +2191,7 @@ function PermissionSettings() {
                         : "text-white/40 hover:text-white"
                     )}
                   >
-                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Force Revoke" : "Force Grant"}
+                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Revoke (Block)" : "Grant (Allow)"}
                   </button>
                 ))}
               </div>
@@ -2278,7 +2278,7 @@ function PermissionSettings() {
                         : "text-white/40 hover:text-white"
                     )}
                   >
-                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Force Revoke" : "Force Grant"}
+                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Revoke (Block)" : "Grant (Allow)"}
                   </button>
                 ))}
               </div>
@@ -2365,7 +2365,7 @@ function PermissionSettings() {
                         : "text-white/40 hover:text-white"
                     )}
                   >
-                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Force Revoke" : "Force Grant"}
+                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Revoke (Block)" : "Grant (Allow)"}
                   </button>
                 ))}
               </div>

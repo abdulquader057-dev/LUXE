@@ -98,8 +98,16 @@ export const CountrySelectorModal = ({ isOpen, onClose }: CountrySelectorModalPr
             }
           }
         } catch (err) {
+          console.error("Error geocoding country:", err);
           toast.dismiss(toastId);
-          toast.error("Could not auto-detect country. Please select manually.");
+          const { latitude, longitude } = position.coords;
+          const isNearIndia = latitude >= 5 && latitude <= 40 && longitude >= 60 && longitude <= 100;
+          if (isNearIndia) {
+            handleSelect("India", "INR");
+            toast.success("Detected location: India (Fallback). Welcome to LUXE!");
+          } else {
+            toast.error("Could not auto-detect country. Please select manually.");
+          }
         } finally {
           setDetecting(false);
         }

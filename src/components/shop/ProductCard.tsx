@@ -243,7 +243,28 @@ const ProductCard = ({ product }: { product: Product }) => {
           </div>
 
           <div className="mt-4 pt-4 flex items-end justify-between" style={{ borderTop: "1px solid rgba(201,168,76,0.1)" }}>
-            <div />
+            <div>
+              {discountPct && discountPct > 0 && (
+                <div className="text-[9px] font-sora text-white/30 line-through tracking-wider mb-0.5">
+                  {convertPrice(Math.round(product.price / (1 - discountPct / 100))).symbol}{convertPrice(Math.round(product.price / (1 - discountPct / 100))).amount}
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-[14px] font-orbitron font-bold tracking-wider"
+                  style={{ color: "#00f2ff" }}
+                >
+                  {priceInfo.symbol}{priceInfo.amount}
+                </span>
+                {discountPct && discountPct > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-sm text-[8px] font-sora font-bold tracking-widest"
+                    style={{ background: "rgba(201,168,76,0.15)", color: "#00f2ff", border: "1px solid rgba(201,168,76,0.25)" }}
+                  >
+                    -{discountPct}%
+                  </span>
+                )}
+              </div>
+            </div>
 
             {product.stock === 0 ? (
               <span className="text-[9px] font-mono font-bold text-red-500/60 uppercase tracking-widest px-3 py-1.5 bg-red-500/5 border border-red-500/10 rounded-lg">
