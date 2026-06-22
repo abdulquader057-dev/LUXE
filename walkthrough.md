@@ -62,12 +62,13 @@ Running `npx vitest run` confirms all unit tests compile and ### 4. Outfit Build
   - Executed a DB update script using Supabase client to sync the price and discount values on the remote database.
 - **File Modified**: [ProductPageClient.tsx](file:///C:/Users/abdulquader/OneDrive/Desktop/SHADAB/src/app/product/[id]/ProductPageClient.tsx)
   - Added array deduplication logic to `activeImages` inside the product page. This filters out duplicate variant images (e.g. duplicate front/back/original view URLs pointing to the same file) and guarantees only one unique photo of each view is shown.
+- **File Modified**: [ProductCard.tsx](file:///C:/Users/abdulquader/OneDrive/Desktop/SHADAB/src/components/shop/ProductCard.tsx)
+  - Removed all price tags, discount tags, and slashed pricing elements from the product cards in the shop/catalog grid, leaving it completely clean to maintain a premium, editorial design. Prices remain visible on the product detail page when users click on a product.
 
 ---
 
 ## Deployment Status
 - **URL**: `https://luxe-kgxq.vercel.app`
 - **Aliased Domain**: `https://luxe-kgxq.vercel.app`
-- Deployed successfully using Vercel CLI.8s
-# ✓ Generating static pages (38/38)
-# Finalizing page optimization ...
+- Deployed successfully using Vercel CLI.
+
