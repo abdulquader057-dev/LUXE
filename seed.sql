@@ -60,12 +60,12 @@ VALUES
 (
   '00000000-0000-4000-a000-000000000005',
   'Luxe Tipped Collar Polo',
-  '{"text": "Premium pique cotton polo featuring tipped details on collar and cuffs. Adorned with a signature chest logo badge.", "colors": ["Carbon Black"], "sizes": ["M", "L", "XL", "XXL"], "images": ["/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg", "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (2).jpeg"], "ratings": 4.7, "reviewsCount": 63, "offer": "Introductory 10% Off", "modelImages": {"front": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg", "side": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (2).jpeg", "back": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg", "variants": {"Carbon Black": {"front": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg", "side": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (2).jpeg", "back": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg", "original": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg"}}}}',
-  799,
+  '{"text": "Premium pique cotton polo featuring tipped details on collar and cuffs. Adorned with a signature chest logo badge.", "colors": ["Carbon Black"], "sizes": ["M", "L", "XL", "XXL"], "images": ["/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg", "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (2).jpeg"], "ratings": 4.7, "reviewsCount": 63, "offer": "Introductory 56% Off", "modelImages": {"front": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg", "side": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (2).jpeg", "back": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg", "variants": {"Carbon Black": {"front": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg", "side": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (2).jpeg", "back": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg", "original": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg"}}}}',
+  399,
   85,
   'streetwear',
   '/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg',
-  10,
+  56,
   true
 ),
 (

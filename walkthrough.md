@@ -46,24 +46,28 @@ We have successfully executed a comprehensive, production-grade upgrade pass on 
 ## 2. Verification Results
 
 ### Unit Tests
-Running `npx vitest run` confirms all unit tests compile and execute successfully:
-```bash
-npx vitest run
-# Output:
-# RUN  v4.1.9 C:/Users/abdulquader/OneDrive/Desktop/SHADAB
-# ✓ src/test/suite.test.tsx (4 tests) 5ms
-# Test Files  1 passed (1)
-# Tests  4 passed (4)
-# Duration  858ms
-```
+Running `npx vitest run` confirms all unit tests compile and ### 4. Outfit Builder Checkout Wiring
+- **File Modified**: [build-outfit/page.tsx](file:///C:/Users/abdulquader/OneDrive/Desktop/SHADAB/src/app/build-outfit/page.tsx)
+  - Injected `addToCart` from the commerce context and bound it to the **Add Complete Fit** button. When clicked, it adds all active outfit items to the cart sidebar at once and fires a success toast.
 
-### Production Build
-Running `npm run build` succeeds without compilation errors:
-```bash
-npm run build
-# Output:
-# ▲ Next.js 16.2.6 (Turbopack)
-# ✓ Compiled successfully in 5.8s
+### 5. Product Image Banner Crop & Mobile Stabilization
+- **Image Cropped**: [WhatsApp Image 2026-05-26 at 8.37.21 PM (1).jpeg](file:///C:/Users/abdulquader/OneDrive/Desktop/SHADAB/public/brand/WhatsApp Image 2026-05-26 at 8.37.21 PM (1).jpeg)
+  - Cropped the top 75px off the collage image to completely remove the promotional "ICONIC BRANDS. TIMELESS STYLE." / "₹799 / ₹999" banner.
+- **File Modified**: [globals.css](file:///C:/Users/abdulquader/OneDrive/Desktop/SHADAB/src/app/globals.css)
+  - Added a responsive media query for `.floatHeadline` that disables the infinite floating animation specifically on mobile screens (`max-width: 768px`) to ensure absolute layout stability while preserving it on PC and laptops.
+
+### 6. Product Pricing Realignment & Deduplication
+- **File Modified**: [products.ts](file:///C:/Users/abdulquader/OneDrive/Desktop/SHADAB/src/data/products.ts) & [seed.sql](file:///C:/Users/abdulquader/OneDrive/Desktop/SHADAB/seed.sql)
+  - Re-aligned the base metadata price of "Luxe Tipped Collar Polo" (`00000000-0000-4000-a000-000000000005`) to `399` INR and discount percentage to `55.617%` (so it computes back to original price `899` INR). This makes the metadata pricing below the product completely match the grey/white ₹399 price tag overlay shown in the photo.
+  - Executed a DB update script using Supabase client to sync the price and discount values on the remote database.
+- **File Modified**: [ProductPageClient.tsx](file:///C:/Users/abdulquader/OneDrive/Desktop/SHADAB/src/app/product/[id]/ProductPageClient.tsx)
+  - Added array deduplication logic to `activeImages` inside the product page. This filters out duplicate variant images (e.g. duplicate front/back/original view URLs pointing to the same file) and guarantees only one unique photo of each view is shown.
+
+---
+
+## Deployment Status
+- **URL**: `https://luxe-kgxq.vercel.app`
+- **Aliased Domain**: `https://luxe-kgxq.vercel.app`
+- Deployed successfully using Vercel CLI.8s
 # ✓ Generating static pages (38/38)
 # Finalizing page optimization ...
-```

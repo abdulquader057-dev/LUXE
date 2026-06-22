@@ -158,7 +158,7 @@ export const MOCK_PRODUCTS: Product[] = [
     "id": "00000000-0000-4000-a000-000000000005",
     "name": "Luxe Tipped Collar Polo",
     "description": "Premium pique cotton polo featuring tipped details on collar and cuffs. Adorned with a signature chest logo badge.",
-    "price": 799,
+    "price": 399,
     "currency": "INR",
     "category": "streetwear",
     "images": [
@@ -170,8 +170,8 @@ export const MOCK_PRODUCTS: Product[] = [
     "colors": ["Carbon Black"],
     "ratings": 4.7,
     "reviewsCount": 63,
-    "discount": 10,
-    "offer": "Introductory 10% Off",
+    "discount": 55.617,
+    "offer": "Introductory 56% Off",
     "modelImages": {
       "front": "/brand/WhatsApp Image 2026-05-26 at 8.42.00 PM (1).jpeg",
       "side": "/brand/WhatsApp Image 2026-05-26 at 8.42.01 PM (2).jpeg",

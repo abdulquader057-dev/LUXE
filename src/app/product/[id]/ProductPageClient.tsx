@@ -233,6 +233,9 @@ export default function ProductPageClient({ product }: { product: any }) {
     activeImages = product.images;
   }
 
+  // Deduplicate activeImages to avoid showing repeated photos
+  activeImages = activeImages.filter((img, index, self) => self.indexOf(img) === index);
+
   
 
   const handleWhatsAppBuy = () => {
