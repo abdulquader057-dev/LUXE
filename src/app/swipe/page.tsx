@@ -29,13 +29,30 @@ export default function SwipePage() {
   const { awardXP } = useXP();
 
   useEffect(() => {
+    // 1. Instant Cache Load (SWR Pattern)
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("luxe-swipe-cache");
+      if (cached) {
+        try {
+          const parsedCache = JSON.parse(cached);
+          if (Array.isArray(parsedCache) && parsedCache.length > 0) {
+            setProducts(parsedCache);
+            setIsLoading(false);
+          }
+        } catch (e) {
+          console.warn("Could not load swipe cache:", e);
+        }
+      }
+    }
+
+    // 2. Background fresh fetch
     async function fetchProducts() {
-      setIsLoading(true);
       try {
         const { data } = await supabase.from("products").select("*");
         if (data && data.length > 0) {
           const parsed = data.map(parseDbProduct);
           setProducts(parsed);
+          localStorage.setItem("luxe-swipe-cache", JSON.stringify(parsed));
         }
       } catch (err) {
         console.error("Failed to fetch products for swipe page:", err);
@@ -192,6 +209,7 @@ export default function SwipePage() {
                 src={nextProduct.images[0] || "/brand/linen_model_front.png"}
                 alt=""
                 fill
+                priority
                 sizes="400px"
                 className="object-cover opacity-50 scale-95 blur-sm"
               />
@@ -343,6 +361,19 @@ export default function SwipePage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Hidden preloader for the next product's image using Next.js Image component to match optimized url caching */}
+      {nextProduct && (
+        <div className="absolute w-1 h-1 opacity-0 pointer-events-none overflow-hidden">
+          <Image
+            src={nextProduct.images[0] || "/brand/linen_model_front.png"}
+            alt=""
+            fill
+            sizes="400px"
+            priority
+          />
+        </div>
+      )}
     </main>
   );
 }

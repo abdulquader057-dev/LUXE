@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, ChevronRight, ChevronLeft, Heart,
@@ -39,6 +39,8 @@ export default function BuildOutfitPage() {
   const [revealPhase, setRevealPhase] = useState(0);
   const [likedOutfits, setLikedOutfits] = useState<Set<string>>(new Set());
   const { convertPrice, addToCart } = useCommerce();
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Supabase Integration States
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
@@ -47,6 +49,7 @@ export default function BuildOutfitPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setIsMounted(true);
     async function loadData() {
       setIsLoading(true);
       setError(null);
@@ -508,6 +511,80 @@ export default function BuildOutfitPage() {
                   </motion.div>
                 ))}
               </motion.div>
+
+              {/* Interactive Style Board */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <BrainCircuit size={16} className="text-primary animate-pulse" />
+                    <span className="text-[10px] font-mono tracking-[0.3em] uppercase text-white/60">Interactive Style Board</span>
+                  </div>
+                  <span className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Drag & Layer Silhouette Elements</span>
+                </div>
+                
+                <div 
+                  ref={canvasRef}
+                  className="relative overflow-hidden w-full h-[400px] rounded-[32px] border border-white/5 bg-black/30 backdrop-blur-md shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] flex items-center justify-center bg-[linear-gradient(rgba(201,168,76,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(201,168,76,0.02)_1px,transparent_1px)] bg-[size:30px_30px]"
+                >
+                  {/* Decorative corner brackets for a HUD feel */}
+                  <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-white/20 pointer-events-none" />
+                  <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-white/20 pointer-events-none" />
+                  <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-white/20 pointer-events-none" />
+                  <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-white/20 pointer-events-none" />
+                  
+                  {outfitProducts.length === 0 && (
+                    <div className="text-[10px] font-mono text-white/20 uppercase tracking-widest pointer-events-none">
+                      No assets loaded
+                    </div>
+                  )}
+
+                  {outfitProducts.map((product, i) => {
+                    if (!product) return null;
+                    
+                    const isMobile = isMounted && typeof window !== "undefined" && window.innerWidth < 768;
+                    const leftOffset = isMobile ? i * 65 + 10 : i * 190 + 50;
+                    const topOffset = isMobile ? 35 + (i % 2) * 40 : 40 + (i % 2) * 60;
+                    
+                    return (
+                      <motion.div
+                        key={`collage-${product.id}`}
+                        drag
+                        dragConstraints={canvasRef}
+                        dragElastic={0.1}
+                        dragMomentum={false}
+                        whileHover={{ scale: 1.05, zIndex: 50 }}
+                        whileDrag={{ scale: 1.1, cursor: "grabbing" }}
+                        style={{
+                          left: `${leftOffset}px`,
+                          top: `${topOffset}px`,
+                        }}
+                        className="absolute w-[130px] md:w-[160px] aspect-[3/4] rounded-[24px] overflow-hidden border border-white/15 bg-[#12121a] shadow-2xl cursor-grab active:cursor-grabbing touch-none group select-none"
+                      >
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={product.images[0]}
+                            alt={product.name}
+                            fill
+                            sizes="(max-width: 768px) 140px, 170px"
+                            className="object-cover pointer-events-none select-none"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                          
+                          {/* Mini info overlay */}
+                          <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
+                            <span className="text-[8px] font-mono tracking-widest text-primary uppercase block truncate">
+                              {generatedOutfit.items[i]?.role}
+                            </span>
+                            <span className="text-[9px] font-bold text-white uppercase block truncate">
+                              {product.name}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
 
               {/* Outfit Items Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

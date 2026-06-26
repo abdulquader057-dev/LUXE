@@ -146,7 +146,9 @@ const AIChatbot = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { isListening, startListening, stopListening } = useSpeechRecognition({
-    onResult: (result) => handleSend(result),
+    onResult: (result) => {
+      setInput((prev) => (prev ? prev + " " + result : result));
+    },
   });
 
   useEffect(() => {

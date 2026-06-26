@@ -8,7 +8,8 @@ import {
   Bell, HelpCircle, Camera, Cpu, 
   History, Share2, MessageSquare, 
   CheckCircle2, ChevronRight, X, Lock,
-  LogOut, Globe, Moon, Eye, Sparkles, Diamond, ShoppingBag, Palette, Calendar, Send, Clipboard
+  LogOut, Globe, Moon, Eye, Sparkles, Diamond, ShoppingBag, Palette, Calendar, Send, Clipboard,
+  RotateCcw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import LuxeButton from "@/components/ui/LuxeButton";
@@ -1992,12 +1993,13 @@ function ThemeSettings() {
 }
 
 function PermissionSettings() {
+  const { user } = useAuth();
   const [cameraStatus, setCameraStatus] = useState<PermissionState>("prompt");
   const [geoStatus, setGeoStatus] = useState<PermissionState>("prompt");
   const [notificationStatus, setNotificationStatus] = useState<PermissionState>("prompt");
   
   const [cameraOverride, setCameraOverride] = useState<"default" | "granted" | "denied">("default");
-  const [geoOverride, setGeoOverride] = useState<"default" | "granted" | "denied">("default");
+  const [geoOverride, setGeoOverride] = useState<"default" | "granted" | "denied" | "offline_fallback">("default");
   const [notificationOverride, setNotificationOverride] = useState<"default" | "granted" | "denied">("default");
   
   const [checking, setChecking] = useState(true);
@@ -2052,20 +2054,81 @@ function PermissionSettings() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setCameraOverride((localStorage.getItem("luxe-override-camera") as any) || "default");
-      setGeoOverride((localStorage.getItem("luxe-override-geolocation") as any) || "default");
-      setNotificationOverride((localStorage.getItem("luxe-override-notifications") as any) || "default");
+      const storedCamera = localStorage.getItem("luxe-override-camera");
+      const storedGeo = localStorage.getItem("luxe-override-geolocation");
+      const storedNotif = localStorage.getItem("luxe-override-notifications");
+
+      const serverOverrides = user?.user_metadata?.permission_overrides;
+
+      const effectiveCamera = storedCamera || serverOverrides?.camera || "default";
+      const effectiveGeo = storedGeo || serverOverrides?.geolocation || "default";
+      const effectiveNotif = storedNotif || serverOverrides?.notifications || "default";
+
+      if (!storedCamera && serverOverrides?.camera) localStorage.setItem("luxe-override-camera", serverOverrides.camera);
+      if (!storedGeo && serverOverrides?.geolocation) localStorage.setItem("luxe-override-geolocation", serverOverrides.geolocation);
+      if (!storedNotif && serverOverrides?.notifications) localStorage.setItem("luxe-override-notifications", serverOverrides.notifications);
+
+      setCameraOverride(effectiveCamera as any);
+      setGeoOverride(effectiveGeo as any);
+      setNotificationOverride(effectiveNotif as any);
     }
     queryPermissions();
-  }, []);
+  }, [user]);
 
-  const handleUpdateOverride = (type: "camera" | "geolocation" | "notifications", val: "default" | "granted" | "denied") => {
+  const syncOverrides = async (cam: string, geo: string, notif: string) => {
+    if (!user) return;
+    try {
+      await supabase.auth.updateUser({
+        data: {
+          permission_overrides: {
+            camera: cam,
+            geolocation: geo,
+            notifications: notif
+          }
+        }
+      });
+    } catch (e) {
+      console.warn("Failed to sync permission overrides with server:", e);
+    }
+  };
+
+  const handleUpdateOverride = (type: "camera" | "geolocation" | "notifications", val: "default" | "granted" | "denied" | "offline_fallback") => {
     if (typeof window === "undefined") return;
     localStorage.setItem(`luxe-override-${type}`, val);
-    if (type === "camera") setCameraOverride(val);
-    if (type === "geolocation") setGeoOverride(val);
-    if (type === "notifications") setNotificationOverride(val);
+    
+    let nextCam = cameraOverride;
+    let nextGeo = geoOverride;
+    let nextNotif = notificationOverride;
+
+    if (type === "camera") {
+      setCameraOverride(val as any);
+      nextCam = val as any;
+    }
+    if (type === "geolocation") {
+      setGeoOverride(val);
+      nextGeo = val;
+    }
+    if (type === "notifications") {
+      setNotificationOverride(val as any);
+      nextNotif = val as any;
+    }
+
     toast.success(`Permission override for ${type} set to: ${val === "default" ? "Browser default" : val.toUpperCase()}`);
+    syncOverrides(nextCam, nextGeo, nextNotif);
+  };
+
+  const handleResetDefaults = () => {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem("luxe-override-camera");
+    localStorage.removeItem("luxe-override-geolocation");
+    localStorage.removeItem("luxe-override-notifications");
+
+    setCameraOverride("default");
+    setGeoOverride("default");
+    setNotificationOverride("default");
+
+    toast.success("Permission configurations reset to default");
+    syncOverrides("default", "default", "default");
   };
 
   const requestCamera = async () => {
@@ -2076,7 +2139,7 @@ function PermissionSettings() {
       toast.success("Camera Link Authenticated!");
       queryPermissions();
     } catch (err) {
-      console.error("Camera request failed:", err);
+      console.warn("Camera request failed:", err);
       toast.error("Camera access denied or unavailable.");
       setCameraStatus("denied");
     }
@@ -2090,7 +2153,7 @@ function PermissionSettings() {
         queryPermissions();
       },
       (err) => {
-        console.error("Geo request failed:", err);
+        console.warn("Geo request failed:", err);
         toast.error("Location access denied.");
         setGeoStatus("denied");
       }
@@ -2108,7 +2171,7 @@ function PermissionSettings() {
         toast.error("Notifications blocked.");
       }
     } catch (err) {
-      console.error("Notification request failed:", err);
+      console.warn("Notification request failed:", err);
     }
   };
 
@@ -2128,16 +2191,27 @@ function PermissionSettings() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <span className="text-[10px] font-mono text-primary tracking-[0.4em] uppercase block mb-1">
-          Privacy Console // Core
-        </span>
-        <h2 className="text-3xl font-display font-light uppercase tracking-tight">
-          System Permissions
-        </h2>
-        <p className="text-[11px] font-sora text-white/40 leading-relaxed uppercase mt-2 max-w-xl">
-          Manage system permissions for real-time 3D camera tracking, location logistics, and drop alert notifications. Adjust overrides to test denied/granted states.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span className="text-[10px] font-mono text-primary tracking-[0.4em] uppercase block mb-1">
+            Privacy Console // Core
+          </span>
+          <h2 className="text-3xl font-display font-light uppercase tracking-tight">
+            System Permissions
+          </h2>
+          <p className="text-[11px] font-sora text-white/40 leading-relaxed uppercase mt-2 max-w-xl">
+            Manage system permissions for real-time 3D camera tracking, location logistics, and drop alert notifications. Adjust overrides to test denied/granted states.
+          </p>
+        </div>
+        <div>
+          <button
+            onClick={handleResetDefaults}
+            className="px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-white text-[9px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+          >
+            <RotateCcw size={12} className="animate-spin-hover" />
+            Reset Defaults
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
@@ -2266,8 +2340,8 @@ function PermissionSettings() {
             {/* Override Control selector */}
             <div className="space-y-1.5">
               <span className="text-[7px] font-mono text-white/30 uppercase tracking-widest block">App Override (Revoke / Grant):</span>
-              <div className="flex bg-white/[0.03] border border-white/5 p-0.5 rounded-xl">
-                {(["default", "denied", "granted"] as const).map((opt) => (
+              <div className="flex bg-white/[0.03] border border-white/5 p-0.5 rounded-xl flex-wrap gap-1">
+                {(["default", "denied", "granted", "offline_fallback"] as const).map((opt) => (
                   <button
                     key={opt}
                     onClick={() => handleUpdateOverride("geolocation", opt)}
@@ -2278,7 +2352,7 @@ function PermissionSettings() {
                         : "text-white/40 hover:text-white"
                     )}
                   >
-                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Revoke (Block)" : "Grant (Allow)"}
+                    {opt === "default" ? "Use Browser" : opt === "denied" ? "Block" : opt === "granted" ? "Allow" : "Offline Fallback"}
                   </button>
                 ))}
               </div>

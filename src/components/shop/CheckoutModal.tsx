@@ -64,6 +64,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [coords, setCoords] = useState<{lat: number; lon: number} | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [detecting, setDetecting] = useState(false);
+  const [isOfflineGeo, setIsOfflineGeo] = useState(false);
 
   // Payment states
   const [paymentMethod, setPaymentMethod] = useState<"card" | "upi" | "cod">("upi");
@@ -168,6 +169,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   // Auto-detect address using Geolocation and Nominatim
   const detectLocation = () => {
     setDetecting(true);
+    setIsOfflineGeo(false);
     const toastId = toast.loading("Acquiring GPS coordinates...");
 
     const geoOverride = typeof window !== "undefined" ? localStorage.getItem("luxe-override-geolocation") : "default";
@@ -200,6 +202,26 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       return;
     }
 
+    if (geoOverride === "offline_fallback") {
+      setTimeout(() => {
+        toast.dismiss(toastId);
+        const lat = 17.3272; // Baba Nagar
+        const lon = 78.4908;
+        setCoords({ lat, lon });
+        const dist = getDistanceKM(lat, lon, BABA_NAGAR.lat, BABA_NAGAR.lon);
+        setDistance(dist);
+        setAddress(`GPS: ${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+        setCity("Hyderabad");
+        setState("Telangana");
+        setPincode("500024");
+        setError(null);
+        setIsOfflineGeo(true);
+        toast.success(`Location synced! Distance from Baba Nagar: ${dist.toFixed(1)} km (Offline Fallback)`);
+        setDetecting(false);
+      }, 800);
+      return;
+    }
+
     if (!navigator.geolocation) {
       toast.dismiss(toastId);
       toast.error("Geolocation is not supported by your browser");
@@ -209,13 +231,13 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        const { latitude, longitude } = position.coords;
+        setCoords({ lat: latitude, lon: longitude });
+
+        const dist = getDistanceKM(latitude, longitude, BABA_NAGAR.lat, BABA_NAGAR.lon);
+        setDistance(dist);
+
         try {
-          const { latitude, longitude } = position.coords;
-          setCoords({ lat: latitude, lon: longitude });
-
-          const dist = getDistanceKM(latitude, longitude, BABA_NAGAR.lat, BABA_NAGAR.lon);
-          setDistance(dist);
-
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
           if (!res.ok) throw new Error("Reverse geocode failed");
           
@@ -255,6 +277,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             setState("Telangana");
             setPincode("500024");
             setError(null);
+            setIsOfflineGeo(true);
             toast.success(`Location synced! Distance from Baba Nagar: ${dist.toFixed(1)} km (Offline Fallback)`);
           } else {
             setError(`Detected location is outside Hyderabad. Distance from Baba Nagar: ${dist.toFixed(1)} km. Delivery is currently exclusive to Hyderabad.`);
@@ -716,7 +739,15 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
             )}
 
             {/* Autofill location button */}
-            <div className="flex justify-end">
+            <div className="flex items-center justify-between gap-4">
+              {isOfflineGeo ? (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-yellow-500/25 bg-yellow-500/10 text-yellow-400 text-[8px] font-mono tracking-widest uppercase animate-pulse">
+                  <AlertCircle size={10} className="text-yellow-400" />
+                  <span>offline geocoding fallback active</span>
+                </div>
+              ) : (
+                <div />
+              )}
               <button
                 type="button"
                 onClick={detectLocation}

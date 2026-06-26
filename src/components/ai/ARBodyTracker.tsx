@@ -309,9 +309,65 @@ export const ARBodyTracker = ({
     <div className="absolute inset-0 w-full h-full z-20 pointer-events-none">
       {/* Library loading overlay */}
       {isLibraryLoading && (
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-8 h-8 text-[#C9A84C] animate-spin" />
-          <span className="text-[10px] font-mono tracking-widest text-[#C9A84C] uppercase">Calibrating AR Engine...</span>
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-6">
+          <div className="relative flex flex-col items-center">
+            <div className="w-[120px] h-[180px] flex items-center justify-center relative">
+              <div className="absolute inset-0 bg-[#C9A84C]/5 blur-xl rounded-full animate-pulse" />
+              <svg width="120" height="180" viewBox="0 0 120 180" className="opacity-80">
+                <g stroke="#C9A84C" strokeWidth="2" strokeLinecap="round" opacity="0.6">
+                  {/* Shoulders */}
+                  <line x1="40" y1="50" x2="80" y2="50" className="animate-pulse" />
+                  {/* Spine */}
+                  <line x1="60" y1="50" x2="60" y2="100" />
+                  {/* Hips */}
+                  <line x1="45" y1="100" x2="75" y2="100" />
+                  
+                  {/* Left Arm */}
+                  <line x1="40" y1="50" x2="30" y2="75" />
+                  <line x1="30" y1="75" x2="25" y2="95" />
+                  
+                  {/* Right Arm */}
+                  <line x1="80" y1="50" x2="90" y2="75" />
+                  <line x1="90" y1="75" x2="95" y2="95" />
+                  
+                  {/* Left Leg */}
+                  <line x1="45" y1="100" x2="40" y2="135" />
+                  <line x1="40" y1="135" x2="35" y2="170" />
+                  
+                  {/* Right Leg */}
+                  <line x1="75" y1="100" x2="80" y2="135" />
+                  <line x1="80" y1="135" x2="85" y2="170" />
+                </g>
+                
+                <g fill="#C9A84C">
+                  {/* Head */}
+                  <circle cx="60" cy="30" r="7" />
+                  
+                  {/* Joint dots */}
+                  <circle cx="40" cy="50" r="3" />
+                  <circle cx="80" cy="50" r="3" />
+                  <circle cx="30" cy="75" r="2.5" />
+                  <circle cx="90" cy="75" r="2.5" />
+                  <circle cx="25" cy="95" r="2.5" className="animate-pulse" />
+                  <circle cx="95" cy="95" r="2.5" className="animate-pulse" />
+                  <circle cx="45" cy="100" r="3" />
+                  <circle cx="75" cy="100" r="3" />
+                  <circle cx="40" cy="135" r="2.5" />
+                  <circle cx="80" cy="135" r="2.5" />
+                  <circle cx="35" cy="170" r="2.5" className="animate-pulse" />
+                  <circle cx="85" cy="170" r="2.5" className="animate-pulse" />
+                </g>
+              </svg>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <span className="text-[10px] font-mono tracking-[0.3em] text-[#C9A84C] uppercase animate-pulse">
+              Calibrating AR Body Mesh...
+            </span>
+            <span className="text-[8px] font-mono text-white/30 uppercase tracking-widest">
+              fitting skeletal landmarks to real-time silhouette
+            </span>
+          </div>
         </div>
       )}
 
