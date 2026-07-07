@@ -160,10 +160,9 @@ export default function ZyraChat() {
     saveMessages(updatedMessages);
     setMessage("");
     setIsLoading(true);
-
-    // 8-second fetch timeout controller
+    // 25-second fetch timeout controller for serverless function cold-starts
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     try {
       const response = await fetch("/api/chat", {

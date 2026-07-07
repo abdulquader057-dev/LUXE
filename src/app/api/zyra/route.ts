@@ -28,8 +28,19 @@ export async function POST(req: Request) {
   const apiKey = process.env.GEMINI_API_KEY || '';
   if (!apiKey) return new Response('API key not configured', { status: 500 });
 
-  // Fetch catalog
-  const { data: catalog } = await supabaseAdmin.from('products').select('id, name, category').eq('is_active', true);
+  // Fetch catalog with resilience fallback
+  let catalog: any[] | null = null;
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .select('id, name, category')
+      .eq('is_active', true);
+    if (!error) {
+      catalog = data;
+    }
+  } catch (e) {
+    console.warn("Supabase Catalog fetch failed in api/zyra, falling back to empty:", e);
+  }
   const catalogStr = catalog && catalog.length > 0
     ? catalog.map((p: any, i: number) => `${i+1}. ${p.name} [ID: ${p.id}]`).join('\n')
     : 'Catalog loading.';

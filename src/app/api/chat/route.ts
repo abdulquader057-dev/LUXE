@@ -88,10 +88,18 @@ export async function POST(req: Request) {
 
     const { supabaseAdmin } = await import('@/lib/supabase');
 
-    // Fetch active products list
-    const { data: dbCatalog } = await supabaseAdmin
-      .from('products')
-      .select('id, name');
+    // Fetch active products list with resilience fallback
+    let dbCatalog: any[] | null = null;
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('products')
+        .select('id, name');
+      if (!error) {
+        dbCatalog = data;
+      }
+    } catch (e) {
+      console.warn("Supabase Catalog fetch failed in api/chat, falling back to empty:", e);
+    }
 
     const catalogListString = dbCatalog && dbCatalog.length > 0
       ? dbCatalog.map((p: any, idx: number) => `${idx + 1}. ${p.name} [ID: ${p.id}]`).join('\n')
@@ -139,14 +147,18 @@ Do not discuss or recommend competitor brands.`;
         
         let recommendations: any[] = [];
         if (recommendedIds.length > 0) {
-          const { data } = await supabaseAdmin
-            .from('products')
-            .select('*')
-            .in('id', recommendedIds);
-          
-          if (data) {
-            const { parseDbProduct } = await import('@/data/products');
-            recommendations = data.map(parseDbProduct);
+          try {
+            const { data } = await supabaseAdmin
+              .from('products')
+              .select('*')
+              .in('id', recommendedIds);
+            
+            if (data) {
+              const { parseDbProduct } = await import('@/data/products');
+              recommendations = data.map(parseDbProduct);
+            }
+          } catch (dbErr) {
+            console.warn("Recommendations database query failed, using empty array:", dbErr);
           }
         }
 
