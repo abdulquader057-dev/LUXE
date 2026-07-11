@@ -12,9 +12,26 @@ function sanitize(text: string): string {
 
 export async function POST(req: Request) {
   const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
-  const limitResult = await rateLimit(ip, 20, 60);
-  if (!limitResult.success) {
+  
+  // IP-based limit (10 requests per 60s)
+  const ipLimitResult = await rateLimit(ip, 10, 60);
+  if (!ipLimitResult.success) {
     return new Response('Rate limit exceeded', { status: 429 });
+  }
+
+  // Secondary User-based limit (15 requests per 60s for authenticated users)
+  try {
+    const { createSupabaseServerClient } = await import('@/lib/supabaseServer');
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const userLimitResult = await rateLimit(user.id, 15, 60);
+      if (!userLimitResult.success) {
+        return new Response('User rate limit exceeded', { status: 429 });
+      }
+    }
+  } catch (authLimitErr) {
+    // Non-blocking fallback
   }
 
   let body: any;

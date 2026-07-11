@@ -359,19 +359,19 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
           size: item.size || "L",
           color: item.color || "White"
         }))
-      });
-
-      const checkoutResponse = await fetch("/api/checkout", {
+      });      const checkoutResponse = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer_id: user?.id || null,
+          items: cart.map(item => ({ id: item.id, quantity: item.quantity })),
           total_price: grandTotal,
           status: paymentMethod === "cod" ? "processing" : "Pending",
           delivery_address: deliveryAddressPayload,
+          activePlan,
+          couponDiscountPercent,
+          distance
         }),
       });
-
       if (!checkoutResponse.ok) {
         const checkErr = await checkoutResponse.json();
         throw new Error(checkErr.error || "Failed to create order on server.");

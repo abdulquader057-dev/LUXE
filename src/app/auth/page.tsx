@@ -182,21 +182,31 @@ export default function AuthPortal() {
       } else {
         const escapedFullName = escapeString(trimmedFullName);
         const escapedPhone = escapeString(trimmedPhone);
- 
-        const { data, error: signUpError } = await supabase.auth.signUp({
+
+        const res = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: normalizedEmail,
+            password: trimmedPassword,
+            fullName: escapedFullName,
+            phone: escapedPhone,
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || "Signup failed");
+        }
+
+        // Auto-login the user immediately after successful signup
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email: normalizedEmail,
           password: trimmedPassword,
-          options: {
-            data: {
-              full_name: escapedFullName,
-              phone_number: escapedPhone,
-            },
-            emailRedirectTo: `${window.location.origin}/auth`,
-          },
         });
- 
-        if (signUpError) throw signUpError;
- 
+
+        if (signInError) throw signInError;
+
         // GTM Event Tracking for Signup Success
         if (typeof window !== "undefined") {
           (window as any).dataLayer = (window as any).dataLayer || [];
@@ -206,8 +216,11 @@ export default function AuthPortal() {
             method: "email"
           });
         }
- 
-        setSuccess("Check your email to verify your account 🖤");
+
+        setSuccess("Account created successfully! Logging you in... 🖤");
+        setTimeout(() => {
+          router.push("/");
+        }, 1500);
         setEmail("");
         setPassword("");
         setFullName("");

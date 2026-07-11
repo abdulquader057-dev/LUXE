@@ -1,13 +1,44 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { supabaseAdmin } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
 export async function POST(request: Request) {
   try {
-    const { amount, orderId } = await request.json();
+    const { amount: clientAmount, orderId } = await request.json();
 
-    if (!amount || typeof amount !== "number" || !orderId) {
+    if (!clientAmount || typeof clientAmount !== "number" || !orderId) {
       return NextResponse.json({ error: "Invalid amount or orderId parameters" }, { status: 400 });
+    }
+
+    // 1. Resolve & Authenticate Session Server-side
+    const supabase = await createSupabaseServerClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
+
+    // 2. Fetch order from the public.orders table server-side to guarantee integrity
+    const { data: dbOrder, error: fetchError } = await supabaseAdmin
+      .from("orders")
+      .select("id, total_price, customer_id, delivery_address")
+      .eq("id", orderId)
+      .single();
+
+    if (fetchError || !dbOrder) {
+      return NextResponse.json({ error: "Order record not found" }, { status: 404 });
+    }
+
+    // 3. Ownership Verification
+    if (dbOrder.customer_id !== user.id) {
+      return NextResponse.json({ error: "Access denied. Order owner mismatch." }, { status: 403 });
+    }
+
+    // 4. Server-Side Price Verification
+    const serverTotalPrice = Number(dbOrder.total_price) || 0;
+    if (Math.abs(serverTotalPrice - clientAmount) > 1) {
+      return NextResponse.json({ error: "Price verification mismatch" }, { status: 400 });
     }
 
     const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
@@ -24,7 +55,7 @@ export async function POST(request: Request) {
     });
 
     // Amount must be in paise (1 INR = 100 paise)
-    const amountInPaise = Math.round(amount * 100);
+    const amountInPaise = Math.round(serverTotalPrice * 100);
 
     const order = await razorpay.orders.create({
       amount: amountInPaise,
@@ -33,16 +64,6 @@ export async function POST(request: Request) {
     });
 
     // Update the Supabase order with the Razorpay Order ID server-side
-    const { data: dbOrder, error: fetchError } = await supabaseAdmin
-      .from("orders")
-      .select("delivery_address")
-      .eq("id", orderId)
-      .single();
-
-    if (fetchError) {
-      throw new Error(`Supabase fetch failed: ${fetchError.message}`);
-    }
-
     let updatedDetails = {};
     try {
       const originalDetails = JSON.parse(dbOrder.delivery_address || "{}");
@@ -60,6 +81,7 @@ export async function POST(request: Request) {
     const { error: updateError } = await supabaseAdmin
       .from("orders")
       .update({
+        razorpay_order_id: order.id, // Write to new indexed column
         delivery_address: JSON.stringify(updatedDetails),
       })
       .eq("id", orderId);
@@ -78,4 +100,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message || "Failed to create payment order" }, { status: 500 });
   }
 }
-

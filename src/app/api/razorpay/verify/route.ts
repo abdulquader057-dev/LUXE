@@ -29,12 +29,20 @@ export async function POST(request: Request) {
     // Update order status in database using admin client (bypassing RLS)
     const { data: orderData, error: fetchError } = await supabaseAdmin
       .from("orders")
-      .select("delivery_address")
+      .select("delivery_address, status")
       .eq("id", orderId)
       .single();
 
-    if (fetchError) {
-      throw new Error(`Failed to fetch order: ${fetchError.message}`);
+    if (fetchError || !orderData) {
+      return NextResponse.json({ error: `Failed to fetch order: ${fetchError?.message || "Not found"}` }, { status: 404 });
+    }
+
+    // Server-side State Transition Validation (Only Pending -> Paid allowed via payment route)
+    if (orderData.status !== "Pending") {
+      if (orderData.status === "Paid") {
+        return NextResponse.json({ status: "verified" }); // Already processed successfully
+      }
+      return NextResponse.json({ error: `Invalid order state transition from ${orderData.status} to Paid` }, { status: 400 });
     }
 
     let updatedDetails = {};
@@ -59,6 +67,7 @@ export async function POST(request: Request) {
       .from("orders")
       .update({
         status: "Paid",
+        razorpay_order_id: razorpay_order_id, // Store in indexed column
         delivery_address: JSON.stringify(updatedDetails),
       })
       .eq("id", orderId);

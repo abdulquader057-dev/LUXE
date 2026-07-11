@@ -96,10 +96,13 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       if (!isAdmin) return;
 
+      // Dynamic fallback: Clean up expired reservations on dashboard load
+      fetch("/api/cron/release-expired-reservations").catch(() => {});
+
       try {
         const [ordersRes, productsRes] = await Promise.all([
-          supabase.from('orders').select('*, profiles(full_name)').order('created_at', { ascending: false }),
-          supabase.from('products').select('*').order('created_at', { ascending: false })
+          supabase.from("orders").select("*, profiles(full_name)").order("created_at", { ascending: false }),
+          supabase.from("products").select("*").order("created_at", { ascending: false })
         ]);
         
         // Format orders for UI
@@ -334,20 +337,24 @@ export default function AdminDashboard() {
     if (!order) return;
 
     try {
-      // 1. Update status in Supabase orders table
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: newStatus })
-        .eq('id', orderId);
+      // 1. Update status via secure Server API
+      const res = await fetch("/api/admin/orders/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, newStatus })
+      });
       
-      if (error) throw error;
+      if (!res.ok) {
+        const errObj = await res.json();
+        throw new Error(errObj.error || "Failed to update order status");
+      }
 
       // 2. Update local state
       setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
       toast.success(`Order status updated to ${newStatus}`);
 
-      // 3. WhatsApp notification when status changes to "Shipped"
-      if (newStatus === "Shipped") {
+      // 3. WhatsApp notification when status changes to "shipped"
+      if (newStatus.toLowerCase() === "shipped") {
         const phoneNum = order.phone || "";
         const trackingLink = `https://luxe.ai/track/${orderId}`;
         const messageText = `Your LUXE order is on the way! 🖤 Track: ${trackingLink}`;
@@ -363,10 +370,9 @@ export default function AdminDashboard() {
         toast.success("WhatsApp tracking message prepared!");
       }
 
-      // 4. Loyalty points addition when status changes to "Delivered"
-      if (newStatus === "Delivered") {
+      // 4. Loyalty points addition when status changes to "delivered"
+      if (newStatus.toLowerCase() === "delivered") {
         if (order.customer_id) {
-          // Also try to update profiles table if loyalty_points column exists (non-blocking)
           try {
             const { data: profileData } = await supabase
               .from("profiles")
@@ -703,11 +709,12 @@ export default function AdminDashboard() {
                         {orders.map((order, i) => {
                           const statusColors: Record<string, string> = {
                             "Pending": "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20",
-                            "Confirmed": "bg-blue-500/10 text-blue-400 border border-blue-500/20",
-                            "Packed": "bg-purple-500/10 text-purple-400 border border-purple-500/20",
-                            "Shipped": "bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse",
-                            "Delivered": "bg-green-500/10 text-green-500 border border-green-500/20",
-                            "Cancelled": "bg-red-500/10 text-red-500 border border-red-500/20"
+                            "Paid": "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+                            "shipped": "bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse",
+                            "delivered": "bg-green-500/10 text-green-500 border border-green-500/20",
+                            "cancelled": "bg-red-500/10 text-red-500 border border-red-500/20",
+                            "refunded": "bg-purple-500/10 text-purple-400 border border-purple-500/20",
+                            "failed": "bg-red-500/10 text-red-400 border border-red-500/20"
                           };
 
                           return (
@@ -718,7 +725,6 @@ export default function AdminDashboard() {
                               transition={{ delay: i * 0.05 }}
                               className="bg-[#0A0A0C] border border-white/5 rounded-[24px] p-6 relative overflow-hidden group hover:border-white/10 transition-all duration-500"
                             >
-                              {/* Order Header */}
                               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/5">
                                 <div className="space-y-1">
                                   <span className="text-[8px] font-mono text-white/30 uppercase tracking-widest">Order Identifier</span>
@@ -738,12 +744,9 @@ export default function AdminDashboard() {
                                       statusColors[order.status || "Pending"] || "bg-white/5 text-white"
                                     )}
                                   >
-                                    <option value="Pending">Pending</option>
-                                    <option value="Confirmed">Confirmed</option>
-                                    <option value="Packed">Packed</option>
-                                    <option value="Shipped">Shipped</option>
-                                    <option value="Delivered">Delivered</option>
-                                    <option value="Cancelled">Cancelled</option>
+                                      {Object.keys(statusColors).map((status) => (
+                                          <option key={status} value={status}>{status.toUpperCase()}</option>
+                                      ))}
                                   </select>
                                 </div>
                               </div>

@@ -26,79 +26,92 @@ export async function POST(request: Request) {
     const payload = JSON.parse(rawBody);
     const event = payload.event;
 
-    // We listen to payment.captured or order.paid
+    // Resolve payment details from payload
+    const paymentEntity = payload.payload.payment?.entity;
+    const orderId = paymentEntity?.order_id || payload.payload.order?.entity?.id;
+    const paymentId = paymentEntity?.id;
+
+    if (!orderId) {
+      return NextResponse.json({ status: "ignored", message: "No Razorpay Order ID in payload" });
+    }
+
+    // 1. Direct O(1) Index lookup by razorpay_order_id
+    const { data: targetOrder, error: fetchError } = await supabaseAdmin
+      .from("orders")
+      .select("id, status, delivery_address")
+      .eq("razorpay_order_id", orderId)
+      .maybeSingle();
+
+    if (fetchError) throw fetchError;
+
+    if (!targetOrder) {
+      console.warn(`No order found matching Razorpay Order ID: ${orderId}`);
+      return NextResponse.json({ status: "ignored", message: "Order not found" });
+    }
+
+    // 2. Parse existing address details
+    let originalDetails = {};
+    try {
+      originalDetails = JSON.parse(targetOrder.delivery_address || "{}");
+    } catch {
+      originalDetails = { rawAddress: targetOrder.delivery_address };
+    }
+
+    // 3. Process events based on state machine rules
+    let nextStatus: string | null = null;
+    let paymentStatusText = "";
+
     if (event === "payment.captured" || event === "order.paid") {
-      const paymentEntity = payload.payload.payment?.entity;
-      const orderId = paymentEntity?.order_id;
-      const paymentId = paymentEntity?.id;
-
-      if (orderId) {
-        console.log(`Razorpay Payment Captured for Order ID: ${orderId}, Payment ID: ${paymentId}`);
-
-        // Update the order in Supabase to mark it as paid and processing
-        // We find the order that contains the Razorpay order ID in its transaction details, or we query it.
-        // Wait, when the order is created, we can save the Razorpay order ID directly in a column,
-        // or inside the delivery_address JSON payload!
-        // Wait! Let's check how the order is stored.
-        // In the existing database schema, `orders` has columns:
-        // `id` (uuid), `customer_id` (uuid), `total_price`, `status`, `delivery_address` (text).
-        // Since we can't alter the `orders` schema dynamically easily without breaking anything,
-        // we can store the Razorpay Order ID in the `delivery_address` JSON string,
-        // or search for the order where `delivery_address` contains the Razorpay order ID!
-        // Let's do that! That is extremely clever.
-        // Or wait, when we query `orders`, we can select all pending orders and find the one that has the matching Razorpay order ID inside its `delivery_address`.
+      // Transition: Pending -> Paid
+      if (targetOrder.status === "Pending") {
+        nextStatus = "Paid";
+        paymentStatusText = "SUCCESS";
+      }
+    } else if (event === "payment.failed") {
+      // Transition: Pending -> failed
+      if (targetOrder.status === "Pending") {
+        nextStatus = "failed";
+        paymentStatusText = "FAILED";
+      }
+    } else if (event === "refund.processed") {
+      // Transition: Paid or delivered -> refunded
+      if (targetOrder.status === "Paid" || targetOrder.status === "delivered" || targetOrder.status === "shipped") {
+        nextStatus = "refunded";
+        paymentStatusText = "REFUNDED";
         
-        // Let's query all 'processing' or 'Pending' orders and check their delivery_address JSON.
-        const { data: pendingOrders, error: fetchError } = await supabaseAdmin
-          .from("orders")
-          .select("id, delivery_address")
-          .eq("status", "Pending");
+        // Restore stock when order is refunded
+        const { data: items } = await supabaseAdmin
+          .from("order_items")
+          .select("product_id, quantity")
+          .eq("order_id", targetOrder.id);
 
-        if (fetchError) throw fetchError;
-
-        let targetOrder = null;
-        if (pendingOrders) {
-          for (const order of pendingOrders) {
-            try {
-              const details = JSON.parse(order.delivery_address || "{}");
-              if (details.razorpayOrderId === orderId) {
-                targetOrder = order;
-                break;
-              }
-            } catch (jsonErr) {
-              // Not a JSON address
-            }
+        if (items) {
+          for (const item of items) {
+            await supabaseAdmin.rpc("restore_stock", {
+              p_product_id: item.product_id,
+              p_quantity: item.quantity
+            });
           }
-        }
-
-        if (targetOrder) {
-          // Update status to 'Paid' or 'processing'
-          // We can also append the razorpayPaymentId in delivery_address to keep records!
-          try {
-            const originalDetails = JSON.parse(targetOrder.delivery_address || "{}");
-            const updatedDetails = {
-              ...originalDetails,
-              razorpayPaymentId: paymentId,
-              paymentStatus: "SUCCESS"
-            };
-
-            const { error: updateError } = await supabaseAdmin
-              .from("orders")
-              .update({
-                status: "Paid",
-                delivery_address: JSON.stringify(updatedDetails)
-              })
-              .eq("id", targetOrder.id);
-
-            if (updateError) throw updateError;
-            console.log(`Order status updated successfully for LUXE Order: ${targetOrder.id}`);
-          } catch (updateErr) {
-            console.error("Failed to update transaction state in Supabase:", updateErr);
-          }
-        } else {
-          console.warn(`No pending order found matching Razorpay Order ID: ${orderId}`);
         }
       }
+    }
+
+    if (nextStatus) {
+      const updatedDetails = {
+        ...originalDetails,
+        razorpayPaymentId: paymentId || (originalDetails as any).razorpayPaymentId,
+        paymentStatus: paymentStatusText,
+      };
+
+      const { error: updateError } = await supabaseAdmin
+        .from("orders")
+        .update({
+          status: nextStatus,
+          delivery_address: JSON.stringify(updatedDetails)
+        })
+        .eq("id", targetOrder.id);
+
+      if (updateError) throw updateError;
     }
 
     return NextResponse.json({ status: "success" });

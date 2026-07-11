@@ -20,18 +20,38 @@ function sanitizeInput(text: string): string {
 }
 
 export async function POST(req: Request) {
-  try {
     // 1. Rate Limiting Check
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
-    const limitResult = await rateLimit(ip, 20, 60);
-    if (!limitResult.success) {
+    
+    // IP-based limit (10 requests per 60s)
+    const ipLimitResult = await rateLimit(ip, 10, 60);
+    if (!ipLimitResult.success) {
       return NextResponse.json(
         { message: "Too many requests, please wait" },
         { status: 429 }
       );
     }
 
-    const body = await req.json().catch(() => null);
+    // Secondary User-based limit (15 requests per 60s for authenticated users)
+    try {
+      const { createSupabaseServerClient } = await import('@/lib/supabaseServer');
+      const supabase = await createSupabaseServerClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const userLimitResult = await rateLimit(user.id, 15, 60);
+        if (!userLimitResult.success) {
+          return NextResponse.json(
+            { message: "Account message rate limit exceeded. Please wait." },
+            { status: 429 }
+          );
+        }
+      }
+    } catch (authLimitErr) {
+      // Non-blocking fallback
+    }
+
+    try {
+      const body = await req.json().catch(() => null);
     if (!body) {
       return NextResponse.json({ error: "Request body is required" }, { status: 400 });
     }
