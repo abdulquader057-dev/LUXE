@@ -177,7 +177,8 @@ export default function AuthPortal() {
             method: "email"
           });
         }
- 
+
+        router.refresh();
         router.push("/");
       } else {
         const escapedFullName = escapeString(trimmedFullName);
@@ -216,8 +217,8 @@ export default function AuthPortal() {
             method: "email"
           });
         }
-
         setSuccess("Account created successfully! Logging you in... 🖤");
+        router.refresh();
         setTimeout(() => {
           router.push("/");
         }, 1500);

@@ -40,13 +40,12 @@ export default function SettingsPageClient({ isAdmin }: { isAdmin: boolean }) {
   const [showConfirmLogout, setShowConfirmLogout] = useState(false);
   const router = useRouter();
   const { signOut } = useAuth();
-
   const handleLogout = async () => {
     await signOut();
     toast.success("Session Terminated.");
+    router.refresh();
     router.push("/auth");
   };
-
   const renderSection = () => {
     switch (activeTab) {
       case "account":

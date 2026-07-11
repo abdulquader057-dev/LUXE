@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-
+import { createBrowserClient } from '@supabase/ssr';
 // Use placeholder values during build if env vars are not yet set
 // The real values must be added in Vercel Environment Variables settings
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
@@ -25,7 +25,7 @@ try {
       }
     }) as any;
   } else {
-    supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    supabaseClient = createBrowserClient(supabaseUrl, supabaseAnonKey);
   }
 } catch (e) {
   console.error('Failed to initialize Supabase client:', e);
