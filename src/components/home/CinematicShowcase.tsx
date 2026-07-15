@@ -50,8 +50,7 @@ export default function CinematicShowcase({ products }: { products: any[] }) {
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
               {/* gradient overlay */}
-              <div className="absolute inset-0"
-                style={{ background: "linear-gradient(to right, transparent 50%, #06060C 100%), linear-gradient(to top, #06060C 0%, transparent 40%)" }} />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06060C] via-[#06060C]/20 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-[#06060C]" />
             </motion.div>
           </AnimatePresence>
 

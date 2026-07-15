@@ -47,6 +47,18 @@ const ProductCard = ({ product }: { product: Product }) => {
   const [isImageFading, setIsImageFading] = useState(false);
   const [showCartBtn, setShowCartBtn] = useState(false);
 
+  useEffect(() => {
+    const checkTouch = () => {
+      const isTouch = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
+      if (isTouch) {
+        setShowCartBtn(true);
+      }
+    };
+    checkTouch();
+    window.addEventListener("resize", checkTouch);
+    return () => window.removeEventListener("resize", checkTouch);
+  }, []);
+
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Framer Motion 3D tilt
@@ -105,7 +117,7 @@ const ProductCard = ({ product }: { product: Product }) => {
     <motion.div
       ref={cardRef}
       // LUXE-FIX [4]: Replace rounded-xl on card with rounded-luxe
-      className="product-card group relative rounded-luxe h-[500px] bg-transparent"
+      className="product-card group relative rounded-luxe h-[390px] md:h-[500px] bg-transparent"
       style={{
         perspective: 800,
         rotateX,
@@ -157,8 +169,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         {/* Image section */}
         <Link
           href={`/product/${product.id}?color=${encodeURIComponent(selectedColor)}`}
-          className="relative flex-shrink-0 overflow-hidden block"
-          style={{ height: "310px" }}
+          className="relative flex-shrink-0 overflow-hidden block h-[220px] md:h-[310px]"
         >
           <Image
             src={imageUrl}
@@ -227,7 +238,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         </Link>
 
         {/* Info section */}
-        <div className="flex-1 p-5 flex flex-col justify-between relative z-10" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(10,10,15,0.95) 100%)" }}>
+        <div className="flex-1 p-3 md:p-5 flex flex-col justify-between relative z-10" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(10,10,15,0.95) 100%)" }}>
           <div>
             <h3 className="text-[13px] font-orbitron font-bold text-white/90 tracking-wider uppercase mb-1.5 line-clamp-1 group-hover:text-[#00f2ff] transition-colors">
               {product.name}

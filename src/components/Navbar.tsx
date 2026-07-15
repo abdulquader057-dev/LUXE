@@ -160,7 +160,7 @@ const Navbar = () => {
             {/* Country Selector */}
             <button 
               onClick={() => setIsCountryModalOpen(true)}
-              className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              className="hidden md:flex w-9 h-9 rounded-full bg-white/5 items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
             >
               <Globe size={16} />
             </button>
@@ -168,7 +168,7 @@ const Navbar = () => {
             {/* Cart */}
             <button 
               onClick={toggleCart} 
-              className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors relative"
+              className="hidden md:flex w-9 h-9 rounded-full bg-white/5 items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors relative"
             >
               <ShoppingBag size={16} />
               {cartCount > 0 && (
@@ -180,7 +180,7 @@ const Navbar = () => {
 
             {/* Admin OS Shortcut */}
             {isAdmin && (
-              <Link href="/admin">
+              <Link href="/admin" className="hidden md:inline-block">
                 <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center border border-primary/30 text-primary hover:bg-primary/20 transition-colors shadow-[0_0_10px_rgba(0,242,255,0.2)]">
                   <Settings size={16} className="animate-spin-slow" />
                 </button>
@@ -188,9 +188,9 @@ const Navbar = () => {
             )}
 
             {/* User / Login */}
-            <Link href={user ? "/profile" : "/auth"} className="flex items-center gap-2">
+            <Link href={user ? "/profile" : "/auth"} className="hidden md:flex items-center gap-2">
               {isGold && (
-                <span className="text-[#00f2ff] font-sora font-bold text-[10px] tracking-wider uppercase animate-pulse-glow mr-1">
+                <span className="text-[#00f2ff] font-sora font-bold text-[10px] tracking-wider uppercase animate-pulse-glow mr-1 hidden md:inline">
                   {profile?.full_name || user?.user_metadata?.full_name || "Vanguard"}
                 </span>
               )}

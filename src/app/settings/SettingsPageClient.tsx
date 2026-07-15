@@ -80,12 +80,22 @@ export default function SettingsPageClient({ isAdmin }: { isAdmin: boolean }) {
       <div className="max-w-[1400px] mx-auto px-6 relative z-10">
         <div className="flex flex-col lg:flex-row gap-12">
           {/* Settings Navigation */}
-          <aside className="w-full lg:w-[320px] space-y-8">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-mono text-primary tracking-[0.5em] uppercase mb-2">Nexus // Control</span>
-              <h1 className="text-4xl font-display font-light italic tracking-tight">System Settings</h1>
+          <aside className="w-full lg:w-[320px] space-y-4 lg:space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-mono text-primary tracking-[0.5em] uppercase mb-2">Nexus // Control</span>
+                <h1 className="text-4xl font-display font-light italic tracking-tight">System Settings</h1>
+              </div>
+              {/* Mobile Logout Trigger */}
+              <button 
+                onClick={() => setShowConfirmLogout(true)}
+                className="lg:hidden p-3 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                title="Terminate Session"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
-            <nav className="space-y-1">
+            <nav className="flex lg:flex-col gap-2 lg:gap-1 lg:space-y-1 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-2 lg:pb-0">
               {filteredMenu.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -96,10 +106,10 @@ export default function SettingsPageClient({ isAdmin }: { isAdmin: boolean }) {
                     whileHover={{ scale: 1.02, x: 4 }}
                     whileTap={{ scale: 0.98 }}
                     className={cn(
-                      "w-full flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-500 group relative overflow-hidden cursor-pointer",
+                      "flex-shrink-0 lg:w-full flex items-center gap-3 lg:gap-4 px-4 lg:px-6 py-2.5 lg:py-4 rounded-xl transition-all duration-500 group relative overflow-hidden cursor-pointer",
                       isActive 
-                        ? "bg-primary/10 border border-primary/20 text-white" 
-                        : "text-white/30 hover:text-white/60"
+                        ? "bg-primary/10 border border-primary/20 text-white animate-pulse-glow" 
+                        : "text-white/30 hover:text-white/60 border border-transparent"
                     )}
                   >
                     {isActive && (
@@ -109,19 +119,19 @@ export default function SettingsPageClient({ isAdmin }: { isAdmin: boolean }) {
                       />
                     )}
                     <Icon 
-                      size={18} 
+                      size={16} 
                       style={{ color: isActive ? item.color : "currentColor" }}
                       className={cn("transition-transform duration-500", isActive && "scale-110")} 
                     />
-                    <span className="text-[10px] font-mono font-bold tracking-[0.3em] uppercase">{item.label}</span>
-                    <ChevronRight size={14} className={cn("ml-auto transition-transform", isActive && "rotate-90")} />
+                    <span className="text-[9px] lg:text-[10px] font-mono font-bold tracking-[0.2em] lg:tracking-[0.3em] uppercase whitespace-nowrap">{item.label}</span>
+                    <ChevronRight size={14} className={cn("hidden lg:block ml-auto transition-transform", isActive && "rotate-90")} />
                   </motion.button>
                 );
               })}
             </nav>
 
-            {/* Logout / Secondary Action */}
-            <div className="pt-8 border-t border-white/[0.03]">
+            {/* Logout / Secondary Action (Desktop only) */}
+            <div className="hidden lg:block pt-8 border-t border-white/[0.03]">
               <motion.button 
                 onClick={() => setShowConfirmLogout(true)}
                 whileHover={{ scale: 1.02, x: 4 }}

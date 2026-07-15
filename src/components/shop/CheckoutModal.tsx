@@ -50,6 +50,17 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { user } = useAuth();
   const { awardXP } = useXP();
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const [name, setName] = useState(user?.user_metadata?.full_name || "");
   const [phone, setPhone] = useState(user?.user_metadata?.phone_number || "");
   const [email, setEmail] = useState(user?.email || "");
@@ -687,9 +698,15 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
     }
   };
 
+  const drawerVariants = {
+    initial: isMobile ? { y: "100%", opacity: 1 } : { scale: 0.95, opacity: 0, y: 30 },
+    animate: { y: 0, scale: 1, opacity: 1 },
+    exit: isMobile ? { y: "100%", opacity: 1 } : { scale: 0.95, opacity: 0, y: 30 },
+  };
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 overflow-y-auto">
+      <div className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-hidden sm:overflow-y-auto">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -699,11 +716,12 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
         />
 
         <motion.div
-          initial={{ scale: 0.95, opacity: 0, y: 30 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 30 }}
-          transition={{ type: "spring", damping: 25, stiffness: 250 }}
-          className="relative w-full max-w-xl bg-[#07070a]/95 border border-white/10 backdrop-blur-2xl rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,240,255,0.05)] flex flex-col my-8 relative z-10"
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={drawerVariants}
+          transition={{ type: "spring", damping: 28, stiffness: 220 }}
+          className="relative w-full max-w-xl bg-[#07070a]/95 border border-white/10 backdrop-blur-2xl rounded-t-[32px] sm:rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,240,255,0.05)] flex flex-col h-[85vh] sm:h-auto sm:max-h-[90vh] relative z-10"
         >
           {/* Glowing Header beam */}
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#00f2ff]/50 to-transparent" />
@@ -726,7 +744,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
           </div>
 
           {/* Form */}
-          <form onSubmit={handleCheckout} className="p-8 space-y-5 overflow-y-auto max-h-[70vh] custom-scrollbar text-left">
+          <form onSubmit={handleCheckout} className="flex-1 p-5 sm:p-8 space-y-5 overflow-y-auto custom-scrollbar text-left pb-24 sm:pb-8">
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
