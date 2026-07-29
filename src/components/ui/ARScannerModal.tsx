@@ -203,7 +203,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
           initial={{ scale: 0.92, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-4xl min-h-[500px] bg-[#050508]/90 border border-primary/20 rounded-[32px] overflow-hidden shadow-[0_0_100px_rgba(0,242,255,0.15)] flex flex-col md:grid md:grid-cols-[1.2fr_1fr] h-[80vh] md:h-[600px] z-10"
+          className="relative w-full max-w-4xl min-h-[500px] bg-[#050508]/90 border border-primary/20 rounded-[32px] overflow-hidden shadow-[0_0_100px_rgba(201, 169, 98,0.15)] flex flex-col md:grid md:grid-cols-[1.2fr_1fr] h-[80vh] md:h-[600px] z-10"
         >
           {/* Left Panel: Scanner Feed Area */}
           <div className="relative bg-black flex items-center justify-center overflow-hidden border-r border-white/5 h-[300px] md:h-full">
@@ -259,12 +259,12 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
                     initial={{ top: "10%", opacity: 0 }}
                     animate={{ top: ["10%", "90%", "10%"], opacity: [0.2, 1, 0.2] }}
                     transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute w-full h-[2px] bg-gradient-to-r from-transparent via-[#00f2ff] to-transparent shadow-[0_0_15px_#00f2ff] z-20"
+                    className="absolute w-full h-[2px] bg-gradient-to-r from-transparent via-[#C9A962] to-transparent shadow-[0_0_15px_#C9A962] z-20"
                   />
                 )}
                 
                 {/* Overlay Scanning grid */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,242,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,242,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] opacity-45" />
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(201, 169, 98,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(201, 169, 98,0.02)_1px,transparent_1px)] bg-[size:20px_20px] opacity-45" />
               </div>
             )}
 
@@ -395,7 +395,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
                               <Image src={prod.image} alt={prod.name} fill sizes="48px" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[8px] font-mono text-[#00f2ff] uppercase tracking-widest font-bold mb-0.5">{prod.badge}</span>
+                              <span className="text-[8px] font-mono text-[#C9A962] uppercase tracking-widest font-bold mb-0.5">{prod.badge}</span>
                               <span className="text-xs font-mono font-bold text-white line-clamp-1">{prod.color} Shirt</span>
                               <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest">₹{prod.price} • Match: {prod.match}</span>
                             </div>
@@ -406,7 +406,7 @@ export const ARScannerModal = ({ isOpen, onClose }: ARScannerModalProps) => {
                             className="px-4 py-2.5 rounded-xl bg-primary hover:bg-white text-black font-mono font-bold text-[9px] uppercase tracking-widest transition-colors flex items-center gap-2 cursor-pointer"
                           >
                             <ShoppingCart size={12} />
-                            Add to Cart
+                            Add to Ensemble
                           </button>
                         </div>
                       ))}

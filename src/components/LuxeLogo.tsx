@@ -9,88 +9,57 @@ interface LuxeLogoProps {
 }
 
 const LuxeLogo = ({ className, showTagline = true }: LuxeLogoProps) => {
-  const [taglineText, setTaglineText] = useState("");
-  const fullText = "Beyond Luxury. Beyond Imaginable.";
-  const [isTyping, setIsTyping] = useState(true);
+  const words = ["Where", "Craft", "Meets", "Consciousness"];
+  const [visibleWords, setVisibleWords] = useState(0);
+  const [cycle, setCycle] = useState(0);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
-    
-    const startTyping = () => {
-      setTaglineText("");
-      setIsTyping(true);
+    const animateWords = () => {
+      setVisibleWords(0);
       let i = 0;
-      
-      const typeChar = () => {
-        if (i < fullText.length) {
-          setTaglineText(fullText.substring(0, i + 1));
+      const showNext = () => {
+        if (i < words.length) {
           i++;
-          timeout = setTimeout(typeChar, 35);
+          setVisibleWords(i);
+          timeout = setTimeout(showNext, 800);
         } else {
-          setIsTyping(false);
-          // Wait 10 seconds, then restart
-          timeout = setTimeout(startTyping, 10000);
+          timeout = setTimeout(() => setCycle(c => c + 1), 10000);
         }
       };
-      
-      typeChar();
+      showNext();
     };
-
-    startTyping();
-
+    animateWords();
     return () => clearTimeout(timeout);
-  }, []);
+  }, [cycle]);
 
   return (
     <div className={cn("logo-container", className)}>
-      {/* Ornament: SVG diamond */}
-      <div className="logo-ornament">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path 
-            d="M12 2L22 12L12 22L2 12L12 2" 
-            stroke="#D4AF37" 
-            strokeWidth="1.5" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          />
-          <path 
-            d="M12 6L18 12L12 18L6 12L12 6" 
-            fill="#D4AF37" 
-            fillOpacity="0.3" 
-            stroke="#D4AF37" 
-            strokeWidth="1" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          />
+      <div style={{ animation: 'float 4s ease-in-out infinite' }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L22 12L12 22L2 12L12 2" stroke="#C9A962" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M12 6L18 12L12 18L6 12L12 6" fill="#C9A962" fillOpacity="0.15" stroke="#C9A962" strokeWidth="0.75" />
         </svg>
       </div>
-
-      {/* Main Brand Word */}
       <div className="logo-main">
         <h1 className="logo-luxe">LUXE THREADS</h1>
       </div>
-
-      {/* Byline */}
-      <div className="logo-byline">
-        <span className="separator-line left"></span>
-        <span className="logo-by">by</span>
-        <span className="separator-line right"></span>
+      <div className="uppercase mt-4" style={{ fontFamily: 'var(--font-inter), sans-serif', fontSize: '10px', fontWeight: 400, letterSpacing: '0.4em', color: 'rgba(158,150,138,0.6)' }}>
+        HYDERABAD
       </div>
-
-      {/* Designer Brand name */}
-      <div className="logo-syeds">
-        {"SYEDS".split("").map((char, index) => (
-          <span key={index}>{char}</span>
-        ))}
-      </div>
-
-      {/* Tagline */}
       {showTagline && (
-        <p className="logo-tagline min-h-[15px]">
-          {taglineText}
-          <span className={cn("inline-block w-[3px] h-[10px] ml-[2px] bg-[rgba(212,175,55,0.8)] align-middle", !isTyping && "animate-pulse")}></span>
+        <p className="font-cormorant italic mt-4" style={{ fontSize: '18px', fontWeight: 400, color: 'rgba(201,169,98,0.7)', minHeight: '28px' }}>
+          {words.slice(0, visibleWords).map((word, i) => (
+            <span key={`${cycle}-${i}`} style={{ display: 'inline-block', marginRight: '0.3em', animation: 'fadeInWord 0.6s ease forwards', opacity: 0 }}>
+              {word}
+            </span>
+          ))}
         </p>
       )}
+      <style jsx>{`
+        @keyframes fadeInWord { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+      `}</style>
     </div>
   );
 };

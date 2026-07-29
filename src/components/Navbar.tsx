@@ -97,15 +97,15 @@ const Navbar = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6",
         isScrolled 
-          ? "bg-[#050508]/85 backdrop-blur-md border-b border-white/5 py-4" 
+          ? "bg-[#0A0A0C]/75 backdrop-blur-[20px] saturate-[1.2] border-b border-[rgba(201,169,98,0.06)] py-4" 
           : "bg-transparent"
       )}
     >
       <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex items-center justify-between">
         {/* Brand/Logo */}
         <div className="flex items-center gap-8 pl-16 md:pl-20">
-          <Link href="/" className="text-xl md:text-2xl font-display font-black tracking-wider text-white hover:text-white/80 transition-colors uppercase whitespace-nowrap">
-            LUXE THREADS<span className="text-[#D4AF37]">.</span>
+          <Link href="/" className="font-cormorant text-[18px] font-normal tracking-[0.2em] uppercase whitespace-nowrap" style={{ color: '#F5F0E8' }}>
+            LUXE THREADS<span style={{ color: '#C9A962', fontSize: '24px', position: 'relative', top: '-2px' }}>.</span>
           </Link>
           
           {/* Main Nav Links */}
@@ -116,16 +116,14 @@ const Navbar = () => {
                 <Link 
                   key={link.name} 
                   href={link.href}
-                  className={cn(
-                    "text-[10px] font-sora font-bold tracking-widest uppercase transition-colors relative py-2",
-                    isActive ? "text-white" : "text-white/40 hover:text-white"
-                  )}
+                  className="text-[12px] font-normal tracking-[0.15em] uppercase transition-colors relative py-2"
+                  style={{ fontFamily: 'var(--font-inter)', color: isActive ? '#F5F0E8' : 'rgba(245, 240, 232, 0.5)' }}
                 >
                   {link.name}
                   {isActive && (
                     <motion.div 
                       layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-[2px] bg-white"
+                      className="absolute bottom-0 left-0 right-0 h-[1px] bg-[#C9A962]"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -138,15 +136,16 @@ const Navbar = () => {
         {/* Right Utilities */}
         <div className="flex items-center gap-6 ml-auto">
           {/* Currency Pills */}
-          <div className="hidden md:flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10">
+          <div className="hidden md:flex items-center gap-4 px-2">
             {availableCurrencies.map((cur) => (
               <button 
                 key={cur}
                 onClick={() => setCurrency(cur)}
-                className={cn(
-                  "text-[9px] font-sora font-bold tracking-wider transition-colors",
-                  currency === cur ? "text-white" : "text-white/40 hover:text-white/80"
-                )}
+                className="text-[10px] uppercase transition-colors"
+                style={{ 
+                  fontFamily: 'var(--font-jetbrains), monospace',
+                  color: currency === cur ? '#F5F0E8' : 'rgba(158,150,138,0.5)' 
+                }}
               >
                 {cur}
               </button>
@@ -177,31 +176,29 @@ const Navbar = () => {
             >
               <ShoppingBag size={16} />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#D4AF37] rounded-full flex items-center justify-center text-[7px] font-bold text-[#050508] shadow-[0_0_8px_rgba(212,175,55,0.4)]">
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#C9A962] rounded-full flex items-center justify-center text-[7px] font-bold text-[#050508] shadow-[0_0_8px_rgba(212,175,55,0.4)]">
                   {cartCount}
                 </span>
               )}
             </button>
 
-            {/* Admin OS Shortcut */}
+            {/* Admin Shortcut */}
             {isAdmin && (
-              <Link href="/admin" className="hidden md:inline-block">
-                <button className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center border border-primary/30 text-primary hover:bg-primary/20 transition-colors shadow-[0_0_10px_rgba(0,242,255,0.2)]">
-                  <Settings size={16} className="animate-spin-slow" />
-                </button>
+              <Link href="/admin" className="hidden md:inline-flex items-center justify-center w-9 h-9">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#C9A962] animate-pulse shadow-[0_0_8px_rgba(201,169,98,0.6)]" />
               </Link>
             )}
 
             {/* User / Login */}
             <Link href={user ? "/profile" : "/auth"} className="hidden md:flex items-center gap-2">
               {isGold && (
-                <span className="text-[#00f2ff] font-sora font-bold text-[10px] tracking-wider uppercase animate-pulse-glow mr-1 hidden md:inline">
+                <span className="text-[#C9A962] font-inter font-bold text-[10px] tracking-wider uppercase animate-pulse-glow mr-1 hidden md:inline">
                   {profile?.full_name || user?.user_metadata?.full_name || "Vanguard"}
                 </span>
               )}
               <button className={cn(
                 "w-9 h-9 rounded-full bg-white/5 flex items-center justify-center border text-white/70 hover:text-white hover:bg-white/10 transition-colors",
-                isGold ? "border-[#D4AF37]/50 text-[#00f2ff] hover:text-[#00f2ff]/80" : "border-white/10"
+                isGold ? "border-[#C9A962]/50 text-[#C9A962] hover:text-[#C9A962]/80" : "border-white/10"
               )}>
                 {user ? <User size={16} /> : <LogIn size={16} />}
               </button>
@@ -211,9 +208,9 @@ const Navbar = () => {
           {/* System Status Badge */}
           <div className="hidden xl:flex items-center gap-3 pl-4 border-l border-white/10">
             <div className="text-right">
-              <div className="text-[10px] font-sora font-bold tracking-widest text-white">SYSTEM SYNC</div>
-              <div className="text-[9px] font-sora tracking-widest text-white/40">
-                {user ? "SECURE UPLINK" : "NEURAL LINK"}
+              <div className="text-[10px] font-inter font-normal tracking-widest text-[#F5F0E8]">LUXE THREADS</div>
+              <div className="text-[9px] font-inter tracking-widest text-[#9E968A]">
+                {user ? "ATELIER ACCESS" : "PRIVATE COLLECTION"}
               </div>
             </div>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${
@@ -232,7 +229,7 @@ const Navbar = () => {
         <motion.div
           animate={{ x: ["0%", "-50%"] }}
           transition={{ ease: "linear", duration: 25, repeat: Infinity }}
-          className="flex whitespace-nowrap gap-16 text-[8px] font-mono tracking-[0.25em] text-[#00f2ff] uppercase"
+          className="flex whitespace-nowrap gap-16 text-[8px] font-mono tracking-[0.25em] text-[#C9A962] uppercase"
         >
           <span>✦ FREE SHIPPING ACROSS INDIA</span>
           <span>✦ CASH ON DELIVERY (COD) AVAILABLE</span>

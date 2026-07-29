@@ -27,7 +27,7 @@ export default function LuxuryLoader({ label = "Synthesizing Luxe Architecture" 
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="absolute inset-2 rounded-full border border-primary/40 bg-primary/5 shadow-[0_0_20px_rgba(0,242,255,0.1)]"
+            className="absolute inset-2 rounded-full border border-primary/40 bg-primary/5 shadow-[0_0_20px_rgba(201, 169, 98,0.1)]"
           />
           {/* Outer rotating luxury border */}
           <motion.div

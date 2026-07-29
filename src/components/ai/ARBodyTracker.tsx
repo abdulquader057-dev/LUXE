@@ -58,7 +58,7 @@ function ProceduralGarment({ color = '#C9A84C' }: { color?: string }) {
       {/* Dynamic light refraction rings */}
       <mesh position={[0, 0.05, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.44, 0.015, 8, 24]} />
-        <meshStandardMaterial color="#00f2ff" transparent opacity={0.8} emissive="#00f2ff" emissiveIntensity={1.5} />
+        <meshStandardMaterial color="#C9A962" transparent opacity={0.8} emissive="#C9A962" emissiveIntensity={1.5} />
       </mesh>
     </group>
   );

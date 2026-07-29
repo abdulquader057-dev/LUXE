@@ -65,7 +65,7 @@ const Sidebar = () => {
       <button 
         onClick={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsOpen(true)}
-        className="fixed top-4 left-4 z-[60] p-2 bg-[#0A0A0F]/80 backdrop-blur-md border border-white/10 rounded-md text-white/70 hover:text-white shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-colors duration-300"
+        className="fixed top-4 left-4 z-[60] p-2 bg-[#0A0A0C]/80 backdrop-blur-md border border-white/10 rounded-md text-white/70 hover:text-white shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-colors duration-300"
       >
         {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -81,7 +81,7 @@ const Sidebar = () => {
       <aside 
         onMouseLeave={() => setIsOpen(false)}
         className={cn(
-          "w-[280px] h-screen flex-shrink-0 bg-[#0A0A0F] border-r border-white/5 flex flex-col overflow-hidden fixed z-[55] transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[20px_0_40px_rgba(0,0,0,0.8)] pt-16",
+          "w-[280px] h-screen flex-shrink-0 bg-[#0A0A0C] border-r border-white/5 flex flex-col overflow-hidden fixed z-[55] transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] shadow-[20px_0_40px_rgba(0,0,0,0.8)] pt-16",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -95,13 +95,13 @@ const Sidebar = () => {
           <button className="flex items-center justify-center p-2 rounded-lg bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-colors">
             <Globe size={18} />
           </button>
-          <div className="absolute right-0 top-full mt-2 w-32 bg-[#050508] border border-white/10 rounded-xl overflow-hidden opacity-0 invisible group-hover/lang:opacity-100 group-hover/lang:visible transition-all z-[70] shadow-xl">
+          <div className="absolute right-0 top-full mt-2 w-32 bg-[#0F0F12] border border-white/10 rounded-xl overflow-hidden opacity-0 invisible group-hover/lang:opacity-100 group-hover/lang:visible transition-all z-[70] shadow-xl">
             {availableLanguages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => setLanguage(lang.code as any)}
                 className={cn(
-                  "w-full text-left px-4 py-3 text-xs font-sora hover:bg-white/10 transition-colors",
+                  "w-full text-left px-4 py-3 text-xs font-sans hover:bg-white/10 transition-colors",
                   language === lang.code ? "text-white bg-white/5" : "text-white/50"
                 )}
               >
@@ -133,7 +133,7 @@ const Sidebar = () => {
                 {isActive && (
                   <motion.div 
                     layoutId="activeTab"
-                    className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-white rounded-r-full shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                    className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-white rounded-r-full shadow-[0_0_10px_rgba(201,169,98,0.3)]"
                   />
                 )}
                 
@@ -143,13 +143,13 @@ const Sidebar = () => {
                     isActive ? "text-white" : "text-white/40 group-hover:text-white/80"
                   )} />
                   <span className={cn(
-                    "text-[13px] font-sora font-semibold tracking-wide transition-colors",
+                    "text-[13px] font-sans font-semibold tracking-wide transition-colors",
                     isActive ? "text-white" : "text-white/60 group-hover:text-white"
                   )}>
                     {link.name}
                   </span>
                 </div>
-                <span className="text-[10px] font-sora text-white/30 tracking-wider pl-[30px]">
+                <span className="text-[10px] font-sans text-white/30 tracking-wider pl-[30px]">
                   {link.subtitle}
                 </span>
               </Link>
@@ -188,17 +188,17 @@ const Sidebar = () => {
               <Link key={link.name} href={link.href} onClick={() => setIsOpen(false)}>
                 <div className={cn(
                   "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 relative group overflow-hidden",
-                  link.isPremium && "bg-gradient-to-r from-[#D4AF37]/5 to-transparent border border-[#D4AF37]/20",
+                  link.isPremium && "bg-gradient-to-r from-[#C9A962]/5 to-transparent border border-[#C9A962]/20",
                   isActive ? "text-white" : "text-white/60 hover:bg-white/5 hover:text-white"
                 )}>
                   <div className={cn(
                     "transition-colors", 
-                    link.isPremium ? "text-[#00f2ff]" : "group-hover:text-white"
+                    link.isPremium ? "text-[#C9A962]" : "group-hover:text-white"
                   )}>
                     <link.icon size={20} strokeWidth={link.isPremium ? 2 : 1.5} />
                   </div>
                   <div>
-                    <div className={cn("text-[13px] font-medium tracking-wide", link.isPremium && "text-[#00f2ff]")}>
+                    <div className={cn("text-[13px] font-medium tracking-wide", link.isPremium && "text-[#C9A962]")}>
                       {link.name}
                     </div>
                     <div className="text-[10px] text-white/30 mt-0.5">{link.subtitle}</div>
@@ -226,7 +226,7 @@ const Sidebar = () => {
                 </div>
                 <div>
                   <div className="text-[13px] font-medium tracking-wide">Sign In</div>
-                  <div className="text-[10px] text-white/30 mt-0.5">Neural Auth</div>
+                  <div className="text-[10px] text-white/30 mt-0.5">Sign In</div>
                 </div>
               </div>
             </Link>

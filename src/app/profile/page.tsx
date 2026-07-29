@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 
 const XP_PER_LEVEL = 400;
 
-function CircularProgress({ value, size = 120, strokeWidth = 8, color = "#00f2ff", children }: {
+function CircularProgress({ value, size = 120, strokeWidth = 8, color = "#C9A962", children }: {
   value: number; size?: number; strokeWidth?: number; color?: string; children?: React.ReactNode;
 }) {
   const radius = (size - strokeWidth) / 2;
@@ -79,7 +79,7 @@ export default function ProfilePage() {
 
   const rarityColors: Record<string, string> = {
     common: "#a0a0a0",
-    rare: "#00f2ff",
+    rare: "#C9A962",
     epic: "#c084fc",
     legendary: "#ffcc00",
   };
@@ -106,7 +106,7 @@ export default function ProfilePage() {
         >
           {/* Avatar / Level Ring */}
           <div className="flex justify-center mb-8">
-            <CircularProgress value={xpProgress} size={160} strokeWidth={6} color="#00f2ff">
+            <CircularProgress value={xpProgress} size={160} strokeWidth={6} color="#C9A962">
               <div className="w-[130px] h-[130px] rounded-full glass-panel border border-primary/20 flex flex-col items-center justify-center">
                 <span className="text-4xl mb-1">🧠</span>
                 <span className="text-[9px] font-black tracking-widest text-primary uppercase">LVL {dna.level}</span>
@@ -179,7 +179,7 @@ export default function ProfilePage() {
                 { label: "Fashion Score", value: "87", icon: Star, color: "#ffcc00" },
                 { label: "Items Saved", value: "34", icon: Heart, color: "#ff4466" },
                 { label: "Outfits Built", value: "12", icon: Sparkles, color: "#c084fc" },
-                { label: "Wardrobe %", value: `${dna.wardrobeCompletion}%`, icon: ShoppingBag, color: "#00f2ff" },
+                { label: "Wardrobe %", value: `${dna.wardrobeCompletion}%`, icon: ShoppingBag, color: "#C9A962" },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -202,7 +202,7 @@ export default function ProfilePage() {
                 {dna.dominantColors.map((color: string) => (
                   <div key={color} className="flex items-center gap-3 glass-panel !rounded-2xl px-5 py-3 border border-white/5">
                     <div className="w-6 h-6 rounded-full border border-white/20"
-                      style={{ backgroundColor: color === "Obsidian Black" ? "#111" : color === "Cyber Cyan" ? "#00f2ff" : "#f8f8f8" }}
+                      style={{ backgroundColor: color === "Obsidian Black" ? "#111" : color === "Cyber Cyan" ? "#C9A962" : "#f8f8f8" }}
                     />
                     <span className="text-sm font-black tracking-wider uppercase">{color}</span>
                   </div>

@@ -544,7 +544,7 @@ export default function AIStudioPage() {
             {hasCamera === true && !stream && !userPhoto && (
               <div className="absolute inset-0 bg-[#050508] z-10 flex flex-col items-center justify-center overflow-hidden">
                 {/* Simulated luxury scanning background mesh */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,242,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,242,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px]" />
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(201, 169, 98,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(201, 169, 98,0.02)_1px,transparent_1px)] bg-[size:30px_30px]" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80" />
                 
                 {/* Rotating HUD mesh rings */}
@@ -552,7 +552,7 @@ export default function AIStudioPage() {
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-                    className="absolute inset-4 rounded-full border border-dashed border-[#00f2ff]/30"
+                    className="absolute inset-4 rounded-full border border-dashed border-[#C9A962]/30"
                   />
                   <motion.div
                     animate={{ rotate: -360 }}

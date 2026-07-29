@@ -574,7 +574,7 @@ export default function AdminDashboard() {
                   initial={{ width: 0 }}
                   animate={{ width: "100%" }}
                   transition={{ duration: 2, ease: "easeInOut" }}
-                  className="h-full bg-primary shadow-[0_0_15px_#00f2ff]" 
+                  className="h-full bg-primary shadow-[0_0_15px_#C9A962]" 
                />
             </div>
          </motion.div>
@@ -671,7 +671,7 @@ export default function AdminDashboard() {
 
                   {/* Core Statistics Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                     <StatCard label="Total Revenue" value={`${convertPrice(metrics.totalRevenue).symbol}${convertPrice(metrics.totalRevenue).amount}`} change="+12.5%" isPositive={true} icon={ShoppingBag} color="#00f2ff" delay={0.1} />
+                     <StatCard label="Total Revenue" value={`${convertPrice(metrics.totalRevenue).symbol}${convertPrice(metrics.totalRevenue).amount}`} change="+12.5%" isPositive={true} icon={ShoppingBag} color="#C9A962" delay={0.1} />
                      <StatCard label="Order Count" value={String(metrics.totalOrders)} change="+5.2%" isPositive={true} icon={ShoppingBag} color="#ff00ff" delay={0.2} />
                      <StatCard label="Catalog Products" value={String(metrics.totalProducts)} change="+2.1%" isPositive={true} icon={BrainCircuit} color="#00ff9d" delay={0.3} />
                      <StatCard label="Customers" value={String(metrics.customerCount)} change="+1.5%" isPositive={true} icon={Users} color="#ffcc00" delay={0.4} />
@@ -801,7 +801,7 @@ export default function AdminDashboard() {
                                     <h5 className="text-[9px] font-mono text-white/30 uppercase tracking-widest font-bold">Financial Stream</h5>
                                     <div className="flex justify-between items-baseline text-white">
                                       <span className="text-white/40 uppercase tracking-wider text-[9px]">Total Value:</span>
-                                      <span className="text-lg font-orbitron font-bold text-[#00f2ff] tracking-wider">₹{order.total_price}</span>
+                                      <span className="text-lg font-orbitron font-bold text-[#C9A962] tracking-wider">₹{order.total_price}</span>
                                     </div>
                                     <div className="flex justify-between text-[10px] font-mono">
                                       <span className="text-white/40">Transfer Method:</span>
@@ -1093,7 +1093,7 @@ export default function AdminDashboard() {
                  exit={{ scale: 0.95, opacity: 0, y: 30 }}
                  className="relative w-full max-w-xl bg-[#08080c] border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative z-10 flex flex-col max-h-[85vh] text-left"
                >
-                 <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#00f2ff]/50 to-transparent" />
+                 <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#C9A962]/50 to-transparent" />
                  <div className="flex justify-between items-center px-8 py-6 border-b border-white/5 bg-white/[0.01]">
                    <div>
                      <h3 className="text-lg font-display italic text-white">{editingProduct ? "Modify Product Asset" : "Initialize New Asset"}</h3>
@@ -1116,7 +1116,7 @@ export default function AdminDashboard() {
                        value={formName}
                        onChange={(e) => setFormName(e.target.value)}
                        placeholder="E.g., Luxe Linen Shirt - Sky Blue"
-                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                      />
                    </div>
 
@@ -1128,7 +1128,7 @@ export default function AdminDashboard() {
                          required
                          value={formPrice}
                          onChange={(e) => setFormPrice(Number(e.target.value))}
-                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                        />
                      </div>
                      <div className="space-y-1.5">
@@ -1138,7 +1138,7 @@ export default function AdminDashboard() {
                          required
                          value={formStock}
                          onChange={(e) => setFormStock(Number(e.target.value))}
-                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                        />
                      </div>
                    </div>
@@ -1149,7 +1149,7 @@ export default function AdminDashboard() {
                        <select
                          value={formCategory}
                          onChange={(e) => setFormCategory(e.target.value)}
-                         className="w-full bg-white/[0.02] border border-white/10 border-white/20 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all uppercase bg-[#08080c]"
+                         className="w-full bg-white/[0.02] border border-white/10 border-white/20 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all uppercase bg-[#08080c]"
                        >
                          <option value="streetwear">Streetwear</option>
                          <option value="accessories">Accessories</option>
@@ -1164,7 +1164,7 @@ export default function AdminDashboard() {
                          value={formOffer}
                          onChange={(e) => setFormOffer(e.target.value)}
                          placeholder="E.g., Buy One Get One Free"
-                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                        />
                      </div>
                    </div>
@@ -1177,7 +1177,7 @@ export default function AdminDashboard() {
                        value={formImageUrl}
                        onChange={(e) => setFormImageUrl(e.target.value)}
                        placeholder="/brand/linen_model_front.png"
-                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                      />
                    </div>
 
@@ -1189,7 +1189,7 @@ export default function AdminDashboard() {
                          value={formSizes}
                          onChange={(e) => setFormSizes(e.target.value)}
                          placeholder="M, L, XL, XXL"
-                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all uppercase"
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all uppercase"
                        />
                      </div>
                      <div className="space-y-1.5">
@@ -1199,7 +1199,7 @@ export default function AdminDashboard() {
                          value={formColors}
                          onChange={(e) => setFormColors(e.target.value)}
                          placeholder="White, Sky Blue, Pink"
-                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                         className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                        />
                      </div>
                    </div>
@@ -1211,7 +1211,7 @@ export default function AdminDashboard() {
                        value={formDescription}
                        onChange={(e) => setFormDescription(e.target.value)}
                        placeholder="Enter garment styling specifics..."
-                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl p-4 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all resize-none"
+                       className="w-full bg-white/[0.02] border border-white/10 rounded-xl p-4 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all resize-none"
                      />
                      <div className="hidden items-center gap-3 p-3 bg-white/[0.01] border border-white/5 rounded-xl">
                        <input

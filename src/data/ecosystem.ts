@@ -89,7 +89,7 @@ export const VIRTUAL_STYLISTS: VirtualStylist[] = [
     avatar: "🤍",
     tone: "Calm, precise, editorial",
     greeting: "Let's build something timeless. Less noise, more presence.",
-    accentColor: "#00f2ff",
+    accentColor: "#C9A962",
   },
   {
     id: "stylist-02",

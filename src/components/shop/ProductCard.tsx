@@ -240,7 +240,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         {/* Info section */}
         <div className="flex-1 p-3 md:p-5 flex flex-col justify-between relative z-10" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(10,10,15,0.95) 100%)" }}>
           <div>
-            <h3 className="text-[13px] font-orbitron font-bold text-white/90 tracking-wider uppercase mb-1.5 line-clamp-1 group-hover:text-[#00f2ff] transition-colors">
+            <h3 className="text-[13px] font-orbitron font-bold text-white/90 tracking-wider uppercase mb-1.5 line-clamp-1 group-hover:text-[#C9A962] transition-colors">
               {product.name}
             </h3>
             <p className="text-[10px] font-sora text-white/40 tracking-wider line-clamp-2 leading-relaxed">
@@ -263,13 +263,13 @@ const ProductCard = ({ product }: { product: Product }) => {
               <div className="flex items-center gap-2">
                 <span
                   className="text-[14px] font-orbitron font-bold tracking-wider"
-                  style={{ color: "#00f2ff" }}
+                  style={{ color: "#C9A962" }}
                 >
                   {priceInfo.symbol}{priceInfo.amount}
                 </span>
                 {discountPct && discountPct > 0 && (
                   <span className="px-1.5 py-0.5 rounded-sm text-[8px] font-sora font-bold tracking-widest"
-                    style={{ background: "rgba(201,168,76,0.15)", color: "#00f2ff", border: "1px solid rgba(201,168,76,0.25)" }}
+                    style={{ background: "rgba(201,168,76,0.15)", color: "#C9A962", border: "1px solid rgba(201,168,76,0.25)" }}
                   >
                     -{discountPct}%
                   </span>

@@ -90,8 +90,8 @@ export default function AnimatedBackground() {
           p.time += 16; p.y += p.speedY;
           p.x += Math.sin(p.time * p.swaySpeed) * p.swayRange * 0.3;
           ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-          ctx.fillStyle = "#C9A84C"; ctx.globalAlpha = p.opacity;
-          ctx.shadowBlur = 5; ctx.shadowColor = "#C9A84C"; ctx.fill();
+          ctx.fillStyle = "#C9A962"; ctx.globalAlpha = p.opacity;
+          ctx.shadowBlur = 5; ctx.shadowColor = "#C9A962"; ctx.fill();
           if (p.y < -10) { p.y = canvas.height+10; p.x = Math.random()*canvas.width; }
           if (p.x < -10 || p.x > canvas.width+10) p.x = Math.random()*canvas.width;
         });
@@ -104,9 +104,9 @@ export default function AnimatedBackground() {
   }, [isGold]);
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" style={{ background: "var(--bg-base, #0A0A0F)", transition: "background 1s" }}>
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" style={{ background: "var(--bg-base, #0A0A0C)", transition: "background 1s" }}>
       {/* Background depth radial glow */}
-      <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 0%, var(--theme-card, #12121A) 0%, transparent 75%)", opacity: 0.9 }} />
+      <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 0%, var(--theme-card, #16161A) 0%, transparent 75%)", opacity: 0.9 }} />
 
       {/* Slow-moving gold orb 1 */}
       <div
@@ -114,7 +114,7 @@ export default function AnimatedBackground() {
         style={{
           width: 700, height: 700,
           top: "-15%", left: "-10%",
-          background: "radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(201,169,98,0.06) 0%, transparent 70%)",
           animation: "goldOrbFloat1 24s ease-in-out infinite",
           filter: "blur(40px)",
         }}
@@ -125,7 +125,7 @@ export default function AnimatedBackground() {
         style={{
           width: 600, height: 600,
           bottom: "-10%", right: "-8%",
-          background: "radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(201,169,98,0.04) 0%, transparent 70%)",
           animation: "goldOrbFloat2 30s ease-in-out infinite",
           filter: "blur(50px)",
         }}
@@ -155,7 +155,7 @@ export default function AnimatedBackground() {
       <div
         className="absolute inset-0 opacity-[0.012]"
         style={{
-          backgroundImage: "linear-gradient(rgba(201,168,76,1) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,1) 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(rgba(201,169,98,1) 1px, transparent 1px), linear-gradient(90deg, rgba(201,169,98,1) 1px, transparent 1px)",
           backgroundSize: "120px 120px",
         }}
       />

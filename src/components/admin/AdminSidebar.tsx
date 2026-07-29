@@ -20,7 +20,7 @@ export const AdminSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { isSuperAdmin } = useAuth();
 
   const menuItems = [
-    { id: "overview", icon: LayoutDashboard, label: "Control Center", color: "#00f2ff" },
+    { id: "overview", icon: LayoutDashboard, label: "Control Center", color: "#C9A962" },
     { id: "orders", icon: ShoppingBag, label: "Commerce Nodes", color: "#ff00ff" },
     { id: "products", icon: Package, label: "Asset Manifest", color: "#7000ff" },
     ...(isSuperAdmin ? [
@@ -34,7 +34,7 @@ export const AdminSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     <div className="w-[280px] sm:w-80 h-full flex flex-col p-6 gap-8 border-r border-white/5 bg-black/40 backdrop-blur-3xl relative overflow-y-auto no-scrollbar group">
       {/* Background Pulse */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
-         <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(0,242,255,0.05),transparent_70%)] animate-pulse-slow" />
+         <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(201, 169, 98,0.05),transparent_70%)] animate-pulse-slow" />
       </div>
 
       {/* Brand / Core Identity */}
@@ -72,7 +72,7 @@ export const AdminSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
             {activeTab === item.id && (
               <motion.div 
                 layoutId="active-sidebar"
-                className="absolute left-0 w-1 h-8 bg-primary rounded-full shadow-[0_0_15px_#00f2ff]"
+                className="absolute left-0 w-1 h-8 bg-primary rounded-full shadow-[0_0_15px_#C9A962]"
               />
             )}
             
@@ -115,7 +115,7 @@ export const AdminSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                <motion.div 
                  initial={{ width: 0 }}
                  animate={{ width: "12%" }}
-                 className="h-full bg-primary shadow-[0_0_10px_#00f2ff]" 
+                 className="h-full bg-primary shadow-[0_0_10px_#C9A962]" 
                />
             </div>
          </div>

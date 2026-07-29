@@ -40,7 +40,7 @@ export function useXP() {
         style: {
           background: 'rgba(26, 26, 38, 0.95)',
           border: '1px solid rgba(201, 168, 76, 0.3)',
-          color: '#00f2ff',
+          color: '#C9A962',
           fontSize: '11px',
           letterSpacing: '0.1em',
           fontFamily: 'var(--font-sora)',
@@ -56,7 +56,7 @@ export function useXP() {
             style: {
               background: 'linear-gradient(135deg, rgba(201,168,76,0.15), rgba(232,201,122,0.1))',
               border: '1px solid rgba(201,168,76,0.5)',
-              color: '#00f2ff',
+              color: '#C9A962',
               fontSize: '12px',
               letterSpacing: '0.1em',
               fontFamily: 'var(--font-orbitron)',

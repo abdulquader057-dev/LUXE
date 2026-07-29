@@ -493,7 +493,7 @@ export default function BuildOutfitPage() {
                 className="grid grid-cols-2 md:grid-cols-4 gap-4"
               >
                 {[
-                  { label: "AI Confidence", value: `${generatedOutfit.confidence}%`, color: "#00f2ff" },
+                  { label: "AI Confidence", value: `${generatedOutfit.confidence}%`, color: "#C9A962" },
                   { label: "Fashion Score", value: `${generatedOutfit.fashionScore}/100`, color: "#ff00ff" },
                   { label: "Color Harmony", value: `${generatedOutfit.colorHarmony}%`, color: "#00ff9d" },
                   { label: "Trend Align", value: `${generatedOutfit.trendAlignment}%`, color: "#ffcc00" },

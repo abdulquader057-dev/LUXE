@@ -117,7 +117,7 @@ export const AnalyticsVisuals = ({ metrics }: AnalyticsVisualsProps) => {
       {/* Bottom Insights Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
          {[
-            { label: "Active Nodes", value: "1,204", icon: Globe, color: "#00f2ff" },
+            { label: "Active Nodes", value: "1,204", icon: Globe, color: "#C9A962" },
             { label: "Interaction Depth", value: "8.4m", icon: MousePointer2, color: "#ff00ff" },
             { label: "Neural Matches", value: "92%", icon: Target, color: "#00ff9d" },
             { label: "Processing Power", value: "4.2 tflops", icon: Layers, color: "#ffcc00" },

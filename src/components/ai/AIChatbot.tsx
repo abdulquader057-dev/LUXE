@@ -326,7 +326,7 @@ const AIChatbot = () => {
               background: "rgba(5, 5, 5, 0.8)",
               backdropFilter: "blur(40px)",
               WebkitBackdropFilter: "blur(40px)",
-              boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 120px rgba(0,242,255,0.03)",
+              boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 120px rgba(201, 169, 98,0.03)",
             }}
           >
             {/* Header — Minimal */}

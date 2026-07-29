@@ -1,12 +1,13 @@
-/* Design System – LUXE */
+/* Design System – LUXE THREADS */
 :root {
-  --color-black: #020203;
-  --color-gold: #D4AF37;
-  --color-offwhite: #F9FAFB;
-  --font-primary: 'Outfit', sans-serif;
-  --font-headline: 'Bebas Neue', sans-serif;
+  --color-black: #0A0A0C;
+  --color-gold: #C9A962;
+  --color-offwhite: #F5F0E8;
+  --font-primary: 'Inter', sans-serif;
+  --font-headline: 'Cormorant Garamond', serif;
   --font-cormorant: 'Cormorant Garamond', serif;
-  --transition-default: 0.3s ease;
+  --font-mono: 'JetBrains Mono', monospace;
+  --transition-default: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html, body {
@@ -23,59 +24,67 @@ html, body {
   background: var(--color-gold);
   color: var(--color-black);
   border: none;
-  border-radius: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-weight: 700;
+  border-radius: 0;
+  padding: 14px 32px;
+  font-weight: 500;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.18em;
   transition: var(--transition-default);
-  box-shadow: 0 0 8px rgba(212, 163, 55, 0.6);
+  box-shadow: 0 4px 20px rgba(201, 169, 98, 0.2);
 }
 .btn-primary:hover {
-  animation: gold-pulse 1.5s infinite;
-  transform: translateY(-2px);
+  background: #D4B978;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(201, 169, 98, 0.3);
+}
+.btn-primary:active {
+  transform: scale(0.98);
 }
 .btn-primary:disabled {
-  background: #555;
-  color: #aaa;
+  background: #2A2A30;
+  color: #6B655D;
   box-shadow: none;
   cursor: not-allowed;
 }
 
 .btn-secondary {
   background: transparent;
-  color: var(--color-gold);
-  border: 2px solid var(--color-gold);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-weight: 700;
+  color: rgba(245, 240, 232, 0.8);
+  border: 1px solid rgba(245, 240, 232, 0.15);
+  border-radius: 0;
+  padding: 14px 32px;
+  font-weight: 500;
+  font-size: 12px;
   text-transform: uppercase;
+  letter-spacing: 0.18em;
   transition: var(--transition-default);
 }
 .btn-secondary:hover {
-  background: var(--color-gold);
-  color: var(--color-black);
+  border-color: rgba(245, 240, 232, 0.4);
+  background: rgba(245, 240, 232, 0.05);
 }
 
 /* Input fields */
 .input-field {
   background: var(--color-black);
   color: var(--color-offwhite);
-  border: 2px solid transparent;
+  border: 1px solid rgba(201, 169, 98, 0.08);
+  border-bottom: 1px solid rgba(245, 240, 232, 0.2);
   padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
+  border-radius: 0;
   transition: var(--transition-default);
 }
 .input-field:focus {
-  border-color: var(--color-gold);
+  border-bottom-color: var(--color-gold);
   outline: none;
 }
 
 /* Gold shimmer skeleton */
 .skeleton {
-  background: linear-gradient(90deg, #020203 25%, #D4AF37 50%, #020203 75%);
+  background: linear-gradient(90deg, #0F0F12 25%, rgba(201,169,98,0.06) 50%, #0F0F12 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 2s ease-in-out infinite;
 }
 @keyframes shimmer {
   0% { background-position: -200% 0; }
@@ -85,12 +94,13 @@ html, body {
 /* Card hover lift */
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  border-color: rgba(201, 169, 98, 0.15);
 }
 
 /* Glass background */
 .glass {
-  background: rgba(255,255,255,0.04);
+  background: rgba(22, 22, 26, 0.6);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(201, 169, 98, 0.06);
 }

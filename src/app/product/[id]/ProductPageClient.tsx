@@ -61,7 +61,7 @@ const ProductViewer3DReal = dynamic(
     loading: () => (
       <div className="w-full h-[500px] md:h-[600px] rounded-[32px] bg-gradient-to-b from-[#0D0D14] to-[#1A1A26] border border-[rgba(201,168,76,0.1)] flex flex-col items-center justify-center gap-4">
         <div className="w-8 h-8 border-2 border-[#C9A84C] border-t-transparent rounded-full animate-spin" />
-        <span className="text-[9px] font-mono text-[#00f2ff] tracking-widest uppercase">Loading 3D Environment...</span>
+        <span className="text-[9px] font-mono text-[#C9A962] tracking-widest uppercase">Loading 3D Environment...</span>
       </div>
     )
   }
@@ -374,7 +374,7 @@ export default function ProductPageClient({ product }: { product: any }) {
                   
                   <button
                     onClick={() => setShowPriceDropModal(true)}
-                    className="w-max mt-2 text-[8px] font-mono tracking-[0.2em] text-[#00f2ff] border border-[#D4AF37]/20 hover:border-[#D4AF37] px-4 py-2 rounded-xl uppercase transition-all bg-[#D4AF37]/5 hover:bg-[#D4AF37]/10 flex items-center gap-2 cursor-pointer"
+                    className="w-max mt-2 text-[8px] font-mono tracking-[0.2em] text-[#C9A962] border border-[#D4AF37]/20 hover:border-[#D4AF37] px-4 py-2 rounded-xl uppercase transition-all bg-[#D4AF37]/5 hover:bg-[#D4AF37]/10 flex items-center gap-2 cursor-pointer"
                   >
                     <Bell size={10} /> Set Price Drop Alert
                   </button>
@@ -450,7 +450,7 @@ export default function ProductPageClient({ product }: { product: any }) {
                         />
                       </div>
                       {pincodeResult && (
-                        <div className="mt-3 text-[10px] font-mono text-[#00f2ff] uppercase tracking-widest flex items-center gap-2 animate-pulse">
+                        <div className="mt-3 text-[10px] font-mono text-[#C9A962] uppercase tracking-widest flex items-center gap-2 animate-pulse">
                           <span>🚚</span> {pincodeResult}
                         </div>
                       )}
@@ -463,7 +463,7 @@ export default function ProductPageClient({ product }: { product: any }) {
                     <div className="flex justify-between items-center mb-6">
                       <h4 className="text-[11px] font-black tracking-[0.3em] text-white/30 uppercase">Select Color</h4>
                       {selectedColor && (
-                        <span className="text-[10px] font-black text-[#00f2ff] uppercase tracking-widest">{selectedColor}</span>
+                        <span className="text-[10px] font-black text-[#C9A962] uppercase tracking-widest">{selectedColor}</span>
                       )}
                     </div>
                     <div className="flex flex-wrap gap-4">
@@ -566,7 +566,7 @@ export default function ProductPageClient({ product }: { product: any }) {
                         className="w-full !py-6 flex items-center justify-center gap-4 hover:border-primary/50 group overflow-hidden"
                       >
                         <ShoppingCart size={20} className="text-primary group-hover:scale-110 transition-transform duration-700" />
-                        <span className="text-xs font-black tracking-[0.3em] uppercase">Add to Cart</span>
+                        <span className="text-xs font-black tracking-[0.3em] uppercase">Add to Ensemble</span>
                       </LuxeButton>
                     </Magnetic>
                     <Magnetic>

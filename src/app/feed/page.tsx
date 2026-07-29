@@ -276,7 +276,7 @@ export default function FeedPage() {
             </div>
             <div className="flex gap-4">
               <button className="flex-1 py-5 bg-white text-black rounded-[20px] font-black text-[10px] tracking-widest uppercase hover:bg-primary transition-all flex items-center justify-center gap-3">
-                <ShoppingBag size={18} /> Add to Cart
+                <ShoppingBag size={18} /> Add to Ensemble
               </button>
               <button className="flex-1 py-5 bg-[#25D366] text-white rounded-[20px] font-black text-[10px] tracking-widest uppercase flex items-center justify-center gap-3">
                 <MessageCircle size={18} fill="white" /> WhatsApp Buy

@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         >
           <Link 
             href="/" 
-            className="inline-flex items-center gap-2 text-[10px] font-mono text-[#00f2ff] hover:text-text-primary uppercase tracking-[0.2em] transition-colors"
+            className="inline-flex items-center gap-2 text-[10px] font-mono text-[#C9A962] hover:text-text-primary uppercase tracking-[0.2em] transition-colors"
           >
             <ArrowLeft size={14} /> Back to Nexus
           </Link>
@@ -36,11 +36,11 @@ export default function PrivacyPage() {
           transition={{ duration: 0.8 }}
           className="mb-16 text-center md:text-left"
         >
-          <h1 className="text-4xl md:text-7xl font-cormorant font-bold text-[#00f2ff] uppercase tracking-[0.25em] leading-[0.9] mb-4">
+          <h1 className="text-4xl md:text-7xl font-cormorant font-bold text-[#C9A962] uppercase tracking-[0.25em] leading-[0.9] mb-4">
             Privacy<br />
             <span className="text-text-primary italic font-light font-cormorant tracking-normal text-3xl md:text-6xl lowercase">protocol.</span>
           </h1>
-          <p className="text-[10px] font-mono text-[#00f2ff]/80 uppercase tracking-[0.3em] mt-4">
+          <p className="text-[10px] font-mono text-[#C9A962]/80 uppercase tracking-[0.3em] mt-4">
             Security. Storage. Trust.
           </p>
         </motion.div>
@@ -58,7 +58,7 @@ export default function PrivacyPage() {
               <div className="w-10 h-10 rounded-full bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
                 <Shield size={20} />
               </div>
-              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#00f2ff]">
+              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#C9A962]">
                 01 // Data Acquisition
               </h2>
             </div>
@@ -83,7 +83,7 @@ export default function PrivacyPage() {
               <div className="w-10 h-10 rounded-full bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
                 <Key size={20} />
               </div>
-              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#00f2ff]">
+              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#C9A962]">
                 02 // Functional Utilization
               </h2>
             </div>
@@ -108,7 +108,7 @@ export default function PrivacyPage() {
               <div className="w-10 h-10 rounded-full bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
                 <Eye size={20} />
               </div>
-              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#00f2ff]">
+              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#C9A962]">
                 03 // Security & Storage
               </h2>
             </div>
@@ -131,7 +131,7 @@ export default function PrivacyPage() {
               <div className="w-10 h-10 rounded-full bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
                 <Shield size={20} />
               </div>
-              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#00f2ff]">
+              <h2 className="text-lg md:text-xl font-mono font-bold uppercase tracking-widest text-[#C9A962]">
                 04 // Governing Law
               </h2>
             </div>
@@ -150,7 +150,7 @@ export default function PrivacyPage() {
             <div className="flex justify-center mb-6 text-[#C9A84C]">
               <Mail size={32} />
             </div>
-            <h3 className="text-xl font-orbitron font-bold text-[#00f2ff] uppercase tracking-[0.2em] mb-4">
+            <h3 className="text-xl font-orbitron font-bold text-[#C9A962] uppercase tracking-[0.2em] mb-4">
               Direct Uplink
             </h3>
             <p className="text-text-secondary text-sm leading-relaxed mb-8 max-w-lg mx-auto">

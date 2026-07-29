@@ -179,7 +179,7 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                         {query ? "SEARCH RESULTS" : "FEATURED"}
                      </h4>
                      {query && results.length > 0 && (
-                       <div className="flex items-center gap-2 text-[9px] font-mono text-[#00f2ff] bg-[#00f2ff]/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                       <div className="flex items-center gap-2 text-[9px] font-mono text-[#C9A962] bg-[#C9A962]/10 px-3 py-1 rounded-full uppercase tracking-wider">
                           <Sparkles size={10} className="animate-pulse" />
                           <span>We found {results.length} products matching your request. Tap to inspect.</span>
                        </div>
@@ -261,7 +261,7 @@ export const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
                              console.error("Chat trigger error:", e);
                            }
                          }}
-                         className="px-6 py-3 bg-[#00f2ff] hover:bg-[#00f2ff]/80 text-black text-[10px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer shadow-[0_0_15px_rgba(0,242,255,0.3)]"
+                         className="px-6 py-3 bg-[#C9A962] hover:bg-[#C9A962]/80 text-black text-[10px] font-mono font-bold tracking-widest uppercase rounded-xl transition-all cursor-pointer shadow-[0_0_15px_rgba(201, 169, 98,0.3)]"
                        >
                          Launch AI Chatbot
                        </button>

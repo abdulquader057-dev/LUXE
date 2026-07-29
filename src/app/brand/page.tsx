@@ -100,7 +100,7 @@ export default function BrandPage() {
           <TurnstileWidget onVerify={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
         </div>
         {errorMsg && (
-          <div className="p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#00f2ff] rounded text-xs font-mono text-center max-w-sm mx-auto">
+          <div className="p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#C9A962] rounded text-xs font-mono text-center max-w-sm mx-auto">
             {errorMsg}
           </div>
         )}

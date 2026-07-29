@@ -25,8 +25,8 @@ export const CinematicAtmosphere = () => {
     const particleCount = isMobile ? 20 : 40;
 
     const colors = [
-      "rgba(183,110,121,0.6)",  // rose gold
-      "rgba(244,194,194,0.5)",  // blush
+      "rgba(201,169,98,0.4)",  // gold dust
+      "rgba(232,213,183,0.3)",  // warm pale
       "rgba(166,124,82,0.4)"    // warm bronze
     ];
 
@@ -94,12 +94,12 @@ export const CinematicAtmosphere = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-bg pointer-events-none overflow-hidden select-none" style={{ backgroundColor: "#020202" }}>
+    <div className="fixed inset-0 z-bg pointer-events-none overflow-hidden select-none" style={{ backgroundColor: "#0A0A0C" }}>
       {/* LAYER 1: Base Gradient */}
       <div 
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at 50% 0%, #1A1A1A 0%, #0A0A0A 35%, #050505 65%, #020202 100%)",
+          background: "radial-gradient(ellipse at 50% 0%, #16161A 0%, #0F0F12 35%, #0A0A0C 65%, #0A0A0C 100%)",
           zIndex: 0
         }}
       />
@@ -108,7 +108,7 @@ export const CinematicAtmosphere = () => {
       <div 
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 30%, rgba(224,191,184,0.05) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 30%, rgba(201,169,98,0.03) 0%, transparent 70%)",
           zIndex: 1
         }}
       />
@@ -117,7 +117,7 @@ export const CinematicAtmosphere = () => {
       <div 
         className="absolute w-[800px] h-[800px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(183,110,121,0.12) 0%, transparent 60%)",
+          background: "radial-gradient(circle, rgba(201,169,98,0.12) 0%, transparent 60%)",
           filter: "blur(90px)",
           top: "-250px",
           left: "-250px",
@@ -130,7 +130,7 @@ export const CinematicAtmosphere = () => {
       <div 
         className="absolute w-[600px] h-[600px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(244,194,194,0.08) 0%, transparent 60%)",
+          background: "radial-gradient(circle, rgba(232,213,183,0.08) 0%, transparent 60%)",
           filter: "blur(90px)",
           bottom: "-150px",
           right: "-150px",
@@ -143,7 +143,7 @@ export const CinematicAtmosphere = () => {
       <div 
         className="absolute w-[1000px] h-[1000px] rounded-full top-1/2 left-1/2"
         style={{
-          background: "radial-gradient(circle, rgba(166,124,82,0.08) 0%, transparent 50%)",
+          background: "radial-gradient(circle, rgba(166,124,82,0.12) 0%, transparent 50%)",
           filter: "blur(140px)",
           transform: "translate(-50%, -50%)",
           zIndex: 1,
@@ -175,7 +175,7 @@ export const CinematicAtmosphere = () => {
       <div 
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(to top, rgba(224,191,184,0.02) 0%, transparent 35%)",
+          background: "linear-gradient(to top, rgba(201,169,98,0.02) 0%, transparent 35%)",
           zIndex: 3,
         }}
       />
@@ -191,7 +191,7 @@ export const CinematicAtmosphere = () => {
       <div 
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 30%, rgba(2,2,2,0.85) 100%)",
+          background: "radial-gradient(ellipse at center, transparent 30%, rgba(10,10,12,0.85) 100%)",
           zIndex: 5,
         }}
       />

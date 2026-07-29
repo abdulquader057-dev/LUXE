@@ -20,7 +20,7 @@ interface Node {
 }
 
 const initialNodes: Node[] = [
-  { id: "1", type: "trigger", label: "New Order Node", desc: "Triggers on new checkout", icon: ShoppingCart, color: "#00f2ff" },
+  { id: "1", type: "trigger", label: "New Order Node", desc: "Triggers on new checkout", icon: ShoppingCart, color: "#C9A962" },
   { id: "2", type: "ai", label: "Style Analysis", desc: "Deep neural style matching", icon: BrainCircuit, color: "#ff00ff" },
   { id: "3", type: "action", label: "Personalized SMS", desc: "AI-generated luxury invite", icon: MessageSquare, color: "#00ff9d" },
   { id: "4", type: "condition", label: "VIP Threshold", desc: "Check customer loyalty score", icon: GitFork, color: "#ffcc00" },
@@ -42,7 +42,7 @@ export const WorkflowCanvas = () => {
             <button className="glass border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 text-xs font-black tracking-widest uppercase hover:bg-white/5 transition-all">
                <Plus size={16} /> Add Node
             </button>
-            <button className="bg-primary px-8 py-3 rounded-2xl flex items-center gap-3 text-xs font-black tracking-widest uppercase text-black hover:scale-105 active:scale-95 transition-all shadow-[0_10px_20px_rgba(0,242,255,0.3)]">
+            <button className="bg-primary px-8 py-3 rounded-2xl flex items-center gap-3 text-xs font-black tracking-widest uppercase text-black hover:scale-105 active:scale-95 transition-all shadow-[0_10px_20px_rgba(201, 169, 98,0.3)]">
                <Play size={16} fill="black" /> Deploy Flow
             </button>
          </div>

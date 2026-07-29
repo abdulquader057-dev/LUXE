@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, Orbitron, Cormorant_Garamond } from "next/font/google";
+import { Inter, Orbitron, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import dynamic from "next/dynamic";
 import "./globals.css";
@@ -22,10 +22,18 @@ import LuxeLoadingBar from "@/components/ui/LuxeLoadingBar";
 import DynamicLayoutWidgets from "@/components/layout/DynamicLayoutWidgets";
 import CinematicRevealWrapper from "@/components/layout/CinematicRevealWrapper";
 
-const sora = Sora({
+const inter = Inter({
   weight: ["300", "400", "500"],
-  variable: "--font-sora",
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  weight: ["300", "400"],
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const orbitron = Orbitron({
@@ -94,7 +102,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sora.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth theme-${themeClass}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${orbitron.variable} ${cormorant.variable} h-full antialiased dark scroll-smooth theme-${themeClass}`}
     >
       <head>
         <meta name="google-site-verification" content="TO_BE_FILLED" />

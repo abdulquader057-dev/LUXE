@@ -726,12 +726,12 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
           className="relative w-full max-w-xl bg-[#07070a]/95 border border-white/10 backdrop-blur-2xl rounded-t-[32px] sm:rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,240,255,0.05)] flex flex-col h-[85vh] sm:h-auto sm:max-h-[90vh] relative z-10"
         >
           {/* Glowing Header beam */}
-          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#00f2ff]/50 to-transparent" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#C9A962]/50 to-transparent" />
 
           {/* Header */}
           <div className="flex justify-between items-center px-8 py-6 border-b border-white/5 bg-white/[0.01]">
             <div className="flex items-center gap-3">
-              <MapPin className="text-[#00f2ff] animate-pulse" size={20} />
+              <MapPin className="text-[#C9A962] animate-pulse" size={20} />
               <div>
                 <h3 className="text-md font-mono font-bold tracking-widest uppercase text-white">Dispatch Uplink</h3>
                 <p className="text-[9px] font-mono text-white/30 uppercase tracking-widest">Enter delivery coordinates</p>
@@ -790,7 +790,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
 
             {/* Brand Handoff & Trust tags */}
             <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-[9px] font-mono uppercase tracking-widest text-white/50 space-y-2 leading-relaxed">
-              <div className="flex items-center gap-2 text-[#00f2ff]">
+              <div className="flex items-center gap-2 text-[#C9A962]">
                 <MapPin size={12} className="animate-pulse" />
                 <span>Hub: Hafiz Baba Nagar, Hyderabad</span>
               </div>
@@ -811,7 +811,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="E.g., Shadab Qr"
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -822,7 +822,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="E.g., +91 79953 38472"
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                   />
                 </div>
               </div>
@@ -835,7 +835,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="customer@luxe.ai"
-                  className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                  className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                 />
               </div>
 
@@ -847,7 +847,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="Door No, Street Name, Apartment, Area..."
-                  className="w-full bg-white/[0.02] border border-white/10 rounded-xl p-4 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all resize-none"
+                  className="w-full bg-white/[0.02] border border-white/10 rounded-xl p-4 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all resize-none"
                 />
               </div>
 
@@ -860,7 +860,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="Hyderabad"
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -871,7 +871,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                     placeholder="Telangana"
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -882,7 +882,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                     value={pincode}
                     onChange={(e) => setPincode(e.target.value)}
                     placeholder="500001"
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                   />
                 </div>
               </div>
@@ -895,7 +895,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                     value={landmark}
                     onChange={(e) => setLandmark(e.target.value)}
                     placeholder="E.g., Near Metro Station"
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -905,7 +905,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                     value={instructions}
                     onChange={(e) => setInstructions(e.target.value)}
                     placeholder="E.g., Leave with security"
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#00f2ff]/40 text-white placeholder:text-white/20 transition-all"
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-[#C9A962]/40 text-white placeholder:text-white/20 transition-all"
                   />
                 </div>
               </div>
@@ -913,7 +913,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
 
             {/* Payment Section */}
             <div className="pt-6 border-t border-white/5 space-y-4">
-              <label className="text-[10px] font-mono text-[#00f2ff] uppercase tracking-widest block mb-2 font-bold">Select Payment Protocol</label>
+              <label className="text-[10px] font-mono text-[#C9A962] uppercase tracking-widest block mb-2 font-bold">Select Payment Protocol</label>
               
               <div className="grid grid-cols-3 gap-3">
                 <button
@@ -1164,8 +1164,8 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
                 )}
                 <div className="h-px bg-white/5 my-2" />
                 <div className="flex justify-between items-center text-xs font-bold text-white">
-                  <span className="text-[#00f2ff]">Grand Total</span>
-                  <span className="text-lg text-[#00f2ff]">{formatPrice(grandTotal)}</span>
+                  <span className="text-[#C9A962]">Grand Total</span>
+                  <span className="text-lg text-[#C9A962]">{formatPrice(grandTotal)}</span>
                 </div>
               </div>
 

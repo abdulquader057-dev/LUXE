@@ -53,7 +53,7 @@ export const AIOrb = ({ isListening, isProcessing, size = "md" }: AIOrbProps) =>
           }}
           className={`absolute inset-${ring * 4} border border-primary/20 rounded-full`}
           style={{ 
-            boxShadow: `0 0 20px rgba(0, 242, 255, ${0.1 / ring})`,
+            boxShadow: `0 0 20px rgba(201, 169, 98, ${0.1 / ring})`,
             transform: `translateZ(${ring * 10}px)`
           }}
         />
@@ -66,7 +66,7 @@ export const AIOrb = ({ isListening, isProcessing, size = "md" }: AIOrbProps) =>
           rotateX: [0, 180, 0],
         }}
         transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-        className="relative w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden border border-white/10 shadow-[inset_0_0_50px_rgba(0,242,255,0.2)]"
+        className="relative w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden border border-white/10 shadow-[inset_0_0_50px_rgba(201, 169, 98,0.2)]"
       >
         {/* Internal Nebula Effect */}
         <motion.div
@@ -105,7 +105,7 @@ export const AIOrb = ({ isListening, isProcessing, size = "md" }: AIOrbProps) =>
                   y: Math.sin(i * (45 * Math.PI / 180)) * 100
                 }}
                 transition={{ repeat: Infinity, duration: 2, delay: i * 0.2 }}
-                className="absolute top-1/2 left-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_10px_#00f2ff]"
+                className="absolute top-1/2 left-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_10px_#C9A962]"
               />
             ))}
           </div>
@@ -120,7 +120,7 @@ export const AIOrb = ({ isListening, isProcessing, size = "md" }: AIOrbProps) =>
               key={i}
               animate={{ 
                 height: ["20%", "100%", "30%", "80%", "20%"],
-                backgroundColor: ["#00f2ff", "#ff00ff", "#00f2ff"]
+                backgroundColor: ["#C9A962", "#ff00ff", "#C9A962"]
               }}
               transition={{ 
                 repeat: Infinity, 
@@ -128,7 +128,7 @@ export const AIOrb = ({ isListening, isProcessing, size = "md" }: AIOrbProps) =>
                 delay: i * 0.05,
                 ease: "easeInOut"
               }}
-              className="w-1.5 rounded-full shadow-[0_0_15px_rgba(0,242,255,0.5)]"
+              className="w-1.5 rounded-full shadow-[0_0_15px_rgba(201, 169, 98,0.5)]"
             />
           ))}
         </div>

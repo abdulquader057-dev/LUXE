@@ -80,7 +80,7 @@ export function CommerceProvider({ children }: { children: React.ReactNode }) {
     if (savedCart) setCart(JSON.parse(savedCart));
 
     // Load saved UI Theme color
-    const savedTheme = localStorage.getItem("luxe-theme-color") || "#00f2ff";
+    const savedTheme = localStorage.getItem("luxe-theme-color") || "#C9A962";
     document.documentElement.style.setProperty("--primary-color", savedTheme);
   }, []);
 

@@ -37,7 +37,7 @@ export default function ShopPage() {
         <div className="min-h-screen flex items-center justify-center relative z-10 pt-24">
           <div className="flex flex-col items-center gap-8">
              <div className="w-16 h-16 border border-white/5 border-t-[#C9A84C]/50 rounded-full animate-spin" />
-             <p className="text-[9px] font-sora tracking-[0.5em] text-[#00f2ff]/50 uppercase">Syncing Archive...</p>
+             <p className="text-[9px] font-sora tracking-[0.5em] text-[#C9A962]/50 uppercase">Syncing Archive...</p>
           </div>
         </div>
       }>

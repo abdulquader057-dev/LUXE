@@ -31,7 +31,7 @@ export default async function ProductPageWrapper({ params }: PageProps) {
         <ShieldAlert className="text-[#C9A84C] mb-4" size={48} />
         <h1 className="text-2xl font-display uppercase tracking-widest text-white mb-2">Manifest Not Found</h1>
         <p className="text-xs font-mono text-white/40 uppercase tracking-widest mb-6">The requested product ID does not exist in LUXE OS catalog.</p>
-        <Link href="/shop" className="px-6 py-3 border border-[#C9A84C] text-[#00f2ff] font-mono text-xs uppercase tracking-widest hover:bg-[#C9A84C]/5 transition-colors">
+        <Link href="/shop" className="px-6 py-3 border border-[#C9A84C] text-[#C9A962] font-mono text-xs uppercase tracking-widest hover:bg-[#C9A84C]/5 transition-colors">
           Return to Archive
         </Link>
       </main>
@@ -104,7 +104,7 @@ export default async function ProductPageWrapper({ params }: PageProps) {
               <div className="space-y-2">
                 <div className="flex justify-between text-[9px] font-mono uppercase tracking-widest text-white/40">
                   <span>Level Requirement</span>
-                  <span className="text-[#00f2ff] font-bold">Level {requiredLevel}</span>
+                  <span className="text-[#C9A962] font-bold">Level {requiredLevel}</span>
                 </div>
                 <div className="flex justify-between text-[9px] font-mono uppercase tracking-widest text-white/40">
                   <span>Your Current Identity</span>
@@ -158,7 +158,7 @@ export default async function ProductPageWrapper({ params }: PageProps) {
                   </div>
                   <Link 
                     href="/shop"
-                    className="w-full py-4 border border-[#C9A84C] text-[#00f2ff] font-mono text-xs uppercase tracking-widest rounded-2xl hover:bg-[#C9A84C]/5 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-4 border border-[#C9A84C] text-[#C9A962] font-mono text-xs uppercase tracking-widest rounded-2xl hover:bg-[#C9A84C]/5 transition-all flex items-center justify-center gap-2"
                   >
                     <ArrowLeft size={14} /> Return to Shop
                   </Link>

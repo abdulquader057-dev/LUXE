@@ -57,11 +57,11 @@ export default function CinematicShowcase({ products }: { products: any[] }) {
           {/* Nav arrows */}
           <div className="absolute bottom-6 left-6 flex gap-3 z-20">
             <button onClick={() => go(active - 1)}
-              className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:border-[#C9A84C] hover:text-[#00f2ff] transition-all text-white/60">
+              className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:border-[#C9A84C] hover:text-[#C9A962] transition-all text-white/60">
               <ChevronLeft size={16} />
             </button>
             <button onClick={() => go(active + 1)}
-              className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:border-[#C9A84C] hover:text-[#00f2ff] transition-all text-white/60">
+              className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:border-[#C9A84C] hover:text-[#C9A962] transition-all text-white/60">
               <ChevronRight size={16} />
             </button>
           </div>

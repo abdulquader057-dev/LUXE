@@ -117,7 +117,7 @@ export const ProductViewer3DReal = ({ modelUrl, productName, selectedColor = 'De
         onClick={() => setIsAutoRotating(!isAutoRotating)}
         className={`absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-2 rounded-full backdrop-blur-md border text-[9px] font-mono tracking-widest uppercase transition-all ${
           isAutoRotating
-            ? 'bg-[rgba(201,168,76,0.15)] border-[rgba(201,168,76,0.4)] text-[#00f2ff]'
+            ? 'bg-[rgba(201,168,76,0.15)] border-[rgba(201,168,76,0.4)] text-[#C9A962]'
             : 'bg-black/40 border-white/10 text-white/40'
         }`}
       >
@@ -128,7 +128,7 @@ export const ProductViewer3DReal = ({ modelUrl, productName, selectedColor = 'De
       {/* Bottom label */}
       <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end pointer-events-none z-10">
         <div className="bg-black/60 backdrop-blur-xl border border-[rgba(201,168,76,0.2)] px-4 py-2 rounded-full">
-          <div className="text-[8px] font-mono tracking-[0.2em] text-[#00f2ff] uppercase font-bold">
+          <div className="text-[8px] font-mono tracking-[0.2em] text-[#C9A962] uppercase font-bold">
             3D Model View
           </div>
           <div className="text-[7px] font-mono text-white/30 tracking-wider">
@@ -137,7 +137,7 @@ export const ProductViewer3DReal = ({ modelUrl, productName, selectedColor = 'De
         </div>
         <div className="bg-black/60 backdrop-blur-xl border border-white/10 px-3 py-2 rounded-full">
           <span className="text-[8px] font-mono text-white/50 uppercase tracking-widest">
-            Color: <span className="text-[#00f2ff]">{selectedColor}</span>
+            Color: <span className="text-[#C9A962]">{selectedColor}</span>
           </span>
         </div>
       </div>

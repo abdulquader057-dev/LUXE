@@ -25,7 +25,7 @@ import { track } from "@vercel/analytics";
 import { setCookie } from "@/lib/cookies";
 
 const SETTINGS_MENU = [
-  { id: "account", label: "Account", icon: User, color: "#00f2ff" },
+  { id: "account", label: "Account", icon: User, color: "#C9A962" },
   { id: "themes", label: "Theme Hub", icon: Palette, color: "#D4AF37" },
   { id: "preferences", label: "Preferences", icon: Shirt, color: "#c084fc" },
   { id: "accessories", label: "Accessory Hub", icon: Watch, color: "#ffcc00" },
@@ -869,7 +869,7 @@ function SubscriptionServices() {
       </div>
 
       {spotsLeft > 0 && (
-         <div className="p-6 rounded-3xl bg-gradient-to-r from-primary/10 via-[#00f2ff]/5 to-transparent border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
+         <div className="p-6 rounded-3xl bg-gradient-to-r from-primary/10 via-[#C9A962]/5 to-transparent border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
                <span className="text-[8px] font-mono text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest font-bold">Limited Promotion</span>
                <h4 className="text-lg font-display font-light italic">First 100 Customers Upgrade Free!</h4>
@@ -947,7 +947,7 @@ function SubscriptionServices() {
          </div>
 
          {/* TIER 2 */}
-         <div className={cn("p-6 rounded-[32px] border space-y-6 relative overflow-hidden group transition-all shadow-[0_0_30px_rgba(0,242,255,0.05)] text-left",
+         <div className={cn("p-6 rounded-[32px] border space-y-6 relative overflow-hidden group transition-all shadow-[0_0_30px_rgba(201, 169, 98,0.05)] text-left",
             activePlan === "Luxe Elite" ? "border-primary bg-primary/20" : "border-white/5 bg-gradient-to-br from-primary/10 to-accent/10 hover:border-primary/50")}>
             <Crown className="text-primary" size={28} />
             <div className="space-y-2">
@@ -1001,7 +1001,7 @@ function SubscriptionServices() {
                   Select your neural interface colorway. (Requires Luxe Elite or higher)
                </p>
                <div className="flex gap-4">
-                  {['#00f2ff', '#c084fc', '#ff4466', '#00ff9d'].map((color) => (
+                  {['#C9A962', '#c084fc', '#ff4466', '#00ff9d'].map((color) => (
                     <motion.button 
                       key={color} 
                       onClick={() => handleSetTheme(color)}
@@ -1035,7 +1035,7 @@ function SubscriptionServices() {
                exit={{ scale: 0.95, opacity: 0 }} 
                className="relative w-full max-w-md bg-[#07070a]/95 border border-white/10 p-8 rounded-3xl shadow-2xl relative z-10 text-left"
              >
-               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#00f2ff]/50 to-transparent" />
+               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#C9A962]/50 to-transparent" />
                <div className="flex justify-between items-center mb-6">
                  <div>
                    <h3 className="text-xl font-display font-light italic">Quantum Gateway</h3>
@@ -1075,7 +1075,7 @@ function SubscriptionServices() {
                  <div className="flex justify-between items-baseline border-b border-white/5 pb-4">
                    <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">Calibrating Tier</span>
                    <div className="text-right">
-                     <p className="text-lg font-display italic text-[#00f2ff]">{selectedPlanName}</p>
+                     <p className="text-lg font-display italic text-[#C9A962]">{selectedPlanName}</p>
                      <p className="text-xl font-mono font-bold text-white tracking-tight">
                        {usePromoSlot ? "₹0 (Free Claim)" : `${convertPrice(selectedPlanPrice).symbol}${convertPrice(selectedPlanPrice).amount}`}
                      </p>
@@ -1195,7 +1195,7 @@ function SubscriptionServices() {
        <AnimatePresence>
          {showSuccessCelebration && (
            <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black/95 backdrop-blur-2xl">
-             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,242,255,0.15),transparent_60%)] animate-pulse" />
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(201, 169, 98,0.15),transparent_60%)] animate-pulse" />
              <motion.div 
                animate={{ rotate: 360 }}
                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
@@ -1213,7 +1213,7 @@ function SubscriptionServices() {
                exit={{ scale: 0.8, opacity: 0 }}
                className="text-center space-y-6 relative z-10"
              >
-               <div className="w-24 h-24 mx-auto rounded-3xl bg-primary/10 border border-primary flex items-center justify-center shadow-[0_0_50px_rgba(0,242,255,0.4)]">
+               <div className="w-24 h-24 mx-auto rounded-3xl bg-primary/10 border border-primary flex items-center justify-center shadow-[0_0_50px_rgba(201, 169, 98,0.4)]">
                  <Crown size={48} className="text-primary animate-bounce" />
                </div>
                <div className="space-y-2">
