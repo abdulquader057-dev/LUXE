@@ -2,15 +2,22 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 const Footer = () => {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="py-16 border-t border-white/[0.03] relative bg-black/40 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 md:px-8 flex flex-col gap-10">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="text-3xl font-display font-black tracking-tighter text-white/80">
-            LUXE<span className="text-primary">.</span>
+          <div className="text-3xl font-display font-black tracking-tighter text-white/80 uppercase">
+            LUXE THREADS<span className="text-[#D4AF37]">.</span>
           </div>
           <div className="flex flex-wrap justify-center gap-10 text-[9px] font-black tracking-[0.3em] text-white/15 uppercase">
             <Link href="/ar-scanner" className="hover:text-white/30 transition-colors">AI Suite</Link>
@@ -37,12 +44,12 @@ const Footer = () => {
           </div>
           <div className="text-center md:text-right">
             <span className="text-white/20 mr-2 font-bold">Feedback Node:</span>
-            <a href="mailto:abdulquader057@gmail.com?subject=LUXE%20Bug%20Report" className="hover:text-white transition-colors underline">Report a Bug</a>
+            <a href="mailto:abdulquader057@gmail.com?subject=LUXE%20Threads%20Feedback" className="hover:text-white transition-colors underline">Report a Bug</a>
           </div>
         </div>
       </div>
       <p className="text-center text-[9px] font-black tracking-[0.6em] text-white/[0.04] uppercase mt-10">
-        © {new Date().getFullYear()} LUXE COGNITIVE FASHION CORP. ALL RIGHTS RESERVED.
+        © {new Date().getFullYear()} LUXE THREADS COGNITIVE FASHION CORP. ALL RIGHTS RESERVED.
       </p>
     </footer>
   );

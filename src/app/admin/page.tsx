@@ -534,8 +534,19 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  if (authLoading || (!isAdmin && !authLoading)) {
-    return <div className="min-h-screen bg-black" />; // Hidden while checking
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/40 flex items-center justify-center relative overflow-hidden">
+          <Cpu size={24} className="text-primary animate-pulse" />
+        </div>
+        <span className="text-[10px] font-black text-white/40 tracking-widest uppercase mt-4">Authenticating Admin Link...</span>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return <div className="min-h-screen bg-black" />;
   }
 
   if (isBooting) {

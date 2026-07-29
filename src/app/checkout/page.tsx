@@ -340,6 +340,7 @@ export default function CheckoutPage() {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     orderId: orderData.id,
+                    notifyToken: orderData.notifyToken,
                     name: escapedName,
                     phone: escapedPhone,
                     address: escapedAddress,
@@ -403,6 +404,7 @@ export default function CheckoutPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             orderId: orderData?.id,
+            notifyToken: orderData?.notifyToken,
             name: escapedName,
             phone: escapedPhone,
             address: escapedAddress,

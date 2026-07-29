@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Crown, Users, Sparkles, CheckCircle2, Loader2, Phone, Mail, User, Lock } from "lucide-react";
 import Link from "next/link";
 import { useTilt } from "@/hooks/useTilt";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 const WA_GROUP_LINK = "https://chat.whatsapp.com/BsNY4Jkv67GC6NvxkcTBji";
 const MAX_MEMBERS = 100;
@@ -91,12 +92,14 @@ export default function LoyaltyPage() {
   const [memberCount, setMemberCount] = useState<number | null>(null);
   const [joined, setJoined] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   // Validation helpers
   const isPhoneValid = /^[6-9]\d{9}$/.test(phone.replace(/[^0-9]/g, "").slice(-10));
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isLengthValid = name.length <= 255 && phone.length <= 255 && email.length <= 255 && address.length <= 255;
-  const canSubmit = name.trim() && isPhoneValid && isEmailValid && address.trim() && isLengthValid && !submitting;
+  const isTurnstileValid = !process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || !!turnstileToken;
+  const canSubmit = name.trim() && isPhoneValid && isEmailValid && address.trim() && isLengthValid && isTurnstileValid && !submitting;
 
   const fetchCount = async () => {
     const { count } = await supabase
@@ -132,6 +135,11 @@ export default function LoyaltyPage() {
       return;
     }
 
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+      toast.error("Please complete the bot verification challenge.");
+      return;
+    }
+
     setSubmitting(true);
     const toastId = toast.loading("Securing your spot...");
 
@@ -147,6 +155,7 @@ export default function LoyaltyPage() {
           address: address.trim(),
           user_id: user.id,
           tier: "Elite",
+          turnstileToken,
         }),
       });
 
@@ -389,6 +398,10 @@ export default function LoyaltyPage() {
                   placeholder="Full delivery address"
                   className="w-full p-3.5 rounded-xl bg-black/60 border border-white/10 text-[#F9FAFB] text-xs font-mono focus:outline-none focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/30 transition-all placeholder:text-white/20 resize-none"
                 />
+              </div>
+
+              <div className="flex justify-center mt-2 mb-4">
+                <TurnstileWidget onVerify={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
               </div>
 
               {errorMsg && (

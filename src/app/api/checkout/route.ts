@@ -2,9 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { calculateOrderPriceServerSide } from "@/lib/pricing";
+import { rateLimit } from "@/lib/rateLimit";
+import { generateNotifyToken } from "@/lib/notifyToken";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: prevent checkout abuse (10 requests/min per IP)
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1";
+    const limitResult = await rateLimit(ip, 10, 60);
+    if (!limitResult.success) {
+      return NextResponse.json({ success: false, error: "Too many checkout requests. Please wait." }, { status: 429 });
+    }
+
     const body = await req.json().catch(() => null);
     if (!body) {
       return NextResponse.json({ success: false, error: "Request body is required" }, { status: 400 });
@@ -139,9 +148,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: rpcErr.message }, { status: 500 });
     }
 
+    // Generate a short-lived HMAC token so the client can call /api/notify-order
+    // only for this specific order. Prevents unauthenticated notification spam.
+    let notifyToken: string | null = null;
+    try {
+      notifyToken = generateNotifyToken(rpcRes.id);
+    } catch {
+      // Non-fatal: NOTIFY_ORDER_SECRET may not be configured yet
+    }
+
     return NextResponse.json({ 
       success: true, 
-      data: { id: rpcRes.id } 
+      data: { id: rpcRes.id, notifyToken } 
     });
 
   } catch (err: any) {

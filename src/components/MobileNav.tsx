@@ -10,6 +10,11 @@ import { useCommerce } from "@/lib/contexts/CommerceContext";
 
 export default function MobileNav() {
   const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const { cartCount, toggleCart } = useCommerce();
   const [activeTab, setActiveTab] = useState("/");
 

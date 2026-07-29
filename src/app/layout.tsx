@@ -49,13 +49,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "LUXE — Luxury Redefined",
+  title: "LUXE THREADS — Luxury Redefined",
   description: "Affordable luxury fashion for the bold generation",
   alternates: {
     canonical: "https://valceron.in/",
   },
   openGraph: {
-    title: "LUXE — Luxury Redefined",
+    title: "LUXE THREADS — Luxury Redefined",
     description: "Affordable luxury fashion for the bold generation",
     url: "https://valceron.in/",
     images: [{ url: "/hero/mobile.jpg" }],

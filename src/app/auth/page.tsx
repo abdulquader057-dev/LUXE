@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { ADMIN_EMAIL, STORE_ADMIN_EMAIL, useAuth } from "@/lib/contexts/AuthContext";
 import toast from "react-hot-toast";
 import { escapeString } from "@/lib/security";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 
 const GoogleIcon = () => (
@@ -29,6 +30,7 @@ export default function AuthPortal() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isRateLimited, setIsRateLimited] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
@@ -181,6 +183,12 @@ export default function AuthPortal() {
         router.refresh();
         router.push("/");
       } else {
+        if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+          setError("Please complete the bot verification challenge.");
+          setLoading(false);
+          return;
+        }
+
         const escapedFullName = escapeString(trimmedFullName);
         const escapedPhone = escapeString(trimmedPhone);
 
@@ -192,6 +200,7 @@ export default function AuthPortal() {
             password: trimmedPassword,
             fullName: escapedFullName,
             phone: escapedPhone,
+            turnstileToken,
           }),
         });
 
@@ -390,6 +399,13 @@ export default function AuthPortal() {
             )}
           </div>
  
+          {!isLogin && (
+            <TurnstileWidget 
+              onVerify={setTurnstileToken} 
+              onExpire={() => setTurnstileToken("")} 
+            />
+          )}
+
           <button
             type="submit"
             disabled={loading}
@@ -411,6 +427,7 @@ export default function AuthPortal() {
               setIsLogin(!isLogin);
               setError(null);
               setSuccess(null);
+              setTurnstileToken("");
             }}
             className="text-[#1C1410]/60 hover:text-[#1C1410] font-sora text-xs transition-colors font-semibold"
           >

@@ -483,6 +483,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     orderId: orderData.id,
+                    notifyToken: orderData.notifyToken,
                     name,
                     phone,
                     address,
@@ -653,6 +654,7 @@ Delivery: ${deliveryFee === 0 ? "FREE" : formatPrice(deliveryFee)}
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             orderId: orderData.id,
+            notifyToken: orderData.notifyToken,
             name,
             phone,
             address,

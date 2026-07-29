@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabaseServer';
 import { supabaseAdmin } from '@/lib/supabase';
+import { rateLimit } from '@/lib/rateLimit';
 
 // State machine transition helper
 function isValidTransition(current: string, next: string): boolean {
@@ -20,8 +21,15 @@ function isValidTransition(current: string, next: string): boolean {
   return (transitions[current] || []).includes(next);
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: protect admin status transitions (30 requests/min per IP)
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1";
+    const limitResult = await rateLimit(ip, 30, 60);
+    if (!limitResult.success) {
+      return NextResponse.json({ error: "Too many requests. Please wait." }, { status: 429 });
+    }
+
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 

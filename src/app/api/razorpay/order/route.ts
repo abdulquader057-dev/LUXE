@@ -1,10 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { supabaseAdmin } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { rateLimit } from "@/lib/rateLimit";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: prevent payment initiation abuse (10 requests/min per IP)
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "127.0.0.1";
+    const limitResult = await rateLimit(ip, 10, 60);
+    if (!limitResult.success) {
+      return NextResponse.json({ error: "Too many payment initiation requests. Please wait." }, { status: 429 });
+    }
+
     const { amount: clientAmount, orderId } = await request.json();
 
     if (!clientAmount || typeof clientAmount !== "number" || !orderId) {

@@ -3,16 +3,15 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(req: Request) {
   try {
-    // 1. Basic security check: verify CRON_SECRET if configured
+    // 1. Basic security check: fail-closed if CRON_SECRET is not configured or auth fails
     const authHeader = req.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
     
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      const url = new URL(req.url);
-      const querySecret = url.searchParams.get('secret');
-      if (querySecret !== cronSecret) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    if (!cronSecret) {
+      return NextResponse.json({ error: 'CRON_SECRET is not configured' }, { status: 500 });
+    }
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // 2. Call the database function to release expired stock reservations (defaults to 30 minutes)

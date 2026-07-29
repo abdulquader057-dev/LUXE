@@ -5,6 +5,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 import Seo from "@/components/seo/Seo";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 export default function VipMigrationPage() {
   const [name, setName] = useState("");
@@ -12,6 +13,7 @@ export default function VipMigrationPage() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +47,11 @@ export default function VipMigrationPage() {
       }
     }
 
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+      setErrorMsg("Please complete the bot verification challenge.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const response = await fetch("/api/vip", {
@@ -54,6 +61,7 @@ export default function VipMigrationPage() {
           name: trimmedName,
           phone: trimmedPhone,
           email: trimmedEmail || undefined,
+          turnstileToken,
         }),
       });
 
@@ -111,8 +119,11 @@ export default function VipMigrationPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-4 py-2 rounded bg-void border border-gold text-offwhite"
-            />
-          </div>
+          />
+        </div>
+        <div className="mt-2">
+          <TurnstileWidget onVerify={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+        </div>
           {errorMsg && (
             <div className="p-3 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded text-xs font-mono text-center">
               {errorMsg}

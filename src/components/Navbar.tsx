@@ -14,6 +14,11 @@ import { SearchModal } from "./SearchModal";
 
 const Navbar = () => {
   const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -99,8 +104,8 @@ const Navbar = () => {
       <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex items-center justify-between">
         {/* Brand/Logo */}
         <div className="flex items-center gap-8 pl-16 md:pl-20">
-          <Link href="/" className="text-2xl font-display font-black tracking-tighter text-white hover:text-white/80 transition-colors">
-            LUXE<span className="text-white/40">.</span>
+          <Link href="/" className="text-xl md:text-2xl font-display font-black tracking-wider text-white hover:text-white/80 transition-colors uppercase whitespace-nowrap">
+            LUXE THREADS<span className="text-[#D4AF37]">.</span>
           </Link>
           
           {/* Main Nav Links */}

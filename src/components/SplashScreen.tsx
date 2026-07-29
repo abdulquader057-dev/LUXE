@@ -193,7 +193,7 @@ export default function SplashScreen() {
       <div className="splash-content">
         <div className="splash-ornament"></div>
         <div className="splash-logo">
-          <h1 className="splash-luxe">LUXE</h1>
+          <h1 className="splash-luxe">LUXE THREADS</h1>
           <div className="splash-byline">
             <span className="splash-line-left"></span>
             <span className="splash-by">by</span>

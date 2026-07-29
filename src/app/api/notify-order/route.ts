@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { createClient } from "@supabase/supabase-js";
 import { validatePhone, validateUpiId, validateLength, escapeString } from "@/lib/security";
+import { rateLimit } from "@/lib/rateLimit";
+import { verifyNotifyToken } from "@/lib/notifyToken";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
@@ -9,6 +11,13 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: prevent notification spam (5 requests/min per IP)
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1";
+    const limitResult = await rateLimit(ip, 5, 60);
+    if (!limitResult.success) {
+      return NextResponse.json({ success: false, error: "Too many notification requests. Please wait." }, { status: 429 });
+    }
+
     const body = await req.json().catch(() => null);
     if (!body) {
       return NextResponse.json({ success: false, error: "Request body is required" }, { status: 400 });
@@ -27,7 +36,15 @@ export async function POST(req: NextRequest) {
       deliveryFee,
       total,
       orderId,
+      notifyToken,
     } = body;
+
+    // HMAC token verification: only requests originating from a real checkout
+    // (which generated this token) are allowed to trigger admin notifications.
+    // Prevents unauthenticated users from spamming the admin email/WhatsApp.
+    if (!notifyToken || !orderId || !verifyNotifyToken(notifyToken, orderId)) {
+      return NextResponse.json({ success: false, error: "Invalid or expired notification token" }, { status: 403 });
+    }
 
     // 1. Validate required fields presence
     if (

@@ -692,6 +692,7 @@ export default function ProductPageClient({ product }: { product: any }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
+          // Defensive: escape '<' to prevent script tag injection in JSON-LD
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Product",
@@ -712,12 +713,13 @@ export default function ProductPageClient({ product }: { product: any }) {
               "@type": "Brand",
               "name": "LUXE"
             }
-          })
+          }).replace(/</g, '\\u003c')
         }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
+          // Defensive: escape '<' to prevent script tag injection in JSON-LD
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
@@ -741,7 +743,7 @@ export default function ProductPageClient({ product }: { product: any }) {
                 "item": `https://valceron.in/product/${product.id}`
               }
             ]
-          })
+          }).replace(/</g, '\\u003c')
         }}
       />
 

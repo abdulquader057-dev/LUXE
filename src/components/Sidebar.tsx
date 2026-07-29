@@ -28,6 +28,11 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 
 const Sidebar = () => {
   const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const [isOpen, setIsOpen] = useState(false);
   const { t, language, setLanguage, availableLanguages } = useLanguage();
   const { user, signOut, isAdmin } = useAuth();

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { validateEmail, validateLength, escapeString } from "@/lib/security";
 import { rateLimit } from "@/lib/rateLimit";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +12,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Too many requests. Please wait before subscribing again." }, { status: 429 });
     }
     const body = await req.json();
-    const { email } = body;
+    const { email, turnstileToken } = body;
+
+    // Bot protection: verify Cloudflare Turnstile token before processing
+    const turnstileValid = await verifyTurnstileToken(turnstileToken);
+    if (!turnstileValid) {
+      return NextResponse.json({ error: "Bot verification failed. Please try again." }, { status: 403 });
+    }
+
 
     // Validate email presence, format, and length
     if (typeof email !== "string" || !email.trim()) {

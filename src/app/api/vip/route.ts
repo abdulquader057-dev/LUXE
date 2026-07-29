@@ -1,11 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { validateEmail, validatePhone, validateLength, escapeString } from "@/lib/security";
+import { rateLimit } from "@/lib/rateLimit";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: prevent VIP registration abuse (5 requests/min per IP)
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1";
+    const limitResult = await rateLimit(ip, 5, 60);
+    if (!limitResult.success) {
+      return NextResponse.json({ error: "Too many requests. Please wait." }, { status: 429 });
+    }
+
     const body = await req.json();
-    const { name, phone, email, address, user_id, tier } = body;
+    const { name, phone, email, address, user_id, tier, turnstileToken } = body;
+
+    // Bot protection: verify Cloudflare Turnstile token before processing
+    const turnstileValid = await verifyTurnstileToken(turnstileToken);
+    if (!turnstileValid) {
+      return NextResponse.json({ error: "Bot verification failed. Please try again." }, { status: 403 });
+    }
 
     // 1. Validate required fields presence
     if (typeof name !== "string" || !name.trim()) {

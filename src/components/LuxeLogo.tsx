@@ -48,16 +48,16 @@ const LuxeLogo = ({ className, showTagline = true }: LuxeLogoProps) => {
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path 
             d="M12 2L22 12L12 22L2 12L12 2" 
-            stroke="#00f2ff" 
+            stroke="#D4AF37" 
             strokeWidth="1.5" 
             strokeLinecap="round" 
             strokeLinejoin="round"
           />
           <path 
             d="M12 6L18 12L12 18L6 12L12 6" 
-            fill="#00f2ff" 
+            fill="#D4AF37" 
             fillOpacity="0.3" 
-            stroke="#00f2ff" 
+            stroke="#D4AF37" 
             strokeWidth="1" 
             strokeLinecap="round" 
             strokeLinejoin="round"
@@ -67,7 +67,7 @@ const LuxeLogo = ({ className, showTagline = true }: LuxeLogoProps) => {
 
       {/* Main Brand Word */}
       <div className="logo-main">
-        <h1 className="logo-luxe">LUXE</h1>
+        <h1 className="logo-luxe">LUXE THREADS</h1>
       </div>
 
       {/* Byline */}
@@ -88,7 +88,7 @@ const LuxeLogo = ({ className, showTagline = true }: LuxeLogoProps) => {
       {showTagline && (
         <p className="logo-tagline min-h-[15px]">
           {taglineText}
-          <span className={cn("inline-block w-[3px] h-[10px] ml-[2px] bg-[rgba(0,242,255,0.8)] align-middle", !isTyping && "animate-pulse")}></span>
+          <span className={cn("inline-block w-[3px] h-[10px] ml-[2px] bg-[rgba(212,175,55,0.8)] align-middle", !isTyping && "animate-pulse")}></span>
         </p>
       )}
     </div>
