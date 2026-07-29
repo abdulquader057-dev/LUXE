@@ -86,7 +86,7 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
       ctx.scale(dpr, dpr);
 
       // Fill canvas background
-      ctx.fillStyle = "#0c0b0a";
+      ctx.fillStyle = "#0A0A0C";
       ctx.fillRect(0, 0, width, height);
 
       // Helper function to draw weave lines with subtle organic Y wobble
@@ -116,8 +116,8 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
           }
         }
 
-        const opacity = 0.02 + Math.random() * 0.05;
-        ctx.strokeStyle = `rgba(212, 175, 55, ${opacity})`;
+        const opacity = 0.02 + Math.random() * 0.02; // max 0.04
+        ctx.strokeStyle = `rgba(201, 169, 98, ${opacity})`;
         ctx.lineWidth = 0.5 + Math.random() * 0.5;
         ctx.stroke();
       };
@@ -169,11 +169,11 @@ export default function OpeningAnimation({ onStartReveal, onComplete }: OpeningA
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 1.1,
+          duration: 1.8,
           stagger: 0.05,
-          ease: "power3.out",
+          ease: "CustomEase.create('custom', '0.16, 1, 0.3, 1')",
         },
-        0.4
+        0.5
       );
 
       // Step 3: Expand shimmer bar line

@@ -221,7 +221,7 @@ export default function SplashScreen() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #020202;
+          background: #0A0A0C;
           overflow: hidden;
         }
 
@@ -247,7 +247,7 @@ export default function SplashScreen() {
           font-size: clamp(56px, 16vw, 140px);
           letter-spacing: 0.15em;
           line-height: 1;
-          background: linear-gradient(135deg, #B76E79 0%, #E0BFB8 45%, #D4AF37 80%, #B76E79 100%);
+          background: linear-gradient(to bottom, #F5F0E8, #E8D5B7, #C9A962);
           background-size: 200% 100%;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
