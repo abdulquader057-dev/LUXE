@@ -18,7 +18,7 @@ export default function LuxeLogo({ className }: LuxeLogoProps) {
       <button 
         onClick={() => setIsLightboxOpen(true)}
         className={cn(
-          "group relative flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-[1.02]",
+          "group relative flex items-center justify-center transition-transform duration-300 hover:scale-[1.02]",
           className
         )}
         aria-label="View LUXE THREADS Logo"
