@@ -24,11 +24,11 @@ export default function LuxeLogo({ className }: LuxeLogoProps) {
         aria-label="View LUXE THREADS Logo"
       >
         <Image
-          src="/brand/luxe-logo-cropped.webp"
+          src="/brand/luxe-logo-full.webp"
           alt="LUXE THREADS"
           width={400}
           height={150}
-          className="w-auto h-[24px] md:h-[28px] object-contain opacity-90 transition-opacity duration-300 group-hover:opacity-100"
+          className="w-auto h-[24px] md:h-[32px] object-contain opacity-90 transition-opacity duration-300 group-hover:opacity-100"
           priority
         />
       </button>
