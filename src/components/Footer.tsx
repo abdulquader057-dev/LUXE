@@ -32,7 +32,7 @@ const Footer = () => {
       }}
     >
       <div className="max-w-[1400px] mx-auto px-6 md:px-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
           {/* Column 1 — Brand */}
           <div>
             <h3
@@ -66,9 +66,8 @@ const Footer = () => {
             <div className="flex flex-col gap-4">
               {[
                 { name: 'The House', href: '/' },
-                { name: 'Privacy', href: '/privacy' },
-                { name: 'Terms', href: '/terms' },
-                { name: 'Contact', href: '/ar-scanner' },
+                { name: 'Boutique', href: '/shop' },
+                { name: 'Atelier', href: '/ai-style' },
               ].map((link) => (
                 <Link
                   key={link.name}
@@ -84,7 +83,36 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Column 3 — Newsletter */}
+          {/* Column 3 — Support */}
+          <div>
+            <p
+              className="text-[11px] font-medium uppercase mb-6"
+              style={{ letterSpacing: '0.2em', color: '#C9A962' }}
+            >
+              Support
+            </p>
+            <div className="flex flex-col gap-4">
+              {[
+                { name: 'Sizing Guide', href: '/sizing-guide' },
+                { name: 'Shipping & Delivery', href: '/shipping-info' },
+                { name: 'Returns & Exchanges', href: '/return-policy' },
+                { name: 'Privacy & Security', href: '/privacy-policy' },
+              ].map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-[12px] font-normal transition-all duration-300 hover:translate-x-1"
+                  style={{ letterSpacing: '0.1em', color: 'rgba(245, 240, 232, 0.4)' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#F5F0E8')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(245, 240, 232, 0.4)')}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Column 4 — Newsletter */}
           <div>
             <p
               className="text-[11px] font-medium uppercase mb-6"

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useAnimation } from "framer-motion";
+import LuxeLogo from "@/components/LuxeLogo";
 import { Search, ShoppingBag, User, Zap, LogIn, Globe, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
@@ -104,9 +105,7 @@ const Navbar = () => {
       <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex items-center justify-between">
         {/* Brand/Logo */}
         <div className="flex items-center gap-8 pl-16 md:pl-20">
-          <Link href="/" className="font-cormorant text-[18px] font-normal tracking-[0.2em] uppercase whitespace-nowrap" style={{ color: '#F5F0E8' }}>
-            LUXE THREADS<span style={{ color: '#C9A962', fontSize: '24px', position: 'relative', top: '-2px' }}>.</span>
-          </Link>
+          <LuxeLogo />
           
           {/* Main Nav Links */}
           <div className="hidden md:flex items-center gap-8 pl-8 border-l border-white/10">
@@ -130,6 +129,19 @@ const Navbar = () => {
                 </Link>
               );
             })}
+
+            {/* Support Dropdown */}
+            <div className="relative group">
+              <button className="text-[12px] font-normal tracking-[0.15em] uppercase transition-colors relative py-2" style={{ fontFamily: 'var(--font-inter)', color: 'rgba(245, 240, 232, 0.5)' }}>
+                SUPPORT
+              </button>
+              <div className="absolute top-full left-0 mt-2 w-48 bg-[#0A0A0C]/95 backdrop-blur-md border border-[#C9A962]/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col py-2 z-50 shadow-2xl">
+                <Link href="/sizing-guide" className="px-4 py-2 text-[11px] font-mono tracking-widest text-[#9E968A] hover:text-[#C9A962]">Sizing Guide</Link>
+                <Link href="/shipping-info" className="px-4 py-2 text-[11px] font-mono tracking-widest text-[#9E968A] hover:text-[#C9A962]">Shipping</Link>
+                <Link href="/return-policy" className="px-4 py-2 text-[11px] font-mono tracking-widest text-[#9E968A] hover:text-[#C9A962]">Returns</Link>
+                <Link href="/privacy-policy" className="px-4 py-2 text-[11px] font-mono tracking-widest text-[#9E968A] hover:text-[#C9A962]">Privacy</Link>
+              </div>
+            </div>
           </div>
         </div>
 
