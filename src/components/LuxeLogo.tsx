@@ -23,15 +23,9 @@ export default function LuxeLogo({ className }: LuxeLogoProps) {
         )}
         aria-label="View LUXE THREADS Logo"
       >
-        <div className="w-[150px] md:w-[180px] h-[28px] md:h-[32px] overflow-hidden relative flex items-center justify-center rounded-sm">
-          <Image
-            src="/brand/luxe-logo-full.webp"
-            alt="LUXE THREADS"
-            fill
-            className="object-cover object-center opacity-90 transition-all duration-300 group-hover:opacity-100 scale-110"
-            priority
-          />
-        </div>
+        <span className="font-cormorant text-[18px] md:text-[22px] font-normal tracking-[0.2em] uppercase whitespace-nowrap text-[#F5F0E8]">
+          LUXE THREADS<span style={{ color: '#C9A962', fontSize: '1.2em', position: 'relative', top: '-2px' }}>.</span>
+        </span>
       </button>
 
       <LogoLightbox 

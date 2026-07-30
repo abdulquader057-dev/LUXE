@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { Menu, X, Globe, LogIn, LogOut } from "lucide-react";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import LogoLightbox from "@/components/ui/LogoLightbox";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -34,6 +35,7 @@ const Sidebar = () => {
   }
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const { t, language, setLanguage, availableLanguages } = useLanguage();
   const { user, signOut, isAdmin } = useAuth();
 
@@ -88,9 +90,10 @@ const Sidebar = () => {
       
       {/* Brand Header */}
       <div className="p-6 flex items-center justify-between">
-        <Link href="/">
+        <button onClick={() => setIsLightboxOpen(true)} aria-label="View LUXE THREADS Logo" className="transition-transform hover:scale-105">
           <Image src="/brand/luxe-logo-full.webp" alt="Brand Logo" width={120} height={120} className="h-12 w-12 rounded-md object-contain" />
-        </Link>
+        </button>
+        <LogoLightbox isOpen={isLightboxOpen} onClose={() => setIsLightboxOpen(false)} />
         <div className="relative group/lang">
           <button className="flex items-center justify-center p-2 rounded-lg bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-colors">
             <Globe size={18} />
