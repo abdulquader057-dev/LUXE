@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useCommerce, Currency } from "@/lib/contexts/CommerceContext";
+import { useCartStore } from "@/lib/store/cartStore";
 import { CountrySelectorModal } from "./CountrySelectorModal";
 import { SearchModal } from "./SearchModal";
 
@@ -26,7 +27,9 @@ const Navbar = () => {
   const cartControls = useAnimation();
   const { t } = useLanguage();
   const { user, profile, isAdmin } = useAuth();
-  const { currency, setCurrency, cartCount, toggleCart, availableCurrencies } = useCommerce();
+  const { currency, setCurrency, availableCurrencies } = useCommerce();
+  const { items, openCart } = useCartStore();
+  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const [isGold, setIsGold] = useState(false);
 
   useEffect(() => {
@@ -183,7 +186,7 @@ const Navbar = () => {
 
             {/* Cart */}
             <button 
-              onClick={toggleCart} 
+              onClick={openCart} 
               className="hidden md:flex w-9 h-9 rounded-full bg-white/5 items-center justify-center border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors relative"
             >
               <ShoppingBag size={16} />

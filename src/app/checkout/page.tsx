@@ -1,742 +1,318 @@
-/* src/app/checkout/page.tsx */
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import Image from "next/image";
-import { useCommerce } from "@/lib/contexts/CommerceContext";
-import { useAuth } from "@/lib/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
-import { MapPin, Phone, User, ShoppingBag, QrCode, Clipboard, CheckCircle2, Loader2 } from "lucide-react";
-import { escapeString } from "@/lib/security";
-import { telemetry } from "@/lib/telemetry";
+import Link from "next/link";
+import { ChevronLeft, Lock } from "lucide-react";
+import { useCartStore } from "@/lib/store/cartStore";
+import { useCheckoutStore, ShippingDetails } from "@/lib/store/checkoutStore";
+import { ShiprocketPincodeResponse } from "@/lib/payments/types";
+import { motion, AnimatePresence } from "framer-motion";
 
-
-const loadRazorpayScript = () => {
-  return new Promise((resolve) => {
-    if (typeof window === "undefined") return resolve(false);
-    if ((window as any).Razorpay) return resolve(true);
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-};
+const checkoutSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  keepUpdated: z.boolean().default(true),
+  fullName: z.string().min(2, "Name must be at least 2 characters"),
+  addressLine1: z.string().min(5, "Please enter your full address"),
+  addressLine2: z.string().optional(),
+  city: z.string().min(2, "City is required"),
+  state: z.string().min(2, "State is required"),
+  pincode: z.string().length(6, "Pincode must be exactly 6 digits").regex(/^\d+$/, "Pincode must contain only numbers"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits").regex(/^\d+$/, "Phone must contain only numbers"),
+});
 
 export default function CheckoutPage() {
-  const { cart, clearCart, totalPrice } = useCommerce();
-  const { user } = useAuth();
-  const router = useRouter();
+  const { items } = useCartStore();
+  const { 
+    shippingDetails, 
+    setShippingDetails, 
+    deliveryEstimate, 
+    setDeliveryEstimate,
+    isCheckingPincode,
+    setIsCheckingPincode
+  } = useCheckoutStore();
 
-  const [name, setName] = useState(user?.user_metadata?.full_name || "");
-  const [phone, setPhone] = useState(user?.user_metadata?.phone_number || "");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [pincode, setPincode] = useState("");
-  const [upi, setUpi] = useState("");
-  const [promo, setPromo] = useState("");
-  const [cod, setCod] = useState(false);
-  const [upiCopied, setUpiCopied] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(false); // Mobile accordion
 
-  const autocompleteRef = useRef<any>(null);
-
-
-  // Load Google Maps API Script
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    setMounted(true);
+  }, []);
 
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-      console.warn("Google Maps API key is missing. Autocomplete disabled.");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<z.infer<typeof checkoutSchema>>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      email: shippingDetails.email || "",
+      keepUpdated: shippingDetails.keepUpdated ?? true,
+      fullName: shippingDetails.fullName || "",
+      addressLine1: shippingDetails.addressLine1 || "",
+      addressLine2: shippingDetails.addressLine2 || "",
+      city: shippingDetails.city || "",
+      state: shippingDetails.state || "",
+      pincode: shippingDetails.pincode || "",
+      phone: shippingDetails.phone || "",
+    },
+  });
 
-    const initAutocomplete = () => {
-      const input = document.getElementById("address-input") as HTMLInputElement;
-      const win = window as any;
-      if (!input || !win.google || !win.google.maps || !win.google.maps.places || !win.google.maps.places.Autocomplete) return;
+  const watchPincode = watch("pincode");
 
-      try {
-        autocompleteRef.current = new win.google.maps.places.Autocomplete(input, {
-          types: ["address"],
-          componentRestrictions: { country: "IN" } // Prioritize India addresses
-        });
-
-        autocompleteRef.current.addListener("place_changed", () => {
-          const place = autocompleteRef.current.getPlace();
-          if (!place.address_components) return;
-
-          let pin = "";
-          let cty = "";
-
-          for (const component of place.address_components) {
-            const types = component.types;
-            if (types.includes("postal_code")) {
-              pin = component.long_name;
-            }
-            if (types.includes("locality")) {
-              cty = component.long_name;
-            } else if (types.includes("administrative_area_level_2") && !cty) {
-              cty = component.long_name;
-            }
-          }
-
-          // Set address to formatted address or name
-          setAddress(place.formatted_address || input.value);
-          if (pin) setPincode(pin);
-          if (cty) setCity(cty);
-
-          toast.success(`Synced location: ${cty} (${pin})`);
-        });
-      } catch (err) {
-        console.warn("Google Maps Autocomplete failed to initialize:", err);
+  useEffect(() => {
+    const checkPincode = async () => {
+      if (watchPincode && watchPincode.length === 6 && /^\d+$/.test(watchPincode)) {
+        setIsCheckingPincode(true);
+        setDeliveryEstimate(null);
+        try {
+          const res = await fetch("/api/mock/shiprocket/pincode", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pincode: watchPincode }),
+          });
+          const data: ShiprocketPincodeResponse = await res.json();
+          setDeliveryEstimate(data);
+        } catch (error) {
+          console.error("Failed to check pincode", error);
+        } finally {
+          setIsCheckingPincode(false);
+        }
+      } else {
+        setDeliveryEstimate(null);
       }
     };
 
-    const win = window as any;
-    if (win.google && win.google.maps && win.google.maps.places) {
-      initAutocomplete();
-    } else {
-      let script = document.getElementById("google-maps-sdk") as HTMLScriptElement;
-      if (!script) {
-        script = document.createElement("script");
-        script.id = "google-maps-sdk";
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => {
-          setTimeout(initAutocomplete, 500);
-        };
-        document.head.appendChild(script);
-      } else {
-        script.addEventListener("load", () => {
-          setTimeout(initAutocomplete, 500);
-        });
-      }
-    }
-  }, []);
+    const timeoutId = setTimeout(checkPincode, 800); // Debounce
+    return () => clearTimeout(timeoutId);
+  }, [watchPincode, setIsCheckingPincode, setDeliveryEstimate]);
 
-  useEffect(() => {
-    if (cart.length > 0) {
-      telemetry.track("checkout_started", {
-        cart_total: totalPrice,
-        items_count: cart.reduce((acc: number, curr: any) => acc + (curr.quantity || 1), 0)
-      });
-    }
-  }, [cart, totalPrice]);
-
-  const isUpiValid = cod ? true : /^[a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+$/.test(upi || "");
-  const isPhoneValid = /^[6-9]\d{9}$/.test((phone || "").replace(/[^0-9]/g, "").slice(-10)); // Accept Indian numbers
-  const canSubmit = name && address && city && pincode && isPhoneValid && (cod ? true : isUpiValid) && cart.length > 0;
-
-  const subtotal = totalPrice;
-  const tax = subtotal * 0.07; // 7% tax example
-  
-  // Delivery Fee Calculation based on Pincode and City
-  // Free delivery for orders above 1999, else Hyderabad is 45, others 90
-  const isHyderabad = (city || "").toLowerCase().includes("hyderabad");
-  const deliveryFee = subtotal > 1999 ? 0 : (isHyderabad ? 45 : 90);
-  const total = subtotal + tax + deliveryFee;
-
-  const copyUpiId = () => {
-    navigator.clipboard.writeText("7995338472@ptaxis");
-    setUpiCopied(true);
-    toast.success("UPI ID copied!");
-    setTimeout(() => setUpiCopied(false), 2000);
+  const onSubmit = (data: z.infer<typeof checkoutSchema>) => {
+    setShippingDetails(data);
+    // Day 2 Mock: Not proceeding to real payment yet
+    console.log("Form data valid. Ready for Day 3 integration.");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg(null);
+  if (!mounted) return null;
 
-    const trimmedName = (name || "").trim();
-    const trimmedPhone = (phone || "").trim();
-    const trimmedAddress = (address || "").trim();
-    const trimmedCity = (city || "").trim();
-    const trimmedPincode = (pincode || "").trim();
-    const trimmedUpi = (upi || "").trim();
-    const trimmedPromo = (promo || "").trim();
-
-    if (!trimmedName || !trimmedPhone || !trimmedAddress || !trimmedCity || !trimmedPincode) {
-      setErrorMsg("Please fill out all required fields.");
-      return;
-    }
-
-    if (
-      trimmedName.length > 255 ||
-      trimmedPhone.length > 255 ||
-      trimmedAddress.length > 255 ||
-      trimmedCity.length > 255 ||
-      trimmedPincode.length > 255 ||
-      trimmedUpi.length > 255 ||
-      trimmedPromo.length > 255
-    ) {
-      setErrorMsg("Oversized inputs are rejected (max 255 characters).");
-      return;
-    }
-
-    if (!isPhoneValid) {
-      setErrorMsg("Please enter a valid phone number (10 to 15 digits).");
-      return;
-    }
-
-    if (!cod && !isUpiValid) {
-      setErrorMsg("Invalid UPI ID format (must be username@bank).");
-      return;
-    }
-
-    if (isSubmitting) return;
-
-    setIsSubmitting(true);
-    const toastId = toast.loading("Syncing order node to LUXE OS...");
-
-    try {
-      const isUuid = user?.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id);
-
-      const cartItems = cart.map((item: any) => ({
-        id: item.id,
-        name: escapeString(item.name || ""),
-        price: item.price,
-        quantity: item.quantity,
-        size: escapeString(item.size || "L"),
-        color: escapeString(item.color || "White")
-      }));
-      
-      const escapedName = escapeString(trimmedName);
-      const escapedPhone = escapeString(trimmedPhone);
-      const escapedAddress = escapeString(trimmedAddress);
-      const escapedCity = escapeString(trimmedCity);
-      const escapedPincode = escapeString(trimmedPincode);
-      const escapedUpi = trimmedUpi ? escapeString(trimmedUpi) : "";
-      const escapedPromo = trimmedPromo ? escapeString(trimmedPromo) : "";
-
-      // Structure all info inside delivery_address column as JSON
-      const orderPayload = JSON.stringify({
-        name: escapedName,
-        phone: escapedPhone,
-        address: escapedAddress,
-        city: escapedCity,
-        pincode: escapedPincode,
-        paymentMethod: cod ? "COD" : "Razorpay Online",
-        upi: escapedUpi,
-        promo: escapedPromo,
-        items: cartItems,
-      });
-
-      // Save order to Supabase orders table via server checkout API
-      const checkoutResponse = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customer_id: isUuid ? user.id : null,
-          total_price: total,
-          status: "Pending",
-          delivery_address: orderPayload,
-        }),
-      });
-
-      if (!checkoutResponse.ok) {
-        const checkErr = await checkoutResponse.json();
-        throw new Error(checkErr.error || "Failed to create order on server.");
-      }
-
-      const checkoutResData = await checkoutResponse.json();
-      const orderData = checkoutResData.data;
-
-      if (!cod) {
-        // Prepaid order via Razorpay
-        const isScriptLoaded = await loadRazorpayScript();
-        if (!isScriptLoaded) {
-          throw new Error("Failed to load Razorpay payment gateway script.");
-        }
-
-        const orderResponse = await fetch("/api/razorpay/order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            amount: total,
-            orderId: orderData.id,
-          }),
-        });
-
-        if (!orderResponse.ok) {
-          const errData = await orderResponse.json();
-          throw new Error(errData.error || "Failed to initiate payment gateway order.");
-        }
-
-        const razorpayOrder = await orderResponse.json();
-
-        telemetry.track("purchase_initiated", {
-          order_id: orderData.id,
-          amount: total,
-          payment_method: "Razorpay"
-        });
-
-        const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
-          amount: razorpayOrder.amount,
-          currency: razorpayOrder.currency,
-          name: "LUXE",
-          description: `Order ID: ${orderData.id}`,
-          order_id: razorpayOrder.id,
-          prefill: {
-            name: escapedName,
-            email: user?.email || "customer@luxe.ai",
-            contact: escapedPhone,
-          },
-          theme: {
-            color: "#C9A84C", // Gold theme accent
-          },
-          modal: {
-            ondismiss: () => {
-              telemetry.track("payment_failed", {
-                order_id: orderData.id,
-                amount: total,
-                reason: "Payment window dismissed by customer",
-                stage: "payment_popup",
-                timestamp: new Date().toISOString()
-              });
-              setIsSubmitting(false);
-              toast.dismiss(toastId);
-              toast.error("Payment cancelled. You can retry from the checkout form.");
-            }
-          },
-          handler: async function (response: any) {
-            const verifyToastId = toast.loading("Verifying payment transaction secure signature...");
-            try {
-              const verifyResponse = await fetch("/api/razorpay/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  orderId: orderData.id,
-                }),
-              });
-
-              if (!verifyResponse.ok) {
-                const verifyErr = await verifyResponse.json();
-                throw new Error(verifyErr.error || "Payment signature verification failed.");
-              }
-
-              toast.dismiss(verifyToastId);
-              toast.success("Payment verified! Custom receipt generated.");
-
-              telemetry.track("purchase_success", {
-                order_id: orderData.id,
-                payment_id: response.razorpay_payment_id,
-                amount: total
-              });
-
-              try {
-                await fetch("/api/notify-order", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    orderId: orderData.id,
-                    notifyToken: orderData.notifyToken,
-                    name: escapedName,
-                    phone: escapedPhone,
-                    address: escapedAddress,
-                    city: escapedCity,
-                    pincode: escapedPincode,
-                    paymentMethod: "Razorpay",
-                    upi: escapedUpi,
-                    items: cartItems,
-                    subtotal: subtotal.toFixed(2),
-                    deliveryFee,
-                    total: total.toFixed(2),
-                  }),
-                });
-              } catch (notifyErr) {
-                console.warn("Notification error:", notifyErr);
-              }
-
-              const itemsText = cart
-                .map((i: any) => `• ${i.name} (Size: ${i.size || "L"}, Color: ${i.color || "White"}) x ${Number(i.quantity) || 0} = ₹${((Number(i.price) || 0) * (Number(i.quantity) || 0)).toFixed(2)}`)
-                .join("\n");
-
-              const whatsappMsg = `🌟 LUXE NEW PREPAID ORDER 🌟\n━━━━━━━━━━━━━━━━━━━━━━━\n🆔 Order ID: ${orderData.id}\n💳 Payment ID: ${response.razorpay_payment_id}\n👤 Name: ${trimmedName}\n📞 Phone: ${trimmedPhone}\n📍 Address: ${trimmedAddress}\n🏙️ City: ${trimmedCity} – ${trimmedPincode}\n💳 Payment: Razorpay Paid\n\n🛍️ Items:\n${itemsText}\n\n💰 Subtotal: ₹${subtotal.toFixed(2)}\n🚚 Delivery: ${deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}\n🧾 *Total: ₹${total.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━━━`;
-
-              toast.dismiss(toastId);
-              clearCart();
-              
-              setTimeout(() => {
-                window.open(`https://wa.me/917995338472?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
-                setTimeout(() => {
-                  window.open(`https://wa.me/917337246297?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
-                }, 800);
-                router.push("/");
-              }, 1200);
-
-            } catch (err: any) {
-              toast.dismiss(verifyToastId);
-              telemetry.track("payment_failed", {
-                order_id: orderData.id,
-                amount: total,
-                reason: err.message || "Signature verification failed",
-                stage: "verification_api",
-                timestamp: new Date().toISOString()
-              });
-              setIsSubmitting(false);
-              toast.dismiss(toastId);
-              toast.error(`Verification Failed: ${err.message}`);
-            }
-          }
-        };
-
-        const rzp = new (window as any).Razorpay(options);
-        rzp.open();
-        return;
-      }
-
-      // COD Path continues if cod is true
-      // ── Trigger notification API (WhatsApp + Email + Supabase log) ──────────
-      try {
-        await fetch("/api/notify-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderId: orderData?.id,
-            notifyToken: orderData?.notifyToken,
-            name: escapedName,
-            phone: escapedPhone,
-            address: escapedAddress,
-            city: escapedCity,
-            pincode: escapedPincode,
-            paymentMethod: "COD",
-            upi: escapedUpi,
-            items: cartItems,
-            subtotal: subtotal.toFixed(2),
-            deliveryFee,
-            total: total.toFixed(2),
-          }),
-        });
-      } catch (notifyErr) {
-        // Non-fatal: order was placed, notification is best-effort
-        console.warn("Notification API error:", notifyErr);
-      }
-
-      // Prepare WhatsApp message text for the store using clean trimmed values
-      const itemsText = cart
-        .map((i: any) => `• ${i.name} (Size: ${i.size || "L"}, Color: ${i.color || "White"}) x ${Number(i.quantity) || 0} = ₹${((Number(i.price) || 0) * (Number(i.quantity) || 0)).toFixed(2)}`)
-        .join("\n");
-
-      const whatsappMsg = `🌟 LUXE NEW COD ORDER 🌟\n━━━━━━━━━━━━━━━━━━━━━━━\n👤 Name: ${trimmedName}\n📞 Phone: ${trimmedPhone}\n📍 Address: ${trimmedAddress}\n🏙️ City: ${trimmedCity} – ${trimmedPincode}\n💳 Payment: Cash on Delivery (COD)\n\n🛍️ Items:\n${itemsText}\n\n💰 Subtotal: ₹${subtotal.toFixed(2)}\n🚚 Delivery: ${deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}\n🧾 *Total: ₹${total.toFixed(2)}*\n━━━━━━━━━━━━━━━━━━━━━━━`;
-
-      // GTM Event Tracking for Purchase
-      if (typeof window !== "undefined") {
-        (window as any).dataLayer = (window as any).dataLayer || [];
-        (window as any).dataLayer.push({
-          event: "purchase",
-          ecommerce: {
-            transaction_id: orderData?.id || `mock-${Date.now()}`,
-            value: total,
-            tax: tax,
-            shipping: deliveryFee,
-            currency: "INR",
-            items: cart.map((item: any) => ({
-              item_id: item.id,
-              item_name: item.name,
-              price: item.price,
-              quantity: item.quantity,
-              item_size: item.size,
-              item_color: item.color
-            }))
-          }
-        });
-      }
-
-      toast.dismiss(toastId);
-      toast.success("Order placed! Connecting you to WhatsApp...");
-
-      clearCart();
-      
-      // Open WhatsApp for primary number; secondary opens after short delay
-      setTimeout(() => {
-        window.open(`https://wa.me/917995338472?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
-        setTimeout(() => {
-          window.open(`https://wa.me/917337246297?text=${encodeURIComponent(whatsappMsg)}`, "_blank");
-        }, 800);
-        router.push("/");
-      }, 1200);
-
-    } catch (err: any) {
-      toast.dismiss(toastId);
-      setErrorMsg(`Order creation failed: ${err.message || "Please try again"}`);
-      toast.error(`Order creation failed: ${err.message || "Please try again"}`);
-      console.error(err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shippingCost = deliveryEstimate?.serviceable ? deliveryEstimate.cost || 0 : 0;
+  const total = subtotal + shippingCost;
 
   return (
-    <main className="min-h-screen bg-[#020203] text-[#F9FAFB] p-6 md:p-12 relative overflow-hidden flex items-center justify-center pt-28">
-      {/* Background radial glow */}
-      <div className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] bg-[#D4AF37]/5 blur-[150px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[10%] left-[-10%] w-[400px] h-[400px] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
-
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-10 relative z-10">
+    <div className="min-h-screen bg-[#0A0A0C] text-[#F0EDE8] font-sans selection:bg-[#C9A84C]/30 pt-20">
+      <div className="max-w-[1200px] mx-auto flex flex-col-reverse lg:flex-row">
         
-        {/* Left Form Column */}
-        <div className="lg:col-span-7 bg-[#0A0A0C]/80 border border-white/5 backdrop-blur-xl rounded-[32px] p-8 md:p-10 shadow-2xl space-y-8">
-          <div>
-            <h1 className="text-3xl font-display font-light italic tracking-tight text-white mb-2">Checkout Uplink</h1>
-            <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest">LUXE secure transaction terminal</p>
-          </div>
+        {/* Left Column — Forms */}
+        <div className="w-full lg:w-[55%] p-6 lg:p-12 lg:pr-16">
+          <Link href="/" className="inline-flex items-center gap-2 text-[#C9A84C] hover:text-[#D4B55B] transition-colors mb-10 text-sm tracking-wide">
+            <ChevronLeft size={16} /> Return to Boutique
+          </Link>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2 flex items-center gap-1.5">
-                  <User size={10} className="text-[#D4AF37]" /> Full Name
-                </label>
-                <input 
-                  type="text" 
-                  required 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  placeholder="Shadab Qr" 
-                  className="w-full p-3.5 rounded-2xl bg-black/60 border border-white/10 text-[#F9FAFB] text-xs font-mono focus:outline-none focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/30 transition-all placeholder:text-white/20" 
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2 flex items-center gap-1.5">
-                  <Phone size={10} className="text-[#D4AF37]" /> Contact Number
-                </label>
-                <input 
-                  type="tel" 
-                  required 
-                  value={phone} 
-                  onChange={(e) => setPhone(e.target.value)} 
-                  placeholder="E.g., 9999999999" 
-                  className={`w-full p-3.5 rounded-2xl bg-black/60 border text-[#F9FAFB] text-xs font-mono focus:outline-none focus:ring-1 transition-all placeholder:text-white/20 ${phone && !isPhoneValid ? 'border-[#D4AF37]/50 focus:border-[#D4AF37] focus:ring-[#D4AF37]/30' : 'border-white/10 focus:border-[#D4AF37]/50 focus:ring-[#D4AF37]/30'}`} 
-                />
-                {phone && !isPhoneValid && <p className="validation-error ml-2 mt-1">Invalid Indian phone format</p>}
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2 flex items-center gap-1.5">
-                <MapPin size={10} className="text-[#D4AF37]" /> Street Address (Google Autocomplete)
-              </label>
-              <textarea 
-                id="address-input"
-                required 
-                rows={2} 
-                value={address} 
-                onChange={(e) => setAddress(e.target.value)} 
-                placeholder="Start typing your address for autocomplete suggestions..." 
-                className="w-full p-4 rounded-2xl bg-black/60 border border-white/10 text-[#F9FAFB] text-xs font-mono focus:outline-none focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/30 transition-all resize-none placeholder:text-white/20 leading-relaxed" 
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">City</label>
-                <input 
-                  type="text" 
-                  required 
-                  value={city} 
-                  onChange={(e) => setCity(e.target.value)} 
-                  placeholder="Auto-detected or custom" 
-                  className="w-full p-3.5 rounded-2xl bg-black/60 border border-white/10 text-[#F9FAFB] text-xs font-mono focus:outline-none focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/30 transition-all placeholder:text-white/20" 
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">ZIP / Pincode</label>
-                <input 
-                  type="text" 
-                  required 
-                  value={pincode} 
-                  onChange={(e) => setPincode(e.target.value)} 
-                  placeholder="E.g. 500024" 
-                  className="w-full p-3.5 rounded-2xl bg-black/60 border border-white/10 text-[#F9FAFB] text-xs font-mono focus:outline-none focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/30 transition-all placeholder:text-white/20" 
-                />
-              </div>
-            </div>
-
-            {/* Toggle COD / UPI */}
-            <div className="pt-4 border-t border-white/5 space-y-4">
-              <label className="text-[10px] font-mono text-[#C9A962] uppercase tracking-widest block font-bold">Payment Protocol</label>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setCod(false)}
-                  className={`py-3.5 rounded-2xl border flex items-center justify-center gap-2 font-mono text-[10px] tracking-widest uppercase transition-all cursor-pointer ${
-                    !cod
-                      ? "border-[#D4AF37] bg-[#D4AF37]/10 text-white"
-                      : "border-white/5 bg-white/[0.02] text-white/40 hover:border-white/10"
-                  }`}
-                >
-                  <QrCode size={14} /> UPI Transfer
-                </button>
-                <button
-                  type="button"
-                  className={`py-3.5 rounded-2xl border flex items-center justify-center gap-2 font-mono text-[10px] tracking-widest uppercase transition-all cursor-pointer ${
-                    cod
-                      ? "border-[#D4AF37] bg-[#D4AF37]/10 text-white"
-                      : "border-white/5 bg-white/[0.02] text-white/40 hover:border-white/10"
-                  }`}
-                  onClick={() => setCod(true)}
-                >
-                  <MapPin size={14} /> Cash on Delivery (COD)
-                </button>
-              </div>
-
-              {/* UPI Sub-Interface */}
-              {!cod && (
-                <div className="p-5 rounded-2xl bg-white/[0.01] border border-white/5 flex flex-col items-center gap-4 text-center">
-                  <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest">Pay overall total then submit your UPI ID</span>
-                  
-                  <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-xl px-4 py-2 w-full justify-between">
-                    <span className="text-[10px] font-mono text-white tracking-widest">7995338472@ptaxis</span>
-                    <button
-                      type="button"
-                      onClick={copyUpiId}
-                      className="p-1 text-[#D4AF37] hover:text-white transition-colors cursor-pointer"
-                    >
-                      {upiCopied ? <CheckCircle2 size={14} className="text-green-400" /> : <Clipboard size={14} />}
-                    </button>
-                  </div>
-
-                  <div className="w-36 h-36 border border-white/15 rounded-xl overflow-hidden bg-white p-1 relative">
-                    <Image src="/upi-qr.jpg" alt="UPI QR" fill className="w-full h-full object-contain" />
-                  </div>
-
-                  <div className="w-full space-y-1.5 text-left">
-                    <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Your UPI ID (e.g. user@bank)</label>
+          <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-12">
+            
+            {/* Section 1: Contact */}
+            <section className="space-y-6">
+              <h2 className="font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-[#C9A84C]">Contact</h2>
+              <div className="space-y-4">
+                <div className="relative">
+                  <input 
+                    {...register("email")}
+                    placeholder="Email Address"
+                    className="w-full bg-transparent border-0 border-b border-[#F5F0E8]/15 px-0 py-3 text-[14px] font-light focus:ring-0 focus:border-[#C9A84C] transition-colors placeholder:text-white/30"
+                  />
+                  {errors.email && <p className="text-[#EF4444]/80 text-xs mt-1 absolute -bottom-5">{errors.email.message}</p>}
+                </div>
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative flex items-center justify-center">
                     <input 
-                      type="text" 
-                      value={upi} 
-                      onChange={(e) => setUpi(e.target.value)} 
-                      placeholder="example@bank" 
-                      className={`w-full p-3 rounded-xl bg-black/60 border text-[#F9FAFB] text-xs font-mono focus:outline-none focus:ring-1 transition-all placeholder:text-white/10 ${upi && !isUpiValid ? 'border-[#D4AF37]/50 focus:border-[#D4AF37] focus:ring-[#D4AF37]/30' : 'border-white/10 focus:border-[#D4AF37]/50'}`} 
+                      type="checkbox" 
+                      {...register("keepUpdated")}
+                      className="peer appearance-none w-4 h-4 border border-[#F5F0E8]/20 rounded-sm bg-transparent checked:bg-[#C9A84C] checked:border-[#C9A84C] transition-colors cursor-pointer"
                     />
-                    {upi && !isUpiValid && <p className="validation-error ml-2 mt-1">Invalid UPI handle format</p>}
+                    <svg className="absolute w-2.5 h-2.5 pointer-events-none opacity-0 peer-checked:opacity-100 text-[#0A0A0C]" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1 5L4.5 8.5L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <span className="text-[13px] text-white/60 group-hover:text-[#F0EDE8] transition-colors">Keep me updated on news and exclusive offers</span>
+                </label>
+              </div>
+            </section>
+
+            {/* Section 2: Shipping */}
+            <section className="space-y-6">
+              <h2 className="font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-[#C9A84C]">Shipping</h2>
+              <div className="space-y-6">
+                <div className="relative">
+                  <input 
+                    {...register("fullName")}
+                    placeholder="Full Name"
+                    className="w-full bg-transparent border-0 border-b border-[#F5F0E8]/15 px-0 py-3 text-[14px] font-light focus:ring-0 focus:border-[#C9A84C] transition-colors placeholder:text-white/30"
+                  />
+                  {errors.fullName && <p className="text-[#EF4444]/80 text-xs mt-1 absolute -bottom-5">{errors.fullName.message}</p>}
+                </div>
+
+                <div className="relative">
+                  <input 
+                    {...register("addressLine1")}
+                    placeholder="Address Line 1"
+                    className="w-full bg-transparent border-0 border-b border-[#F5F0E8]/15 px-0 py-3 text-[14px] font-light focus:ring-0 focus:border-[#C9A84C] transition-colors placeholder:text-white/30"
+                  />
+                  {errors.addressLine1 && <p className="text-[#EF4444]/80 text-xs mt-1 absolute -bottom-5">{errors.addressLine1.message}</p>}
+                </div>
+
+                <div className="relative">
+                  <input 
+                    {...register("addressLine2")}
+                    placeholder="Address Line 2 (Optional)"
+                    className="w-full bg-transparent border-0 border-b border-[#F5F0E8]/15 px-0 py-3 text-[14px] font-light focus:ring-0 focus:border-[#C9A84C] transition-colors placeholder:text-white/30"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="relative">
+                    <input 
+                      {...register("city")}
+                      placeholder="City"
+                      className="w-full bg-transparent border-0 border-b border-[#F5F0E8]/15 px-0 py-3 text-[14px] font-light focus:ring-0 focus:border-[#C9A84C] transition-colors placeholder:text-white/30"
+                    />
+                    {errors.city && <p className="text-[#EF4444]/80 text-xs mt-1 absolute -bottom-5">{errors.city.message}</p>}
+                  </div>
+                  <div className="relative">
+                    <select 
+                      {...register("state")}
+                      className="w-full bg-transparent border-0 border-b border-[#F5F0E8]/15 px-0 py-3 text-[14px] font-light focus:ring-0 focus:border-[#C9A84C] transition-colors text-[#F0EDE8] appearance-none"
+                    >
+                      <option value="" className="bg-[#0A0A0C]">State / Province</option>
+                      <option value="MH" className="bg-[#0A0A0C]">Maharashtra</option>
+                      <option value="KA" className="bg-[#0A0A0C]">Karnataka</option>
+                      <option value="DL" className="bg-[#0A0A0C]">Delhi</option>
+                      {/* Add more states */}
+                    </select>
+                    {errors.state && <p className="text-[#EF4444]/80 text-xs mt-1 absolute -bottom-5">{errors.state.message}</p>}
                   </div>
                 </div>
-              )}
 
-              {cod && (
-                <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/5 text-center flex flex-col items-center justify-center gap-1">
-                  <CheckCircle2 size={20} className="text-[#D4AF37] animate-pulse" />
-                  <p className="text-[10px] font-mono text-white/60 uppercase tracking-widest font-bold">COD Mode Selected</p>
-                  <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest">Pay overall total in cash at time of physical package handoff</span>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="relative">
+                    <input 
+                      {...register("pincode")}
+                      placeholder="Pincode"
+                      maxLength={6}
+                      className="w-full bg-transparent border-0 border-b border-[#F5F0E8]/15 px-0 py-3 text-[14px] font-light focus:ring-0 focus:border-[#C9A84C] transition-colors placeholder:text-white/30"
+                    />
+                    {errors.pincode && <p className="text-[#EF4444]/80 text-xs mt-1 absolute -bottom-5">{errors.pincode.message}</p>}
+                  </div>
+                  <div className="relative">
+                    <input 
+                      {...register("phone")}
+                      placeholder="Phone Number"
+                      className="w-full bg-transparent border-0 border-b border-[#F5F0E8]/15 px-0 py-3 text-[14px] font-light focus:ring-0 focus:border-[#C9A84C] transition-colors placeholder:text-white/30"
+                    />
+                    {errors.phone && <p className="text-[#EF4444]/80 text-xs mt-1 absolute -bottom-5">{errors.phone.message}</p>}
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Promo Code Input */}
-            <div className="pt-4 border-t border-white/5 space-y-2">
-              <label className="text-[9px] font-mono text-white/40 uppercase tracking-widest ml-2">Promo / Voucher Code</label>
-              <input 
-                type="text" 
-                value={promo} 
-                onChange={(e) => setPromo(e.target.value.toUpperCase())} 
-                placeholder="ENTER PROMO CODE" 
-                className="w-full p-3.5 rounded-2xl bg-black/60 border border-white/10 text-[#F9FAFB] text-xs font-mono focus:outline-none focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/30 transition-all placeholder:text-white/20 uppercase" 
-              />
-            </div>
-
-            {errorMsg && (
-              <div className="p-3.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#C9A962] rounded-xl text-xs font-mono text-center">
-                {errorMsg}
               </div>
-            )}
-            <button 
-              type="submit" 
-              disabled={!canSubmit || isSubmitting} 
-              className="w-full py-4.5 bg-[#D4AF37] text-[#020203] font-mono font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-[#D4AF37]/90 hover:scale-[1.01] transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 mt-4 cursor-pointer"
-            >
+            </section>
 
-              {isSubmitting ? (
-                <>
-                  <Loader2 size={14} className="animate-spin" /> Uplinking Order...
-                </>
-              ) : (
-                "Place Order & Dispatch"
-              )}
-            </button>
+            {/* Section 3: Delivery */}
+            <section className="space-y-6">
+              <h2 className="font-sans text-[11px] font-medium tracking-[0.15em] uppercase text-[#C9A84C]">Delivery</h2>
+              <div className="min-h-[60px] border border-[#F5F0E8]/10 rounded-sm p-4 bg-[#12121A]/50 flex items-center">
+                {isCheckingPincode ? (
+                  <div className="flex items-center gap-3 w-full justify-center text-white/50 text-[13px]">
+                    <div className="w-4 h-4 rounded-full border border-[#C9A84C] border-t-transparent animate-spin" />
+                    Checking serviceable locations...
+                  </div>
+                ) : deliveryEstimate ? (
+                  deliveryEstimate.serviceable ? (
+                    <div className="w-full flex justify-between items-center text-[14px]">
+                      <div>
+                        <span className="text-[#F0EDE8]">Standard Delivery</span>
+                        <span className="text-white/50 block text-[12px] mt-0.5">{deliveryEstimate.estimatedDays} business days</span>
+                      </div>
+                      <span className="font-mono text-[#C9A84C]">{deliveryEstimate.cost === 0 ? "Free" : `₹${deliveryEstimate.cost}`}</span>
+                    </div>
+                  ) : (
+                    <div className="w-full text-center text-[#EF4444]/90 text-[13px]">
+                      {deliveryEstimate.message}
+                    </div>
+                  )
+                ) : (
+                  <div className="w-full text-center text-white/30 text-[13px]">
+                    Enter your pincode to see delivery options
+                  </div>
+                )}
+              </div>
+            </section>
+
           </form>
         </div>
 
-        {/* Right Summary Column */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-[#0A0A0C]/80 border border-white/5 backdrop-blur-xl rounded-[32px] p-8 shadow-2xl">
-            <h2 className="text-xl font-display font-light italic tracking-tight text-white mb-6 flex items-center gap-2 pb-4 border-b border-white/5">
-              <ShoppingBag size={18} className="text-[#D4AF37]" /> Order Summary
-            </h2>
-
-            {cart.length === 0 ? (
-              <p className="text-xs font-mono text-white/30 uppercase tracking-widest py-6">Your transaction manifest is empty.</p>
-            ) : (
-              <div className="space-y-6">
-                {/* Items list */}
-                <div className="space-y-4 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
-                  {cart.map((item: any) => (
-                    <div key={item.id + (item.size || "") + (item.color || "")} className="flex justify-between items-center gap-4 text-xs">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0 relative">
-                          <Image src={item.image} alt="" fill sizes="40px" className="w-full h-full object-cover grayscale" />
-                        </div>
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-white uppercase tracking-tight line-clamp-1">{item.name}</p>
-                          <span className="text-[9px] font-mono text-white/30 uppercase">{item.quantity} × Size {item.size || "L"} · {item.color || "White"}</span>
-                        </div>
-                      </div>
-                      <span className="font-mono font-medium text-white/80">₹{((Number(item.price) || 0) * (Number(item.quantity) || 0)).toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Bill Breakdown */}
-                <div className="pt-6 border-t border-white/5 space-y-3 text-[10px] font-mono uppercase tracking-widest text-white/40">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span className="text-white">₹{subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax (7% example)</span>
-                    <span className="text-white">₹{tax.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Delivery Charges</span>
-                    <span className="text-white">
-                      {deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}
-                    </span>
-                  </div>
-
-                  <div className="pt-4 border-t border-white/5 flex justify-between items-baseline text-white">
-                    <span className="text-xs font-bold">Total Payable</span>
-                    <span className="text-xl font-orbitron font-bold text-[#C9A962] tracking-wider">₹{total.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-            )}
+        {/* Right Column — Order Summary */}
+        <div className="w-full lg:w-[45%] bg-[#12121A] lg:min-h-[calc(100vh-80px)] p-6 lg:p-12 lg:pl-16 border-b lg:border-b-0 lg:border-l border-[#C9A962]/10 relative">
+          
+          {/* Mobile Accordion Toggle */}
+          <div className="lg:hidden flex justify-between items-center pb-6 border-b border-[#C9A962]/10 mb-6" onClick={() => setIsOrderSummaryOpen(!isOrderSummaryOpen)}>
+            <span className="font-sans text-[13px] text-[#C9A84C]">Order Summary ({items.length})</span>
+            <span className="font-mono text-[16px] text-[#F0EDE8]">₹{total.toLocaleString()}</span>
           </div>
 
-          {/* Verification Badge info */}
-          <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/15 rounded-[24px] p-6 space-y-3">
-            <h4 className="text-[10px] font-mono text-[#C9A962] uppercase tracking-widest font-bold flex items-center gap-1.5">
-              <CheckCircle2 size={12} /> Dispatch Protocol
-            </h4>
-            <p className="text-[9px] font-mono text-white/40 leading-relaxed uppercase">
-              Upon uplinking, your dispatch coordinates are sent to our central coordination team. Real-time updates will synchronize via the WhatsApp interface.
-            </p>
+          <div className={cn("lg:block", isOrderSummaryOpen ? "block" : "hidden")}>
+            <div className="flex flex-col gap-6 mb-8 lg:mb-12">
+              {items.map(item => (
+                <div key={`${item.id}-${item.variant}`} className="flex gap-4 items-center">
+                  <div className="relative w-[48px] h-[64px] flex-shrink-0 bg-black/20">
+                    <Image src={item.image} alt={item.name} fill className="object-cover" />
+                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-[#C9A84C]/20 backdrop-blur-md border border-[#C9A84C]/50 rounded-full flex items-center justify-center text-[#F0EDE8] text-[10px] font-mono">
+                      {item.quantity}
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-sans text-[14px] text-[#F0EDE8]">{item.name}</h3>
+                    <p className="font-sans text-[12px] text-white/50">{item.variant}</p>
+                  </div>
+                  <span className="font-mono text-[14px] text-[#F0EDE8]">₹{(item.price * item.quantity).toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-4 border-t border-[#C9A962]/10 pt-6 pb-8">
+              <div className="flex justify-between font-sans text-[13px] text-white/60">
+                <span>Subtotal</span>
+                <span className="font-mono text-[#F0EDE8]">₹{subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between font-sans text-[13px] text-white/60">
+                <span>Shipping</span>
+                <span className="font-mono text-[#F0EDE8]">{shippingCost === 0 ? "Complimentary" : `₹${shippingCost}`}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center border-t border-[#C9A962]/10 pt-6 mb-10">
+              <span className="font-sans text-[14px] text-[#F0EDE8]">Total</span>
+              <span className="font-cormorant text-[24px] font-light text-[#C9A84C]">
+                <span className="font-sans text-[12px] text-white/40 mr-2 uppercase">INR</span>
+                ₹{total.toLocaleString()}
+              </span>
+            </div>
+
+            <button 
+              type="submit" 
+              form="checkout-form"
+              disabled={true}
+              className="w-full bg-[#16161A] border border-[#C9A84C]/30 text-white/40 font-sans text-[12px] font-medium tracking-[0.15em] uppercase py-4 flex items-center justify-center gap-2 cursor-not-allowed transition-all"
+            >
+              <Lock size={14} className="text-[#C9A84C]/50" />
+              Awaiting Payment Gateway
+            </button>
           </div>
         </div>
-
       </div>
-    </main>
+    </div>
   );
 }

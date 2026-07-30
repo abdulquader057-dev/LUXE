@@ -8,7 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import { CommerceProvider } from "@/lib/contexts/CommerceContext";
 import { LanguageProvider } from "@/lib/contexts/LanguageContext";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
-import CartSidebar from "@/components/ui/CartSidebar";
+import SlideOverCart from "@/components/cart/SlideOverCart";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollProgress from "@/components/ScrollProgress";
@@ -150,7 +150,7 @@ export default async function RootLayout({
           <CinematicRevealWrapper>
             <DynamicLayoutWidgets />
             <Sidebar />
-            <CartSidebar />
+            <SlideOverCart />
             
             <main className="flex-1 flex flex-col min-h-screen overflow-x-hidden relative scroll-smooth pb-20 md:pb-0">
               <Navbar />

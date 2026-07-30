@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Home, Grid, ShoppingBag, Sparkles, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCommerce } from "@/lib/contexts/CommerceContext";
+import { useCartStore } from "@/lib/store/cartStore";
 
 export default function MobileNav() {
   const pathname = usePathname();
@@ -15,7 +15,8 @@ export default function MobileNav() {
     return null;
   }
 
-  const { cartCount, toggleCart } = useCommerce();
+  const { items, openCart } = useCartStore();
+  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const [activeTab, setActiveTab] = useState("/");
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function MobileNav() {
       name: "Cart",
       href: "#cart",
       icon: ShoppingBag,
-      onClick: toggleCart,
+      onClick: openCart,
       isCart: true,
     },
     { name: "Profile", href: "/profile", icon: User },
