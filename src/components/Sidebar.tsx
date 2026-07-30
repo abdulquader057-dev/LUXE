@@ -89,7 +89,7 @@ const Sidebar = () => {
       {/* Brand Header */}
       <div className="p-6 flex items-center justify-between">
         <Link href="/">
-          <Image src="/logo.jpeg" alt="Brand Logo" width={120} height={40} className="h-10 w-auto rounded-md object-contain" />
+          <Image src="/brand/luxe-logo-full.webp" alt="Brand Logo" width={120} height={120} className="h-12 w-12 rounded-md object-contain" />
         </Link>
         <div className="relative group/lang">
           <button className="flex items-center justify-center p-2 rounded-lg bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-colors">
