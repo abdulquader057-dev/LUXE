@@ -118,9 +118,9 @@ export default function LogoLightbox({ isOpen, onClose }: LogoLightboxProps) {
                 ref={imageRef as any}
                 src="/brand/luxe-logo-full.webp"
                 alt="LUXE THREADS Full Logo"
-                width={800}
-                height={800}
-                className="w-auto h-auto max-w-[70vw] max-h-[70vh] object-contain shadow-2xl"
+                width={1200}
+                height={1200}
+                className="w-full h-auto max-w-[95vw] md:max-w-[60vw] max-h-[85vh] object-contain shadow-2xl"
                 priority
               />
             </motion.div>
